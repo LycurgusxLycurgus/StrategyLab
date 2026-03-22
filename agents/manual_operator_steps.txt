@@ -1,0 +1,119 @@
+***
+
+# UNIVERSAL OPERATOR RUNBOOK & AUTHORING RULES
+
+**CORE INSTRUCTION:** 
+**Generate a detailed, manual, step-by-step guide for anything the human needs to set up manually by themselves.** 
+
+Whenever manual human intervention is required for setup, deployment, debugging, or configuration, you must generate a runbook following the exact rules and structure below.
+
+---
+
+### PART A: HOW MANUAL STEPS MUST BE WRITTEN
+
+**Purpose:**
+Ensure every manual-intervention guide is one-shot executable for a human operator. The guide must exactly match the user's operating system and shell environment (e.g., Bash, Zsh, PowerShell, Command Prompt). If the target shell is unknown, clearly state assumptions or provide commands for the most likely environment.
+
+**Required Output Shape:**
+1. **Context:** State what is already working and what exact blocker or task remains.
+2. **Prerequisites:** List required tools, accounts, or CLIs explicitly.
+3. **UI vs. CLI:** Strictly separate manual browser/UI actions from terminal commands.
+4. **Copy-Paste Ready:** Provide exact, copy-pasteable commands in the correct shell syntax.
+5. **Placeholders:** Mark every placeholder value distinctly and explain exactly where it comes from.
+6. **Verification:** Include verification commands immediately after each critical step.
+7. **Success Signals:** Include the exact expected output/success signal for every verification.
+8. **Shell-Native Networking:** Use appropriate syntax for the environment (e.g., `curl` for Unix/Bash, `Invoke-RestMethod` for PowerShell). 
+9. **Secret Handling:** If a command depends on a secret, show how to place it into a temporary shell environment variable first, before passing it to the command.
+10. **Environment Variable Clarity:** If deployment uses env vars, clearly state that local `.env` files do not automatically populate remote hosted services, and provide the exact command to inject them remotely.
+
+**Mandatory Placeholder Rules:**
+- Never write `<YOUR_X>` or `REPLACE_ME` without stating exactly how the operator obtains or creates that value.
+- If the value is user-chosen, provide the exact command to generate a safe random value.
+- If the value comes from a web dashboard, name the provider, the dashboard name, and the exact page/tab.
+- If the value comes from a prior command's output, reference that exact step.
+
+**Mandatory Shell Execution Rules:**
+- Wrap paths containing spaces or special characters in quotes.
+- Use correct line continuations for the target shell (`\` for Bash/Zsh, `` ` `` for PowerShell).
+- When writing headers or JSON bodies for API requests, use the correct native formatting (e.g., hashtables for PowerShell, properly escaped JSON strings for Bash).
+
+**Mandatory Deployment Rules:**
+- Explicitly label which commands are **Local**, which **Modify Remote State**, and which are **Safe Read-Only Verifications**.
+- After any remote configuration change, include the exact redeploy, restart, or update command required to apply the change.
+
+---
+
+### PART B: UNIVERSAL RUNBOOK TEMPLATE
+
+*(When generating the runbook, use this exact structure, populated with the specific details of the current repo/task.)*
+
+**1. Context**
+- Current environment/project ID: `...`
+- Current service name: `...`
+- Task/Blocker: `...`
+
+**2. Prerequisites**
+- [ ] Required Shell (e.g., Bash, PowerShell)
+- [ ] Required runtimes (e.g., Node.js, Python, Docker)
+- [ ] Required CLIs installed (e.g., AWS CLI, gcloud, kubectl)
+- [ ] Required external API keys/accounts
+
+**3. Manual UI Actions**
+1. [Action] (e.g., Go to [Dashboard URL] -> Click [Button] -> Copy [Value]).
+2. [Action]
+
+**4. Local Setup and Verification**
+1. Open your terminal and navigate to the project root:
+   `cd /path/to/repo`
+2. Verify required CLI is installed:
+   `[cli-name] --version`
+   *Expected success signal: version information is printed.*
+3. Install dependencies:
+   `[install-command]`
+4. Build/Test locally:
+   `[build/test-command]`
+   *Expected success signal: all tests pass / build succeeds.*
+
+**5. Secret Variables (Current Shell Session)**
+1. Put required secrets into variables:
+   *(Bash example)* `export API_KEY="your-retrieved-key"`
+   *(PowerShell example)* `$API_KEY = "your-retrieved-key"`
+2. Verify they are populated:
+   *(Bash)* `echo $API_KEY`
+   *Expected success signal: the key prints to the terminal.*
+
+**6. Infrastructure / Cloud Authentication**
+1. Log in to your cloud provider:
+   `[login-command]`
+2. Select active project/environment:
+   `[set-project-command]`
+   *Expected success signal: output confirms correct target environment.*
+
+**7. Remote Deployment**
+1. Build the artifact/image:
+   `[build-command]`
+2. Deploy the service (passing in the shell variables created in step 5):
+   `[deploy-command-with-env-vars]`
+3. Verify the deployment:
+   `[status-check-command]`
+   *Expected success signal: deployment returns a success state or active URL.*
+
+**8. Safe Read-Only Verification**
+1. Inspect remote configuration to ensure variables took effect:
+   `[describe-service-command]`
+   *Expected success signal: env vars include [Keys] and show expected values.*
+
+**9. Smoke Tests**
+1. Check health endpoint:
+   `[curl / Invoke-RestMethod command to /health]`
+   *Expected success signal: HTTP 200, status "ok".*
+2. Check core functionality:
+   `[API request to core route]`
+   *Expected success signal: specific expected JSON response.*
+
+**10. Troubleshooting / Fallbacks**
+- **If [Specific Error] occurs:** [Explanation of what it means].
+- **Fix:** 
+  1. [Command to fix configuration]
+  2. [Command to redeploy]
+  3. [Command to verify]

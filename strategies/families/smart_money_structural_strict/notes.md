@@ -1,0 +1,1 @@
+SMART_MONEY_STRICT is the source-faithful variant: strict body-close MSS, 1H fractal dealing ranges, HTF premium/discount filtering, limit-order retrace entries, and opposing-liquidity / minimum-RR exits with ATR-padded stops beyond the sweep extreme.

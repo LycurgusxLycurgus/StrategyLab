@@ -1,0 +1,53 @@
+{
+  "asset": "BTCUSDT",
+  "class_description": "White-box structural range strategy: explicit macro extreme, range, and breakout rules over OHLCV candles.",
+  "class_type": "white_box",
+  "family_id": "a_zero_srlc",
+  "gates": {
+    "max_drawdown_keep": 0.2,
+    "profit_factor_keep": 1.15,
+    "sharpe_keep": 1.25,
+    "sharpe_promote": 1.75
+  },
+  "notes_path": "strategies/families/a_zero_srlc/notes.md",
+  "min_bars_by_timeframe": {
+    "1H": 1800,
+    "4H": 500
+  },
+  "optimization_grid": {
+    "age_threshold_bars": [
+      504,
+      672,
+      840
+    ],
+    "lookback_days": [
+      60,
+      75,
+      90
+    ],
+    "range_multiplier": [
+      1.15,
+      1.18,
+      1.2
+    ]
+  },
+  "parameters": {
+    "age_threshold_bars": 672,
+    "lookback_days": 90,
+    "range_multiplier": 1.18
+  },
+  "risk": {
+    "risk_per_trade": 0.01
+  },
+  "rules": {
+    "same_bar_rule": "stop_first",
+    "sl_width_pct": 0.02,
+    "tp1_fraction": 0.33
+  },
+  "supported_timeframes": [
+    "1H",
+    "4H"
+  ],
+  "timeframe": "1H",
+  "title": "A-ZERO Structural Range Liquidity Capture"
+}

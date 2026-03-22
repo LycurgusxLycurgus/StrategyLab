@@ -1,0 +1,1 @@
+SMART_MONEY is the BTC-adapted variant: crypto-session killzones, 1H fractal context, relaxed MSS confirmation, no hard HTF premium/discount veto, limit-order retrace entries, and opposing-liquidity / minimum-RR exits with ATR-padded stops beyond the sweep extreme.

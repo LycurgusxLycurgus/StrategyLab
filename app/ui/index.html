@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>StrategyLab</title>
+  </head>
+  <body>
+    <header>
+      <h1>StrategyLab</h1>
+      <p>Local strategy research console.</p>
+      <button id="refresh-button" type="button">Refresh</button>
+    </header>
+    <main>
+      <section>
+        <h2>Primary Workflow</h2>
+        <p>Normal use should be only two actions: get market data, then run a strategy on that data.</p>
+        <p>A dataset means candle history for one asset and one timeframe: timestamp, open, high, low, close, and volume.</p>
+      </section>
+      <section>
+        <h2>1. Get Real Market Data</h2>
+        <p>This downloads real OHLCV candles from Binance public market-data endpoints. No API key is required.</p>
+        <form id="binance-dataset-form">
+          <label>Symbol
+            <select id="binance-symbol" name="symbol">
+              <option value="BTCUSDT" selected>BTCUSDT</option>
+              <option value="ETHUSDT">ETHUSDT</option>
+              <option value="SOLUSDT">SOLUSDT</option>
+              <option value="BNBUSDT">BNBUSDT</option>
+              <option value="XRPUSDT">XRPUSDT</option>
+            </select>
+          </label>
+          <label>Timeframe
+            <select id="binance-timeframe" name="timeframe">
+              <option value="5m">5m</option>
+              <option value="1H" selected>1H</option>
+              <option value="4H">4H</option>
+            </select>
+          </label>
+          <label>Bars
+            <select id="binance-bars" name="bars">
+              <option value="500">500</option>
+              <option value="1000">1000</option>
+              <option value="1500">1500</option>
+              <option value="2500" selected>2500</option>
+              <option value="5000">5000</option>
+            </select>
+          </label>
+          <button type="submit">Download Real Market Dataset</button>
+        </form>
+        <p id="binance-status">Ready. Default first run: BTCUSDT, 1H, 2500 bars.</p>
+        <p id="dataset-current">No active dataset selected yet.</p>
+      </section>
+      <section>
+        <h2>2. Run Strategy On Current Data</h2>
+        <p>Use this after the dataset status above says the market download is ready. This runs the full parameter grid for the selected family and dataset.</p>
+        <form id="guided-sweep-form">
+          <label>Family <select id="guided-family" name="family_id"></select></label>
+          <label>Dataset <select id="guided-dataset" name="dataset_id"></select></label>
+          <button type="submit">Run Family Sweep</button>
+        </form>
+        <p id="guided-family-help">Select a family to see its category, compatible timeframes, minimum bars, and sweepable parameter space.</p>
+        <p id="run-status">No family sweep has been started yet.</p>
+      </section>
+      <section>
+        <h2>3. Review Results With LLM</h2>
+        <p>This sends the family manifest, sweep runs, graveyard context, strategy canon, and app role to Gemini so it can propose explanation-based parameter-grid corrections.</p>
+        <form id="review-form">
+          <label>Family <select id="review-family" name="family_id"></select></label>
+          <label>Dataset <select id="review-dataset" name="dataset_id"></select></label>
+          <button type="submit">Review Results With Gemini</button>
+        </form>
+        <p id="review-status">No LLM review has been requested yet.</p>
+        <details id="review-panel" hidden>
+          <summary id="review-summary">> Show review</summary>
+          <div id="review-content"></div>
+        </details>
+      </section>
+      <section>
+        <h2>Current Next Action</h2>
+        <p id="next-action">Refresh to load the current recommended next step.</p>
+      </section>
+      <section>
+        <h2>Datasets</h2>
+        <table border="1">
+          <thead>
+            <tr><th>Id</th><th>Name</th><th>Symbol</th><th>Timeframe</th><th>Rows</th><th>Action</th></tr>
+          </thead>
+          <tbody id="datasets-table"></tbody>
+        </table>
+      </section>
+      <section>
+        <h2>Families</h2>
+        <table border="1">
+          <thead>
+            <tr><th>Id</th><th>Title</th><th>Category</th><th>Asset</th><th>Compatible Timeframes</th><th>Minimum Bars</th><th>Parameter Grid</th></tr>
+          </thead>
+          <tbody id="families-table"></tbody>
+        </table>
+      </section>
+      <section>
+        <h2>Backtest Runs</h2>
+        <table border="1">
+          <thead>
+            <tr><th>Run Id</th><th>Family</th><th>Dataset</th><th>Parameters</th><th>Verdict</th><th>OOS Sharpe</th><th>Action</th></tr>
+          </thead>
+          <tbody id="runs-table"></tbody>
+        </table>
+      </section>
+      <section>
+        <h2>Graveyard</h2>
+        <table border="1">
+          <thead>
+            <tr><th>Artifact Id</th><th>Family</th><th>Run</th><th>Path</th><th>Action</th></tr>
+          </thead>
+          <tbody id="graveyard-table"></tbody>
+        </table>
+      </section>
+      <section>
+        <h2>Output</h2>
+        <p>This is the raw API response from the last action.</p>
+        <pre id="output"></pre>
+      </section>
+    </main>
+    <script src="/app.js"></script>
+  </body>
+ </html>

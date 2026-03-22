@@ -1,0 +1,71 @@
+{
+  "asset": "BTCUSDT",
+  "class_description": "White-box structural intraday strategy adapted for BTC: crypto-session killzones, relaxed structural confirmation, HTF context, and opposing-liquidity exits.",
+  "class_type": "white_box",
+  "family_id": "smart_money_structural",
+  "gates": {
+    "max_drawdown_keep": 0.2,
+    "profit_factor_keep": 1.15,
+    "sharpe_keep": 1.25,
+    "sharpe_promote": 1.75
+  },
+  "notes_path": "strategies/families/smart_money_structural/notes.md",
+  "min_bars_by_timeframe": {
+    "5m": 1500
+  },
+  "optimization_grid": {
+    "displacement_requirement_atr": [
+      0.8,
+      1.0,
+      1.2
+    ],
+    "entry_retrace_level": [
+      0.5,
+      0.618,
+      0.705
+    ],
+    "htf_fractal_depth": [
+      3,
+      5
+    ],
+    "min_rr_target": [
+      2.0,
+      2.5,
+      3.0
+    ],
+    "stop_loss_padding_atr": [
+      0.1,
+      0.2,
+      0.3
+    ]
+  },
+  "parameters": {
+    "displacement_requirement_atr": 0.8,
+    "entry_retrace_level": 0.618,
+    "htf_fractal_depth": 3,
+    "htf_pd_filter": false,
+    "htf_timeframe": "1H",
+    "min_rr_target": 2.0,
+    "mss_confirmation_type": "relaxed",
+    "sweep_min_atr": 0.2,
+    "stop_loss_padding_atr": 0.1,
+    "take_profit_logic": "opposing_liquidity_pool"
+  },
+  "risk": {
+    "risk_per_trade": 0.01
+  },
+  "rules": {
+    "cancel_order_on_session_close": true,
+    "killzone_buffer_minutes": 15,
+    "killzone_profile": "crypto",
+    "killzone_timezone": "America/New_York",
+    "news_filter_mode": "cancel_pending",
+    "same_bar_rule": "stop_first",
+    "trade_min_duration_bars": 1
+  },
+  "supported_timeframes": [
+    "5m"
+  ],
+  "timeframe": "5m",
+  "title": "SMART_MONEY Structural Event Sequence"
+}
