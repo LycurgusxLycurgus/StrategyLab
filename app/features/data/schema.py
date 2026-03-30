@@ -1,35 +1,30 @@
 from __future__ import annotations
 
+from datetime import datetime
+from typing import Literal
+
 from pydantic import BaseModel, Field
 
 
-class ImportDatasetRequest(BaseModel):
-    path: str
-    symbol: str
-    timeframe: str
-    dataset_name: str = Field(min_length=3, max_length=80)
+class DatasetDownloadRequest(BaseModel):
+    symbol: Literal["XAU_USD"] = "XAU_USD"
+    timeframe: Literal["15m"] = "15m"
+    lookback_days: Literal[30, 45, 60] = 60
+    provider: Literal["auto", "oanda"] = "auto"
+    name: str | None = Field(default=None, max_length=80)
 
 
-class DemoDatasetRequest(BaseModel):
-    symbol: str = "BTCUSDT"
-    timeframe: str = "1H"
-    dataset_name: str = "demo-btc-1h"
-    bars: int = Field(default=240, ge=60, le=2000)
-
-
-class BinanceDatasetRequest(BaseModel):
-    symbol: str = "BTCUSDT"
-    timeframe: str = "1H"
-    dataset_name: str = "binance-btc-1h"
-    bars: int = Field(default=2500, ge=60, le=5000)
-
-
-class DatasetSummary(BaseModel):
+class DatasetRecord(BaseModel):
     dataset_id: str
-    dataset_name: str
+    name: str
     symbol: str
     timeframe: str
-    row_count: int
-    start_ts: int
-    end_ts: int
-    source_path: str
+    rows_count: int
+    path: str
+    created_at: datetime
+
+
+class DatasetImportRequest(BaseModel):
+    symbol: str = "XAU_USD"
+    timeframe: str = "15m"
+    name: str | None = Field(default=None, max_length=80)

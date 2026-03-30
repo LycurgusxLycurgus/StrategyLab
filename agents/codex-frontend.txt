@@ -1,0 +1,1 @@
+frontend for codex: https://github.com/openai/skills/blob/main/skills/.curated/frontend-skill/SKILL.md

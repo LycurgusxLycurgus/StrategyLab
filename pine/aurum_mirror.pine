@@ -1,0 +1,41 @@
+//@version=6
+indicator("Project Aurum Mirror", overlay=true, max_labels_count=200)
+
+killzoneLondon = not na(time(timeframe.period, "0200-0500:1234567", "America/New_York"))
+killzoneNewYork = not na(time(timeframe.period, "0700-1000:1234567", "America/New_York"))
+asianBuild = not na(time(timeframe.period, "1800-0200:1234567", "America/New_York"))
+
+var float asianHigh = na
+var float asianLow = na
+if ta.change(time("D"))
+    asianHigh := na
+    asianLow := na
+
+if asianBuild
+    asianHigh := na(asianHigh) ? high : math.max(asianHigh, high)
+    asianLow := na(asianLow) ? low : math.min(asianLow, low)
+
+prevHigh = request.security(syminfo.tickerid, "D", high[1], lookahead = barmerge.lookahead_off)
+prevLow = request.security(syminfo.tickerid, "D", low[1], lookahead = barmerge.lookahead_off)
+atr = ta.atr(14)
+
+sweptLow = (killzoneLondon or killzoneNewYork) and not na(asianLow) and low < asianLow and close > asianLow and (asianLow - low) <= atr * 0.8
+sweptHigh = (killzoneLondon or killzoneNewYork) and not na(asianHigh) and high > asianHigh and close < asianHigh and (high - asianHigh) <= atr * 0.8
+body = math.abs(close - open)
+bullishFvg = low > high[2]
+bearishFvg = high < low[2]
+bullChoch = close > ta.highest(high[1], 4) and (bullishFvg or body >= atr * 0.6)
+bearChoch = close < ta.lowest(low[1], 4) and (bearishFvg or body >= atr * 0.6)
+
+plot(asianHigh, "Asian High", color=color.new(color.orange, 10))
+plot(asianLow, "Asian Low", color=color.new(color.teal, 10))
+plot(prevHigh, "Previous Day High", color=color.new(color.red, 50))
+plot(prevLow, "Previous Day Low", color=color.new(color.green, 50))
+
+plotshape(sweptLow, title="Sweep Low", style=shape.triangleup, location=location.belowbar, color=color.new(color.green, 0), size=size.tiny)
+plotshape(sweptHigh, title="Sweep High", style=shape.triangledown, location=location.abovebar, color=color.new(color.red, 0), size=size.tiny)
+plotshape(sweptLow and bullChoch, title="Bull Candidate", style=shape.labelup, location=location.belowbar, color=color.new(color.gold, 0), text="Aurum Long")
+plotshape(sweptHigh and bearChoch, title="Bear Candidate", style=shape.labeldown, location=location.abovebar, color=color.new(color.gold, 0), text="Aurum Short")
+
+alertcondition(sweptLow and bullChoch, title="Aurum Long Candidate", message='{"direction":"long","session_ny":0,"sweep_depth_atr":0.3}')
+alertcondition(sweptHigh and bearChoch, title="Aurum Short Candidate", message='{"direction":"short","session_ny":0,"sweep_depth_atr":0.3}')

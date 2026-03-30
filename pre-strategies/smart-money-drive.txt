@@ -1,0 +1,93 @@
+
+
+
+Based on the analysis of the Google Drive folder structure and the comprehensive "Strategy Codification Canon" you provided, the drive contains a complete **Smart Money Concepts (SMC) / Inner Circle Trader (ICT)** curriculum. The folders explicitly map to the core tenets of algorithmic price delivery: *IPDA, Fractals (Structure), Liquidity, Orderblocks, FVGs, Confirmations, KillZones, and Fundamentals.*
+
+To achieve your goal of creating a **15-minute intraday strategy for XAUUSD (Gold)** using a **Hybrid Approach** (TradingView/PineScript for White-Box + Free Render Service for Black-Box), I have compacted and translated the drive's methodology into a formalized **Strategy Codification Blueprint**. 
+
+You can feed the following document directly to another LLM to generate the PineScript code, the Python backend code, and the testing metrics.
+
+***
+
+# STRATEGY CODIFICATION BLUEPRINT: XAUUSD 15m Hybrid SMC
+
+## 1. Strategy Identity & Edge Hypothesis
+* **Name:** Project Aurum - Hybrid SMC Intraday
+* **Instrument:** XAUUSD (Gold / US Dollar)
+* **Timeframe:** 15-minute (Primary structural timeframe)
+* **Codification Approach:** **Hybrid Pattern 2** (White-Box Setup Detection + Black-Box ML Confirmation Filter).
+* **Edge Hypothesis:** Gold intraday price action is driven by the Interbank Price Delivery Algorithm (IPDA). It engineers liquidity (induces retail traders) during Asian/pre-London sessions, sweeps that liquidity during specific time windows (KillZones), mitigates higher-timeframe supply/demand (Orderblocks/FVGs), and reverses. By explicitly defining the structure (White-Box) and filtering the probability of follow-through using statistical context (Black-Box), we maximize risk-adjusted returns.
+
+---
+
+## 2. White-Box Components (The PineScript Domain)
+*This layer translates the Drive folders into explicit, human-readable rules to be coded in TradingView (PineScript).*
+
+### Component 1: Market Context Filter (Folders 7 & 9 - KillZones & Fundamental)
+*   **Time Filter:** Strategy is only active during specific KillZones:
+    *   London KillZone: 02:00 - 05:00 EST
+    *   New York KillZone: 07:00 - 10:00 EST
+*   **Fundamental Filter:** No entries 30 minutes before or after high-impact USD news (NFP, CPI, FOMC).
+
+### Component 2: State Machine & Structural Bias (Folders 1 & 2 - IPDA & Fractales)
+*   **State Machine:** `IDLE` → `WATCHING_LIQUIDITY` → `POI_MITIGATED` → `CONFIRMATION` → `IN_TRADE`
+*   **Structural Bias (Fractals):** The 15m trend is defined by the last two Swing Highs and Swing Lows (e.g., Higher Highs + Higher Lows = Bullish Bias).
+
+### Component 3: Setup Detection (Folders 3, 4 & 5 - Liquidez, Orderblocks, FVG)
+*   **Liquidity Sweep (Liquidez):** Price must pierce a recent Asian Session High/Low or a previous day's High/Low by a maximum of *X* ATR, then close back inside the range.
+*   **Point of Interest (POI):** After the sweep, price must tap into a valid 15m **Orderblock** (last opposing candle before an impulsive move) or a **Fair Value Gap (FVG)** (3-candle imbalance).
+
+### Component 4: Entry Logic (Folder 6 & 8 - Confirmaciones & Estrategia)
+*   **Trigger (Change of Character - CHoCH):** Once the POI is tapped, we wait for a 15m candle to close past the most recent minor swing high/low in the opposite direction of the sweep.
+*   **Execution:** Limit order placed at the newly formed FVG/Orderblock created by the CHoCH impulse.
+
+### Component 5: Risk & Trade Management (Folders 10 & 11 - Backtesting & Trades)
+*   **Stop Loss:** Placed 1 ATR below the sweep low (for longs) or above the sweep high (for shorts).
+*   **Take Profit:** Fixed structural targets (next opposing liquidity pool) or a minimum of 2R (Reward-to-Risk).
+*   **Management:** Move stop to Breakeven when price reaches 1R.
+
+---
+
+## 3. Black-Box Components (The Python/Render Domain)
+*This layer acts as the ML Confirmation Filter. PineScript will detect the White-Box setup and send a Webhook to the Render service. The ML model will score the setup.*
+
+### Component 1: Feature Engineering Pipeline (Context Variables)
+When a setup is detected, the Python backend will calculate features that are hard to explicitly code in PineScript:
+*   **Volatility Context:** Current 15m ATR vs. Daily ATR.
+*   **Time Context:** Day of the week, exact hour/minute of the sweep.
+*   **Cross-Asset Correlation:** Current 15m trend of DXY (US Dollar Index) and US10Y (Treasury Yields). *Rule: Gold longs have higher probability if DXY is bearish.*
+*   **Sweep Magnitude:** How deep the liquidity grab was relative to average volume.
+
+### Component 2: The Model (XGBoost / LightGBM)
+*   **Target Variable:** Binary classification (1 = Trade hit 2R before Stop Loss; 0 = Trade hit Stop Loss first).
+*   **Inference:** The model outputs a probability score (0.0 to 1.0).
+*   **Threshold:** Only return a "TRADE_APPROVED" signal to TradingView if the model's confidence score is **> 0.65**.
+
+---
+
+## 4. System Architecture & Execution Plan
+*How the two systems communicate to execute the Hybrid Strategy.*
+
+1. **TradingView (PineScript):** Runs the White-Box logic. When `CONFIRMATION` state is reached, PineScript fires a JSON Webhook containing the entry price, stop loss, timestamp, and basic chart features.
+2. **Render (Python/FastAPI):** Receives the JSON. Fetches auxiliary data (DXY, Yields) via free APIs (e.g., yfinance). Passes the feature vector to the pre-trained XGBoost model.
+3. **Response:** Python returns a JSON: `{"action": "EXECUTE", "confidence": 0.72}`.
+4. **Broker Execution:** If approved, TradingView (via a service like PineConnector or direct broker integration) executes the limit order.
+
+---
+
+## 5. Evaluation & Metrics Framework (Postplatonic Lens)
+*Based on the "Strategy Evaluation Canon", the next LLM must generate code to track these specific metrics.*
+
+*   **Economic Performance:** Sharpe Ratio, Expectancy per trade, Win Rate, and Capacity-aware return (accounting for Gold's specific spread/slippage).
+*   **Robustness:** Walk-forward stability across different Gold regimes (e.g., High-inflation regime vs. Rate-cut regime).
+*   **Implementation Integrity:** Strict checks for "Lookahead bias" in FVG and Fractal detection.
+*   **Epistemic Quality (Hybrid Handoff Quality):** The system must separately track the performance of *all* White-Box signals vs. the *Filtered* signals. If the Black-Box filter does not improve the Sharpe ratio by at least 20%, the feature pipeline must be mutated or sent to the graveyard.
+*   **Explanatory Recoverability:** Every executed trade must log the exact White-Box reason (e.g., "Swept Asian High, Tapped H1 OB") AND the Black-Box score (e.g., "ML Confidence: 0.68").
+
+***
+
+### Instructions for the Next LLM:
+*"Using the **STRATEGY CODIFICATION BLUEPRINT** above, please act as a Senior Quant Developer. 
+1. Write the **PineScript v5 code** to detect the White-Box SMC setups (KillZones, Liquidity Sweeps, FVGs, CHoCH) and trigger a JSON webhook. 
+2. Write the **Python FastAPI code** (ready to be deployed on Render) that receives this webhook, simulates a basic ML feature evaluation, and returns an execution signal. 
+3. Write a Python script to calculate the **Evaluation Metrics** (Sharpe, Sortino, Handoff Quality) based on the Strategy Evaluation Canon."*

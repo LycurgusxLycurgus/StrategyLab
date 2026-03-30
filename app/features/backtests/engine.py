@@ -1,646 +1,521 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
-from datetime import datetime, timezone
-from itertools import groupby
-from math import sqrt
-from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
+import math
+import uuid
+from datetime import date, datetime, timedelta
+from statistics import mean
+from typing import Any
+
+from app.config import settings
+from app.domain import Bar, Candidate, Trade
 
 
-try:
-    NY_TZ = ZoneInfo("America/New_York")
-except ZoneInfoNotFoundError:  # pragma: no cover - depends on host tzdata availability
-    NY_TZ = timezone.utc
-TIMEFRAME_SECONDS = {"5m": 300, "1H": 3600, "4H": 14400}
+def classify_session(ts: datetime) -> str:
+    local = ts.astimezone(settings.timezone)
+    hour = local.hour + (local.minute / 60)
+    if 2 <= hour < 5:
+        return "london_killzone"
+    if 7 <= hour < 10:
+        return "ny_killzone"
+    if hour >= 18 or hour < 2:
+        return "asian_build"
+    return "off_session"
 
 
-@dataclass
-class Position:
-    direction: str
-    entry_ts: int
-    entry_price: float
-    quantity: float
-    stop: float
-    target_one: float
-    target_two: float
-    tp1_hit: bool = False
-    reentry_used: bool = False
+def trading_day(ts: datetime) -> date:
+    local = ts.astimezone(settings.timezone)
+    return local.date() if local.hour < 18 else (local + timedelta(days=1)).date()
 
 
-def compute_rsi(candles: list[dict], period: int = 14) -> list[float]:
-    values = [50.0] * len(candles)
-    gains: list[float] = []
-    losses: list[float] = []
-    for index in range(1, len(candles)):
-        delta = candles[index]["close"] - candles[index - 1]["close"]
-        gains.append(max(delta, 0.0))
-        losses.append(abs(min(delta, 0.0)))
-        if index < period:
-            continue
-        avg_gain = sum(gains[index - period : index]) / period
-        avg_loss = sum(losses[index - period : index]) / period
-        if avg_loss == 0:
-            values[index] = 100.0
-        else:
-            rs = avg_gain / avg_loss
-            values[index] = 100 - (100 / (1 + rs))
-    return values
+def atr_series(bars: list[Bar], period: int = 14) -> list[float]:
+    result: list[float] = []
+    prev_close = bars[0].close if bars else 0.0
+    trs: list[float] = []
+    for bar in bars:
+        tr = max(bar.high - bar.low, abs(bar.high - prev_close), abs(bar.low - prev_close))
+        trs.append(tr)
+        window = trs[-period:]
+        result.append(sum(window) / len(window))
+        prev_close = bar.close
+    return result
 
 
-def compute_atr(candles: list[dict], period: int = 14) -> list[float]:
-    atr = [0.0] * len(candles)
-    tr_values: list[float] = []
-    for index, candle in enumerate(candles):
-        if index == 0:
-            tr = candle["high"] - candle["low"]
-        else:
-            previous_close = candles[index - 1]["close"]
-            tr = max(
-                candle["high"] - candle["low"],
-                abs(candle["high"] - previous_close),
-                abs(candle["low"] - previous_close),
-            )
-        tr_values.append(tr)
-        if index >= period:
-            atr[index] = sum(tr_values[index - period + 1 : index + 1]) / period
-        else:
-            atr[index] = sum(tr_values) / len(tr_values)
-    return atr
-
-
-def fractal_indices(candles: list[dict], side: str, depth: int = 2) -> set[int]:
-    points: set[int] = set()
-    for index in range(depth, len(candles) - depth):
-        window = candles[index - depth : index + depth + 1]
-        center = candles[index]
-        if side == "high" and center["high"] == max(item["high"] for item in window):
-            points.add(index)
-        if side == "low" and center["low"] == min(item["low"] for item in window):
-            points.add(index)
-    return points
-
-
-def annualization_factor(timeframe: str) -> float:
-    periods = {"5m": 12 * 24 * 365, "1H": 24 * 365, "4H": 6 * 365}
-    return sqrt(periods[timeframe])
-
-
-def run_a_zero(candles: list[dict], timeframe: str, parameters: dict, risk: dict, rules: dict, fees: float, slippage: float) -> dict:
-    lookback_days = int(parameters.get("lookback_days", 90))
-    range_multiplier = float(parameters.get("range_multiplier", 1.18))
-    age_threshold_bars = int(parameters.get("age_threshold_bars", 28 * 24))
-    periods_per_day = max(1, 86400 // TIMEFRAME_SECONDS[timeframe])
-    lookback = lookback_days * periods_per_day
-    execution_lookback = max(periods_per_day * 14, lookback // 3)
-    rsi_values = compute_rsi(candles)
-    start_equity = 10000.0
-    equity = start_equity
-    equity_curve = [{"ts": candles[0]["ts"], "equity": equity, "drawdown": 0.0}]
-    peak_equity = equity
-    trades: list[dict] = []
-    position: Position | None = None
-    pending_entry: dict | None = None
-    recent_stop: dict | None = None
-    max_hold_bars = max(24, lookback // 6)
-
-    for index in range(1, len(candles)):
-        candle = candles[index]
-        previous = candles[index - 1]
-        if pending_entry and position is None:
-            entry_price = candle["open"] * (1 + slippage if pending_entry["direction"] == "long" else 1 - slippage)
-            stop = pending_entry["stop"]
-            risk_amount = equity * float(risk.get("risk_per_trade", 0.01))
-            stop_distance = abs(entry_price - stop) or entry_price * 0.01
-            quantity = risk_amount / stop_distance
-            position = Position(
-                direction=pending_entry["direction"],
-                entry_ts=candle["ts"],
-                entry_price=entry_price,
-                quantity=quantity,
-                stop=stop,
-                target_one=pending_entry["target_one"],
-                target_two=pending_entry["target_two"],
-                reentry_used=pending_entry.get("reentry_used", False),
-            )
-            equity -= entry_price * quantity * fees
-            pending_entry = None
-
-        if position is not None:
-            exit_trade = _manage_position(position, candle, fees, "a_zero")
-            if exit_trade:
-                equity += exit_trade["pnl"]
-                trades.append(exit_trade)
-                if exit_trade["reason"] == "stop":
-                    recent_stop = {"direction": position.direction, "bars_left": 2}
-                position = None
-            elif index - _bar_index_for_timestamp(candles, position.entry_ts) >= max_hold_bars:
-                exit_trade = _force_exit(position, candle, fees, "a_zero", "time_exit")
-                equity += exit_trade["pnl"]
-                trades.append(exit_trade)
-                position = None
-
-        if index < lookback:
-            equity_curve.append(_equity_point(candle["ts"], equity, peak_equity))
-            peak_equity = max(peak_equity, equity)
-            continue
-
-        macro_window = candles[index - lookback : index]
-        rolling = candles[max(0, index - execution_lookback) : index]
-        if not rolling or not macro_window:
-            equity_curve.append(_equity_point(candle["ts"], equity, peak_equity))
-            peak_equity = max(peak_equity, equity)
-            continue
-
-        rolling_low = min(item["low"] for item in rolling)
-        rolling_high = max(item["high"] for item in rolling)
-        macro_low = min(item["low"] for item in macro_window)
-        macro_high = max(item["high"] for item in macro_window)
-        range_high = max(rolling_high, rolling_low * range_multiplier)
-        range_span = max(range_high - rolling_low, candle["close"] * 0.01)
-        width = range_span / rolling_low if rolling_low else 0.0
-        if width < 0.015 or width > 0.60:
-            equity_curve.append(_equity_point(candle["ts"], equity, peak_equity))
-            peak_equity = max(peak_equity, equity)
-            continue
-
-        low_anchor = max(pos for pos, item in enumerate(rolling) if item["low"] == rolling_low)
-        high_anchor = max(pos for pos, item in enumerate(rolling) if item["high"] == rolling_high)
-        age_from_low = len(rolling) - 1 - low_anchor
-        age_from_high = len(rolling) - 1 - high_anchor
-        range_low = rolling_low
-        zone_pct = min(0.40, max(0.18, 0.12 + (range_multiplier - 1.0)))
-        lower_zone = rolling_low + range_span * zone_pct
-        upper_zone = range_high - range_span * zone_pct
-        macro_mid = macro_low + (macro_high - macro_low) * 0.50
-        bullish_bias = previous["close"] >= macro_mid or age_from_low >= age_threshold_bars // 3
-        bearish_bias = previous["close"] <= macro_mid or age_from_high >= age_threshold_bars // 3
-        breakout_up = candle["close"] > rolling_high * (1 + (range_multiplier - 1.0) * 0.05) and previous["close"] <= rolling_high
-        breakout_down = candle["close"] < rolling_low * (1 - (range_multiplier - 1.0) * 0.05) and previous["close"] >= rolling_low
-        pullback_long = candle["low"] <= lower_zone and candle["close"] >= previous["close"]
-        rejection_short = candle["high"] >= upper_zone and candle["close"] <= previous["close"]
-        continuation_short = candle["close"] <= lower_zone and candle["close"] < candle["open"] and rsi_values[index] <= 48
-
-        if recent_stop:
-            recent_stop["bars_left"] -= 1
-            if recent_stop["bars_left"] < 0:
-                recent_stop = None
-
-        if position is None and pending_entry is None and bullish_bias:
-            long_confirm = candle["close"] > candle["open"] or rsi_values[index] <= 58
-            breakout = age_from_high >= max(4, age_threshold_bars // 6) and breakout_up
-            reentry_ready = recent_stop and recent_stop["direction"] == "long" and range_low <= candle["close"] <= range_high
-            if pullback_long and (long_confirm or reentry_ready):
-                stop = min(candle["close"] * 0.98, range_low * 0.985)
-                pending_entry = {
-                    "direction": "long",
-                    "stop": stop,
-                    "target_one": range_low + range_span * 0.5,
-                    "target_two": range_high,
-                    "reentry_used": bool(reentry_ready),
-                }
-            elif breakout:
-                pending_entry = {
-                    "direction": "long",
-                    "stop": candle["close"] * 0.98,
-                    "target_one": candle["close"] + range_span * 0.5,
-                    "target_two": candle["close"] + range_span,
-                }
-        if position is None and pending_entry is None and bearish_bias:
-            short_confirm = candle["close"] < candle["open"] or rsi_values[index] >= 42
-            if (rejection_short or continuation_short) and short_confirm:
-                pending_entry = {
-                    "direction": "short",
-                    "stop": max(candle["close"] * 1.02, range_high * 1.02),
-                    "target_one": range_high - range_span * 0.5,
-                    "target_two": rolling_low,
-                }
-            elif age_from_low >= max(4, age_threshold_bars // 6) and breakout_down:
-                pending_entry = {
-                    "direction": "short",
-                    "stop": candle["close"] * 1.02,
-                    "target_one": candle["close"] - range_span * 0.5,
-                    "target_two": candle["close"] - range_span,
-                }
-
-        peak_equity = max(peak_equity, equity)
-        equity_curve.append(_equity_point(candle["ts"], equity, peak_equity))
-
-    if position is not None:
-        exit_trade = _force_exit(position, candles[-1], fees, "a_zero", "end_of_data")
-        equity += exit_trade["pnl"]
-        trades.append(exit_trade)
-        equity_curve[-1] = _equity_point(candles[-1]["ts"], equity, max(peak_equity, equity))
-
-    return {"equity_curve": equity_curve, "trades": trades, "final_equity": equity}
-
-
-def run_smart_money(candles: list[dict], timeframe: str, parameters: dict, risk: dict, rules: dict, fees: float, slippage: float) -> dict:
-    atr = compute_atr(candles)
-    start_equity = 10000.0
-    equity = start_equity
-    peak_equity = equity
-    equity_curve = [{"ts": candles[0]["ts"], "equity": equity, "drawdown": 0.0}]
-    trades: list[dict] = []
-    position: Position | None = None
-    pending_order: dict | None = None
-    sweep_state: dict | None = None
-    daily_realized: dict[str, float] = {}
-    consecutive_losses = 0
-    trading_locked_day: str | None = None
-    hourly = _aggregate_to_hourly(candles)
-    htf_fractal_depth = int(parameters.get("htf_fractal_depth", 5))
-    htf_depth_span = max(1, (htf_fractal_depth - 1) // 2)
-    hourly_zones = _build_hourly_zones(hourly)
-    sweep_window = max(12, int(12 + float(parameters.get("sweep_min_atr", parameters.get("sweep_multiplier", 0.2))) * 18))
-    confirmation_window = max(3, int(3 + float(parameters.get("displacement_requirement_atr", parameters.get("displacement_requirement", 1.0))) * 2))
-    lookback_htf = int(parameters.get("lookback_htf", 48))
-    entry_retrace_level = float(parameters.get("entry_retrace_level", 0.5))
-    confirmation_type = str(parameters.get("mss_confirmation_type", "strict"))
-    displacement_requirement = float(parameters.get("displacement_requirement_atr", parameters.get("displacement_requirement", 1.2)))
-    htf_pd_filter = bool(parameters.get("htf_pd_filter", False))
-    min_rr_target = float(parameters.get("min_rr_target", 2.5))
-    take_profit_logic = str(parameters.get("take_profit_logic", "opposing_liquidity_pool"))
-    sweep_min_atr = float(parameters.get("sweep_min_atr", parameters.get("sweep_multiplier", 0.2)))
-    stop_loss_padding_atr = float(parameters.get("stop_loss_padding_atr", 0.2))
-    killzone_buffer_minutes = int(rules.get("killzone_buffer_minutes", 15))
-    killzone_profile = str(rules.get("killzone_profile", "fx"))
-    trade_min_duration_bars = int(rules.get("trade_min_duration_bars", 1))
-    diagnostics = {
-        "zone_hits": 0,
-        "sweeps": 0,
-        "near_miss_no_mss": 0,
-        "mss_confirmations": 0,
-        "fvg_confirmations": 0,
-        "blocked_no_fvg": 0,
-        "pending_orders": 0,
-        "expired_orders": 0,
-        "voided_orders": 0,
-        "filled_orders": 0,
-        "gate_no_zone": 0,
-        "gate_no_sweep": 0,
-        "gate_no_mss": 0,
-        "gate_no_displacement": 0,
+def compute_metrics(trades: list[Trade]) -> dict[str, float]:
+    if not trades:
+        return {
+            "sharpe": 0.0,
+            "sortino": 0.0,
+            "max_drawdown": 0.0,
+            "profit_factor": 0.0,
+            "expectancy": 0.0,
+            "win_rate": 0.0,
+            "trades": 0,
+            "total_return": 0.0,
+            "avg_r": 0.0,
+        }
+    outcomes = [trade.outcome_r for trade in trades]
+    avg = sum(outcomes) / len(outcomes)
+    variance = sum((value - avg) ** 2 for value in outcomes) / len(outcomes)
+    downside = [value for value in outcomes if value < 0]
+    downside_var = sum(value**2 for value in downside) / len(downside) if downside else 0.0
+    sharpe = (avg / math.sqrt(variance)) * math.sqrt(len(outcomes)) if variance > 0 else 0.0
+    sortino = (avg / math.sqrt(downside_var)) * math.sqrt(len(outcomes)) if downside_var > 0 else 0.0
+    gross_wins = sum(value for value in outcomes if value > 0)
+    gross_losses = abs(sum(value for value in outcomes if value < 0))
+    equity = 0.0
+    peak = 0.0
+    max_drawdown = 0.0
+    for value in outcomes:
+        equity += value
+        peak = max(peak, equity)
+        max_drawdown = max(max_drawdown, peak - equity)
+    return {
+        "sharpe": round(sharpe, 4),
+        "sortino": round(sortino, 4),
+        "max_drawdown": round(max_drawdown, 4),
+        "profit_factor": round(gross_wins / gross_losses, 4) if gross_losses else round(gross_wins, 4),
+        "expectancy": round(avg, 4),
+        "win_rate": round(sum(1 for value in outcomes if value > 0) / len(outcomes), 4),
+        "trades": len(outcomes),
+        "total_return": round(sum(outcomes), 4),
+        "avg_r": round(avg, 4),
     }
 
-    for index in range(2, len(candles)):
-        candle = candles[index]
-        date_key = datetime.fromtimestamp(candle["ts"], timezone.utc).astimezone(NY_TZ).date().isoformat()
-        if trading_locked_day != date_key:
-            consecutive_losses = 0
-            if trading_locked_day and trading_locked_day != date_key:
-                trading_locked_day = None
-        if pending_order and position is None:
-            order_expired = candle["ts"] > pending_order["expires_at"] or not _is_killzone(candle["ts"], killzone_buffer_minutes, killzone_profile)
-            opposing_target_hit = (
-                candle["high"] >= pending_order["target_two"] if pending_order["direction"] == "long" else candle["low"] <= pending_order["target_two"]
+
+class WhiteBoxEngine:
+    def __init__(self, profile: dict[str, float]) -> None:
+        self.profile = profile
+
+    def run(self, bars: list[Bar]) -> dict[str, Any]:
+        if len(bars) < 80:
+            return {
+                "candidates": [],
+                "trades": [],
+                "metrics": compute_metrics([]),
+                "diagnostics": {"bars": len(bars), "note": "Dataset too small for strategy logic."},
+                "trace": [],
+            }
+
+        atrs = atr_series(bars)
+        previous_day_levels: dict[date, dict[str, float]] = {}
+        asian_levels: dict[date, dict[str, float]] = {}
+        day_highs: dict[date, list[float]] = {}
+        day_lows: dict[date, list[float]] = {}
+        asian_highs: dict[date, list[float]] = {}
+        asian_lows: dict[date, list[float]] = {}
+
+        for bar in bars:
+            local = bar.ts.astimezone(settings.timezone)
+            calendar_day = local.date()
+            day_highs.setdefault(calendar_day, []).append(bar.high)
+            day_lows.setdefault(calendar_day, []).append(bar.low)
+            if classify_session(bar.ts) == "asian_build":
+                td = trading_day(bar.ts)
+                asian_highs.setdefault(td, []).append(bar.high)
+                asian_lows.setdefault(td, []).append(bar.low)
+
+        ordered_days = sorted(day_highs.keys())
+        prev: dict[str, float] | None = None
+        for day in ordered_days:
+            if prev:
+                previous_day_levels[day] = prev
+            prev = {"high": max(day_highs[day]), "low": min(day_lows[day])}
+        for day in asian_highs:
+            asian_levels[day] = {"high": max(asian_highs[day]), "low": min(asian_lows[day])}
+
+        diagnostics = {
+            "bars": len(bars),
+            "killzone_bars": 0,
+            "sweeps": 0,
+            "confirmed_candidates": 0,
+            "orders_filled": 0,
+            "setup_expired": 0,
+            "pending_expired": 0,
+        }
+        candidates: list[Candidate] = []
+        trades: list[Trade] = []
+        trace: list[dict[str, Any]] = []
+        active_setup: dict[str, Any] | None = None
+        pending_order: dict[str, Any] | None = None
+        open_trade: dict[str, Any] | None = None
+
+        for index, bar in enumerate(bars):
+            atr = atrs[index]
+            session = classify_session(bar.ts)
+            local = bar.ts.astimezone(settings.timezone)
+            td = trading_day(bar.ts)
+            current_levels = self._current_liquidity_levels(td, local.date(), asian_levels, previous_day_levels)
+            trace_entry = self._make_trace_entry(
+                bar=bar,
+                atr=atr,
+                session=session,
+                levels=current_levels,
+                active_setup=active_setup,
+                pending_order=pending_order,
+                open_trade=open_trade,
             )
-            if order_expired or opposing_target_hit:
-                diagnostics["expired_orders" if order_expired else "voided_orders"] += 1
-                pending_order = None
-            else:
-                touched_entry = (
-                    candle["low"] <= pending_order["entry_price"] <= candle["high"]
-                    if pending_order["direction"] == "long"
-                    else candle["low"] <= pending_order["entry_price"] <= candle["high"]
-                )
-                if touched_entry:
-                    entry_price = pending_order["entry_price"] * (1 + slippage if pending_order["direction"] == "long" else 1 - slippage)
-                    stop = pending_order["stop"]
-                    risk_amount = equity * float(risk.get("risk_per_trade", 0.01))
-                    stop_distance = abs(entry_price - stop) or entry_price * 0.01
-                    position = Position(
-                        direction=pending_order["direction"],
-                        entry_ts=candle["ts"],
-                        entry_price=entry_price,
-                        quantity=risk_amount / stop_distance,
-                        stop=stop,
-                        target_one=pending_order["target_one"],
-                        target_two=pending_order["target_two"],
+            if session in {"london_killzone", "ny_killzone"}:
+                diagnostics["killzone_bars"] += 1
+
+            if open_trade:
+                self._manage_open_trade(open_trade, bar, trades)
+                trace_entry["active_trade"] = {
+                    "direction": open_trade["direction"],
+                    "entry": round(open_trade["entry"], 4),
+                    "stop": round(open_trade["stop"], 4),
+                    "target": round(open_trade["target"], 4),
+                    "candidate_id": open_trade["candidate"].candidate_id,
+                }
+                if open_trade.get("closed"):
+                    trace_entry["events"].append(
+                        f"trade_closed:{trades[-1].exit_reason}:{trades[-1].outcome_r}R"
                     )
-                    equity -= entry_price * position.quantity * fees
-                    diagnostics["filled_orders"] += 1
+                    open_trade = None
+
+            if pending_order and index > pending_order["created_index"]:
+                if index > pending_order["expires_index"] or classify_session(bar.ts) != pending_order["session"]:
+                    trace_entry["rejection_reason"] = "pending_order_expired_or_session_changed"
+                    trace_entry["events"].append("pending_order_cancelled")
+                    diagnostics["pending_expired"] += 1
                     pending_order = None
-        if position is not None:
-            held_bars = index - _bar_index_for_timestamp(candles, position.entry_ts)
-            if held_bars < trade_min_duration_bars:
-                peak_equity = max(peak_equity, equity)
-                equity_curve.append(_equity_point(candle["ts"], equity, peak_equity))
+                elif bar.low <= pending_order["entry"] <= bar.high:
+                    open_trade = self._open_trade(pending_order, bar.ts)
+                    diagnostics["orders_filled"] += 1
+                    trace_entry["events"].append("pending_order_filled")
+                    pending_order = None
+
+            if active_setup:
+                trace_entry["confirmation"] = self._confirmation_status(bars, index, active_setup, atr)
+                if index > active_setup["expires_index"] or session != active_setup["session"]:
+                    trace_entry["rejection_reason"] = "setup_expired_without_confirmation"
+                    trace_entry["events"].append("setup_cancelled")
+                    diagnostics["setup_expired"] += 1
+                    active_setup = None
+                elif trace_entry["confirmation"]["confirmed"]:
+                    candidate = self._build_candidate(bars, index, active_setup, atr, previous_day_levels.get(local.date()))
+                    candidates.append(candidate)
+                    diagnostics["confirmed_candidates"] += 1
+                    trace_entry["candidate_id"] = candidate.candidate_id
+                    trace_entry["planned_order"] = {
+                        "entry": candidate.entry,
+                        "stop": candidate.stop,
+                        "target": candidate.target,
+                    }
+                    trace_entry["events"].append("candidate_confirmed")
+                    pending_order = {
+                        "candidate": candidate,
+                        "direction": candidate.direction,
+                        "entry": candidate.entry,
+                        "stop": candidate.stop,
+                        "target": candidate.target,
+                        "session": active_setup["session"],
+                        "created_index": index,
+                        "expires_index": index + int(self.profile["order_ttl_bars"]),
+                    }
+                    active_setup = None
+
+            if active_setup or pending_order or open_trade or session not in {"london_killzone", "ny_killzone"} or index < 20:
+                trace_entry["state"] = self._state_name(active_setup, pending_order, open_trade)
+                trace.append(trace_entry)
                 continue
 
-        if position is not None:
-            exit_trade = _manage_position(position, candle, fees, "smart_money")
-            if exit_trade:
-                equity += exit_trade["pnl"]
-                trades.append(exit_trade)
-                daily_realized[date_key] = daily_realized.get(date_key, 0.0) + exit_trade["pnl"]
-                consecutive_losses = consecutive_losses + 1 if exit_trade["pnl"] < 0 else 0
-                if daily_realized[date_key] <= -0.02 * start_equity or consecutive_losses >= 2:
-                    trading_locked_day = date_key
-                position = None
+            if not current_levels:
+                trace_entry["rejection_reason"] = "no_liquidity_levels_for_bar"
+                trace_entry["state"] = self._state_name(active_setup, pending_order, open_trade)
+                trace.append(trace_entry)
+                continue
 
-        if trading_locked_day == date_key or position is not None or pending_order is not None or timeframe != "5m":
-            peak_equity = max(peak_equity, equity)
-            equity_curve.append(_equity_point(candle["ts"], equity, peak_equity))
-            continue
+            sweep = self._detect_sweep(bar, atr, current_levels)
+            if sweep:
+                diagnostics["sweeps"] += 1
+                trace_entry["sweep"] = sweep
+                trace_entry["events"].append("liquidity_sweep_detected")
+                active_setup = {
+                    "direction": sweep["direction"],
+                    "session": session,
+                    "level_name": sweep["level_name"],
+                    "level_price": sweep["level_price"],
+                    "sweep_extreme": sweep["sweep_extreme"],
+                    "start_index": index,
+                    "expires_index": index + 8,
+                }
+            else:
+                trace_entry["rejection_reason"] = "no_valid_sweep"
+            trace_entry["state"] = self._state_name(active_setup, pending_order, open_trade)
+            trace.append(trace_entry)
 
-        if not _is_killzone(candle["ts"], killzone_buffer_minutes, killzone_profile):
-            peak_equity = max(peak_equity, equity)
-            equity_curve.append(_equity_point(candle["ts"], equity, peak_equity))
-            continue
+        if open_trade:
+            self._force_close(open_trade, bars[-1], trades)
 
-        htf_range = _latest_structural_range(hourly, candle["ts"], htf_depth_span, lookback_htf)
-        active_zone = _active_zone(hourly_zones, candle["ts"], candle["close"], lookback_htf, atr[index] * 0.5)
-        if not active_zone or not htf_range:
-            diagnostics["gate_no_zone"] += 1
-            peak_equity = max(peak_equity, equity)
-            equity_curve.append(_equity_point(candle["ts"], equity, peak_equity))
-            continue
-        diagnostics["zone_hits"] += 1
+        return {
+            "candidates": [candidate.to_dict() for candidate in candidates],
+            "trades": [trade.to_dict() for trade in trades],
+            "metrics": compute_metrics(trades),
+            "diagnostics": diagnostics,
+            "trace": trace,
+        }
 
-        tolerance = max(candle["close"] * 0.00002, atr[index] * max(0.05, sweep_min_atr))
-        prior_window = candles[max(0, index - sweep_window) : index]
-        prior_low = min(item["low"] for item in prior_window)
-        prior_high = max(item["high"] for item in prior_window)
-        body_size = abs(candle["close"] - candle["open"])
-        body_threshold = atr[index] * max(0.08, displacement_requirement * 0.35)
-        if candle["low"] <= prior_low - tolerance and candle["close"] >= prior_low + body_threshold * 0.15:
-            local_pivot_high = max(item["high"] for item in candles[max(0, index - 3) : index])
-            sweep_state = {
-                "direction": "long",
-                "index": index,
-                "pivot": local_pivot_high,
-                "sweep_depth": max(0.0, prior_low - candle["low"]),
-                "sweep_extreme": candle["low"],
-            }
-            diagnostics["sweeps"] += 1
-        if candle["high"] >= prior_high + tolerance and candle["close"] <= prior_high - body_threshold * 0.15:
-            local_pivot_low = min(item["low"] for item in candles[max(0, index - 3) : index])
-            sweep_state = {
-                "direction": "short",
-                "index": index,
-                "pivot": local_pivot_low,
-                "sweep_depth": max(0.0, candle["high"] - prior_high),
-                "sweep_extreme": candle["high"],
-            }
-            diagnostics["sweeps"] += 1
+    def _current_liquidity_levels(
+        self,
+        trade_day: date,
+        local_day: date,
+        asian_levels: dict[date, dict[str, float]],
+        previous_day_levels: dict[date, dict[str, float]],
+    ) -> list[tuple[str, float]]:
+        levels: list[tuple[str, float]] = []
+        if trade_day in asian_levels:
+            levels.append(("asian_high", asian_levels[trade_day]["high"]))
+            levels.append(("asian_low", asian_levels[trade_day]["low"]))
+        if local_day in previous_day_levels:
+            levels.append(("previous_day_high", previous_day_levels[local_day]["high"]))
+            levels.append(("previous_day_low", previous_day_levels[local_day]["low"]))
+        return levels
 
-        minimum_sweep_depth = atr[index] * max(0.05, sweep_min_atr)
-        displacement_threshold = atr[index] * max(0.12, displacement_requirement)
-        bullish_fvg = candles[index - 2]["high"] < candle["low"]
-        bearish_fvg = candles[index - 2]["low"] > candle["high"]
-        relaxed_bullish_displacement = body_size >= displacement_threshold * displacement_requirement and candle["high"] > candles[index - 1]["high"]
-        relaxed_bearish_displacement = body_size >= displacement_threshold * displacement_requirement and candle["low"] < candles[index - 1]["low"]
-        strict_bullish_mss = bool(
-            sweep_state
-            and sweep_state["direction"] == "long"
-            and index - sweep_state["index"] <= confirmation_window
-            and candle["close"] > candle["open"]
-            and body_size >= body_threshold
-            and candle["close"] > sweep_state["pivot"]
-            and sweep_state["sweep_depth"] >= minimum_sweep_depth
-        )
-        strict_bearish_mss = bool(
-            sweep_state
-            and sweep_state["direction"] == "short"
-            and index - sweep_state["index"] <= confirmation_window
-            and candle["close"] < candle["open"]
-            and body_size >= body_threshold
-            and candle["close"] < sweep_state["pivot"]
-            and sweep_state["sweep_depth"] >= minimum_sweep_depth
-        )
-        relaxed_bullish_mss = bool(
-            sweep_state
-            and sweep_state["direction"] == "long"
-            and index - sweep_state["index"] <= confirmation_window + 1
-            and candle["high"] > min(sweep_state["pivot"], candles[index - 1]["high"])
-            and candle["close"] >= candle["open"] + body_threshold * 0.25
-            and sweep_state["sweep_depth"] >= minimum_sweep_depth * 0.75
-            and relaxed_bullish_displacement
-        )
-        relaxed_bearish_mss = bool(
-            sweep_state
-            and sweep_state["direction"] == "short"
-            and index - sweep_state["index"] <= confirmation_window + 1
-            and candle["low"] < max(sweep_state["pivot"], candles[index - 1]["low"])
-            and candle["close"] <= candle["open"] - body_threshold * 0.25
-            and sweep_state["sweep_depth"] >= minimum_sweep_depth * 0.75
-            and relaxed_bearish_displacement
-        )
-        bullish_mss = strict_bullish_mss if confirmation_type == "strict" else strict_bullish_mss or relaxed_bullish_mss
-        bearish_mss = strict_bearish_mss if confirmation_type == "strict" else strict_bearish_mss or relaxed_bearish_mss
-        if htf_pd_filter:
-            if bullish_mss and candle["close"] > htf_range["mid"]:
-                bullish_mss = False
-            if bearish_mss and candle["close"] < htf_range["mid"]:
-                bearish_mss = False
-        if not sweep_state or index - sweep_state["index"] > confirmation_window + 1:
-            diagnostics["gate_no_sweep"] += 1
-        elif not bullish_mss and not bearish_mss:
-            diagnostics["near_miss_no_mss"] += 1
-            diagnostics["gate_no_mss"] += 1
-        has_bullish_displacement = bullish_fvg or (confirmation_type == "relaxed" and relaxed_bullish_displacement)
-        has_bearish_displacement = bearish_fvg or (confirmation_type == "relaxed" and relaxed_bearish_displacement)
-        if active_zone["direction"] == "long" and bullish_mss and has_bullish_displacement:
-            diagnostics["mss_confirmations"] += 1
-            diagnostics["fvg_confirmations"] += 1
-            fvg_bottom = candles[index - 2]["high"] if bullish_fvg else min(candles[index - 1]["open"], candles[index - 1]["close"])
-            fvg_top = candle["low"] if bullish_fvg else max(candles[index - 1]["open"], candles[index - 1]["close"])
-            entry_price = fvg_bottom + max(0.0, fvg_top - fvg_bottom) * entry_retrace_level
-            stop = sweep_state["sweep_extreme"] - atr[index] * stop_loss_padding_atr
-            risk_span = max(entry_price - stop, atr[index] * 0.2)
-            opposing_liquidity = max(prior_high, htf_range["top"])
-            target_two = max(entry_price + risk_span * min_rr_target, opposing_liquidity) if take_profit_logic == "opposing_liquidity_pool" else entry_price + risk_span * min_rr_target
-            pending_order = {
-                "direction": "long",
-                "entry_price": entry_price,
-                "stop": stop,
-                "target_one": entry_price + (target_two - entry_price) * 0.5,
-                "target_two": target_two,
-                "expires_at": _killzone_end_ts(candle["ts"], killzone_buffer_minutes, killzone_profile),
-            }
-            diagnostics["pending_orders"] += 1
-        elif active_zone["direction"] == "long" and bullish_mss:
-            diagnostics["blocked_no_fvg"] += 1
-            diagnostics["gate_no_displacement"] += 1
-        if active_zone["direction"] == "short" and bearish_mss and has_bearish_displacement:
-            diagnostics["mss_confirmations"] += 1
-            diagnostics["fvg_confirmations"] += 1
-            fvg_top = candles[index - 2]["low"] if bearish_fvg else max(candles[index - 1]["open"], candles[index - 1]["close"])
-            fvg_bottom = candle["high"] if bearish_fvg else min(candles[index - 1]["open"], candles[index - 1]["close"])
-            entry_price = fvg_top - max(0.0, fvg_top - fvg_bottom) * entry_retrace_level
-            stop = sweep_state["sweep_extreme"] + atr[index] * stop_loss_padding_atr
-            risk_span = max(stop - entry_price, atr[index] * 0.2)
-            opposing_liquidity = min(prior_low, htf_range["bottom"])
-            target_two = min(entry_price - risk_span * min_rr_target, opposing_liquidity) if take_profit_logic == "opposing_liquidity_pool" else entry_price - risk_span * min_rr_target
-            pending_order = {
-                "direction": "short",
-                "entry_price": entry_price,
-                "stop": stop,
-                "target_one": entry_price - (entry_price - target_two) * 0.5,
-                "target_two": target_two,
-                "expires_at": _killzone_end_ts(candle["ts"], killzone_buffer_minutes, killzone_profile),
-            }
-            diagnostics["pending_orders"] += 1
-        elif active_zone["direction"] == "short" and bearish_mss:
-            diagnostics["blocked_no_fvg"] += 1
-            diagnostics["gate_no_displacement"] += 1
-
-        peak_equity = max(peak_equity, equity)
-        equity_curve.append(_equity_point(candle["ts"], equity, peak_equity))
-
-    if position is not None:
-        exit_trade = _force_exit(position, candles[-1], fees, "smart_money", "end_of_data")
-        equity += exit_trade["pnl"]
-        trades.append(exit_trade)
-        equity_curve[-1] = _equity_point(candles[-1]["ts"], equity, max(peak_equity, equity))
-
-    return {"equity_curve": equity_curve, "trades": trades, "final_equity": equity, "diagnostics": diagnostics}
-
-
-def _manage_position(position: Position, candle: dict, fees: float, strategy_name: str) -> dict | None:
-    sign = 1 if position.direction == "long" else -1
-    stop_hit = candle["low"] <= position.stop if position.direction == "long" else candle["high"] >= position.stop
-    target_one_hit = candle["high"] >= position.target_one if position.direction == "long" else candle["low"] <= position.target_one
-    target_two_hit = candle["high"] >= position.target_two if position.direction == "long" else candle["low"] <= position.target_two
-
-    if stop_hit:
-        pnl = sign * (position.stop - position.entry_price) * position.quantity - position.stop * position.quantity * fees
-        return _trade(position, candle["ts"], position.stop, pnl, "stop", strategy_name)
-
-    if target_one_hit and not position.tp1_hit:
-        partial_qty = position.quantity * 0.33
-        pnl = sign * (position.target_one - position.entry_price) * partial_qty - position.target_one * partial_qty * fees
-        position.quantity -= partial_qty
-        position.tp1_hit = True
-        position.stop = position.entry_price
-        if target_two_hit:
-            pnl += sign * (position.target_two - position.entry_price) * position.quantity - position.target_two * position.quantity * fees
-            return _trade(position, candle["ts"], position.target_two, pnl, "tp2_after_tp1", strategy_name)
+    def _detect_sweep(self, bar: Bar, atr: float, levels: list[tuple[str, float]]) -> dict[str, Any] | None:
+        max_excursion = atr * float(self.profile["sweep_atr_max"])
+        for level_name, level_price in levels:
+            if "high" in level_name and bar.high > level_price and bar.close < level_price and (bar.high - level_price) <= max_excursion:
+                return {
+                    "direction": "short",
+                    "level_name": level_name,
+                    "level_price": level_price,
+                    "sweep_extreme": bar.high,
+                }
+            if "low" in level_name and bar.low < level_price and bar.close > level_price and (level_price - bar.low) <= max_excursion:
+                return {
+                    "direction": "long",
+                    "level_name": level_name,
+                    "level_price": level_price,
+                    "sweep_extreme": bar.low,
+                }
         return None
 
-    if target_two_hit:
-        pnl = sign * (position.target_two - position.entry_price) * position.quantity - position.target_two * position.quantity * fees
-        return _trade(position, candle["ts"], position.target_two, pnl, "tp2", strategy_name)
-    return None
-
-
-def _trade(position: Position, exit_ts: int, exit_price: float, pnl: float, reason: str, strategy_name: str) -> dict:
-    return {
-        "strategy": strategy_name,
-        "direction": position.direction,
-        "entry_ts": position.entry_ts,
-        "exit_ts": exit_ts,
-        "entry_price": round(position.entry_price, 6),
-        "exit_price": round(exit_price, 6),
-        "quantity": round(position.quantity, 6),
-        "pnl": round(pnl, 6),
-        "return_pct": round(pnl / 10000.0, 6),
-        "reason": reason,
-    }
-
-
-def _force_exit(position: Position, candle: dict, fees: float, strategy_name: str, reason: str) -> dict:
-    sign = 1 if position.direction == "long" else -1
-    exit_price = candle["close"]
-    pnl = sign * (exit_price - position.entry_price) * position.quantity - exit_price * position.quantity * fees
-    return _trade(position, candle["ts"], exit_price, pnl, reason, strategy_name)
-
-
-def _equity_point(ts: int, equity: float, peak_equity: float) -> dict:
-    drawdown = 0.0 if peak_equity == 0 else max(0.0, (peak_equity - equity) / peak_equity)
-    return {"ts": ts, "equity": round(equity, 6), "drawdown": round(drawdown, 6)}
-
-
-def _bar_index_for_timestamp(candles: list[dict], ts: int) -> int:
-    for index, candle in enumerate(candles):
-        if candle["ts"] == ts:
-            return index
-    return len(candles) - 1
-
-
-def _killzone_windows(profile: str) -> list[tuple[int, int]]:
-    if profile == "crypto":
-        return [(0, 240), (420, 660), (1140, 1380)]
-    return [(120, 300), (420, 600)]
-
-
-def _is_killzone(ts: int, buffer_minutes: int = 0, profile: str = "fx") -> bool:
-    local = datetime.fromtimestamp(ts, timezone.utc).astimezone(NY_TZ)
-    minutes = local.hour * 60 + local.minute
-    return any((start - buffer_minutes) <= minutes <= (end + buffer_minutes) for start, end in _killzone_windows(profile))
-
-
-def _killzone_end_ts(ts: int, buffer_minutes: int = 0, profile: str = "fx") -> int:
-    local = datetime.fromtimestamp(ts, timezone.utc).astimezone(NY_TZ)
-    minutes = local.hour * 60 + local.minute
-    matching_window = next(
-        ((start, end) for start, end in _killzone_windows(profile) if (start - buffer_minutes) <= minutes <= (end + buffer_minutes)),
-        None,
-    )
-    if not matching_window:
-        return ts
-    _, end = matching_window
-    end_minutes = end + buffer_minutes
-    local_end = local.replace(hour=end_minutes // 60, minute=end_minutes % 60, second=0, microsecond=0)
-    return int(local_end.astimezone(timezone.utc).timestamp())
-
-
-def _aggregate_to_hourly(candles: list[dict]) -> list[dict]:
-    grouped: list[dict] = []
-    for _, items in groupby(candles, key=lambda item: datetime.fromtimestamp(item["ts"], timezone.utc).astimezone(NY_TZ).replace(minute=0, second=0, microsecond=0)):
-        bucket = list(items)
-        grouped.append(
-            {
-                "ts": bucket[-1]["ts"],
-                "open": bucket[0]["open"],
-                "high": max(item["high"] for item in bucket),
-                "low": min(item["low"] for item in bucket),
-                "close": bucket[-1]["close"],
+    def _confirmation_status(self, bars: list[Bar], index: int, setup: dict[str, Any], atr: float) -> dict[str, Any]:
+        lookback = int(self.profile["swing_lookback"])
+        if index - setup["start_index"] < 2 or index < lookback + 2:
+            return {
+                "confirmed": False,
+                "state": "waiting_for_minimum_bars",
+                "blockers": ["not_enough_bars_after_sweep"],
             }
+        window = bars[max(setup["start_index"], index - lookback) : index]
+        body_size = abs(bars[index].close - bars[index].open)
+        body_threshold = atr * float(self.profile["poi_atr_threshold"])
+        if setup["direction"] == "long":
+            pivot = max(bar.high for bar in window)
+            has_fvg = bars[index].low > bars[index - 2].high
+            close_pass = bars[index].close > pivot
+        else:
+            pivot = min(bar.low for bar in window)
+            has_fvg = bars[index].high < bars[index - 2].low
+            close_pass = bars[index].close < pivot
+        blockers: list[str] = []
+        if not close_pass:
+            blockers.append("close_not_through_local_pivot")
+        if not has_fvg and body_size < body_threshold:
+            blockers.append("no_displacement_confirmation")
+        return {
+            "confirmed": close_pass and (has_fvg or body_size >= body_threshold),
+            "state": "confirmed" if close_pass and (has_fvg or body_size >= body_threshold) else "waiting_confirmation",
+            "pivot": round(pivot, 4),
+            "body_size": round(body_size, 4),
+            "body_threshold": round(body_threshold, 4),
+            "has_fvg": has_fvg,
+            "blockers": blockers,
+        }
+
+    def _build_candidate(
+        self,
+        bars: list[Bar],
+        index: int,
+        setup: dict[str, Any],
+        atr: float,
+        previous_day: dict[str, float] | None,
+    ) -> Candidate:
+        bar = bars[index]
+        if setup["direction"] == "long":
+            gap_low = bars[index - 2].high
+            gap_high = max(gap_low, bar.low)
+            entry = gap_low + (gap_high - gap_low) * float(self.profile["entry_offset"])
+            stop = setup["sweep_extreme"] - (atr * float(self.profile["stop_atr"]))
+            target = entry + ((entry - stop) * float(self.profile["target_r"]))
+            distance_to_prev = abs((previous_day or {"high": bar.high})["high"] - bar.close) / max(atr, 0.0001)
+        else:
+            gap_high = bars[index - 2].low
+            gap_low = min(gap_high, bar.high)
+            entry = gap_high - ((gap_high - gap_low) * float(self.profile["entry_offset"]))
+            stop = setup["sweep_extreme"] + (atr * float(self.profile["stop_atr"]))
+            target = entry - ((stop - entry) * float(self.profile["target_r"]))
+            distance_to_prev = abs(bar.close - (previous_day or {"low": bar.low})["low"]) / max(atr, 0.0001)
+        body_size = abs(bar.close - bar.open)
+        fvg_size = abs(gap_high - gap_low)
+        sma_window = [sample.close for sample in bars[max(0, index - 20) : index]]
+        bias = 1 if not sma_window or bar.close >= mean(sma_window) else -1
+        session = classify_session(bar.ts)
+        features = {
+            "session_ny": 1 if session == "ny_killzone" else 0,
+            "sweep_depth_atr": round(abs(setup["level_price"] - setup["sweep_extreme"]) / max(atr, 0.0001), 4),
+            "body_atr": round(body_size / max(atr, 0.0001), 4),
+            "fvg_size_atr": round(fvg_size / max(atr, 0.0001), 4),
+            "bias": bias,
+            "distance_to_prev_day_atr": round(distance_to_prev, 4),
+        }
+        reason = (
+            f"{setup['level_name']} swept during {session}; "
+            f"CHoCH confirmed with displacement; entry plans retrace into imbalance."
         )
-    return grouped
+        return Candidate(
+            candidate_id=f"cand_{uuid.uuid4().hex[:12]}",
+            ts=bar.ts,
+            direction=setup["direction"],
+            sweep_level=setup["level_name"],
+            poi_type="fvg",
+            entry=round(entry, 4),
+            stop=round(stop, 4),
+            target=round(target, 4),
+            atr=round(atr, 4),
+            reason=reason,
+            features=features,
+            context={"session": session, "trade_day": trading_day(bar.ts).isoformat()},
+        )
 
+    def _open_trade(self, pending_order: dict[str, Any], ts: datetime) -> dict[str, Any]:
+        candidate: Candidate = pending_order["candidate"]
+        return {
+            "trade_id": f"tr_{uuid.uuid4().hex[:12]}",
+            "candidate": candidate,
+            "entry": candidate.entry,
+            "stop": candidate.stop,
+            "target": candidate.target,
+            "direction": candidate.direction,
+            "entry_ts": ts,
+            "breakeven_done": False,
+            "risk": abs(candidate.entry - candidate.stop),
+        }
 
-def _build_hourly_zones(candles: list[dict]) -> list[dict]:
-    atr = compute_atr(candles)
-    zones: list[dict] = []
-    for index in range(2, len(candles)):
-        current = candles[index]
-        prev = candles[index - 1]
-        prior = candles[index - 2]
-        if current["low"] > prior["high"]:
-            zones.append({"direction": "long", "start_ts": current["ts"], "bottom": prior["high"], "top": current["low"], "expires_at": current["ts"] + 6 * 3600})
-        displacement = current["high"] - current["low"]
-        if current["high"] < prior["low"]:
-            zones.append({"direction": "short", "start_ts": current["ts"], "bottom": current["high"], "top": prior["low"], "expires_at": current["ts"] + 6 * 3600})
-        if displacement > atr[index] * 1.5:
-            if current["close"] > prev["high"]:
-                zones.append({"direction": "long", "start_ts": current["ts"], "bottom": prev["low"], "top": prev["high"], "expires_at": current["ts"] + 6 * 3600})
-            if current["close"] < prev["low"]:
-                zones.append({"direction": "short", "start_ts": current["ts"], "bottom": prev["low"], "top": prev["high"], "expires_at": current["ts"] + 6 * 3600})
-    return zones
+    def _manage_open_trade(self, open_trade: dict[str, Any], bar: Bar, trades: list[Trade]) -> None:
+        risk = max(open_trade["risk"], 0.0001)
+        if open_trade["direction"] == "long":
+            favorable = bar.high - open_trade["entry"]
+            if favorable >= risk * float(self.profile["breakeven_r"]) and not open_trade["breakeven_done"]:
+                open_trade["stop"] = open_trade["entry"]
+                open_trade["breakeven_done"] = True
+            stop_hit = bar.low <= open_trade["stop"]
+            target_hit = bar.high >= open_trade["target"]
+        else:
+            favorable = open_trade["entry"] - bar.low
+            if favorable >= risk * float(self.profile["breakeven_r"]) and not open_trade["breakeven_done"]:
+                open_trade["stop"] = open_trade["entry"]
+                open_trade["breakeven_done"] = True
+            stop_hit = bar.high >= open_trade["stop"]
+            target_hit = bar.low <= open_trade["target"]
+        if stop_hit and target_hit:
+            target_hit = False
+        if stop_hit:
+            self._close_trade(open_trade, bar.ts, open_trade["stop"], "stop", trades)
+        elif target_hit:
+            self._close_trade(open_trade, bar.ts, open_trade["target"], "target", trades)
 
+    def _close_trade(
+        self,
+        open_trade: dict[str, Any],
+        exit_ts: datetime,
+        exit_price: float,
+        exit_reason: str,
+        trades: list[Trade],
+    ) -> None:
+        candidate: Candidate = open_trade["candidate"]
+        risk = max(open_trade["risk"], 0.0001)
+        if open_trade["direction"] == "long":
+            outcome = (exit_price - open_trade["entry"]) / risk
+        else:
+            outcome = (open_trade["entry"] - exit_price) / risk
+        trades.append(
+            Trade(
+                trade_id=open_trade["trade_id"],
+                candidate_id=candidate.candidate_id,
+                direction=open_trade["direction"],
+                entry_ts=open_trade["entry_ts"],
+                exit_ts=exit_ts,
+                entry=round(open_trade["entry"], 4),
+                exit=round(exit_price, 4),
+                stop=round(candidate.stop, 4),
+                target=round(candidate.target, 4),
+                risk_r=1.0,
+                outcome_r=round(outcome, 4),
+                exit_reason=exit_reason,
+                reason=candidate.reason,
+            )
+        )
+        open_trade["closed"] = True
 
-def _latest_structural_range(candles: list[dict], ts: int, depth: int, lookback_hours: int) -> dict | None:
-    high_points = sorted(fractal_indices(candles, "high", depth))
-    low_points = sorted(fractal_indices(candles, "low", depth))
-    recent_high = next((candles[index] for index in reversed(high_points) if candles[index]["ts"] <= ts and ts - candles[index]["ts"] <= lookback_hours * 3600), None)
-    recent_low = next((candles[index] for index in reversed(low_points) if candles[index]["ts"] <= ts and ts - candles[index]["ts"] <= lookback_hours * 3600), None)
-    if not recent_high or not recent_low:
-        return None
-    top = recent_high["high"]
-    bottom = recent_low["low"]
-    if bottom >= top:
-        return None
-    return {"top": top, "bottom": bottom, "mid": bottom + (top - bottom) * 0.5}
+    def _force_close(self, open_trade: dict[str, Any], last_bar: Bar, trades: list[Trade]) -> None:
+        self._close_trade(open_trade, last_bar.ts, last_bar.close, "time_exit", trades)
 
+    @staticmethod
+    def _state_name(
+        active_setup: dict[str, Any] | None,
+        pending_order: dict[str, Any] | None,
+        open_trade: dict[str, Any] | None,
+    ) -> str:
+        if open_trade:
+            return "in_trade"
+        if pending_order:
+            return "pending_order"
+        if active_setup:
+            return "watching_confirmation"
+        return "searching"
 
-def _active_zone(zones: list[dict], ts: int, price: float, lookback_htf: int = 24, tolerance: float = 0.0) -> dict | None:
-    valid = [
-        zone
-        for zone in zones
-        if zone["start_ts"] <= ts <= zone["expires_at"]
-        and ts - zone["start_ts"] <= lookback_htf * 3600
-        and (zone["bottom"] - tolerance) <= price <= (zone["top"] + tolerance)
-    ]
-    return valid[-1] if valid else None
+    def _make_trace_entry(
+        self,
+        bar: Bar,
+        atr: float,
+        session: str,
+        levels: list[tuple[str, float]],
+        active_setup: dict[str, Any] | None,
+        pending_order: dict[str, Any] | None,
+        open_trade: dict[str, Any] | None,
+    ) -> dict[str, Any]:
+        level_map = {name: round(price, 4) for name, price in levels}
+        entry: dict[str, Any] = {
+            "ts": bar.ts.isoformat(),
+            "session": session,
+            "bar": {
+                "open": round(bar.open, 4),
+                "high": round(bar.high, 4),
+                "low": round(bar.low, 4),
+                "close": round(bar.close, 4),
+            },
+            "atr": round(atr, 4),
+            "asian_range": {
+                "high": level_map.get("asian_high"),
+                "low": level_map.get("asian_low"),
+            },
+            "previous_day_range": {
+                "high": level_map.get("previous_day_high"),
+                "low": level_map.get("previous_day_low"),
+            },
+            "sweep": None,
+            "confirmation": None,
+            "planned_order": None,
+            "active_trade": None,
+            "candidate_id": None,
+            "state": self._state_name(active_setup, pending_order, open_trade),
+            "events": [],
+            "rejection_reason": None,
+        }
+        if active_setup:
+            entry["active_setup"] = {
+                "direction": active_setup["direction"],
+                "level_name": active_setup["level_name"],
+                "level_price": round(active_setup["level_price"], 4),
+                "sweep_extreme": round(active_setup["sweep_extreme"], 4),
+            }
+        if pending_order:
+            entry["planned_order"] = {
+                "entry": round(pending_order["entry"], 4),
+                "stop": round(pending_order["stop"], 4),
+                "target": round(pending_order["target"], 4),
+                "candidate_id": pending_order["candidate"].candidate_id,
+            }
+        return entry

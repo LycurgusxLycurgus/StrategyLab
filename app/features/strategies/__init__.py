@@ -1,1 +1,1 @@
-
+"""Strategy catalog slice."""

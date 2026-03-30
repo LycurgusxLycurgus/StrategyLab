@@ -1,127 +1,122 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>StrategyLab</title>
-  </head>
-  <body>
-    <header>
-      <h1>StrategyLab</h1>
-      <p>Local strategy research console.</p>
-      <button id="refresh-button" type="button">Refresh</button>
-    </header>
-    <main>
-      <section>
-        <h2>Primary Workflow</h2>
-        <p>Normal use should be only two actions: get market data, then run a strategy on that data.</p>
-        <p>A dataset means candle history for one asset and one timeframe: timestamp, open, high, low, close, and volume.</p>
-      </section>
-      <section>
-        <h2>1. Get Real Market Data</h2>
-        <p>This downloads real OHLCV candles from Binance public market-data endpoints. No API key is required.</p>
-        <form id="binance-dataset-form">
-          <label>Symbol
-            <select id="binance-symbol" name="symbol">
-              <option value="BTCUSDT" selected>BTCUSDT</option>
-              <option value="ETHUSDT">ETHUSDT</option>
-              <option value="SOLUSDT">SOLUSDT</option>
-              <option value="BNBUSDT">BNBUSDT</option>
-              <option value="XRPUSDT">XRPUSDT</option>
-            </select>
-          </label>
-          <label>Timeframe
-            <select id="binance-timeframe" name="timeframe">
-              <option value="5m">5m</option>
-              <option value="1H" selected>1H</option>
-              <option value="4H">4H</option>
-            </select>
-          </label>
-          <label>Bars
-            <select id="binance-bars" name="bars">
-              <option value="500">500</option>
-              <option value="1000">1000</option>
-              <option value="1500">1500</option>
-              <option value="2500" selected>2500</option>
-              <option value="5000">5000</option>
-            </select>
-          </label>
-          <button type="submit">Download Real Market Dataset</button>
-        </form>
-        <p id="binance-status">Ready. Default first run: BTCUSDT, 1H, 2500 bars.</p>
-        <p id="dataset-current">No active dataset selected yet.</p>
-      </section>
-      <section>
-        <h2>2. Run Strategy On Current Data</h2>
-        <p>Use this after the dataset status above says the market download is ready. This runs the full parameter grid for the selected family and dataset.</p>
-        <form id="guided-sweep-form">
-          <label>Family <select id="guided-family" name="family_id"></select></label>
-          <label>Dataset <select id="guided-dataset" name="dataset_id"></select></label>
-          <button type="submit">Run Family Sweep</button>
-        </form>
-        <p id="guided-family-help">Select a family to see its category, compatible timeframes, minimum bars, and sweepable parameter space.</p>
-        <p id="run-status">No family sweep has been started yet.</p>
-      </section>
-      <section>
-        <h2>3. Review Results With LLM</h2>
-        <p>This sends the family manifest, sweep runs, graveyard context, strategy canon, and app role to Gemini so it can propose explanation-based parameter-grid corrections.</p>
-        <form id="review-form">
-          <label>Family <select id="review-family" name="family_id"></select></label>
-          <label>Dataset <select id="review-dataset" name="dataset_id"></select></label>
-          <button type="submit">Review Results With Gemini</button>
-        </form>
-        <p id="review-status">No LLM review has been requested yet.</p>
-        <details id="review-panel" hidden>
-          <summary id="review-summary">> Show review</summary>
-          <div id="review-content"></div>
-        </details>
-      </section>
-      <section>
-        <h2>Current Next Action</h2>
-        <p id="next-action">Refresh to load the current recommended next step.</p>
-      </section>
-      <section>
-        <h2>Datasets</h2>
-        <table border="1">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Project Aurum</title>
+  <link rel="stylesheet" href="/ui/style.css">
+</head>
+<body>
+  <main class="shell">
+    <section class="hero">
+      <div class="hero-copy">
+        <p class="eyebrow">Project Aurum</p>
+        <h1>Hybrid SMC research cockpit for 15m gold.</h1>
+        <p class="lede">Python owns the truth. TradingView is a mirror. The workflow stays narrow: data, baseline, hybrid, paper.</p>
+      </div>
+      <div class="hero-status" id="strategySummary"></div>
+    </section>
+
+    <section class="grid">
+      <article class="panel">
+        <h2>1. Acquire Data</h2>
+        <label>Symbol
+          <select id="symbolSelect"></select>
+        </label>
+        <label>Lookback
+          <select id="lookbackSelect">
+            <option value="30">30 days</option>
+            <option value="45">45 days</option>
+            <option value="60" selected>60 days</option>
+          </select>
+        </label>
+        <label>Provider
+          <select id="providerSelect"></select>
+        </label>
+        <button id="downloadButton">Download 15m dataset</button>
+        <p class="status" id="downloadStatus">Use OANDA Practice when available. Otherwise import HistData M1 and the app will aggregate it to 15m.</p>
+      </article>
+
+      <article class="panel">
+        <h2>Manual CSV Import</h2>
+        <p class="microcopy">Upload either a normal 15m OHLCV CSV or the raw HistData XAUUSD M1 ASCII file. The app will aggregate M1 to 15m automatically.</p>
+        <label>CSV file
+          <input id="csvFileInput" type="file" accept=".csv">
+        </label>
+        <label>Dataset label
+          <input id="csvNameInput" type="text" placeholder="xau-manual-15m">
+        </label>
+        <button id="importCsvButton">Import CSV dataset</button>
+        <p class="status" id="importStatus"></p>
+      </article>
+
+      <article class="panel">
+        <h2>2. White-Box Baseline</h2>
+        <label>Dataset
+          <select id="datasetSelect"></select>
+        </label>
+        <label>Profile
+          <select id="profileSelect"></select>
+        </label>
+        <button id="whiteboxButton">Run baseline</button>
+        <p class="status" id="whiteboxStatus"></p>
+      </article>
+
+      <article class="panel">
+        <h2>3. Hybrid Comparison</h2>
+        <p class="microcopy">Train on the early candidate stream, evaluate on held-out candidates, and compare handoff quality.</p>
+        <button id="hybridButton">Run hybrid comparison</button>
+        <p class="status" id="hybridStatus"></p>
+      </article>
+
+      <article class="panel">
+        <h2>4. Paper Week</h2>
+        <p class="microcopy">Replay the latest week with the current hybrid threshold and preserve rejected setups for review.</p>
+        <button id="paperButton">Simulate week</button>
+        <p class="status" id="paperStatus"></p>
+      </article>
+    </section>
+
+    <section class="grid lower">
+      <article class="panel wide">
+        <div class="panel-head">
+          <h2>Datasets</h2>
+          <button class="ghost" id="refreshButton">Refresh</button>
+        </div>
+        <table>
           <thead>
-            <tr><th>Id</th><th>Name</th><th>Symbol</th><th>Timeframe</th><th>Rows</th><th>Action</th></tr>
+            <tr><th>Name</th><th>Symbol</th><th>Rows</th><th>Created</th><th>Action</th></tr>
           </thead>
-          <tbody id="datasets-table"></tbody>
+          <tbody id="datasetsTable"></tbody>
         </table>
-      </section>
-      <section>
-        <h2>Families</h2>
-        <table border="1">
+      </article>
+
+      <article class="panel wide">
+        <h2>Runs</h2>
+        <table>
           <thead>
-            <tr><th>Id</th><th>Title</th><th>Category</th><th>Asset</th><th>Compatible Timeframes</th><th>Minimum Bars</th><th>Parameter Grid</th></tr>
+            <tr><th>Kind</th><th>Verdict</th><th>Sharpe</th><th>Trades</th><th>Artifacts</th><th>Action</th></tr>
           </thead>
-          <tbody id="families-table"></tbody>
+          <tbody id="runsTable"></tbody>
         </table>
-      </section>
-      <section>
-        <h2>Backtest Runs</h2>
-        <table border="1">
+      </article>
+
+      <article class="panel wide">
+        <h2>Paper</h2>
+        <table>
           <thead>
-            <tr><th>Run Id</th><th>Family</th><th>Dataset</th><th>Parameters</th><th>Verdict</th><th>OOS Sharpe</th><th>Action</th></tr>
+            <tr><th>Paper Id</th><th>Trades</th><th>Sharpe</th><th>Artifact</th></tr>
           </thead>
-          <tbody id="runs-table"></tbody>
+          <tbody id="paperTable"></tbody>
         </table>
-      </section>
-      <section>
-        <h2>Graveyard</h2>
-        <table border="1">
-          <thead>
-            <tr><th>Artifact Id</th><th>Family</th><th>Run</th><th>Path</th><th>Action</th></tr>
-          </thead>
-          <tbody id="graveyard-table"></tbody>
-        </table>
-      </section>
-      <section>
+      </article>
+
+      <article class="panel wide">
         <h2>Output</h2>
-        <p>This is the raw API response from the last action.</p>
-        <pre id="output"></pre>
-      </section>
-    </main>
-    <script src="/app.js"></script>
-  </body>
- </html>
+        <pre id="outputBox">Waiting for the first run.</pre>
+      </article>
+    </section>
+  </main>
+  <script src="/ui/app.js"></script>
+</body>
+</html>

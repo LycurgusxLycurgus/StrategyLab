@@ -1,1 +1,1 @@
-
+"""Data feature slice."""

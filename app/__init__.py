@@ -1,1 +1,1 @@
-
+"""Project Aurum application package."""

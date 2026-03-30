@@ -1,279 +1,347 @@
 from __future__ import annotations
 
 import csv
-import math
 import json
+import io
+import urllib.parse
+import urllib.request
 import uuid
-from datetime import datetime, timezone
+from dataclasses import asdict
+from datetime import UTC, datetime, timedelta
+from urllib.error import HTTPError
 from pathlib import Path
-from urllib.parse import urlencode
-from urllib.request import urlopen
+from fastapi import HTTPException
 
-import duckdb
-
-from app.features.data.schema import BinanceDatasetRequest, DatasetSummary, DemoDatasetRequest, ImportDatasetRequest
-from app.infra.config import AppConfig
-from app.infra.db import Database
-from app.infra.logging import get_logger
-from app.shared.errors import AppError
-
-
-REQUIRED_COLUMNS = {"timestamp", "open", "high", "low", "close", "volume"}
-TIMEFRAMES = {"5m", "1H", "4H"}
-BINANCE_INTERVALS = {"5m": "5m", "1H": "1h", "4H": "4h"}
-BINANCE_KLINES_URL = "https://api.binance.com/api/v3/klines"
+from app.config import settings
+from app.domain import Bar
+from app.storage import Repository
 
 
 class DataService:
-    def __init__(self, config: AppConfig, db: Database):
-        self.config = config
-        self.db = db
-        self.logger = get_logger("strategylab.data")
+    def __init__(self, repo: Repository | None = None) -> None:
+        self.repo = repo or Repository()
 
-    def import_dataset(self, payload: ImportDatasetRequest) -> DatasetSummary:
-        if payload.timeframe not in TIMEFRAMES:
-            raise AppError(400, "INVALID_TIMEFRAME", "unsupported timeframe", {"timeframe": payload.timeframe})
-        path = Path(payload.path)
-        if not path.exists():
-            raise AppError(404, "DATASET_NOT_FOUND", "dataset file does not exist", {"path": str(path)})
-        rows = self._load_rows(path)
-        if len(rows) < 30:
-            raise AppError(400, "DATASET_TOO_SMALL", "dataset requires at least 30 rows")
+    def download_market_dataset(
+        self,
+        symbol: str,
+        timeframe: str,
+        lookback_days: int,
+        provider: str = "auto",
+        name: str | None = None,
+    ) -> dict:
         dataset_id = f"ds_{uuid.uuid4().hex[:12]}"
-        candle_rows = [
-            (
-                dataset_id,
-                self._parse_timestamp(row["timestamp"]),
-                float(row["open"]),
-                float(row["high"]),
-                float(row["low"]),
-                float(row["close"]),
-                float(row["volume"]),
+        resolved_provider = self._resolve_provider(symbol, provider)
+        bars = self._download_oanda(symbol, timeframe, lookback_days)
+        dataset_name = name or f"{resolved_provider}-{symbol.lower().replace('=', '-').replace('/', '-')}-{timeframe}-{lookback_days}d"
+        path = settings.data_dir / f"{dataset_id}.csv"
+
+        self.write_bars(path, bars)
+        record = {
+            "dataset_id": dataset_id,
+            "name": dataset_name,
+            "symbol": symbol,
+            "timeframe": timeframe,
+            "rows_count": len(bars),
+            "path": str(path),
+            "created_at": datetime.now(UTC).isoformat(),
+        }
+        self.repo.upsert_dataset(record)
+        return record
+
+    def _resolve_provider(self, symbol: str, provider: str) -> str:
+        if provider == "auto":
+            provider = "oanda"
+        if provider != "oanda":
+            raise HTTPException(status_code=400, detail="Only OANDA download is supported. Use manual HistData import otherwise.")
+        if symbol != "XAU_USD":
+            raise HTTPException(status_code=400, detail="OANDA download currently supports XAU_USD only.")
+        if not settings.oanda_api_token:
+            raise HTTPException(
+                status_code=400,
+                detail="APP_OANDA_API_TOKEN is missing. Add your OANDA practice token or use manual HistData import.",
             )
-            for row in rows
-        ]
-        candle_rows.sort(key=lambda item: item[1])
-        self.db.executemany(
-            """
-            insert into candles (dataset_id, ts, open, high, low, close, volume)
-            values (?, ?, ?, ?, ?, ?, ?)
-            """,
-            candle_rows,
-        )
-        start_ts = candle_rows[0][1]
-        end_ts = candle_rows[-1][1]
-        self.db.execute(
-            """
-            insert into datasets
-            (dataset_id, dataset_name, symbol, timeframe, source_path, row_count, start_ts, end_ts)
-            values (?, ?, ?, ?, ?, ?, ?, ?)
-            """,
-            (
-                dataset_id,
-                payload.dataset_name,
-                payload.symbol,
-                payload.timeframe,
-                str(path),
-                len(candle_rows),
-                start_ts,
-                end_ts,
-            ),
-        )
-        self.logger.info(
-            "dataset imported",
-            extra={"extra_data": {"dataset_id": dataset_id, "rows": len(candle_rows), "timeframe": payload.timeframe}},
-        )
-        return DatasetSummary(
-            dataset_id=dataset_id,
-            dataset_name=payload.dataset_name,
-            symbol=payload.symbol,
-            timeframe=payload.timeframe,
-            row_count=len(candle_rows),
-            start_ts=start_ts,
-            end_ts=end_ts,
-            source_path=str(path),
-        )
+        return "oanda"
 
-    def create_demo_dataset(self, payload: DemoDatasetRequest) -> DatasetSummary:
-        if payload.timeframe not in TIMEFRAMES:
-            raise AppError(400, "INVALID_TIMEFRAME", "unsupported timeframe", {"timeframe": payload.timeframe})
-        path = self.config.app_data_dir / f"{payload.dataset_name}.csv"
-        rows = self._demo_rows(payload.timeframe, payload.bars)
-        with path.open("w", encoding="utf-8", newline="") as handle:
-            writer = csv.DictWriter(handle, fieldnames=["timestamp", "open", "high", "low", "close", "volume"])
-            writer.writeheader()
-            writer.writerows(rows)
-        return self.import_dataset(
-            ImportDatasetRequest(
-                path=str(path),
-                symbol=payload.symbol,
-                timeframe=payload.timeframe,
-                dataset_name=payload.dataset_name,
+    def _download_oanda(self, symbol: str, timeframe: str, lookback_days: int) -> list[Bar]:
+        if timeframe != "15m":
+            raise HTTPException(status_code=400, detail="OANDA adapter currently supports 15m only.")
+        end = datetime.now(UTC)
+        start = end - timedelta(days=lookback_days)
+        bars: list[Bar] = []
+        cursor = start
+        step = timedelta(days=10)
+        while cursor < end:
+            window_end = min(cursor + step, end)
+            params = urllib.parse.urlencode(
+                {
+                    "price": "M",
+                    "granularity": "M15",
+                    "from": cursor.isoformat().replace("+00:00", "Z"),
+                    "to": window_end.isoformat().replace("+00:00", "Z"),
+                }
             )
-        )
-
-    def import_binance_dataset(self, payload: BinanceDatasetRequest) -> DatasetSummary:
-        if payload.timeframe not in BINANCE_INTERVALS:
-            raise AppError(400, "INVALID_TIMEFRAME", "unsupported timeframe for Binance download", {"timeframe": payload.timeframe})
-        rows = self._fetch_binance_klines(payload.symbol, BINANCE_INTERVALS[payload.timeframe], payload.bars)
-        path = self.config.app_data_dir / f"{payload.dataset_name}.csv"
-        with path.open("w", encoding="utf-8", newline="") as handle:
-            writer = csv.DictWriter(handle, fieldnames=["timestamp", "open", "high", "low", "close", "volume"])
-            writer.writeheader()
-            writer.writerows(rows)
-        return self.import_dataset(
-            ImportDatasetRequest(
-                path=str(path),
-                symbol=payload.symbol,
-                timeframe=payload.timeframe,
-                dataset_name=payload.dataset_name,
+            url = f"{settings.oanda_base_url}/v3/instruments/{symbol}/candles?{params}"
+            request = urllib.request.Request(
+                url,
+                headers={
+                    "Authorization": f"Bearer {settings.oanda_api_token}",
+                    "Accept-Datetime-Format": "RFC3339",
+                },
             )
-        )
-
-    def list_datasets(self) -> list[DatasetSummary]:
-        rows = self.db.fetch_all("select * from datasets order by created_at desc")
-        return [DatasetSummary(**row) for row in rows]
-
-    def delete_dataset(self, dataset_id: str) -> dict:
-        dataset = self.get_dataset(dataset_id)
-        run_rows = self.db.fetch_all(
-            "select artifact_path, report_path from backtest_runs where dataset_id = ?",
-            (dataset_id,),
-        )
-        self.db.delete_dataset_related(dataset_id)
-        for path_value in [dataset.source_path, *[row["artifact_path"] for row in run_rows], *[row["report_path"] for row in run_rows if row["report_path"]]]:
-            if not path_value:
-                continue
-            path = Path(path_value)
-            if path.exists():
-                path.unlink()
-        return {"dataset_id": dataset_id, "deleted": True}
-
-    def get_dataset(self, dataset_id: str) -> DatasetSummary:
-        row = self.db.fetch_one("select * from datasets where dataset_id = ?", (dataset_id,))
-        if not row:
-            raise AppError(404, "DATASET_NOT_FOUND", "unknown dataset", {"dataset_id": dataset_id})
-        return DatasetSummary(**row)
-
-    def load_candles(self, dataset_id: str) -> list[dict]:
-        dataset = self.get_dataset(dataset_id)
-        return self.db.fetch_all(
-            """
-            select ts, open, high, low, close, volume
-            from candles
-            where dataset_id = ?
-            order by ts asc
-            """,
-            (dataset.dataset_id,),
-        )
-
-    def _load_rows(self, path: Path) -> list[dict]:
-        if path.suffix.lower() == ".csv":
-            with path.open("r", encoding="utf-8", newline="") as handle:
-                reader = csv.DictReader(handle)
-                if not reader.fieldnames or set(reader.fieldnames) != REQUIRED_COLUMNS:
-                    raise AppError(
-                        400,
-                        "INVALID_COLUMNS",
-                        "csv must contain timestamp, open, high, low, close, volume columns",
-                        {"columns": reader.fieldnames or []},
-                    )
-                return [row for row in reader]
-        if path.suffix.lower() == ".parquet":
-            with duckdb.connect() as conn:
-                cursor = conn.execute(f"select * from read_parquet('{self._escape(path)}')")
-                columns = [column[0] for column in cursor.description]
-                if set(columns) != REQUIRED_COLUMNS:
-                    raise AppError(
-                        400,
-                        "INVALID_COLUMNS",
-                        "parquet must contain timestamp, open, high, low, close, volume columns",
-                        {"columns": columns},
-                    )
-                return [dict(zip(columns, row)) for row in cursor.fetchall()]
-        raise AppError(400, "UNSUPPORTED_FORMAT", "only csv and parquet files are supported")
-
-    def _fetch_binance_klines(self, symbol: str, interval: str, limit: int) -> list[dict]:
-        remaining = limit
-        end_time_ms: int | None = None
-        rows: list[dict] = []
-        while remaining > 0:
-            batch_size = min(1000, remaining)
-            query_args = {"symbol": symbol.upper(), "interval": interval, "limit": batch_size}
-            if end_time_ms is not None:
-                query_args["endTime"] = end_time_ms
-            query = urlencode(query_args)
-            url = f"{BINANCE_KLINES_URL}?{query}"
             try:
-                with urlopen(url, timeout=20) as response:
+                with urllib.request.urlopen(request, timeout=30) as response:
                     payload = json.loads(response.read().decode("utf-8"))
-            except Exception as exc:  # pragma: no cover - network boundary
-                raise AppError(
-                    502,
-                    "BINANCE_FETCH_FAILED",
-                    "failed to download market candles from Binance",
-                    {"symbol": symbol, "interval": interval, "error": str(exc)},
-                ) from exc
-            if not isinstance(payload, list) or not payload:
-                break
-            batch = [
-                {
-                    "timestamp": int(item[0]) // 1000,
-                    "open": item[1],
-                    "high": item[2],
-                    "low": item[3],
-                    "close": item[4],
-                    "volume": item[5],
-                }
-                for item in payload
-            ]
-            rows = batch + rows
-            remaining -= len(batch)
-            oldest_open_ms = int(payload[0][0])
-            end_time_ms = oldest_open_ms - 1
-            if len(batch) < batch_size:
-                break
-        deduped: dict[int, dict] = {row["timestamp"]: row for row in rows}
+            except HTTPError as exc:
+                body = exc.read().decode("utf-8", errors="replace")
+                detail = f"OANDA error HTTP {exc.code}"
+                try:
+                    error_payload = json.loads(body)
+                    message = error_payload.get("errorMessage") or error_payload.get("message")
+                    if message:
+                        detail = f"OANDA error: {message}"
+                except json.JSONDecodeError:
+                    if body:
+                        detail = f"OANDA error: {body}"
+                raise HTTPException(status_code=502, detail=detail) from exc
+            except Exception as exc:
+                raise HTTPException(status_code=502, detail=f"OANDA download failed: {exc}") from exc
+
+            candles = payload.get("candles", [])
+            for candle in candles:
+                if not candle.get("complete", False):
+                    continue
+                mid = candle.get("mid")
+                if not mid:
+                    continue
+                bars.append(
+                    Bar(
+                        ts=datetime.fromisoformat(candle["time"].replace("Z", "+00:00")).astimezone(UTC),
+                        open=float(mid["o"]),
+                        high=float(mid["h"]),
+                        low=float(mid["l"]),
+                        close=float(mid["c"]),
+                        volume=float(candle.get("volume", 0.0) or 0.0),
+                        symbol=symbol,
+                        timeframe=timeframe,
+                    )
+                )
+            cursor = window_end
+
+        deduped: dict[str, Bar] = {bar.ts.isoformat(): bar for bar in bars}
         ordered = [deduped[key] for key in sorted(deduped.keys())]
-        return ordered[-limit:]
+        if not ordered:
+            raise HTTPException(status_code=400, detail="OANDA returned no completed candles for that range.")
+        return ordered
+
+    def list_datasets(self) -> list[dict]:
+        return self.repo.list_datasets()
+
+    def import_csv_dataset(
+        self,
+        content: bytes,
+        filename: str,
+        symbol: str,
+        timeframe: str,
+        name: str | None = None,
+    ) -> dict:
+        bars = self._parse_csv_bars(content, symbol, timeframe)
+        if not bars:
+            raise HTTPException(status_code=400, detail="CSV import produced no bars.")
+        dataset_id = f"ds_{uuid.uuid4().hex[:12]}"
+        safe_name = name or Path(filename).stem or f"manual-{symbol.lower()}-{timeframe}"
+        dataset_name = f"manual-{safe_name}"
+        path = settings.data_dir / f"{dataset_id}.csv"
+        self.write_bars(path, bars)
+        record = {
+            "dataset_id": dataset_id,
+            "name": dataset_name,
+            "symbol": symbol,
+            "timeframe": timeframe,
+            "rows_count": len(bars),
+            "path": str(path),
+            "created_at": datetime.now(UTC).isoformat(),
+        }
+        self.repo.upsert_dataset(record)
+        return record
+
+    def delete_dataset(self, dataset_id: str) -> None:
+        self.repo.delete_dataset(dataset_id)
+
+    def load_bars(self, dataset_id: str) -> list[Bar]:
+        dataset = self.repo.get_dataset(dataset_id)
+        if not dataset:
+            raise HTTPException(status_code=404, detail="Dataset not found.")
+        return self.read_bars(Path(dataset["path"]))
 
     @staticmethod
-    def _demo_rows(timeframe: str, bars: int) -> list[dict]:
-        step = {"5m": 300, "1H": 3600, "4H": 14400}[timeframe]
-        start_ts = 1_700_000_000
-        rows: list[dict] = []
-        for index in range(bars):
-            trend = 28_000 + index * (4 if timeframe == "1H" else 0.5 if timeframe == "5m" else 12)
-            wave = math.sin(index / 8) * 180 + math.cos(index / 19) * 90
-            base = trend + wave
-            close = base + math.sin(index / 3) * 55
-            rows.append(
-                {
-                    "timestamp": start_ts + index * step,
-                    "open": round(base, 4),
-                    "high": round(max(base, close) + 45, 4),
-                    "low": round(min(base, close) - 45, 4),
-                    "close": round(close, 4),
-                    "volume": round(100 + (index % 12) * 5.5, 4),
-                }
+    def write_bars(path: Path, bars: list[Bar]) -> None:
+        with path.open("w", newline="", encoding="utf-8") as handle:
+            writer = csv.DictWriter(
+                handle,
+                fieldnames=["ts", "open", "high", "low", "close", "volume", "symbol", "timeframe"],
             )
-        return rows
+            writer.writeheader()
+            for bar in bars:
+                row = asdict(bar)
+                row["ts"] = bar.ts.isoformat()
+                writer.writerow(row)
 
     @staticmethod
-    def _escape(path: Path) -> str:
-        return path.as_posix().replace("'", "''")
+    def read_bars(path: Path) -> list[Bar]:
+        bars: list[Bar] = []
+        with path.open("r", newline="", encoding="utf-8") as handle:
+            reader = csv.DictReader(handle)
+            for row in reader:
+                bars.append(
+                    Bar(
+                        ts=datetime.fromisoformat(row["ts"]),
+                        open=float(row["open"]),
+                        high=float(row["high"]),
+                        low=float(row["low"]),
+                        close=float(row["close"]),
+                        volume=float(row["volume"]),
+                        symbol=row["symbol"],
+                        timeframe=row["timeframe"],
+                    )
+                )
+        return bars
+
+    def _parse_csv_bars(self, content: bytes, symbol: str, timeframe: str) -> list[Bar]:
+        text = content.decode("utf-8-sig")
+        histdata_rows = self._parse_histdata_ascii_m1(text, symbol)
+        if histdata_rows is not None:
+            if timeframe == "15m":
+                return self._aggregate_bars(histdata_rows, timeframe)
+            return histdata_rows
+        sample = text[:2048]
+        try:
+            dialect = csv.Sniffer().sniff(sample, delimiters=",;\t")
+        except csv.Error:
+            dialect = csv.excel
+        reader = csv.DictReader(io.StringIO(text), dialect=dialect)
+        if not reader.fieldnames:
+            raise HTTPException(status_code=400, detail="CSV import needs a header row.")
+
+        headers = {field.lower().strip(): field for field in reader.fieldnames}
+
+        def pick(*names: str) -> str:
+            for name in names:
+                key = headers.get(name)
+                if key:
+                    return key
+            raise HTTPException(
+                status_code=400,
+                detail=(
+                    "CSV is missing required columns. Required: timestamp/date/time and open/high/low/close. "
+                    "Optional: volume."
+                ),
+            )
+
+        ts_key = pick("timestamp", "datetime", "date", "time")
+        open_key = pick("open", "o")
+        high_key = pick("high", "h")
+        low_key = pick("low", "l")
+        close_key = pick("close", "c")
+        volume_key = headers.get("volume") or headers.get("vol") or headers.get("v")
+
+        bars: list[Bar] = []
+        for row in reader:
+            ts = self._parse_timestamp(row[ts_key])
+            bars.append(
+                Bar(
+                    ts=ts,
+                    open=float(row[open_key]),
+                    high=float(row[high_key]),
+                    low=float(row[low_key]),
+                    close=float(row[close_key]),
+                    volume=float(row[volume_key]) if volume_key and row.get(volume_key) else 0.0,
+                    symbol=symbol,
+                    timeframe=timeframe,
+                )
+            )
+        bars.sort(key=lambda bar: bar.ts)
+        deduped: dict[str, Bar] = {bar.ts.isoformat(): bar for bar in bars}
+        ordered = [deduped[key] for key in sorted(deduped.keys())]
+        if timeframe == "15m" and ordered and self._is_minute_series(ordered):
+            return self._aggregate_bars(ordered, timeframe)
+        return ordered
+
+    def _parse_histdata_ascii_m1(self, text: str, symbol: str) -> list[Bar] | None:
+        lines = [line.strip() for line in text.splitlines() if line.strip()]
+        if not lines:
+            return None
+        first = lines[0]
+        parts = first.split(";")
+        if len(parts) != 6 or " " not in parts[0]:
+            return None
+        date_part, time_part = parts[0].split(" ", 1)
+        if len(date_part) != 8 or len(time_part) != 6 or not (date_part + time_part).isdigit():
+            return None
+        bars: list[Bar] = []
+        for line in lines:
+            fields = line.split(";")
+            if len(fields) != 6:
+                continue
+            raw_dt, raw_open, raw_high, raw_low, raw_close, raw_volume = fields
+            dt = datetime.strptime(raw_dt, "%Y%m%d %H%M%S").replace(tzinfo=UTC)
+            bars.append(
+                Bar(
+                    ts=dt,
+                    open=float(raw_open),
+                    high=float(raw_high),
+                    low=float(raw_low),
+                    close=float(raw_close),
+                    volume=float(raw_volume or 0.0),
+                    symbol=symbol,
+                    timeframe="1m",
+                )
+            )
+        return bars
 
     @staticmethod
-    def _parse_timestamp(value: object) -> int:
-        if isinstance(value, (int, float)):
-            raw = int(value)
-            return raw // 1000 if raw > 10_000_000_000 else raw
-        text = str(value).strip()
-        if text.isdigit():
-            raw = int(text)
-            return raw // 1000 if raw > 10_000_000_000 else raw
-        normalized = text.replace("Z", "+00:00")
-        dt = datetime.fromisoformat(normalized)
-        if dt.tzinfo is None:
-            dt = dt.replace(tzinfo=timezone.utc)
-        return int(dt.astimezone(timezone.utc).timestamp())
+    def _is_minute_series(bars: list[Bar]) -> bool:
+        if len(bars) < 2:
+            return False
+        delta = bars[1].ts - bars[0].ts
+        return delta <= timedelta(minutes=1)
+
+    @staticmethod
+    def _aggregate_bars(bars: list[Bar], timeframe: str) -> list[Bar]:
+        if timeframe != "15m":
+            return bars
+        buckets: dict[datetime, list[Bar]] = {}
+        for bar in bars:
+            bucket_ts = bar.ts.replace(minute=(bar.ts.minute // 15) * 15, second=0, microsecond=0)
+            buckets.setdefault(bucket_ts, []).append(bar)
+        aggregated: list[Bar] = []
+        for bucket_ts in sorted(buckets.keys()):
+            group = buckets[bucket_ts]
+            aggregated.append(
+                Bar(
+                    ts=bucket_ts,
+                    open=group[0].open,
+                    high=max(item.high for item in group),
+                    low=min(item.low for item in group),
+                    close=group[-1].close,
+                    volume=sum(item.volume for item in group),
+                    symbol=group[0].symbol,
+                    timeframe="15m",
+                )
+            )
+        return aggregated
+
+    @staticmethod
+    def _parse_timestamp(raw: str) -> datetime:
+        value = raw.strip()
+        if value.isdigit():
+            ts = datetime.fromtimestamp(int(value), tz=UTC)
+            return ts
+        value = value.replace("/", "-")
+        if " " in value and "T" not in value:
+            value = value.replace(" ", "T", 1)
+        if value.endswith("Z"):
+            value = value.replace("Z", "+00:00")
+        ts = datetime.fromisoformat(value)
+        if ts.tzinfo is None:
+            ts = ts.replace(tzinfo=UTC)
+        return ts.astimezone(UTC)
