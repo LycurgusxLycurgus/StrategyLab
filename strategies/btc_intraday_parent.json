@@ -1,0 +1,103 @@
+{
+  "engine_id": "ma_cross_atr_stop_v1",
+  "asset": "BTCUSDT",
+  "venue": "Binance Spot",
+  "timeframe": "15m",
+  "metadata": {},
+  "parameters": {
+    "ma_kind": "sma",
+    "fast_len": 25,
+    "slow_len": 96,
+    "noise_lookback": 25,
+    "max_no_cross": 5,
+    "entry_mode": "crossover_only",
+    "allow_long": true,
+    "allow_short": true,
+    "atr_len": 23,
+    "atr_timeframe": "15m",
+    "stop_mult": 4.6,
+    "quantity": 1.0,
+    "initial_capital": 100000.0,
+    "commission_pct": 0.04,
+    "slippage_ticks": 2,
+    "tick_size": 0.01
+  },
+  "evaluation": {
+    "minimum_trades": 50,
+    "minimum_profit_factor": 1.2,
+    "maximum_drawdown_pct": 12.0,
+    "minimum_net_pnl": 0.0
+  },
+  "mutation_space": [
+    {
+      "kind": "white_box",
+      "lever": "fast_len",
+      "path": "parameters.fast_len",
+      "values": [21, 34],
+      "rationale": "Shift reaction speed while holding the slow anchor fixed."
+    },
+    {
+      "kind": "white_box",
+      "lever": "slow_len",
+      "path": "parameters.slow_len",
+      "values": [72, 120],
+      "rationale": "Re-anchor the trend horizon without stacking other changes."
+    },
+    {
+      "kind": "white_box",
+      "lever": "max_no_cross",
+      "path": "parameters.max_no_cross",
+      "values": [4, 6],
+      "rationale": "Tighten or loosen the anti-chop gate."
+    },
+    {
+      "kind": "white_box",
+      "lever": "atr_len",
+      "path": "parameters.atr_len",
+      "values": [14, 34],
+      "rationale": "Change stop responsiveness through ATR memory only."
+    },
+    {
+      "kind": "white_box",
+      "lever": "stop_mult",
+      "path": "parameters.stop_mult",
+      "values": [4.0, 5.0],
+      "rationale": "Tighten or loosen the static volatility stop."
+    },
+    {
+      "kind": "white_box",
+      "lever": "entry_mode",
+      "path": "parameters.entry_mode",
+      "values": ["crossover_plus_pullback"],
+      "rationale": "Test whether the family benefits from adding pullback continuation entries."
+    },
+    {
+      "kind": "white_box",
+      "lever": "ma_kind",
+      "path": "parameters.ma_kind",
+      "values": ["ema"],
+      "rationale": "Swap the smoothing model without changing the causal family."
+    },
+    {
+      "kind": "white_box",
+      "lever": "allow_short",
+      "path": "parameters.allow_short",
+      "values": [false],
+      "rationale": "Check whether short-side participation is degrading the parent."
+    },
+    {
+      "kind": "white_box",
+      "lever": "allow_long",
+      "path": "parameters.allow_long",
+      "values": [false],
+      "rationale": "Check whether long-side participation is degrading the parent."
+    },
+    {
+      "kind": "hybrid",
+      "lever": "quality_gate_placeholder",
+      "path": "metadata.hybrid_placeholder",
+      "values": ["score_parent_candidates_only"],
+      "rationale": "Reserve the first cheap black-box mutation for later, only after the white-box parent survives broader history."
+    }
+  ]
+}

@@ -2,31 +2,57 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from fastapi import FastAPI, File, Form, HTTPException, UploadFile
+from fastapi import FastAPI, HTTPException
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
+from pydantic import BaseModel, Field
 
 from app.config import settings
-from app.features.backtests.schema import HybridRunRequest, WhiteBoxRunRequest
-from app.features.backtests.service import BacktestService
-from app.features.data.schema import DatasetDownloadRequest
-from app.features.data.service import DataService
-from app.features.paper.service import PaperService
-from app.features.strategies.service import StrategyService
-from app.features.webhooks.schema import WebhookSignalRequest
-from app.features.webhooks.service import WebhookService
+from app.data import DataService
+from app.lab import MutationLabService
 from app.storage import Repository
+
+
+class DatasetDownloadRequest(BaseModel):
+    symbol: str = Field(default="BTCUSDT")
+    timeframe: str = Field(default="15m")
+    bars: int = Field(default=40000, ge=40000, le=300000)
+    full_history: bool = False
+    name: str | None = None
+
+
+class RegisterBaselineRequest(BaseModel):
+    family_id: str
+    title: str
+    asset: str
+    venue: str
+    timeframe: str
+    version_name: str
+    source_code: str
+    spec_json: dict
+    causal_story: str
+    notes: str = ""
+
+
+class TunePreviewRequest(BaseModel):
+    dataset_id: str
+    parameter_overrides: dict
+
+
+class SaveTuneRequest(BaseModel):
+    dataset_id: str
+    parameter_overrides: dict
+    name: str | None = None
+    notes: str = ""
 
 
 settings.ensure_dirs()
 repo = Repository()
 data_service = DataService(repo)
-strategy_service = StrategyService()
-backtest_service = BacktestService(repo, data_service, strategy_service)
-paper_service = PaperService(repo, data_service, strategy_service, backtest_service)
-webhook_service = WebhookService(repo, backtest_service)
+lab = MutationLabService(repo, data_service)
+lab.ensure_seeded()
 
-app = FastAPI(title="Project Aurum", version="1.0.0")
+app = FastAPI(title="Mutation Lab", version="1.0.0")
 app.mount("/ui", StaticFiles(directory=Path(__file__).parent / "ui"), name="ui")
 
 
@@ -37,97 +63,123 @@ def root() -> FileResponse:
 
 @app.get("/health")
 def health() -> dict[str, str]:
-    return {"status": "ok", "app": "project-aurum"}
+    return {"status": "ok", "app": "mutation-lab"}
 
 
-@app.get("/api/strategies/current")
-def current_strategy() -> dict:
-    return strategy_service.current()
+@app.get("/api/prompts")
+def prompt_catalog() -> list[dict]:
+    return lab.list_prompts()
 
 
-@app.get("/api/data/datasets")
+@app.get("/api/families")
+def list_families() -> list[dict]:
+    return lab.list_families()
+
+
+@app.get("/api/families/{family_id}")
+def family_detail(family_id: str) -> dict:
+    return lab.family_detail(family_id)
+
+
+@app.get("/api/versions/{version_id}/tuning")
+def tuning_edges(version_id: str, include_hybrid: bool = False) -> list[dict]:
+    return lab.list_tuning_edges(version_id, include_hybrid=include_hybrid)
+
+
+@app.post("/api/families/register")
+def register_family(request: RegisterBaselineRequest) -> dict:
+    return lab.register_baseline(
+        family_id=request.family_id,
+        title=request.title,
+        asset=request.asset,
+        venue=request.venue,
+        timeframe=request.timeframe,
+        version_name=request.version_name,
+        source_code=request.source_code,
+        spec_json=request.spec_json,
+        causal_story=request.causal_story,
+        notes=request.notes,
+    )
+
+
+@app.post("/api/families/{family_id}/promote/{version_id}")
+def promote_version(family_id: str, version_id: str) -> dict:
+    return lab.promote_version(family_id, version_id)
+
+
+@app.get("/api/datasets")
 def list_datasets() -> list[dict]:
     return data_service.list_datasets()
 
 
-@app.post("/api/data/download")
+@app.post("/api/datasets/download")
 def download_dataset(request: DatasetDownloadRequest) -> dict:
-    return data_service.download_market_dataset(
+    return data_service.download_binance_dataset(
         symbol=request.symbol,
         timeframe=request.timeframe,
-        lookback_days=request.lookback_days,
-        provider=request.provider,
+        bars=request.bars,
+        full_history=request.full_history,
         name=request.name,
     )
 
 
-@app.post("/api/data/import-csv")
-async def import_csv_dataset(
-    file: UploadFile = File(...),
-    symbol: str = Form("XAU_USD"),
-    timeframe: str = Form("15m"),
-    name: str | None = Form(None),
-) -> dict:
-    content = await file.read()
-    return data_service.import_csv_dataset(
-        content=content,
-        filename=file.filename or "import.csv",
-        symbol=symbol,
-        timeframe=timeframe,
-        name=name,
-    )
-
-
-@app.delete("/api/data/datasets/{dataset_id}")
+@app.delete("/api/datasets/{dataset_id}")
 def delete_dataset(dataset_id: str) -> dict[str, str]:
     data_service.delete_dataset(dataset_id)
     return {"status": "deleted"}
 
 
-@app.get("/api/backtests/runs")
-def list_runs() -> list[dict]:
-    return backtest_service.list_runs()
+@app.get("/api/runs")
+def list_runs(family_id: str | None = None) -> list[dict]:
+    return lab.list_runs(family_id=family_id)
 
 
-@app.post("/api/backtests/whitebox")
-def run_whitebox(request: WhiteBoxRunRequest) -> dict:
-    return backtest_service.run_whitebox(request.dataset_id, request.profile)
+@app.post("/api/versions/{version_id}/run")
+def run_version(version_id: str, dataset_id: str) -> dict:
+    return lab.run_version(version_id, dataset_id)
 
 
-@app.post("/api/backtests/hybrid")
-def run_hybrid(request: HybridRunRequest) -> dict:
-    return backtest_service.run_hybrid(request.dataset_id, request.profile, request.threshold)
+@app.post("/api/versions/{version_id}/preview")
+def preview_tuned_version(version_id: str, request: TunePreviewRequest) -> dict:
+    return lab.preview_tuned_version(version_id, request.dataset_id, request.parameter_overrides)
 
 
-@app.delete("/api/backtests/runs/{run_id}")
+@app.post("/api/versions/{version_id}/save-tuned")
+def save_tuned_version(version_id: str, request: SaveTuneRequest) -> dict:
+    return lab.save_tuned_version(
+        version_id=version_id,
+        dataset_id=request.dataset_id,
+        parameter_overrides=request.parameter_overrides,
+        name=request.name,
+        notes=request.notes,
+    )
+
+
+@app.post("/api/versions/{version_id}/proposals/generate")
+def generate_proposals(version_id: str, include_hybrid: bool = False) -> list[dict]:
+    return lab.generate_proposals(version_id, include_hybrid=include_hybrid)
+
+
+@app.post("/api/versions/{version_id}/proposals/run-all")
+def run_proposals(version_id: str, dataset_id: str, include_hybrid: bool = False) -> dict:
+    return lab.run_proposal_pack(version_id, dataset_id, include_hybrid=include_hybrid)
+
+
+@app.post("/api/proposals/{proposal_id}/run")
+def run_proposal(proposal_id: str, dataset_id: str) -> dict:
+    return lab.run_proposal(proposal_id, dataset_id)
+
+
+@app.delete("/api/runs/{run_id}")
 def delete_run(run_id: str) -> dict[str, str]:
-    backtest_service.delete_run(run_id)
+    lab.delete_run(run_id)
     return {"status": "deleted"}
 
 
-@app.post("/api/backtests/runs/{run_id}/tv-debug")
-def build_tv_debug(run_id: str) -> dict:
-    return backtest_service.build_tradingview_debug(run_id)
-
-
-@app.post("/api/backtests/runs/{run_id}/debug-trace")
-def build_debug_trace(run_id: str) -> dict:
-    return backtest_service.build_debug_trace(run_id)
-
-
-@app.get("/api/paper/runs")
-def list_paper_runs() -> list[dict]:
-    return paper_service.list_runs()
-
-
-@app.post("/api/paper/run")
-def run_paper(request: WhiteBoxRunRequest) -> dict:
-    return paper_service.run_week(request.dataset_id, request.profile, use_hybrid=True)
-
-
-@app.post("/api/webhooks/tradingview")
-def evaluate_webhook(request: WebhookSignalRequest) -> dict:
-    return webhook_service.evaluate_signal(request.model_dump(mode="json"))
+@app.delete("/api/versions/{version_id}")
+def delete_version(version_id: str) -> dict[str, str]:
+    lab.delete_version(version_id)
+    return {"status": "deleted"}
 
 
 @app.get("/api/artifacts/{kind}/{artifact_name}")
@@ -135,12 +187,12 @@ def get_artifact(kind: str, artifact_name: str) -> FileResponse:
     roots = {
         "runs": settings.run_dir,
         "reports": settings.report_dir,
-        "paper": settings.paper_dir,
         "data": settings.data_dir,
     }
-    if kind not in roots:
+    root = roots.get(kind)
+    if root is None:
         raise HTTPException(status_code=404, detail="Artifact group not found.")
-    path = roots[kind] / artifact_name
+    path = root / artifact_name
     if not path.exists():
         raise HTTPException(status_code=404, detail="Artifact not found.")
     return FileResponse(path)

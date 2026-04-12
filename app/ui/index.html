@@ -1,122 +1,275 @@
 <!doctype html>
 <html lang="en">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Project Aurum</title>
-  <link rel="stylesheet" href="/ui/style.css">
-</head>
-<body>
-  <main class="shell">
-    <section class="hero">
-      <div class="hero-copy">
-        <p class="eyebrow">Project Aurum</p>
-        <h1>Hybrid SMC research cockpit for 15m gold.</h1>
-        <p class="lede">Python owns the truth. TradingView is a mirror. The workflow stays narrow: data, baseline, hybrid, paper.</p>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Mutation Lab</title>
+    <link rel="stylesheet" href="/ui/style.css" />
+  </head>
+  <body>
+    <nav class="topbar" aria-label="Primary">
+      <a class="brand-mark" href="#top" aria-label="Mutation Lab home">ML</a>
+      <div class="topbar-links">
+        <a href="#data">Data</a>
+        <a href="#lab">Tune</a>
+        <a href="#runs">Runs</a>
+        <a href="#prompts">Prompts</a>
       </div>
-      <div class="hero-status" id="strategySummary"></div>
-    </section>
+      <button id="refreshButton" class="nav-action">Refresh</button>
+    </nav>
 
-    <section class="grid">
-      <article class="panel">
-        <h2>1. Acquire Data</h2>
-        <label>Symbol
-          <select id="symbolSelect"></select>
-        </label>
-        <label>Lookback
-          <select id="lookbackSelect">
-            <option value="30">30 days</option>
-            <option value="45">45 days</option>
-            <option value="60" selected>60 days</option>
-          </select>
-        </label>
-        <label>Provider
-          <select id="providerSelect"></select>
-        </label>
-        <button id="downloadButton">Download 15m dataset</button>
-        <p class="status" id="downloadStatus">Use OANDA Practice when available. Otherwise import HistData M1 and the app will aggregate it to 15m.</p>
-      </article>
-
-      <article class="panel">
-        <h2>Manual CSV Import</h2>
-        <p class="microcopy">Upload either a normal 15m OHLCV CSV or the raw HistData XAUUSD M1 ASCII file. The app will aggregate M1 to 15m automatically.</p>
-        <label>CSV file
-          <input id="csvFileInput" type="file" accept=".csv">
-        </label>
-        <label>Dataset label
-          <input id="csvNameInput" type="text" placeholder="xau-manual-15m">
-        </label>
-        <button id="importCsvButton">Import CSV dataset</button>
-        <p class="status" id="importStatus"></p>
-      </article>
-
-      <article class="panel">
-        <h2>2. White-Box Baseline</h2>
-        <label>Dataset
-          <select id="datasetSelect"></select>
-        </label>
-        <label>Profile
-          <select id="profileSelect"></select>
-        </label>
-        <button id="whiteboxButton">Run baseline</button>
-        <p class="status" id="whiteboxStatus"></p>
-      </article>
-
-      <article class="panel">
-        <h2>3. Hybrid Comparison</h2>
-        <p class="microcopy">Train on the early candidate stream, evaluate on held-out candidates, and compare handoff quality.</p>
-        <button id="hybridButton">Run hybrid comparison</button>
-        <p class="status" id="hybridStatus"></p>
-      </article>
-
-      <article class="panel">
-        <h2>4. Paper Week</h2>
-        <p class="microcopy">Replay the latest week with the current hybrid threshold and preserve rejected setups for review.</p>
-        <button id="paperButton">Simulate week</button>
-        <p class="status" id="paperStatus"></p>
-      </article>
-    </section>
-
-    <section class="grid lower">
-      <article class="panel wide">
-        <div class="panel-head">
-          <h2>Datasets</h2>
-          <button class="ghost" id="refreshButton">Refresh</button>
+    <main id="top">
+      <section class="hero">
+        <div class="hero-copy">
+          <p class="eyebrow">White-box first research console</p>
+          <h1>Mutation Lab</h1>
+          <p class="lede">
+            Freeze a parent, tune the live parameters, and save only the children that beat the evidence.
+          </p>
         </div>
-        <table>
-          <thead>
-            <tr><th>Name</th><th>Symbol</th><th>Rows</th><th>Created</th><th>Action</th></tr>
-          </thead>
-          <tbody id="datasetsTable"></tbody>
-        </table>
-      </article>
+        <aside class="hero-card" aria-label="Research flow">
+          <span>Current loop</span>
+          <strong>Data -> Parent -> Live Tune -> Save</strong>
+          <p>Every parameter edit creates an unsaved preview. Promotion remains explicit.</p>
+        </aside>
+      </section>
 
-      <article class="panel wide">
-        <h2>Runs</h2>
-        <table>
-          <thead>
-            <tr><th>Kind</th><th>Verdict</th><th>Sharpe</th><th>Trades</th><th>Artifacts</th><th>Action</th></tr>
-          </thead>
-          <tbody id="runsTable"></tbody>
-        </table>
-      </article>
+      <section class="summary-grid" id="summaryGrid" aria-label="Lab summary"></section>
 
-      <article class="panel wide">
-        <h2>Paper</h2>
-        <table>
-          <thead>
-            <tr><th>Paper Id</th><th>Trades</th><th>Sharpe</th><th>Artifact</th></tr>
-          </thead>
-          <tbody id="paperTable"></tbody>
-        </table>
-      </article>
+      <section id="data" class="scene scene-light">
+        <div class="scene-head">
+          <div>
+            <p class="eyebrow">Step 1</p>
+            <h2>Research Data</h2>
+          </div>
+          <p>Binance public candles, no API key. Use at least 40k bars unless you choose full history.</p>
+        </div>
 
-      <article class="panel wide">
-        <h2>Output</h2>
-        <pre id="outputBox">Waiting for the first run.</pre>
-      </article>
-    </section>
-  </main>
-  <script src="/ui/app.js"></script>
-</body>
+        <div class="control-grid">
+          <label>
+            Symbol
+            <input id="symbolInput" value="BTCUSDT" />
+          </label>
+          <label>
+            Timeframe
+            <select id="timeframeSelect">
+              <option value="15m" selected>15m</option>
+              <option value="5m">5m</option>
+              <option value="1h">1h</option>
+              <option value="4h">4h</option>
+            </select>
+          </label>
+          <label>
+            Bars
+            <input id="barsInput" type="number" value="40000" min="40000" max="300000" step="1000" />
+          </label>
+          <label class="checkbox">
+            <input id="fullHistoryInput" type="checkbox" />
+            Full history
+          </label>
+          <label class="span-2">
+            Optional dataset label
+            <input id="datasetNameInput" placeholder="binance-btcusdt-15m-40000" />
+          </label>
+          <button id="downloadButton" class="primary">Download Dataset</button>
+        </div>
+        <p id="downloadStatus" class="status"></p>
+      </section>
+
+      <section id="lab" class="lab-layout">
+        <section class="scene scene-dark command-center">
+          <div class="scene-head">
+            <div>
+              <p class="eyebrow">Step 2</p>
+              <h2>Current Family</h2>
+            </div>
+            <p>Choose the parent and dataset, then tune from the mutation edges below.</p>
+          </div>
+
+          <div class="control-grid three-col">
+            <label>
+              Selected family
+              <select id="familySelect"></select>
+            </label>
+            <label>
+              Mutation base
+              <select id="versionSelect"></select>
+            </label>
+            <label>
+              Dataset
+              <select id="datasetSelect"></select>
+            </label>
+          </div>
+
+          <div id="familyMeta" class="family-meta"></div>
+
+          <div class="action-row">
+            <button id="runParentButton" class="primary">Run Selected Version</button>
+            <button id="resetTuneButton">Reset To Selected Base</button>
+            <button id="saveTuneButton">Save Tuned Child</button>
+          </div>
+          <p id="familyStatus" class="status">
+            Change any working value in Mutation Edges and the preview will refresh automatically.
+          </p>
+        </section>
+
+        <section class="scene scene-light metrics-scene">
+          <div class="scene-head">
+            <div>
+              <p class="eyebrow">Live Instrument Panel</p>
+              <h2>Latest Run</h2>
+            </div>
+            <p>Unsaved tuning previews appear here before you save a child.</p>
+          </div>
+          <div id="metricsGrid" class="metrics-grid"></div>
+        </section>
+
+        <section class="scene scene-dark tuning-scene">
+          <div class="scene-head">
+            <div>
+              <p class="eyebrow">Parameter Tuning</p>
+              <h2>Mutation Edges</h2>
+            </div>
+            <p>Suggested edges are direction hints. Working values are live.</p>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Priority</th>
+                  <th>Lever</th>
+                  <th>Current</th>
+                  <th>Suggested Down</th>
+                  <th>Suggested Up</th>
+                  <th>Working Value</th>
+                </tr>
+              </thead>
+              <tbody id="proposalsTable"></tbody>
+            </table>
+          </div>
+        </section>
+      </section>
+
+      <section class="scene scene-light coverage-scene">
+        <div class="scene-head">
+          <div>
+            <p class="eyebrow">Datasets</p>
+            <h2>Coverage</h2>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Symbol</th>
+                <th>TF</th>
+                <th>Rows</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="datasetsTable"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section id="runs" class="scene scene-dark runs-scene">
+        <div class="scene-head">
+          <div>
+            <p class="eyebrow">Evidence Ledger</p>
+            <h2>Parent vs Child Runs</h2>
+          </div>
+          <p>Live previews stay unsaved until you decide they deserve a version.</p>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Version</th>
+                <th>Verdict</th>
+                <th>PF</th>
+                <th>Trades</th>
+                <th>DD%</th>
+                <th>Net PnL</th>
+                <th>Artifacts</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="runsTable"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="scene scene-light versions-scene">
+        <div class="scene-head">
+          <div>
+            <p class="eyebrow">Saved Mutation Bases</p>
+            <h2>Versions</h2>
+          </div>
+          <p>Clean out generated children you do not want to keep. Current family version cannot be deleted.</p>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Version</th>
+                <th>Stage</th>
+                <th>Parent</th>
+                <th>Created</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="versionsTable"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section id="prompts" class="split">
+        <section class="scene scene-light">
+          <div class="scene-head">
+            <div>
+              <p class="eyebrow">Prompt Core</p>
+              <h2>Mutation Engine</h2>
+            </div>
+          </div>
+          <div id="promptsList" class="prompt-list"></div>
+        </section>
+
+        <section class="scene scene-dark">
+          <div class="scene-head">
+            <div>
+              <p class="eyebrow">Advanced</p>
+              <h2>Register Baseline</h2>
+            </div>
+            <p>Use only when you have source code, a spec JSON, and a causal story.</p>
+          </div>
+          <div class="form-stack">
+            <input id="registerFamilyId" placeholder="family_id" />
+            <input id="registerTitle" placeholder="Family title" />
+            <input id="registerAsset" placeholder="Asset (e.g. BTCUSDT)" />
+            <input id="registerVenue" placeholder="Venue (e.g. Binance Spot)" />
+            <input id="registerTimeframe" placeholder="Timeframe (e.g. 15m)" />
+            <input id="registerVersionName" placeholder="Version name" />
+            <textarea id="registerCausalStory" placeholder="Causal story"></textarea>
+            <textarea id="registerNotes" placeholder="Notes"></textarea>
+            <textarea id="registerSourceCode" placeholder="Baseline source code"></textarea>
+            <textarea id="registerSpecJson" placeholder="Canonical spec JSON"></textarea>
+            <button id="registerButton">Register Baseline</button>
+          </div>
+          <p id="registerStatus" class="status"></p>
+        </section>
+      </section>
+
+      <section class="scene scene-dark output-scene">
+        <div class="scene-head">
+          <div>
+            <p class="eyebrow">Output</p>
+            <h2>API Payload</h2>
+          </div>
+        </div>
+        <pre id="outputBox"></pre>
+      </section>
+    </main>
+    <script src="/ui/app.js" defer></script>
+  </body>
 </html>

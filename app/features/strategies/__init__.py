@@ -1,1 +1,0 @@
-"""Strategy catalog slice."""

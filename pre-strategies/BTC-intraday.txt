@@ -1,0 +1,107 @@
+//@version=6
+strategy(
+     title = "Agora Trend Intraday (15M)",
+     shorttitle = "ATI 15M Base",
+     overlay = true,
+     pyramiding = 0,
+     initial_capital = 100000,
+     commission_type = strategy.commission.percent,
+     commission_value = 0.04,
+     slippage = 2,
+     calc_on_every_tick = false,
+     process_orders_on_close = true
+)
+
+// =========================
+// Inputs
+// =========================
+fastLen       = input.int(25, "Fast SMA Length", minval = 1)
+slowLen       = input.int(96, "Slow SMA Length", minval = 2)
+
+lookbackValue = input.int(25, "Noise Lookback", minval = 5)
+maxNoCross    = input.int(5, "Max Fast-SMA Crosses", minval = 1)
+
+atrLkb        = input.int(23, "ATR Stop Period", minval = 1)
+atrRes        = input.timeframe("15", "ATR Resolution")
+stopMult      = input.float(4.6, "ATR Stop Multiplier", minval = 0.1, step = 0.1)
+
+showStops     = input.bool(true, "Show ATR Stops")
+
+// =========================
+// Moving averages
+// =========================
+fastSMA = ta.sma(close, fastLen)
+slowSMA = ta.sma(close, slowLen)
+
+// =========================
+// Noise filter
+// =========================
+priceCrossFast = ta.cross(close, fastSMA) ? 1.0 : 0.0
+crossCum       = ta.cum(priceCrossFast)
+crossCountSum  = crossCum - nz(crossCum[lookbackValue], 0.0)
+crossCountOk   = crossCountSum <= maxNoCross
+
+// =========================
+// Parent entry family only: aggressive crossovers
+// =========================
+longCondition  = ta.crossover(fastSMA, slowSMA) and crossCountOk
+shortCondition = ta.crossunder(fastSMA, slowSMA) and crossCountOk
+
+if longCondition
+    strategy.entry("Long", strategy.long)
+
+if shortCondition
+    strategy.entry("Short", strategy.short)
+
+// =========================
+// ATR
+// =========================
+atrValue = request.security(
+    syminfo.tickerid,
+    atrRes,
+    ta.atr(atrLkb),
+    lookahead = barmerge.lookahead_off
+)
+
+// =========================
+// Static ATR stop
+// =========================
+var float longStop  = na
+var float shortStop = na
+
+if shortCondition
+    longStop := na
+else if longCondition and strategy.position_size <= 0
+    longStop := close - (atrValue * stopMult)
+else
+    longStop := longStop[1]
+
+if longCondition
+    shortStop := na
+else if shortCondition and strategy.position_size >= 0
+    shortStop := close + (atrValue * stopMult)
+else
+    shortStop := shortStop[1]
+
+// Reset when flat
+if strategy.position_size == 0
+    longStop  := na
+    shortStop := na
+
+// =========================
+// Exits
+// =========================
+strategy.exit("Long ATR Stop", "Long", stop = longStop)
+strategy.exit("Short ATR Stop", "Short", stop = shortStop)
+
+// =========================
+// Clean plots only
+// =========================
+trendColor = fastSMA > slowSMA ? color.green : color.red
+
+p1 = plot(fastSMA, title = "Fast SMA", color = trendColor, linewidth = 2)
+p2 = plot(slowSMA, title = "Slow SMA", color = trendColor, linewidth = 2)
+fill(p1, p2, color = color.new(trendColor, 88))
+
+plot(showStops ? longStop : na,  title = "Long ATR Stop",  color = color.red, linewidth = 2, style = plot.style_linebr)
+plot(showStops ? shortStop : na, title = "Short ATR Stop", color = color.red, linewidth = 2, style = plot.style_linebr)

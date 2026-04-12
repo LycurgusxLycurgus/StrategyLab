@@ -1,27 +1,32 @@
-# Project Aurum
+# Mutation Lab
 
-Project Aurum is a small Python-first research cockpit for a hybrid Smart Money Concepts workflow on XAUUSD 15-minute bars. The Python engine is the canonical source of truth for white-box logic, candidate generation, hybrid scoring, reports, webhook evaluation, and internal paper simulation.
+Mutation Lab is a white-box-first strategy mutation workbench for repeatable parent -> single-mutation -> comparison -> promotion loops. It starts from a frozen baseline, downloads real data, generates one-step mutations from the canonical mutation space, and persists every run with report artifacts.
 
-The app intentionally keeps the operator flow narrow:
+## Core Flow
 
-1. Download a 15-minute gold dataset from OANDA practice or import a HistData XAUUSD M1 file.
-2. Run the white-box backtest baseline.
-3. Train and evaluate the hybrid filter against the same candidate stream.
-4. Simulate a paper week or evaluate a TradingView webhook against the latest model.
+1. Freeze or register a baseline parent.
+2. Download at least `40000` real bars for the target asset and timeframe.
+3. Run the promoted parent.
+4. Tune one or more live parameters around the current parent.
+5. Run a preview without saving.
+6. Save only the tuned children that deserve to become real versions.
+7. Compare metrics and promote only real winners.
 
-The valuation canon used by the app is summarized in [agents/docs/verdict_criteria.md](/Users/Baham/Documents/pre-nexuz/memecorp&starfish/markov_dove-red/StrategyLab/agents/docs/verdict_criteria.md). The deeper philosophical sources remain in [agents/docs/codification_boxes.md](/Users/Baham/Documents/pre-nexuz/memecorp&starfish/markov_dove-red/StrategyLab/agents/docs/codification_boxes.md), [agents/docs/metrics_boxes.md](/Users/Baham/Documents/pre-nexuz/memecorp&starfish/markov_dove-red/StrategyLab/agents/docs/metrics_boxes.md), and [agents/docs/white_black_boxes-perspectives.md](/Users/Baham/Documents/pre-nexuz/memecorp&starfish/markov_dove-red/StrategyLab/agents/docs/white_black_boxes-perspectives.md).
+## Seed Family
 
-## Architecture
+- Family id: `btc_intraday`
+- Seed source: [pre-strategies/BTC-intraday.txt](C:/Users/Baham/Documents/pre-nexuz/memecorp&starfish/markov_dove-red/StrategyLab/pre-strategies/BTC-intraday.txt)
+- Canonical spec: [strategies/btc_intraday_parent.json](C:/Users/Baham/Documents/pre-nexuz/memecorp&starfish/markov_dove-red/StrategyLab/strategies/btc_intraday_parent.json)
 
-The implementation stays monolithic and vertical:
+## Prompts
 
-- `app/features/data`: dataset download, storage, and catalog
-- `app/features/backtests`: canonical white-box engine, candidate dataset generation, hybrid evaluation
-- `app/features/reports`: evaluation canon report writing
-- `app/features/paper`: internal paper simulation
-- `app/features/webhooks`: TradingView-style signal evaluation
-- `app/ui`: vanilla operator shell
-- `pine`: chart mirror artifact
+The mutation engine prompt set lives in:
+- [01_translation.md](C:/Users/Baham/Documents/pre-nexuz/memecorp&starfish/markov_dove-red/StrategyLab/agents/translation%20and%20generation/whitebox/01_translation.md)
+- [02_baseline.md](C:/Users/Baham/Documents/pre-nexuz/memecorp&starfish/markov_dove-red/StrategyLab/agents/translation%20and%20generation/whitebox/02_baseline.md)
+- [03_full-whitebox.md](C:/Users/Baham/Documents/pre-nexuz/memecorp&starfish/markov_dove-red/StrategyLab/agents/translation%20and%20generation/whitebox/03_full-whitebox.md)
+- [04_hybrid-blackbox.md](C:/Users/Baham/Documents/pre-nexuz/memecorp&starfish/markov_dove-red/StrategyLab/agents/translation%20and%20generation/whitebox/04_hybrid-blackbox.md)
+
+Prompt `03` now assumes one freeform research packet and derives the next white-box mutation from the winning baseline and evidence. Prompt `04` now assumes one surviving white-box parent and derives the first hybrid mutation from that parent’s remaining weakness without canned examples.
 
 ## Run
 
@@ -34,5 +39,12 @@ python -m venv .venv
 ## Test
 
 ```powershell
-python -m unittest discover -s app -p tests.py
+.venv\Scripts\python -m unittest discover -s app -p tests.py
 ```
+
+## Artifacts
+
+Generated runtime artifacts are written to:
+- `artifacts/data`
+- `artifacts/runs`
+- `artifacts/reports`
