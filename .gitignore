@@ -12,8 +12,13 @@ __pycache__/
 .mypy_cache/
 .ruff_cache/
 
-artifacts/
+#artifacts/
 agents/histdata/
+agents/docs/
+agents/codex-writing.txt
+agents/mutation-lab-01.txt
+agents/new-frontend.txt 
+
 
 *.sqlite3
 *.db
@@ -21,6 +26,8 @@ agents/histdata/
 
 .DS_Store
 Thumbs.db
+
+issues.txt
 
 #Bridge
 

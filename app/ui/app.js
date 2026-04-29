@@ -14,6 +14,10 @@ const metricsGrid = document.getElementById("metricsGrid");
 const familySelect = document.getElementById("familySelect");
 const versionSelect = document.getElementById("versionSelect");
 const datasetSelect = document.getElementById("datasetSelect");
+const optimizeAllButton = document.getElementById("optimizeAllButton");
+const optimizationStatus = document.getElementById("optimizationStatus");
+const barsInput = document.getElementById("barsInput");
+const fullHistoryInput = document.getElementById("fullHistoryInput");
 const familyMeta = document.getElementById("familyMeta");
 const datasetsTable = document.getElementById("datasetsTable");
 const proposalsTable = document.getElementById("proposalsTable");
@@ -21,6 +25,9 @@ const runsTable = document.getElementById("runsTable");
 const versionsTable = document.getElementById("versionsTable");
 const promptsList = document.getElementById("promptsList");
 let previewTimer = null;
+const MIN_DATASET_BARS = 40000;
+const FULL_HISTORY_SENTINEL_BARS = 1000000;
+let optimizationInFlight = false;
 
 function setStatus(elementId, message, tone = "") {
   const node = document.getElementById(elementId);
@@ -30,6 +37,45 @@ function setStatus(elementId, message, tone = "") {
 
 function showOutput(payload) {
   outputBox.textContent = typeof payload === "string" ? payload : JSON.stringify(payload, null, 2);
+}
+
+function setOptimizationStatus(message, tone = "working") {
+  optimizationStatus.className = `optimization-status visible ${tone}`.trim();
+  optimizationStatus.innerHTML = `<span class="optimization-spinner" aria-hidden="true"></span><span>${message}</span>`;
+}
+
+function clearOptimizationStatus(delayMs = 0) {
+  if (!delayMs) {
+    optimizationStatus.className = "optimization-status";
+    optimizationStatus.textContent = "";
+    return;
+  }
+  window.setTimeout(() => clearOptimizationStatus(), delayMs);
+}
+
+function setOptimizationBusy(isBusy, activeLever = "") {
+  optimizationInFlight = isBusy;
+  optimizeAllButton.disabled = isBusy;
+  proposalsTable.querySelectorAll('[data-action="optimize-lever"]').forEach((button) => {
+    button.disabled = isBusy && button.dataset.key !== activeLever;
+  });
+  proposalsTable.querySelectorAll("[data-working-key], [data-action='reset-edge']").forEach((control) => {
+    control.disabled = isBusy;
+  });
+}
+
+function syncFullHistoryBars() {
+  if (fullHistoryInput.checked) {
+    barsInput.value = String(FULL_HISTORY_SENTINEL_BARS);
+    barsInput.disabled = true;
+    barsInput.title = "Full history ignores manual bar count. The backend will page exchange history until completion or safety cap.";
+    return;
+  }
+  barsInput.disabled = false;
+  barsInput.title = "";
+  if (!Number(barsInput.value) || Number(barsInput.value) < MIN_DATASET_BARS) {
+    barsInput.value = String(MIN_DATASET_BARS);
+  }
 }
 
 async function fetchJson(url, options = {}) {
@@ -84,6 +130,11 @@ function selectedVersionRuns() {
   return currentRuns().filter((run) => run.version_id === version.version_id);
 }
 
+function savedRunForSelection() {
+  const datasetId = selectedDatasetId();
+  return selectedVersionRuns().find((run) => run.dataset_id === datasetId) || null;
+}
+
 function formatNumber(value, digits = 2) {
   if (value === null || value === undefined || Number.isNaN(Number(value))) {
     return "n/a";
@@ -103,11 +154,77 @@ function activeMetrics() {
   if (state.previewResult?.metrics) {
     return state.previewResult.metrics;
   }
-  return selectedVersionRuns()[0]?.metrics_json || null;
+  return savedRunForSelection()?.metrics_json || null;
 }
 
 function activeMetricSource() {
-  return state.previewResult ? "Live preview" : "Saved run";
+  if (state.previewResult) {
+    return "Live preview";
+  }
+  return savedRunForSelection() ? "Saved run" : "No saved run";
+}
+
+function activeSpec() {
+  if (state.previewResult?.spec) {
+    return state.previewResult.spec;
+  }
+  return currentVersion()?.spec_json || null;
+}
+
+function capitalModelWarnings(spec, metrics) {
+  if (!spec || !metrics) {
+    return [];
+  }
+  const parameters = spec.parameters || {};
+  const warnings = [];
+  const mode = parameters.sizing_mode || "fixed_quantity";
+  if (mode === "fixed_notional_pct") {
+    const pct = Number(parameters.notional_pct ?? 1);
+    warnings.push(`${formatNumber(pct * 100)}% of current equity is deployed on every new trade, then compounded.`);
+    if (pct >= 1) {
+      warnings.push("This is an all-in 1x compounding scenario, not a conservative production default.");
+    }
+  }
+  if (mode === "fixed_risk_pct") {
+    const pct = Number(parameters.risk_pct ?? 0);
+    warnings.push(`${formatNumber(pct * 100, 4)}% of current equity is the intended stop-loss budget per trade.`);
+  }
+  if (Number(metrics.max_initial_risk_pct || 0) > 10) {
+    warnings.push(`Max initial risk reached ${formatNumber(metrics.max_initial_risk_pct, 4)}% of equity on at least one trade.`);
+  }
+  return warnings;
+}
+
+function productionGateSummary(spec, metrics) {
+  if (!spec || !metrics) {
+    return "n/a";
+  }
+  const parameters = spec.parameters || {};
+  const rules = spec.evaluation || {};
+  const mode = parameters.sizing_mode || "fixed_quantity";
+  const allowed = rules.production_sizing_modes || ["fixed_notional_pct", "fixed_risk_pct"];
+  const corePass =
+    Number(metrics.total_trades || 0) >= Number(rules.minimum_trades || 0) &&
+    Number(metrics.profit_factor || 0) >= Number(rules.minimum_profit_factor || 0) &&
+    Number(metrics.max_equity_drawdown_pct || 0) <= Number(rules.maximum_drawdown_pct || 100) &&
+    Number(metrics.net_pnl || 0) > Number(rules.minimum_net_pnl ?? -Infinity) &&
+    Number(metrics.sharpe || 0) >= Number(rules.minimum_sharpe ?? -Infinity) &&
+    Number(metrics.sortino || 0) >= Number(rules.minimum_sortino ?? -Infinity) &&
+    Number(metrics.daily_sharpe || 0) >= Number(rules.minimum_daily_sharpe ?? -Infinity) &&
+    Number(metrics.daily_sortino || 0) >= Number(rules.minimum_daily_sortino ?? -Infinity) &&
+    Number(metrics.calmar || 0) >= Number(rules.minimum_calmar ?? -Infinity) &&
+    Number(metrics.max_initial_risk_pct || 0) <= Number(rules.maximum_initial_risk_pct || 100) &&
+    Number(metrics.max_entry_exposure_pct || 0) <= Number(rules.maximum_entry_exposure_pct || 100) &&
+    Number(metrics.avg_entry_exposure_pct || 0) <= Number(rules.maximum_avg_exposure_pct || 100) &&
+    Math.abs(Math.min(Number(metrics.worst_daily_return_pct || 0), 0)) <= Number(rules.maximum_worst_daily_loss_pct || 100);
+  if (!corePass) {
+    return "Core gates failed";
+  }
+  if (!allowed.includes(mode)) {
+    return "Diagnostic capital model";
+  }
+  const benchmarkPass = Number(metrics.outperformance_pct || 0) > 0 || Number(metrics.calmar_delta || 0) > 0;
+  return benchmarkPass ? "Production candidate" : "Weak vs benchmark";
 }
 
 function renderMetrics() {
@@ -116,9 +233,13 @@ function renderMetrics() {
     metricsGrid.innerHTML = `<div class="empty-state">Run the selected version or change a tuning value to populate the performance panel.</div>`;
     return;
   }
+  const spec = activeSpec();
   const comparison = state.previewResult?.comparison || null;
+  const warnings = capitalModelWarnings(spec, metrics);
   const items = [
     ["Source", activeMetricSource()],
+    ["Sizing Mode", spec?.parameters?.sizing_mode || "fixed_quantity"],
+    ["Production Gate", productionGateSummary(spec, metrics)],
     ["Net PnL", formatNumber(metrics.net_pnl)],
     ["Return %", `${formatNumber(metrics.return_pct)}%`],
     ["Profit Factor", formatNumber(metrics.profit_factor, 4)],
@@ -126,12 +247,45 @@ function renderMetrics() {
     ["Trades", formatNumber(metrics.total_trades, 0)],
     ["Win Rate", `${formatNumber(metrics.percent_profitable)}%`],
     ["Max Drawdown %", `${formatNumber(metrics.max_equity_drawdown_pct)}%`],
-    ["Sharpe", formatNumber(metrics.sharpe, 4)],
-    ["Sortino", formatNumber(metrics.sortino, 4)],
-    ["PF Delta", comparison ? formatNumber(comparison.profit_factor_delta, 4) : "n/a"],
-    ["DD Delta", comparison ? `${formatNumber(comparison.drawdown_pct_delta)}%` : "n/a"],
+    ["Trade Sharpe", formatNumber(metrics.sharpe, 4)],
+    ["Trade Sortino", formatNumber(metrics.sortino, 4)],
+    ["Daily Sharpe", formatNumber(metrics.daily_sharpe, 4)],
+    ["Daily Sortino", formatNumber(metrics.daily_sortino, 4)],
+    ["Daily Vol %", `${formatNumber(metrics.daily_volatility_pct)}%`],
+    ["Worst Day %", `${formatNumber(metrics.worst_daily_return_pct)}%`],
+    ["Positive Day %", `${formatNumber(metrics.positive_day_pct)}%`],
+    ["Calmar", formatNumber(metrics.calmar, 4)],
+    ["B&H Max DD %", `${formatNumber(metrics.buy_hold_max_drawdown_pct)}%`],
+    ["B&H Calmar", formatNumber(metrics.buy_hold_calmar, 4)],
+    ["Calmar Delta", formatNumber(metrics.calmar_delta, 4)],
+    ["Avg Exposure %", `${formatNumber(metrics.avg_entry_exposure_pct)}%`],
+    ["Max Exposure %", `${formatNumber(metrics.max_entry_exposure_pct)}%`],
+    ["Avg Risk %", `${formatNumber(metrics.avg_initial_risk_pct, 4)}%`],
+    ["Max Risk %", `${formatNumber(metrics.max_initial_risk_pct, 4)}%`],
+    ["Base PF Delta", comparison ? formatNumber(comparison.profit_factor_delta, 4) : "n/a"],
+    ["Base DD Delta", comparison ? `${formatNumber(comparison.drawdown_pct_delta)}%` : "n/a"],
+    ["Buy & Hold PnL", formatNumber(metrics.buy_hold_return)],
+    ["Buy & Hold Asset %", `${formatNumber(metrics.buy_hold_return_pct)}%`],
+    ["Alpha vs B&H", formatNumber(metrics.outperformance)],
+    ["Alpha vs B&H %", `${formatNumber(metrics.outperformance_pct)}%`],
+    ["Gross Profit", formatNumber(metrics.gross_profit)],
+    ["Gross Loss", formatNumber(metrics.gross_loss)],
+    ["Avg Trade", formatNumber(metrics.avg_pnl)],
+    ["Avg Win/Loss", formatNumber(metrics.ratio_avg_win_loss, 4)],
   ];
-  metricsGrid.innerHTML = items
+  const warningCards = warnings
+    .map(
+      (warning) => `
+        <article class="metric-card metric-warning">
+          <span>Capital Model</span>
+          <strong>${escapeHtml(warning)}</strong>
+        </article>
+      `,
+    )
+    .join("");
+  metricsGrid.innerHTML =
+    warningCards +
+    items
     .map(
       ([label, value]) => `
         <article class="metric-card">
@@ -162,7 +316,7 @@ function renderSummary() {
   const runCount = currentRuns().length;
   const edgeCount = tuningEdges().length;
   const version = currentVersion();
-  const latestRun = selectedVersionRuns()[0];
+  const latestRun = savedRunForSelection();
   const cards = [
     ["Families", state.families.length, "Reusable strategy families in the lab"],
     ["Datasets", state.datasets.length, "Research datasets available for mutation work"],
@@ -281,7 +435,7 @@ function renderFamilyMeta() {
 function renderTuningEdges() {
   const edges = tuningEdges();
   if (!edges.length) {
-    proposalsTable.innerHTML = `<tr><td colspan="6" class="empty-state">No tuning edges for this family yet.</td></tr>`;
+    proposalsTable.innerHTML = `<tr><td colspan="5" class="empty-state">No tuning edges for this family yet.</td></tr>`;
     return;
   }
   proposalsTable.innerHTML = edges
@@ -296,51 +450,56 @@ function renderTuningEdges() {
             <option value="false" ${String(working) === "false" ? "selected" : ""}>false</option>
           </select>
         `;
-      } else if (edge.value_type === "enum") {
-        const choices = [current, ...edge.alternatives].filter((value, index, arr) => arr.indexOf(value) === index);
+      } else if (edge.value_type === "enum" || edge.value_type === "list") {
+        const seen = new Set();
+        const choices = [current, ...edge.alternatives].filter((value) => {
+          const token = valueToken(value);
+          if (seen.has(token)) {
+            return false;
+          }
+          seen.add(token);
+          return true;
+        });
         control = `
           <select data-working-key="${edge.lever}">
             ${choices
-              .map((value) => `<option value="${value}" ${String(working) === String(value) ? "selected" : ""}>${value}</option>`)
+              .map((value) => {
+                const token = valueToken(value);
+                return `<option value="${token}" ${valueToken(working) === token ? "selected" : ""}>${displayValue(value)}</option>`;
+              })
               .join("")}
           </select>
         `;
       } else {
         const step = edge.value_type === "float" ? "0.1" : "1";
-        control = `<input data-working-key="${edge.lever}" type="number" step="${step}" value="${working}" />`;
+        const minAttr = edge.search_min !== null && edge.search_min !== undefined ? ` min="${edge.search_min}"` : "";
+        const maxAttr = edge.search_max !== null && edge.search_max !== undefined ? ` max="${edge.search_max}"` : "";
+        const stepAttr = edge.search_step !== null && edge.search_step !== undefined ? edge.search_step : step;
+        control = `<input data-working-key="${edge.lever}" type="number" step="${stepAttr}"${minAttr}${maxAttr} value="${working}" />`;
       }
-      const downButton =
-        edge.suggested_down !== null
-          ? `<button class="ghost" data-action="apply-edge" data-key="${edge.lever}" data-value="${edge.suggested_down}">Use ${edge.suggested_down}</button>`
-          : "";
-      const upButton =
-        edge.suggested_up !== null
-          ? `<button class="ghost" data-action="apply-edge" data-key="${edge.lever}" data-value="${edge.suggested_up}">Use ${edge.suggested_up}</button>`
-          : "";
       return `
         <tr>
-          <td class="numeric">${edge.priority}</td>
           <td>
             <strong>${edge.lever}</strong>
             <div>${edge.rationale}</div>
           </td>
-          <td class="numeric">${current}</td>
-          <td>${edge.suggested_down ?? "n/a"}</td>
-          <td>${edge.suggested_up ?? "n/a"}</td>
+          <td class="numeric">${displayValue(current)}</td>
           <td>
-            <div class="form-stack">
-              ${control}
-              <div class="table-actions">
-                ${downButton}
-                ${upButton}
-                <button class="ghost" data-action="reset-edge" data-key="${edge.lever}" data-value="${current}">Reset</button>
-              </div>
+            ${control}
+          </td>
+          <td>
+            <div class="table-actions">
+              <button class="ghost" data-action="optimize-lever" data-key="${edge.lever}">Optimize</button>
+              <button class="ghost" data-action="reset-edge" data-key="${edge.lever}" data-value="${valueToken(current)}">Reset</button>
             </div>
           </td>
         </tr>
       `;
     })
     .join("");
+  if (optimizationInFlight) {
+    setOptimizationBusy(true);
+  }
 }
 
 function renderVersions() {
@@ -462,7 +621,9 @@ function escapeHtml(value) {
 }
 
 function renderPrompts() {
-  const prompts = state.prompts.length ? state.prompts : state.familyDetail?.prompts || [];
+  const prompts = [...(state.prompts.length ? state.prompts : state.familyDetail?.prompts || [])].sort(
+    (left, right) => promptSortKey(left.name).localeCompare(promptSortKey(right.name)),
+  );
   promptsList.innerHTML = prompts
     .map(
       (prompt) => `
@@ -475,14 +636,53 @@ function renderPrompts() {
     .join("");
 }
 
+function promptSortKey(name) {
+  const match = String(name).match(/^(\d+)(?:-(\d+))?[_-]/);
+  if (!match) {
+    return String(name);
+  }
+  const phase = match[1].padStart(2, "0");
+  const subphase = match[2] ? `.${match[2].padStart(2, "0")}` : ".00";
+  return `${phase}${subphase}-${name}`;
+}
+
+function valueToken(value) {
+  return Array.isArray(value) ? JSON.stringify(value) : String(value);
+}
+
+function displayValue(value) {
+  return Array.isArray(value) ? `[${value.join(", ")}]` : String(value);
+}
+
 function castValue(raw, currentValue) {
   if (typeof currentValue === "boolean") {
     return raw === true || raw === "true";
+  }
+  if (Array.isArray(currentValue)) {
+    return Array.isArray(raw) ? raw : JSON.parse(raw);
   }
   if (typeof currentValue === "number") {
     return Number(raw);
   }
   return raw;
+}
+
+function edgeForKey(key) {
+  return tuningEdges().find((edge) => edge.lever === key) || null;
+}
+
+function clampToEdge(value, edge) {
+  if (!edge || typeof value !== "number" || Number.isNaN(value)) {
+    return value;
+  }
+  let next = value;
+  if (edge.search_min !== null && edge.search_min !== undefined) {
+    next = Math.max(next, Number(edge.search_min));
+  }
+  if (edge.search_max !== null && edge.search_max !== undefined) {
+    next = Math.min(next, Number(edge.search_max));
+  }
+  return next;
 }
 
 function collectOverrides() {
@@ -493,7 +693,7 @@ function collectOverrides() {
   const base = version.spec_json?.parameters || {};
   const overrides = {};
   for (const [key, value] of Object.entries(state.workingParameters)) {
-    if (String(value) !== String(base[key])) {
+    if (valueToken(value) !== valueToken(base[key])) {
       overrides[key] = value;
     }
   }
@@ -576,11 +776,13 @@ async function refreshSelectedVersion() {
 
 async function downloadDataset() {
   setStatus("downloadStatus", "Downloading Binance dataset...", "");
+  syncFullHistoryBars();
+  const fullHistory = fullHistoryInput.checked;
   const payload = {
     symbol: document.getElementById("symbolInput").value.trim().toUpperCase(),
     timeframe: document.getElementById("timeframeSelect").value,
-    bars: Number(document.getElementById("barsInput").value),
-    full_history: document.getElementById("fullHistoryInput").checked,
+    bars: fullHistory ? MIN_DATASET_BARS : Number(barsInput.value),
+    full_history: fullHistory,
     name: document.getElementById("datasetNameInput").value.trim() || null,
   };
   try {
@@ -590,9 +792,19 @@ async function downloadDataset() {
       body: JSON.stringify(payload),
     });
     showOutput(result);
-    setStatus("downloadStatus", `Dataset ready: ${result.name} (${result.rows_count} rows).`, "success");
+    const suffix =
+      result.download_mode === "full_history"
+        ? result.history_truncated
+          ? ` Full history hit the safety cap at ${result.history_cap_bars} bars, so this dataset is still truncated.`
+          : " Full history download completed."
+        : "";
+    setStatus("downloadStatus", `Dataset ready: ${result.name} (${result.rows_count} rows).${suffix}`, "success");
     await refreshAll();
     datasetSelect.value = result.dataset_id;
+    state.previewResult = null;
+    renderSummary();
+    renderRuns();
+    schedulePreview(true);
   } catch (error) {
     setStatus("downloadStatus", error.message, "error");
     showOutput({ error: error.message });
@@ -628,17 +840,26 @@ async function executePreview(showMessage = false) {
     return;
   }
   const overrides = collectOverrides();
+  const savedRun = savedRunForSelection();
   if (!Object.keys(overrides).length) {
-    state.previewResult = null;
-    renderSummary();
-    renderRuns();
-    if (showMessage) {
-      setStatus("familyStatus", "Working values match the frozen parent.", "success");
+    if (savedRun) {
+      state.previewResult = null;
+      renderSummary();
+      renderRuns();
+      if (showMessage) {
+        setStatus("familyStatus", "Showing the saved run for the selected dataset.", "success");
+      }
+      return;
     }
-    return;
+    if (showMessage) {
+      setStatus("familyStatus", "No saved run for this dataset. Generating a live preview...", "");
+    }
   }
   const requestToken = ++state.previewRequestToken;
-  if (showMessage) {
+  state.previewResult = null;
+  renderSummary();
+  renderRuns();
+  if (showMessage && Object.keys(overrides).length) {
     setStatus("familyStatus", "Refreshing live preview...", "");
   }
   try {
@@ -667,6 +888,142 @@ async function executePreview(showMessage = false) {
   }
 }
 
+async function optimizeLever(lever) {
+  const version = currentVersion();
+  const datasetId = selectedDatasetId();
+  if (!version || !datasetId) {
+    setStatus("familyStatus", "Select a mutation base and dataset first.", "error");
+    return;
+  }
+  if (optimizationInFlight) {
+    return;
+  }
+  setOptimizationBusy(true, lever);
+  setOptimizationStatus(`Optimizing ${lever}. Testing candidate values against the selected dataset...`);
+  try {
+    const result = await fetchJson(`/api/versions/${version.version_id}/optimize-lever`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        dataset_id: datasetId,
+        lever,
+        parameter_overrides: collectOverrides(),
+      }),
+    });
+    const current = currentVersion().spec_json.parameters[lever];
+    state.workingParameters[lever] = castValue(result.best.value, current);
+    state.previewResult = {
+      mode: "preview",
+      family_id: result.family_id,
+      base_version_id: result.base_version_id,
+      dataset_id: result.dataset_id,
+      parameter_overrides: result.best.parameter_overrides,
+      spec: result.best_spec,
+      metrics: result.best.metrics,
+      comparison: result.best.comparison,
+      verdict: result.best.verdict,
+    };
+    renderSummary();
+    renderTuningEdges();
+    renderRuns();
+    showOutput(result);
+    const search = result.search || {};
+    const rangeText =
+      search.min !== null && search.min !== undefined ? ` across ${search.min}-${search.max}` : "";
+    const eligibleText =
+      result.eligible_count !== undefined
+        ? ` ${result.eligible_count} met the evidence gates. Selection: ${result.selection_mode}.`
+        : "";
+    setStatus(
+      "familyStatus",
+      `${lever} optimized to ${result.best.value}. Tested ${result.candidates.length} candidates${rangeText}.${eligibleText}`,
+      "success",
+    );
+    setOptimizationStatus(
+      `${lever} optimized to ${result.best.value}. Tested ${result.candidates.length} candidates${rangeText}.${eligibleText}`,
+      "success",
+    );
+    clearOptimizationStatus(9000);
+  } catch (error) {
+    setStatus("familyStatus", error.message, "error");
+    showOutput({ error: error.message });
+    setOptimizationStatus(`${lever} optimization failed: ${error.message}`, "error");
+  } finally {
+    setOptimizationBusy(false);
+  }
+}
+
+async function optimizeAll() {
+  const version = currentVersion();
+  const datasetId = selectedDatasetId();
+  if (!version || !datasetId) {
+    setStatus("familyStatus", "Select a mutation base and dataset first.", "error");
+    return;
+  }
+  if (optimizationInFlight) {
+    return;
+  }
+  setOptimizationBusy(true);
+  setOptimizationStatus("Running two-pass production optimization. Fixed-quantity and over-levered candidates are not eligible...");
+  try {
+    const result = await fetchJson(`/api/versions/${version.version_id}/optimize-all`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        dataset_id: datasetId,
+        parameter_overrides: collectOverrides(),
+        passes: 2,
+      }),
+    });
+    state.workingParameters = { ...currentVersion().spec_json.parameters, ...result.parameter_overrides };
+    state.previewResult = result.preview;
+    renderSummary();
+    renderTuningEdges();
+    renderRuns();
+    showOutput(result);
+    const tunedCount = Object.keys(result.parameter_overrides).length;
+    setStatus("familyStatus", `Optimization complete. Applied ${tunedCount} tuned values.`, "success");
+    setOptimizationStatus(`Optimization complete. Applied ${tunedCount} tuned values.`, "success");
+    clearOptimizationStatus(9000);
+  } catch (error) {
+    setStatus("familyStatus", error.message, "error");
+    showOutput({ error: error.message });
+    setOptimizationStatus(`Optimization failed: ${error.message}`, "error");
+  } finally {
+    setOptimizationBusy(false);
+  }
+}
+
+async function runRobustnessGate() {
+  const version = currentVersion();
+  const datasetId = selectedDatasetId();
+  if (!version || !datasetId) {
+    setStatus("familyStatus", "Select a mutation base and dataset first.", "error");
+    return;
+  }
+  setStatus("familyStatus", "Running walk-forward and cost-stress robustness checks...", "");
+  try {
+    const result = await fetchJson(`/api/versions/${version.version_id}/robustness`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        dataset_id: datasetId,
+        parameter_overrides: collectOverrides(),
+      }),
+    });
+    showOutput(result);
+    const summary = result.summary || {};
+    setStatus(
+      "familyStatus",
+      `Robustness: ${summary.label}. Walk-forward ${summary.walk_forward_passed}/${summary.walk_forward_total}; cost stress ${summary.cost_stress_passed}/${summary.cost_stress_total}.`,
+      summary.passed ? "success" : "error",
+    );
+  } catch (error) {
+    setStatus("familyStatus", error.message, "error");
+    showOutput({ error: error.message });
+  }
+}
+
 function schedulePreview(immediate = false) {
   if (previewTimer) {
     clearTimeout(previewTimer);
@@ -682,9 +1039,28 @@ function schedulePreview(immediate = false) {
 function resetTune() {
   syncWorkingParameters();
   state.previewResult = null;
+  renderSummary();
   renderTuningEdges();
   renderRuns();
   setStatus("familyStatus", "Working parameters reset to the selected mutation base.", "success");
+}
+
+function applyProductionDefaults() {
+  const version = currentVersion();
+  if (!version) {
+    setStatus("familyStatus", "Select a mutation base first.", "error");
+    return;
+  }
+  state.workingParameters = {
+    ...state.workingParameters,
+    sizing_mode: "fixed_risk_pct",
+    risk_pct: 0.005,
+    max_leverage: 1,
+    notional_pct: 0.25,
+  };
+  renderTuningEdges();
+  schedulePreview(true);
+  setStatus("familyStatus", "Production defaults applied: fixed risk 0.5%, max exposure 1x.", "success");
 }
 
 async function saveTune() {
@@ -786,6 +1162,10 @@ async function handleTableClick(event) {
       schedulePreview();
       return;
     }
+    if (action === "optimize-lever") {
+      await optimizeLever(button.dataset.key);
+      return;
+    }
     if (action === "save-preview-now") {
       await saveTune();
       return;
@@ -839,25 +1219,36 @@ function handleWorkingInput(event) {
   if (current === undefined) {
     return;
   }
-  state.workingParameters[key] = castValue(control.value, current);
+  const edge = edgeForKey(key);
+  const nextValue = clampToEdge(castValue(control.value, current), edge);
+  state.workingParameters[key] = nextValue;
+  if (typeof nextValue === "number" && String(nextValue) !== control.value) {
+    control.value = nextValue;
+  }
   schedulePreview();
 }
 
 document.getElementById("refreshButton").addEventListener("click", refreshAll);
 document.getElementById("downloadButton").addEventListener("click", downloadDataset);
 document.getElementById("runParentButton").addEventListener("click", runParent);
+document.getElementById("productionDefaultsButton").addEventListener("click", applyProductionDefaults);
+document.getElementById("robustnessButton").addEventListener("click", runRobustnessGate);
 document.getElementById("resetTuneButton").addEventListener("click", resetTune);
 document.getElementById("saveTuneButton").addEventListener("click", saveTune);
+optimizeAllButton.addEventListener("click", optimizeAll);
 document.getElementById("registerButton").addEventListener("click", registerBaseline);
 familySelect.addEventListener("change", refreshFamilyDetail);
 versionSelect.addEventListener("change", refreshSelectedVersion);
 datasetSelect.addEventListener("change", () => schedulePreview(true));
+fullHistoryInput.addEventListener("change", syncFullHistoryBars);
 datasetsTable.addEventListener("click", handleTableClick);
 proposalsTable.addEventListener("click", handleTableClick);
 proposalsTable.addEventListener("input", handleWorkingInput);
 proposalsTable.addEventListener("change", handleWorkingInput);
 runsTable.addEventListener("click", handleTableClick);
 versionsTable.addEventListener("click", handleTableClick);
+
+syncFullHistoryBars();
 
 refreshAll().catch((error) => {
   showOutput({ error: error.message });

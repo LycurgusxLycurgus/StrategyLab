@@ -52,6 +52,8 @@ INTERVAL_MS = {
     "1d": 86_400_000,
 }
 
+FULL_HISTORY_BAR_CAP = 1_000_000
+
 
 class DataService:
     def __init__(self, repo: Repository | None = None) -> None:
@@ -110,7 +112,7 @@ class DataService:
                 detail="Mutation Lab requires at least 40000 bars unless full history is selected.",
             )
         target_bars = bars if not full_history else bars
-        collected = self._download_klines(symbol, timeframe, target_bars, full_history)
+        collected, download_meta = self._download_klines(symbol, timeframe, target_bars, full_history)
         if len(collected) < min(500, bars):
             raise HTTPException(status_code=502, detail="Downloaded dataset is too small for research use.")
         dataset_id = f"ds_{uuid.uuid4().hex[:12]}"
@@ -127,6 +129,9 @@ class DataService:
             "source": "binance_public",
             "rows_count": len(collected),
             "path": str(path),
+            "download_mode": "full_history" if full_history else "fixed_window",
+            "history_truncated": download_meta["history_truncated"],
+            "history_cap_bars": download_meta["history_cap_bars"],
             "created_at": datetime.now(UTC).isoformat(),
         }
         self.repo.put_dataset(payload)
@@ -156,11 +161,12 @@ class DataService:
         self.repo.put_dataset(payload)
         return payload
 
-    def _download_klines(self, symbol: str, timeframe: str, bars: int, full_history: bool) -> list[Bar]:
+    def _download_klines(self, symbol: str, timeframe: str, bars: int, full_history: bool) -> tuple[list[Bar], dict[str, Any]]:
         limit = 1000
         interval_ms = INTERVAL_MS[timeframe]
         collected: list[list[Any]] = []
         start_time = 0 if full_history else max(0, int(datetime.now(UTC).timestamp() * 1000) - (bars * interval_ms))
+        history_truncated = False
         while True:
             query = {"symbol": symbol.upper(), "interval": timeframe, "limit": limit}
             query["startTime"] = start_time
@@ -174,8 +180,13 @@ class DataService:
                 break
             if len(payload) < limit:
                 break
-            start_time = int(payload[-1][0]) + interval_ms
-            if len(collected) >= 300_000:
+            next_start_time = int(payload[-1][0]) + interval_ms
+            if next_start_time <= start_time:
+                break
+            start_time = next_start_time
+            if full_history and len(collected) >= FULL_HISTORY_BAR_CAP:
+                collected = collected[:FULL_HISTORY_BAR_CAP]
+                history_truncated = True
                 break
         bars_out: list[Bar] = []
         for row in collected:
@@ -191,7 +202,10 @@ class DataService:
                     timeframe=timeframe,
                 )
             )
-        return bars_out
+        return bars_out, {
+            "history_truncated": history_truncated,
+            "history_cap_bars": FULL_HISTORY_BAR_CAP if full_history else None,
+        }
 
     def _fetch_klines_page(self, url: str, full_history: bool) -> Any:
         backoffs = [1.0, 2.0, 4.0]

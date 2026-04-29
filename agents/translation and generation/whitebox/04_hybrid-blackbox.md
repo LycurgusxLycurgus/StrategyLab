@@ -46,7 +46,11 @@ Sixth, define the model contract. Choose the smallest transparent CPU-friendly m
 
 Seventh, define the validation contract. This must be chronological, strictly out-of-sample, and explicitly compared against the frozen white-box parent. The hybrid layer does not survive by deleting almost all trades.
 
-Eighth, define the acceptance rule and the failure rule. A hybrid mutation survives only if it improves the parent in a meaningful way while preserving a credible amount of activity.
+Eighth, define the acceptance rule and the failure rule. A hybrid mutation survives only if it improves the parent in a meaningful way while preserving a credible amount of activity. Separate offline-preview survival from live-engine survival. An offline preview is only a research filter; the mutation is not promoted until its decision rule is implemented as explicit strategy parameters, re-tested against the same frozen parent and dataset, optimized through Mutation Lab, and shown to preserve or improve the parent under the same acceptance rules. For quant-firm style review, the acceptance rule must emphasize portfolio-period metrics, not only trade-level metrics: daily Sharpe, daily Sortino, worst daily return, Calmar, exposure, and initial risk are required evidence. If the live proxy does not reproduce the offline edge, keep it disabled as a tunable branch or reject it instead of silently promoting it.
+
+Before the final route can claim production readiness, require the Mutation Lab robustness gate. The hybrid parent must survive chronological walk-forward folds and execution-cost stress tests, including doubled commission, doubled slippage, and combined doubled costs. A hybrid layer that only works in the full-sample backtest but fails robustness checks is a research artifact, not a production strategy. A hybrid/full parent that passes the robustness gate should be called a production robustness candidate, not live-production ready. The next route is a frozen candidate dossier plus paper trading.
+
+Paper trading must have both a calendar requirement and a trade-count requirement. The minimum should be chosen from the strategy's historical trade frequency. A very active intraday strategy may produce enough evidence in a few weeks. A strategy averaging roughly one or two trades per week should usually paper trade for several weeks to a few months, or until at least 20 to 30 live paper trades are observed, whichever takes longer. During paper trading, compare live trade frequency, fill quality, slippage, stop behavior, exposure, drawdown rhythm, and rule diagnostics against the backtest. If the paper sample is too small, the correct result is "continue paper trading," not "approved."
 
 Ninth, describe exactly one first experiment to run.
 
@@ -60,8 +64,9 @@ Your output must contain these sections in this exact order:
 7. Validation Contract
 8. Acceptance Rule
 9. Failure Rule
-10. First Hybrid Experiment
-11. Final Routing
+10. Live-Engine Promotion Contract
+11. First Hybrid Experiment
+12. Final Routing
 
 Do not use stock black-box examples as if every parent should receive the same treatment. The hybrid mutation must emerge from the surviving white-box parent’s specific evidence. If the evidence does not yet justify hybrid work, route the family back to white-box research.
 

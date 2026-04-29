@@ -7,45 +7,54 @@
     <link rel="stylesheet" href="/ui/style.css" />
   </head>
   <body>
-    <nav class="topbar" aria-label="Primary">
-      <a class="brand-mark" href="#top" aria-label="Mutation Lab home">ML</a>
-      <div class="topbar-links">
-        <a href="#data">Data</a>
-        <a href="#lab">Tune</a>
-        <a href="#runs">Runs</a>
-        <a href="#prompts">Prompts</a>
-      </div>
-      <button id="refreshButton" class="nav-action">Refresh</button>
-    </nav>
+    <aside class="side-rail" aria-label="Mutation Lab navigation">
+      <a class="brand-mark" href="#top" aria-label="Mutation Lab home">
+        <span class="brand-sigil">ML</span>
+        <span>
+          <strong>Mutation Lab</strong>
+          <small>white-box research</small>
+        </span>
+      </a>
 
-    <main id="top">
-      <section class="hero">
-        <div class="hero-copy">
-          <p class="eyebrow">White-box first research console</p>
+      <nav class="rail-nav" aria-label="Primary">
+        <a href="#data">Data Intake</a>
+        <a href="#lab">Command Deck</a>
+        <a href="#runs">Evidence Ledger</a>
+        <a href="#prompts">Prompt Core</a>
+      </nav>
+
+      <div class="rail-status">
+        <span class="pulse-dot"></span>
+        <span>Local engine online</span>
+      </div>
+    </aside>
+
+    <main id="top" class="app-shell">
+      <header class="app-header">
+        <div>
+          <p class="eyebrow">Production robustness cockpit</p>
           <h1>Mutation Lab</h1>
           <p class="lede">
-            Freeze a parent, tune the live parameters, and save only the children that beat the evidence.
+            Freeze a parent, tune one evidence edge at a time, stress the candidate, then paper trade only what survives.
           </p>
         </div>
-        <aside class="hero-card" aria-label="Research flow">
-          <span>Current loop</span>
-          <strong>Data -> Parent -> Live Tune -> Save</strong>
-          <p>Every parameter edit creates an unsaved preview. Promotion remains explicit.</p>
-        </aside>
-      </section>
+        <div class="header-actions">
+          <button id="refreshButton" class="nav-action">Refresh</button>
+        </div>
+      </header>
 
       <section class="summary-grid" id="summaryGrid" aria-label="Lab summary"></section>
 
-      <section id="data" class="scene scene-light">
-        <div class="scene-head">
+      <section id="data" class="panel data-panel">
+        <div class="panel-head">
           <div>
             <p class="eyebrow">Step 1</p>
             <h2>Research Data</h2>
           </div>
-          <p>Binance public candles, no API key. Use at least 40k bars unless you choose full history.</p>
+          <p>Binance public candles, no API key. Use at least 40k bars unless full history is selected.</p>
         </div>
 
-        <div class="control-grid">
+        <div class="control-grid data-grid">
           <label>
             Symbol
             <input id="symbolInput" value="BTCUSDT" />
@@ -61,7 +70,7 @@
           </label>
           <label>
             Bars
-            <input id="barsInput" type="number" value="40000" min="40000" max="300000" step="1000" />
+            <input id="barsInput" type="number" value="40000" min="40000" max="1000000" step="1000" />
           </label>
           <label class="checkbox">
             <input id="fullHistoryInput" type="checkbox" />
@@ -76,14 +85,14 @@
         <p id="downloadStatus" class="status"></p>
       </section>
 
-      <section id="lab" class="lab-layout">
-        <section class="scene scene-dark command-center">
-          <div class="scene-head">
+      <section id="lab" class="command-grid">
+        <section class="panel command-panel">
+          <div class="panel-head">
             <div>
               <p class="eyebrow">Step 2</p>
               <h2>Current Family</h2>
             </div>
-            <p>Choose the parent and dataset, then tune from the mutation edges below.</p>
+            <p>Choose the mutation base and dataset. Working values below update the live instrument panel.</p>
           </div>
 
           <div class="control-grid three-col">
@@ -105,6 +114,8 @@
 
           <div class="action-row">
             <button id="runParentButton" class="primary">Run Selected Version</button>
+            <button id="productionDefaultsButton">Apply Production Defaults</button>
+            <button id="robustnessButton">Run Robustness Gate</button>
             <button id="resetTuneButton">Reset To Selected Base</button>
             <button id="saveTuneButton">Save Tuned Child</button>
           </div>
@@ -113,35 +124,37 @@
           </p>
         </section>
 
-        <section class="scene scene-light metrics-scene">
-          <div class="scene-head">
+        <section class="panel metrics-panel">
+          <div class="panel-head compact">
             <div>
               <p class="eyebrow">Live Instrument Panel</p>
               <h2>Latest Run</h2>
             </div>
-            <p>Unsaved tuning previews appear here before you save a child.</p>
+            <p>Unsaved previews appear here before you save a child.</p>
           </div>
           <div id="metricsGrid" class="metrics-grid"></div>
         </section>
 
-        <section class="scene scene-dark tuning-scene">
-          <div class="scene-head">
+        <section class="panel tuning-panel">
+          <div class="panel-head compact">
             <div>
               <p class="eyebrow">Parameter Tuning</p>
               <h2>Mutation Edges</h2>
             </div>
-            <p>Suggested edges are direction hints. Working values are live.</p>
+            <div class="optimizer-tools">
+              <p>Optimize one lever or run a two-pass production sequence.</p>
+              <button id="optimizeAllButton" class="primary">Optimize Production Twice</button>
+              <div id="optimizationStatus" class="optimization-status" aria-live="polite"></div>
+            </div>
           </div>
           <div class="table-wrap">
             <table>
               <thead>
                 <tr>
-                  <th>Priority</th>
                   <th>Lever</th>
                   <th>Current</th>
-                  <th>Suggested Down</th>
-                  <th>Suggested Up</th>
                   <th>Working Value</th>
+                  <th>Action</th>
                 </tr>
               </thead>
               <tbody id="proposalsTable"></tbody>
@@ -150,8 +163,8 @@
         </section>
       </section>
 
-      <section class="scene scene-light coverage-scene">
-        <div class="scene-head">
+      <section class="panel coverage-panel">
+        <div class="panel-head compact">
           <div>
             <p class="eyebrow">Datasets</p>
             <h2>Coverage</h2>
@@ -173,8 +186,8 @@
         </div>
       </section>
 
-      <section id="runs" class="scene scene-dark runs-scene">
-        <div class="scene-head">
+      <section id="runs" class="panel runs-panel">
+        <div class="panel-head compact">
           <div>
             <p class="eyebrow">Evidence Ledger</p>
             <h2>Parent vs Child Runs</h2>
@@ -200,8 +213,8 @@
         </div>
       </section>
 
-      <section class="scene scene-light versions-scene">
-        <div class="scene-head">
+      <section class="panel versions-panel">
+        <div class="panel-head compact">
           <div>
             <p class="eyebrow">Saved Mutation Bases</p>
             <h2>Versions</h2>
@@ -224,9 +237,9 @@
         </div>
       </section>
 
-      <section id="prompts" class="split">
-        <section class="scene scene-light">
-          <div class="scene-head">
+      <section id="prompts" class="prompt-grid">
+        <section class="panel prompt-panel">
+          <div class="panel-head compact">
             <div>
               <p class="eyebrow">Prompt Core</p>
               <h2>Mutation Engine</h2>
@@ -235,8 +248,8 @@
           <div id="promptsList" class="prompt-list"></div>
         </section>
 
-        <section class="scene scene-dark">
-          <div class="scene-head">
+        <section class="panel register-panel">
+          <div class="panel-head compact">
             <div>
               <p class="eyebrow">Advanced</p>
               <h2>Register Baseline</h2>
@@ -260,8 +273,8 @@
         </section>
       </section>
 
-      <section class="scene scene-dark output-scene">
-        <div class="scene-head">
+      <section class="panel output-panel">
+        <div class="panel-head compact">
           <div>
             <p class="eyebrow">Output</p>
             <h2>API Payload</h2>

@@ -25,6 +25,7 @@ class Settings:
     data_dir: Path = Path(os.getenv("APP_DATA_DIR", str(BASE_DIR / "artifacts" / "data")))
     run_dir: Path = Path(os.getenv("APP_RUN_DIR", str(BASE_DIR / "artifacts" / "runs")))
     report_dir: Path = Path(os.getenv("APP_REPORT_DIR", str(BASE_DIR / "artifacts" / "reports")))
+    diagnostic_dir: Path = Path(os.getenv("APP_DIAGNOSTIC_DIR", str(BASE_DIR / "artifacts" / "diagnostics")))
     prompt_dir: Path = BASE_DIR / "agents" / "translation and generation" / "whitebox"
     seed_strategy_path: Path = BASE_DIR / "pre-strategies" / "BTC-intraday.txt"
     seed_spec_path: Path = BASE_DIR / "strategies" / "btc_intraday_parent.json"
@@ -34,7 +35,14 @@ class Settings:
         return load_timezone(self.timezone_name)
 
     def ensure_dirs(self) -> None:
-        for path in (self.db_path.parent, self.data_dir, self.run_dir, self.report_dir, self.seed_spec_path.parent):
+        for path in (
+            self.db_path.parent,
+            self.data_dir,
+            self.run_dir,
+            self.report_dir,
+            self.diagnostic_dir,
+            self.seed_spec_path.parent,
+        ):
             path.mkdir(parents=True, exist_ok=True)
 
 
