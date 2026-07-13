@@ -19,6 +19,7 @@ const versionSelect = document.getElementById("versionSelect");
 const datasetSelect = document.getElementById("datasetSelect");
 const optimizeResearchButton = document.getElementById("optimizeResearchButton");
 const optimizeAllButton = document.getElementById("optimizeAllButton");
+const optimizeRobustnessButton = document.getElementById("optimizeRobustnessButton");
 const optimizationStatus = document.getElementById("optimizationStatus");
 const barsInput = document.getElementById("barsInput");
 const fullHistoryInput = document.getElementById("fullHistoryInput");
@@ -146,7 +147,7 @@ function renderOptimizationProgress(progress) {
   if (!progress || !progress.active) {
     return;
   }
-  const isOptimizeAll = progress.mode === "optimize_all";
+  const isOptimizeAll = ["optimize_all", "optimize_robustness_repair"].includes(progress.mode);
   const total = isOptimizeAll
     ? progressNumber(progress.total_overall)
     : progressNumber(progress.total_candidates);
@@ -163,11 +164,18 @@ function renderOptimizationProgress(progress) {
   }
   state.optimizationProgressHighWater = percent;
   const currentLever = progress.current_lever || progress.lever || "lever";
-  const label = isOptimizeAll
-    ? `Overall ${done}/${total || "?"}`
-    : `${currentLever} ${progress.candidate_index || 0}/${progress.total_candidates || "?"}`;
+  const isFullRobustnessFinalist = progress.stage === "full_robustness_finalists";
+  const label = isFullRobustnessFinalist
+    ? `Full robustness finalist ${progress.finalist_index || 0}/${progress.finalist_total || "?"}`
+    : isOptimizeAll
+      ? `Overall ${done}/${total || "?"}`
+      : `${currentLever} ${progress.candidate_index || 0}/${progress.total_candidates || "?"}`;
   const detailParts = [];
-  if (isOptimizeAll) {
+  if (isFullRobustnessFinalist) {
+    detailParts.push("walk-forward 4 folds");
+    detailParts.push("anchored OOS 3 folds");
+    detailParts.push("cost stress 3 scenarios");
+  } else if (isOptimizeAll) {
     detailParts.push(`pass ${progress.current_pass || 1}/${progress.passes || 1}`);
     detailParts.push(`lever ${progress.current_lever_index || 0}/${progress.total_levers || 0}: ${currentLever}`);
     detailParts.push(`candidate ${progress.candidate_index || 0}/${progress.total_candidates || "?"}`);
@@ -272,6 +280,7 @@ function setOptimizationBusy(isBusy, activeLever = "") {
   optimizationInFlight = isBusy;
   optimizeResearchButton.disabled = isBusy;
   optimizeAllButton.disabled = isBusy;
+  optimizeRobustnessButton.disabled = isBusy;
   proposalsTable.querySelectorAll('[data-action="optimize-lever"]').forEach((button) => {
     button.disabled = isBusy && button.dataset.key !== activeLever;
   });
@@ -1306,9 +1315,17 @@ function applyOptimizeAllResult(result, recovered = false, startingParameters = 
   const rejectedNote = result.final_candidate_rejected
     ? " Optimized candidate failed production gates, so the starting values were kept."
     : "";
-  const message = `Optimization complete. Applied ${tunedCount} changed values (${modeNote}${selectedNote}).${rejectedNote}${recoveredNote}`;
-  setStatus("familyStatus", message, "success");
-  setOptimizationStatus(message, "success");
+  const robustness = result.robustness_evidence;
+  const robustnessSummary = robustness?.summary;
+  const robustnessNote = robustnessSummary
+    ? ` Full robustness: walk-forward ${robustnessSummary.walk_forward_passed}/${robustnessSummary.walk_forward_total}, anchored OOS ${robustnessSummary.anchored_train_test_passed}/${robustnessSummary.anchored_train_test_total}, cost stress ${robustnessSummary.cost_stress_passed}/${robustnessSummary.cost_stress_total}; ${robustnessSummary.passed ? "survived" : "best finalist still needs review"}.`
+    : robustness
+      ? ` Cost stress ${robustness.cost_stress_passed}/${robustness.cost_stress_total}${robustness.all_cost_stress_passed ? "; repair survived available checks" : "; best available repair still needs review"}.`
+      : "";
+  const message = `Optimization complete. Applied ${tunedCount} changed values (${modeNote}${selectedNote}).${rejectedNote}${robustnessNote}${recoveredNote}`;
+  const completionTone = robustnessSummary && !robustnessSummary.passed ? "error" : "success";
+  setStatus("familyStatus", message, completionTone);
+  setOptimizationStatus(message, completionTone);
   clearOptimizationStatus(9000);
 }
 
@@ -1334,7 +1351,11 @@ async function optimizeAll(optimizationMode = "production") {
   let reattachedExistingJob = false;
   setOptimizationBusy(true);
   const startingParameters = { ...currentVersion().spec_json.parameters, ...collectOverrides() };
-  const modeLabel = optimizationMode === "research" ? "baseline research" : "production";
+  const modeLabel = optimizationMode === "research"
+    ? "baseline research"
+    : optimizationMode === "robustness_repair"
+      ? "robustness repair"
+      : "production";
   setOptimizationStatus(`Starting background two-pass ${modeLabel} optimization...`);
   try {
     const job = await fetchJson(`/api/versions/${version.version_id}/optimize-all/jobs`, {
@@ -1390,7 +1411,11 @@ async function waitForOptimizationJob(jobId) {
     if (job.status === "failed") {
       throw new Error(job.error || "Optimization job failed.");
     }
-    setOptimizationStatus(optimizationProgressMessage(job));
+    if (job.progress) {
+      renderOptimizationProgress({ ...job.progress, active: true, job_id: job.job_id });
+    } else {
+      setOptimizationStatus(optimizationProgressMessage(job));
+    }
   }
 }
 
@@ -1682,6 +1707,7 @@ bindClick("resetTuneButton", resetTune);
 bindClick("saveTuneButton", saveTune);
 optimizeResearchButton.addEventListener("click", () => optimizeAll("research"));
 optimizeAllButton.addEventListener("click", () => optimizeAll("production"));
+optimizeRobustnessButton.addEventListener("click", () => optimizeAll("robustness_repair"));
 bindClick("registerButton", registerBaseline);
 familySelect.addEventListener("change", refreshFamilyDetail);
 versionSelect.addEventListener("change", refreshSelectedVersion);

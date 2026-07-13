@@ -88,6 +88,11 @@ class HybridEntryQualityRequest(BaseModel):
     veto_fraction: float = Field(default=0.15, ge=0.01, le=0.5)
 
 
+class HybridEntrySizingRequest(BaseModel):
+    reduced_fraction: float = Field(default=0.10, ge=0.05, le=0.25)
+    risk_multiplier: float = Field(default=0.50, ge=0.10, le=0.90)
+
+
 class HybridTimeDecayTriageRequest(BaseModel):
     exit_fraction: float = Field(default=0.15, ge=0.01, le=0.5)
 
@@ -371,6 +376,15 @@ def delete_run(run_id: str) -> dict[str, str]:
 @app.post("/api/runs/{run_id}/hybrid-entry-quality")
 def run_hybrid_entry_quality(run_id: str, request: HybridEntryQualityRequest) -> dict:
     return lab.run_hybrid_entry_quality_experiment(run_id, veto_fraction=request.veto_fraction)
+
+
+@app.post("/api/runs/{run_id}/hybrid-entry-sizing")
+def run_hybrid_entry_sizing(run_id: str, request: HybridEntrySizingRequest) -> dict:
+    return lab.run_hybrid_entry_sizing_experiment(
+        run_id,
+        reduced_fraction=request.reduced_fraction,
+        risk_multiplier=request.risk_multiplier,
+    )
 
 
 @app.post("/api/runs/{run_id}/hybrid-time-decay-triage")

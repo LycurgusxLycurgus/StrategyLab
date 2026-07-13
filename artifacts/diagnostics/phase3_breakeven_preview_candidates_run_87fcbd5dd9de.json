@@ -1,0 +1,335 @@
+{
+  "run_id": "run_87fcbd5dd9de",
+  "version_id": "ver_3230ea522e50",
+  "dataset_id": "ds_4e109af56413",
+  "mutation_family": "breakeven_maturity_gate",
+  "frozen_parent_metrics": {
+    "net_pnl": 6539.61,
+    "return_pct": 130.79,
+    "profit_factor": 1.8493,
+    "max_equity_drawdown_pct": 4.63,
+    "expected_payoff": 5.58,
+    "total_trades": 1172,
+    "percent_profitable": 29.35,
+    "daily_sharpe": 2.1956,
+    "daily_sortino": 3.0895,
+    "worst_daily_return_pct": -1.1,
+    "calmar": 28.2337,
+    "max_initial_risk_pct": 0.9866,
+    "max_entry_exposure_pct": 99.99
+  },
+  "frozen_parent_diagnostics": {
+    "entries": 1172,
+    "stop_exits": 202,
+    "breakeven_stop_exits": 415,
+    "breakeven_stop_moves": 759,
+    "breakeven_maturity_blocks": 0,
+    "gann_state_exits": 554,
+    "mt5_stop_modify_rejects": 37,
+    "mt5_invalid_lot_skips": 1
+  },
+  "frozen_parent_exit_summary": {
+    "breakeven_stop": {
+      "trades": 415,
+      "net_pnl": -290.12,
+      "profit_factor": 0.0
+    },
+    "gann_state_exit": {
+      "trades": 554,
+      "net_pnl": 11114.68,
+      "profit_factor": 4.5601
+    },
+    "stop": {
+      "trades": 202,
+      "net_pnl": -4287.72,
+      "profit_factor": 0.0
+    },
+    "time_exit": {
+      "trades": 1,
+      "net_pnl": 2.77,
+      "profit_factor": 2.77
+    }
+  },
+  "candidates": [
+    {
+      "mutation_name": "breakeven_maturity_min_1_bar",
+      "parameter_overrides": {
+        "breakeven_min_bars": 1
+      },
+      "metrics": {
+        "net_pnl": 6539.61,
+        "return_pct": 130.79,
+        "profit_factor": 1.8493,
+        "max_equity_drawdown_pct": 4.63,
+        "expected_payoff": 5.58,
+        "total_trades": 1172,
+        "percent_profitable": 29.35,
+        "daily_sharpe": 2.1956,
+        "daily_sortino": 3.0895,
+        "worst_daily_return_pct": -1.1,
+        "calmar": 28.2337,
+        "max_initial_risk_pct": 0.9866,
+        "max_entry_exposure_pct": 99.99
+      },
+      "diagnostics": {
+        "entries": 1172,
+        "stop_exits": 202,
+        "breakeven_stop_exits": 415,
+        "breakeven_stop_moves": 759,
+        "breakeven_maturity_blocks": 0,
+        "gann_state_exits": 554,
+        "mt5_stop_modify_rejects": 37,
+        "mt5_invalid_lot_skips": 1
+      },
+      "exit_summary": {
+        "breakeven_stop": {
+          "trades": 415,
+          "net_pnl": -290.12,
+          "profit_factor": 0.0
+        },
+        "gann_state_exit": {
+          "trades": 554,
+          "net_pnl": 11114.68,
+          "profit_factor": 4.5601
+        },
+        "stop": {
+          "trades": 202,
+          "net_pnl": -4287.72,
+          "profit_factor": 0.0
+        },
+        "time_exit": {
+          "trades": 1,
+          "net_pnl": 2.77,
+          "profit_factor": 2.77
+        }
+      },
+      "trade_count_retention_pct": 100.0,
+      "verdict": "rejected",
+      "reason": "no_effect_vs_parent"
+    },
+    {
+      "mutation_name": "breakeven_maturity_min_2_bars",
+      "parameter_overrides": {
+        "breakeven_min_bars": 2
+      },
+      "metrics": {
+        "net_pnl": 7155.56,
+        "return_pct": 143.11,
+        "profit_factor": 1.8496,
+        "max_equity_drawdown_pct": 5.16,
+        "expected_payoff": 6.12,
+        "total_trades": 1170,
+        "percent_profitable": 31.28,
+        "daily_sharpe": 2.284,
+        "daily_sortino": 3.208,
+        "worst_daily_return_pct": -1.04,
+        "calmar": 27.7387,
+        "max_initial_risk_pct": 0.9895,
+        "max_entry_exposure_pct": 99.99
+      },
+      "diagnostics": {
+        "entries": 1170,
+        "stop_exits": 224,
+        "breakeven_stop_exits": 361,
+        "breakeven_stop_moves": 727,
+        "breakeven_maturity_blocks": 368,
+        "gann_state_exits": 584,
+        "mt5_stop_modify_rejects": 29,
+        "mt5_invalid_lot_skips": 1
+      },
+      "exit_summary": {
+        "breakeven_stop": {
+          "trades": 361,
+          "net_pnl": -254.55,
+          "profit_factor": 0.0
+        },
+        "gann_state_exit": {
+          "trades": 584,
+          "net_pnl": 12262.48,
+          "profit_factor": 4.7017
+        },
+        "stop": {
+          "trades": 224,
+          "net_pnl": -4855.14,
+          "profit_factor": 0.0
+        },
+        "time_exit": {
+          "trades": 1,
+          "net_pnl": 2.77,
+          "profit_factor": 2.77
+        }
+      },
+      "trade_count_retention_pct": 99.83,
+      "verdict": "survivor_needs_baseline_optimization",
+      "reason": "net_pnl_improved_pf_stable_portfolio_metrics_improved_drawdown_tradeoff_requires_baseline_optimization"
+    },
+    {
+      "mutation_name": "breakeven_maturity_min_3_bars",
+      "parameter_overrides": {
+        "breakeven_min_bars": 3
+      },
+      "metrics": {
+        "net_pnl": 7135.58,
+        "return_pct": 142.71,
+        "profit_factor": 1.8017,
+        "max_equity_drawdown_pct": 5.66,
+        "expected_payoff": 6.1,
+        "total_trades": 1169,
+        "percent_profitable": 32.59,
+        "daily_sharpe": 2.2225,
+        "daily_sortino": 3.0589,
+        "worst_daily_return_pct": -1.04,
+        "calmar": 25.2029,
+        "max_initial_risk_pct": 0.9986,
+        "max_entry_exposure_pct": 99.92
+      },
+      "diagnostics": {
+        "entries": 1169,
+        "stop_exits": 245,
+        "breakeven_stop_exits": 313,
+        "breakeven_stop_moves": 694,
+        "breakeven_maturity_blocks": 771,
+        "gann_state_exits": 610,
+        "mt5_stop_modify_rejects": 14,
+        "mt5_invalid_lot_skips": 1
+      },
+      "exit_summary": {
+        "breakeven_stop": {
+          "trades": 313,
+          "net_pnl": -219.78,
+          "profit_factor": 0.0
+        },
+        "gann_state_exit": {
+          "trades": 610,
+          "net_pnl": 12604.98,
+          "profit_factor": 4.6764
+        },
+        "stop": {
+          "trades": 245,
+          "net_pnl": -5252.39,
+          "profit_factor": 0.0
+        },
+        "time_exit": {
+          "trades": 1,
+          "net_pnl": 2.77,
+          "profit_factor": 2.77
+        }
+      },
+      "trade_count_retention_pct": 99.74,
+      "verdict": "rejected",
+      "reason": "profit_factor_below_parent, drawdown_above_parent"
+    },
+    {
+      "mutation_name": "breakeven_maturity_min_4_bars",
+      "parameter_overrides": {
+        "breakeven_min_bars": 4
+      },
+      "metrics": {
+        "net_pnl": 7007.42,
+        "return_pct": 140.15,
+        "profit_factor": 1.7571,
+        "max_equity_drawdown_pct": 6.07,
+        "expected_payoff": 6.0,
+        "total_trades": 1168,
+        "percent_profitable": 33.22,
+        "daily_sharpe": 2.164,
+        "daily_sortino": 2.9567,
+        "worst_daily_return_pct": -1.05,
+        "calmar": 23.0769,
+        "max_initial_risk_pct": 0.9984,
+        "max_entry_exposure_pct": 99.98
+      },
+      "diagnostics": {
+        "entries": 1168,
+        "stop_exits": 254,
+        "breakeven_stop_exits": 282,
+        "breakeven_stop_moves": 670,
+        "breakeven_maturity_blocks": 1173,
+        "gann_state_exits": 631,
+        "mt5_stop_modify_rejects": 11,
+        "mt5_invalid_lot_skips": 1
+      },
+      "exit_summary": {
+        "breakeven_stop": {
+          "trades": 282,
+          "net_pnl": -198.27,
+          "profit_factor": 0.0
+        },
+        "gann_state_exit": {
+          "trades": 631,
+          "net_pnl": 12697.4,
+          "profit_factor": 4.564
+        },
+        "stop": {
+          "trades": 254,
+          "net_pnl": -5494.48,
+          "profit_factor": 0.0
+        },
+        "time_exit": {
+          "trades": 1,
+          "net_pnl": 2.77,
+          "profit_factor": 2.77
+        }
+      },
+      "trade_count_retention_pct": 99.66,
+      "verdict": "rejected",
+      "reason": "profit_factor_below_parent, drawdown_above_parent"
+    },
+    {
+      "mutation_name": "breakeven_maturity_min_5_bars",
+      "parameter_overrides": {
+        "breakeven_min_bars": 5
+      },
+      "metrics": {
+        "net_pnl": 6937.68,
+        "return_pct": 138.75,
+        "profit_factor": 1.7326,
+        "max_equity_drawdown_pct": 6.17,
+        "expected_payoff": 5.94,
+        "total_trades": 1168,
+        "percent_profitable": 33.99,
+        "daily_sharpe": 2.1326,
+        "daily_sortino": 2.8911,
+        "worst_daily_return_pct": -1.06,
+        "calmar": 22.5045,
+        "max_initial_risk_pct": 0.9988,
+        "max_entry_exposure_pct": 100.0
+      },
+      "diagnostics": {
+        "entries": 1168,
+        "stop_exits": 262,
+        "breakeven_stop_exits": 251,
+        "breakeven_stop_moves": 648,
+        "breakeven_maturity_blocks": 1607,
+        "gann_state_exits": 654,
+        "mt5_stop_modify_rejects": 11,
+        "mt5_invalid_lot_skips": 1
+      },
+      "exit_summary": {
+        "breakeven_stop": {
+          "trades": 251,
+          "net_pnl": -175.52,
+          "profit_factor": 0.0
+        },
+        "gann_state_exit": {
+          "trades": 654,
+          "net_pnl": 12733.79,
+          "profit_factor": 4.4692
+        },
+        "stop": {
+          "trades": 262,
+          "net_pnl": -5623.36,
+          "profit_factor": 0.0
+        },
+        "time_exit": {
+          "trades": 1,
+          "net_pnl": 2.77,
+          "profit_factor": 2.77
+        }
+      },
+      "trade_count_retention_pct": 99.66,
+      "verdict": "rejected",
+      "reason": "profit_factor_below_parent, drawdown_above_parent"
+    }
+  ]
+}
