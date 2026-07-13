@@ -1,18 +1,19 @@
 {
   "engine_id": "ghl_dc_breakout_v1",
-  "asset": "XAUUSD",
+  "asset": "USDJPY",
   "venue": "IC Markets MT5",
-  "timeframe": "30m",
+  "timeframe": "1h",
   "metadata": {
-    "family_id": "xauusd_ghl_dc",
-    "source_project": "AutoXAU GHL+DC",
+    "family_id": "usdjpy_ghl_dc",
+    "title": "USDJPY GHL+DC H1 Parent",
+    "source_project": "StrategyLab GHL+DC cross-asset translation",
     "source_files": [
       "C:/Users/G3_Mb/OneDrive/Documentos/Trading/AutoXAU/xau_ghl_dc_strategy_long_short.pine",
       "C:/Users/G3_Mb/OneDrive/Documentos/Trading/AutoXAU/integrated_xau_ghl_dc.pine"
     ],
     "translation_prompt": "agents/translation and generation/whitebox/01_translation.md",
     "translation_target": "universal inspired strategy candidate",
-    "notes": "Translated from the local Gann High Low plus Donchian breakout Pine strategy. The source has Gann-state exits but no production stop, so this parent adds an explicit ATR initial stop for auditable risk sizing."
+    "notes": "Clean USDJPY H1 translation of the Gann High Low plus Donchian breakout parent. XAU-optimized values and time filters are not inherited. FX quote-currency PnL is converted from JPY to USD and IC Markets lot economics are fixed execution assumptions."
   },
   "parameters": {
     "gann_high_period": 13,
@@ -39,16 +40,18 @@
     "time_risk_block_utc_hours": [],
     "time_risk_block_weekdays": [],
     "quantity": 1.0,
-    "initial_capital": 100000.0,
-    "commission_pct": 0.0035,
-    "slippage_ticks": 10,
-    "spread_ticks": 5,
-    "tick_size": 0.01,
-    "sizing_mode": "fixed_risk_pct",
+    "initial_capital": 5000.0,
+    "commission_pct": 0.0,
+    "commission_per_lot_side": 3.5,
+    "slippage_ticks": 2,
+    "spread_ticks": 8,
+    "tick_size": 0.001,
+    "account_conversion_mode": "quote_divide_price",
+    "sizing_mode": "mt5_fixed_risk_lot",
     "notional_pct": 0.25,
     "risk_pct": 0.005,
     "max_leverage": 1.0,
-    "contract_size": 100.0,
+    "contract_size": 100000.0,
     "min_lot": 0.01,
     "lot_step": 0.01,
     "max_lot": 100.0,
@@ -81,11 +84,33 @@
       "lever": "spread_ticks",
       "path": "parameters.spread_ticks",
       "values": [
-        5
+        8
       ],
       "search_mode": "values_only",
       "optimizable": false,
-      "rationale": "Fixed XAUUSD bid/ask spread proxy used by causal MT5-style fills. Treat it as a broker execution assumption, not an alpha lever."
+      "rationale": "Fixed USDJPY bid/ask spread proxy used by causal MT5-style fills. Treat it as a broker execution assumption, not an alpha lever."
+    },
+    {
+      "kind": "execution",
+      "lever": "commission_per_lot_side",
+      "path": "parameters.commission_per_lot_side",
+      "values": [
+        3.5
+      ],
+      "search_mode": "values_only",
+      "optimizable": false,
+      "rationale": "IC Markets Raw commission in USD per standard lot per side; fixed broker economics, not an alpha lever."
+    },
+    {
+      "kind": "execution",
+      "lever": "account_conversion_mode",
+      "path": "parameters.account_conversion_mode",
+      "values": [
+        "quote_divide_price"
+      ],
+      "search_mode": "values_only",
+      "optimizable": false,
+      "rationale": "Convert JPY-denominated USDJPY trade PnL and risk into the USD account currency."
     },
     {
       "kind": "white_box",
@@ -213,11 +238,11 @@
         2,
         3,
         4,
-        5
+        8
       ],
       "search_mode": "range",
       "search_min": 0,
-      "search_max": 5,
+      "search_max": 8,
       "search_step": 1,
       "rationale": "Require a minimum trade age before moving the GHL+DC stop to breakeven, reducing immature stop modifications."
     },
@@ -230,7 +255,7 @@
         false
       ],
       "search_mode": "values_only",
-      "rationale": "Enable or disable the UTC entry-hour risk filter for the XAUUSD GHL+DC parent."
+      "rationale": "Enable or disable the UTC entry-hour risk filter for the USDJPY GHL+DC parent."
     },
     {
       "kind": "white_box",
@@ -238,61 +263,14 @@
       "path": "parameters.time_risk_block_utc_hours",
       "values": [
         [],
-        [
-          1
-        ],
-        [
-          7
-        ],
-        [
-          21
-        ],
-        [
-          14
-        ],
-        [
-          1,
-          7
-        ],
-        [
-          1,
-          21
-        ],
-        [
-          7,
-          21
-        ],
-        [
-          1,
-          7,
-          21
-        ],
-        [
-          1,
-          7,
-          14,
-          21
-        ],
-        [
-          1,
-          7,
-          12,
-          14,
-          21
-        ],
-        [
-          1,
-          7,
-          8,
-          11,
-          12,
-          13,
-          14,
-          21
-        ]
+        [0],
+        [7],
+        [12],
+        [15],
+        [21]
       ],
       "search_mode": "values_only",
-      "rationale": "Tune evidenced weak UTC entry-hour exclusions for the XAUUSD GHL+DC parent."
+      "rationale": "Scout single UTC-hour exclusions for USDJPY only after the unfiltered baseline establishes evidence."
     },
     {
       "kind": "white_box",
@@ -321,20 +299,22 @@
       "lever": "allow_short",
       "path": "parameters.allow_short",
       "values": [
+        true,
         false
       ],
       "search_mode": "values_only",
-      "rationale": "Check whether short-side participation hurts the XAUUSD parent."
+      "rationale": "Test both-side participation without inheriting XAUUSD's long-only result."
     },
     {
       "kind": "white_box",
       "lever": "allow_long",
       "path": "parameters.allow_long",
       "values": [
+        true,
         false
       ],
       "search_mode": "values_only",
-      "rationale": "Check whether long-side participation is carrying or degrading the family."
+      "rationale": "Test whether USDJPY has asymmetric long-side behavior."
     },
     {
       "kind": "white_box",
@@ -353,33 +333,33 @@
       "lever": "initial_capital",
       "path": "parameters.initial_capital",
       "values": [
-        5000.0,
-        100000.0
+        5000.0
       ],
       "search_mode": "values_only",
-      "rationale": "Switch between research account equity and funded-account sizing scenarios."
+      "optimizable": false,
+      "rationale": "The account balance is a user constraint, not an alpha parameter."
     },
     {
       "kind": "portfolio",
       "lever": "sizing_mode",
       "path": "parameters.sizing_mode",
       "values": [
-        "fixed_risk_pct",
         "mt5_fixed_risk_lot"
       ],
       "search_mode": "values_only",
-      "rationale": "Compare StrategyLab continuous fixed-risk sizing with MT5 lot-constrained fixed-risk sizing."
+      "optimizable": false,
+      "rationale": "Use MT5 lot-constrained sizing for production-comparable USDJPY evaluation."
     },
     {
       "kind": "portfolio",
       "lever": "contract_size",
       "path": "parameters.contract_size",
       "values": [
-        100.0
+        100000.0
       ],
       "search_mode": "values_only",
       "optimizable": false,
-      "rationale": "XAUUSD broker contract size used by mt5_fixed_risk_lot sizing. Treat it as an execution constant, not an alpha lever."
+      "rationale": "USDJPY standard-lot contract size used by mt5_fixed_risk_lot sizing. Treat it as an execution constant, not an alpha lever."
     },
     {
       "kind": "portfolio",
@@ -419,14 +399,14 @@
       "lever": "skip_below_min_lot",
       "path": "parameters.skip_below_min_lot",
       "values": [
-        true,
-        false
+        true
       ],
       "search_mode": "values_only",
-      "rationale": "Skip below-minimum lots for funded realism or floor them for an explicit stress test."
+      "optimizable": false,
+      "rationale": "Broker minimum volume is an execution constraint. Skip below-minimum lots instead of flooring them to 0.01 and silently exceeding the intended risk budget."
     }
   ],
-  "causal_story": "Gann High Low defines a transparent trend-state flip. Donchian confirmation requires price to break the stored channel extreme soon after the flip, filtering weak crosses. Positions exit on the opposite Gann state close or on an explicit ATR risk stop added for auditable portfolio sizing.",
+  "causal_story": "On USDJPY H1, Gann High Low defines a transparent trend-state flip. Donchian confirmation requires price to break the stored channel extreme soon after the flip. Positions exit on the opposite Gann state close or an explicit ATR stop, with next-executable MT5 fills and JPY-denominated PnL converted to USD.",
   "translation_audit": {
     "direct_translation": [
       "Gann High Low state from SMA(high, HPeriod) and SMA(low, LPeriod)",
@@ -437,9 +417,10 @@
     ],
     "transparent_approximations": [
       "ATR initial stop is added because the Pine source had no hard stop and StrategyLab needs bounded risk for fixed-risk sizing.",
-      "MT5 proxy execution arms stop orders only after a completed Gann setup bar, fills from the following bar using bid OHLC plus explicit spread and gap-aware prices, activates the initial stop only after entry, and executes Gann market exits at the following bar open."
+      "MT5 proxy execution arms stop orders only after a completed Gann setup bar, fills from the following bar using bid OHLC plus explicit spread and gap-aware prices, activates the initial stop only after entry, and executes Gann market exits at the following bar open.",
+      "USDJPY gross PnL and stop risk are first calculated in JPY and converted to USD using the executable price; commission is modeled as 3.5 USD per standard lot per side."
     ],
-    "first_test_dataset": "XAUUSD_M30_201711020700_202605011900",
+    "first_test_dataset": "USDJPY_H1_201711020100_202605011600",
     "routing": "proceed_to_first_executable_translation"
   }
 }

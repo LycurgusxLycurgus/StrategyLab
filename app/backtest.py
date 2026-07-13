@@ -32,6 +32,10 @@ class Position:
     stop_moved_to_breakeven: bool = False
     time_decay_confirmation_suppressed: int = 0
     reverse_confirmation_suppressed: int = 0
+    gann_exit_confirmation_suppressed: int = 0
+    account_conversion_mode: str = "identity"
+    contract_size: float = 0.0
+    commission_per_lot_side: float = 0.0
 
 
 @dataclass(slots=True)
@@ -387,7 +391,14 @@ def mark_to_market_equity(realized_equity: float, position: Position | None, clo
         unrealized = (close_price - position.entry_price) * position.quantity
     else:
         unrealized = (position.entry_price - close_price) * position.quantity
-    exit_commission = close_price * position.quantity * commission_pct
+    if position.account_conversion_mode == "quote_divide_price" and close_price > 0:
+        unrealized /= close_price
+    lots = position.quantity / position.contract_size if position.contract_size > 0 else 0.0
+    exit_commission = (
+        lots * position.commission_per_lot_side
+        if position.commission_per_lot_side > 0
+        else close_price * position.quantity * commission_pct
+    )
     return realized_equity + unrealized - position.entry_commission - exit_commission
 
 
@@ -3043,6 +3054,8 @@ class BacktestEngine:
         equity = float(parameters.get("initial_capital", 100_000.0))
         tick_size = float(parameters.get("tick_size", 0.01))
         slippage = int(parameters.get("slippage_ticks", 0)) * tick_size
+        configured_spread = int(parameters.get("spread_ticks", 0)) * tick_size
+        spread = configured_spread if mt5_bar_proxy else 0.0
         commission_pct = float(parameters.get("commission_pct", 0.0)) / 100
         diagnostics = {
             "bars": len(bars),
@@ -3053,17 +3066,38 @@ class BacktestEngine:
             "entries": 0,
             "reverse_exits": 0,
             "gann_state_exits": 0,
+            "gann_exit_confirmation_candidates": 0,
+            "gann_exit_confirmation_suppressed": 0,
+            "gann_exit_confirmation_confirmed": 0,
+            "gann_exit_confirmation_adverse_escapes": 0,
+            "gann_exit_confirmation_recovered": 0,
+            "gann_exit_confirmation_suppressed_net_pnl": 0.0,
             "stop_exits": 0,
             "breakeven_stop_moves": 0,
             "breakeven_stop_exits": 0,
+            "breakeven_maturity_blocks": 0,
+            "failed_entry_triage_exits": 0,
+            "failed_entry_triage_candidates": 0,
             "time_risk_filter_blocks": 0,
             "time_risk_filter_long_blocks": 0,
             "time_risk_filter_short_blocks": 0,
             "mt5_invalid_lot_skips": 0,
             "mt5_stop_modify_rejects": 0,
+            "pending_entry_orders": 0,
+            "pending_order_fills": 0,
+            "pending_order_gap_fills": 0,
+            "pending_gann_exits": 0,
+            "gann_exit_next_open_fills": 0,
+            "gap_stop_fills": 0,
             "expired_setups": 0,
             "time_exits": 0,
             "execution_model": execution_model,
+            "spread_ticks": int(parameters.get("spread_ticks", 0)),
+            "execution_semantics": (
+                "closed_bar_setup_pending_stop_next_bar_gap_aware_next_open_gann_exit"
+                if mt5_bar_proxy
+                else "research_same_bar"
+            ),
         }
         pending_long = False
         pending_short = False
@@ -3072,6 +3106,9 @@ class BacktestEngine:
         pending_long_breakout: float | None = None
         pending_short_breakdown: float | None = None
         last_gann_flip_index: int | None = None
+        gann_exit_candidate_index: int | None = None
+        pending_market_exit_reason: str | None = None
+        pending_market_exit_index: int | None = None
         warmup = benchmark_warmup_index(parameters, len(bars))
 
         def append_equity_point(current_bar: Bar) -> None:
@@ -3090,73 +3127,147 @@ class BacktestEngine:
                 append_equity_point(bar)
                 continue
 
+            # Closed-bar exits become executable market orders at the next bar open.
+            # A stop already resting at the broker has priority when the market gaps
+            # through it before that market exit can execute.
+            if (
+                mt5_bar_proxy
+                and position
+                and pending_market_exit_reason
+                and pending_market_exit_index is not None
+                and index > pending_market_exit_index
+            ):
+                stop_gapped = self._ghl_dc_stop_gapped_at_open(position.direction, bar, position.stop_price, spread)
+                if stop_gapped:
+                    reason = "breakeven_stop" if position.stop_moved_to_breakeven else "stop"
+                    exit_price = self._ghl_dc_stop_fill_price(position.direction, bar, position.stop_price, slippage, spread)
+                    diagnostics["breakeven_stop_exits" if reason == "breakeven_stop" else "stop_exits"] += 1
+                    diagnostics["gap_stop_fills"] += 1
+                else:
+                    reason = pending_market_exit_reason
+                    exit_price = self._ghl_dc_market_open_fill_price(position.direction, bar, slippage, spread)
+                    diagnostics["gann_exit_next_open_fills"] += int(reason == "gann_state_exit")
+                    diagnostics["gann_state_exits"] += int(reason == "gann_state_exit")
+                    diagnostics["reverse_exits"] += int(reason == "reverse")
+                    diagnostics["failed_entry_triage_exits"] += int(reason == "failed_entry_triage_exit")
+                trade = self._close_trade(position, bar, index, exit_price, reason, commission_pct, equity)
+                trades.append(trade)
+                equity += trade["net_pnl"]
+                position = None
+                pending_market_exit_reason = None
+                pending_market_exit_index = None
+                gann_exit_candidate_index = None
+
             if position:
                 self._update_excursion(position, bar)
 
-            stop_can_trigger = position is not None and (index >= position.stop_initialized_on_index if mt5_bar_proxy else index > position.stop_initialized_on_index)
+            stop_can_trigger = position is not None and index > position.stop_initialized_on_index
             if position and stop_can_trigger:
-                if position.direction == 1 and bar.low <= position.stop_price:
+                if self._ghl_dc_stop_triggered(position.direction, bar, position.stop_price, spread):
                     reason = "breakeven_stop" if position.stop_moved_to_breakeven else "stop"
-                    trade = self._close_trade(position, bar, index, max(position.stop_price - slippage, 0.0), reason, commission_pct, equity)
+                    if mt5_bar_proxy:
+                        exit_price = self._ghl_dc_stop_fill_price(position.direction, bar, position.stop_price, slippage, spread)
+                        diagnostics["gap_stop_fills"] += int(
+                            self._ghl_dc_stop_gapped_at_open(position.direction, bar, position.stop_price, spread)
+                        )
+                    else:
+                        exit_price = max(position.stop_price - slippage, 0.0) if position.direction == 1 else position.stop_price + slippage
+                    trade = self._close_trade(position, bar, index, exit_price, reason, commission_pct, equity)
                     trades.append(trade)
                     equity += trade["net_pnl"]
                     diagnostics["breakeven_stop_exits" if reason == "breakeven_stop" else "stop_exits"] += 1
                     position = None
-                elif position.direction == -1 and bar.high >= position.stop_price:
-                    reason = "breakeven_stop" if position.stop_moved_to_breakeven else "stop"
-                    trade = self._close_trade(position, bar, index, position.stop_price + slippage, reason, commission_pct, equity)
-                    trades.append(trade)
-                    equity += trade["net_pnl"]
-                    diagnostics["breakeven_stop_exits" if reason == "breakeven_stop" else "stop_exits"] += 1
-                    position = None
+                    pending_market_exit_reason = None
+                    pending_market_exit_index = None
+                    gann_exit_candidate_index = None
 
             if position and parameters.get("breakeven_stop_enabled", False):
                 initial_risk = position.initial_risk_per_unit
                 if initial_risk > 0:
+                    bars_held = index - position.entry_index
+                    min_bars = int(parameters.get("breakeven_min_bars", 0))
                     trigger_r = float(parameters.get("breakeven_trigger_mfe_r", 1.0))
                     lock_r = float(parameters.get("breakeven_lock_r", 0.0))
                     if position.direction == 1 and ((bar.high - position.entry_price) / initial_risk) >= trigger_r:
-                        new_stop = position.entry_price + (initial_risk * lock_r)
-                        if mt5_bar_proxy and new_stop >= bar.close:
-                            diagnostics["mt5_stop_modify_rejects"] += 1
-                        elif new_stop > position.stop_price:
-                            position.stop_price = new_stop
-                            position.stop_moved_to_breakeven = True
-                            diagnostics["breakeven_stop_moves"] += 1
+                        if bars_held < min_bars:
+                            diagnostics["breakeven_maturity_blocks"] += 1
+                        else:
+                            new_stop = position.entry_price + (initial_risk * lock_r)
+                            if mt5_bar_proxy and new_stop >= bar.close:
+                                diagnostics["mt5_stop_modify_rejects"] += 1
+                            elif new_stop > position.stop_price:
+                                position.stop_price = new_stop
+                                position.stop_moved_to_breakeven = True
+                                diagnostics["breakeven_stop_moves"] += 1
                     elif position.direction == -1 and ((position.entry_price - bar.low) / initial_risk) >= trigger_r:
-                        new_stop = position.entry_price - (initial_risk * lock_r)
-                        if mt5_bar_proxy and new_stop <= bar.close:
-                            diagnostics["mt5_stop_modify_rejects"] += 1
-                        elif new_stop < position.stop_price:
-                            position.stop_price = new_stop
-                            position.stop_moved_to_breakeven = True
-                            diagnostics["breakeven_stop_moves"] += 1
+                        if bars_held < min_bars:
+                            diagnostics["breakeven_maturity_blocks"] += 1
+                        else:
+                            new_stop = position.entry_price - (initial_risk * lock_r)
+                            if mt5_bar_proxy and new_stop <= bar.close:
+                                diagnostics["mt5_stop_modify_rejects"] += 1
+                            elif new_stop < position.stop_price:
+                                position.stop_price = new_stop
+                                position.stop_moved_to_breakeven = True
+                                diagnostics["breakeven_stop_moves"] += 1
+
+            if position and parameters.get("failed_entry_triage_enabled", False):
+                initial_risk = position.initial_risk_per_unit
+                bars_held = index - position.entry_index
+                triage_bars = int(parameters.get("failed_entry_triage_bars", 3))
+                min_mfe_r = float(parameters.get("failed_entry_triage_min_mfe_r", 0.25))
+                max_current_r = float(parameters.get("failed_entry_triage_max_current_r", 0.0))
+                if initial_risk > 0 and bars_held >= triage_bars:
+                    current_r = ((bar.close - position.entry_price) * position.direction) / initial_risk
+                    mfe_r = position.max_favorable_excursion / initial_risk
+                    if mfe_r < min_mfe_r and current_r <= max_current_r:
+                        diagnostics["failed_entry_triage_candidates"] += 1
+                        if mt5_bar_proxy:
+                            pending_market_exit_reason = "failed_entry_triage_exit"
+                            pending_market_exit_index = index
+                        else:
+                            exit_price = max(bar.close - slippage, 0.0) if position.direction == 1 else bar.close + slippage
+                            trade = self._close_trade(position, bar, index, exit_price, "failed_entry_triage_exit", commission_pct, equity)
+                            trades.append(trade)
+                            equity += trade["net_pnl"]
+                            diagnostics["failed_entry_triage_exits"] += 1
+                            position = None
+                            gann_exit_candidate_index = None
 
             previous_hilo = hilo_values[index - 1]
             current_hilo = hilo_values[index]
-            gann_cross_up = previous_hilo is not None and current_hilo is not None and closes[index - 1] <= float(previous_hilo) and bar.close > float(current_hilo)
-            gann_cross_down = previous_hilo is not None and current_hilo is not None and closes[index - 1] >= float(previous_hilo) and bar.close < float(current_hilo)
-            if gann_cross_up:
-                diagnostics["gann_cross_up"] += 1
-                last_gann_flip_index = index
-                pending_long = True
-                pending_long_bar = index
-                pending_long_breakout = dc_upper[index - 1] if index > 0 else None
-                pending_short = False
-                pending_short_breakdown = None
-            if gann_cross_down:
-                diagnostics["gann_cross_down"] += 1
-                last_gann_flip_index = index
-                pending_short = True
-                pending_short_bar = index
-                pending_short_breakdown = dc_lower[index - 1] if index > 0 else None
-                pending_long = False
-                pending_long_breakout = None
 
+            # In MT5 mode, only orders armed by a previous closed bar can fill.
+            # Capture and consume those orders before the current close is allowed
+            # to arm a replacement setup.
             long_age = index - pending_long_bar if pending_long else 0
             short_age = index - pending_short_bar if pending_short else 0
-            long_signal = bool(pending_long and long_age <= max_breakout_bars and pending_long_breakout is not None and bar.high > pending_long_breakout and highs[index - 1] <= pending_long_breakout)
-            short_signal = bool(pending_short and short_age <= max_breakout_bars and pending_short_breakdown is not None and bar.low < pending_short_breakdown and lows[index - 1] >= pending_short_breakdown)
+            causal_long_trigger = bool(
+                mt5_bar_proxy
+                and pending_long
+                and 1 <= long_age <= max_breakout_bars
+                and pending_long_breakout is not None
+                and (bar.high + spread) >= pending_long_breakout
+            )
+            causal_short_trigger = bool(
+                mt5_bar_proxy
+                and pending_short
+                and 1 <= short_age <= max_breakout_bars
+                and pending_short_breakdown is not None
+                and bar.low <= pending_short_breakdown
+            )
+            signal_long_trigger = pending_long_breakout if causal_long_trigger else None
+            signal_short_trigger = pending_short_breakdown if causal_short_trigger else None
+            signal_long_age = long_age
+            signal_short_age = short_age
+            signal_long_setup_index = pending_long_bar if causal_long_trigger else index
+            signal_short_setup_index = pending_short_bar if causal_short_trigger else index
+            if causal_long_trigger:
+                pending_long = False
+                pending_long_breakout = None
+            if causal_short_trigger:
+                pending_short = False
+                pending_short_breakdown = None
             if pending_long and long_age > max_breakout_bars:
                 pending_long = False
                 pending_long_breakout = None
@@ -3166,13 +3277,93 @@ class BacktestEngine:
                 pending_short_breakdown = None
                 diagnostics["expired_setups"] += 1
 
-            if position and ((position.direction == 1 and bar.close < float(current_hilo) and state_values[index] == -1) or (position.direction == -1 and bar.close > float(current_hilo) and state_values[index] == 1)):
-                exit_price = max(bar.close - slippage, 0.0) if position.direction == 1 else bar.close + slippage
-                trade = self._close_trade(position, bar, index, exit_price, "gann_state_exit", commission_pct, equity)
-                trades.append(trade)
-                equity += trade["net_pnl"]
-                diagnostics["gann_state_exits"] += 1
-                position = None
+            gann_cross_up = previous_hilo is not None and current_hilo is not None and closes[index - 1] <= float(previous_hilo) and bar.close > float(current_hilo)
+            gann_cross_down = previous_hilo is not None and current_hilo is not None and closes[index - 1] >= float(previous_hilo) and bar.close < float(current_hilo)
+            if gann_cross_up:
+                diagnostics["gann_cross_up"] += 1
+                last_gann_flip_index = index
+                pending_long = True
+                pending_long_bar = index
+                pending_long_breakout = dc_upper[index - 1] if index > 0 else None
+                diagnostics["pending_entry_orders"] += int(mt5_bar_proxy and pending_long_breakout is not None)
+                pending_short = False
+                pending_short_breakdown = None
+            if gann_cross_down:
+                diagnostics["gann_cross_down"] += 1
+                last_gann_flip_index = index
+                pending_short = True
+                pending_short_bar = index
+                pending_short_breakdown = dc_lower[index - 1] if index > 0 else None
+                diagnostics["pending_entry_orders"] += int(mt5_bar_proxy and pending_short_breakdown is not None)
+                pending_long = False
+                pending_long_breakout = None
+
+            if mt5_bar_proxy:
+                long_signal = causal_long_trigger
+                short_signal = causal_short_trigger
+                long_trigger_level = signal_long_trigger
+                short_trigger_level = signal_short_trigger
+                long_signal_age = signal_long_age
+                short_signal_age = signal_short_age
+            else:
+                long_age = index - pending_long_bar if pending_long else 0
+                short_age = index - pending_short_bar if pending_short else 0
+                long_signal = bool(pending_long and long_age <= max_breakout_bars and pending_long_breakout is not None and bar.high > pending_long_breakout and highs[index - 1] <= pending_long_breakout)
+                short_signal = bool(pending_short and short_age <= max_breakout_bars and pending_short_breakdown is not None and bar.low < pending_short_breakdown and lows[index - 1] >= pending_short_breakdown)
+                long_trigger_level = pending_long_breakout
+                short_trigger_level = pending_short_breakdown
+                long_signal_age = long_age
+                short_signal_age = short_age
+                signal_long_setup_index = pending_long_bar
+                signal_short_setup_index = pending_short_bar
+
+            adverse_gann_state = bool(
+                position
+                and (
+                    (position.direction == 1 and bar.close < float(current_hilo) and state_values[index] == -1)
+                    or (position.direction == -1 and bar.close > float(current_hilo) and state_values[index] == 1)
+                )
+            )
+            if position and adverse_gann_state:
+                exit_allowed = True
+                if parameters.get("gann_exit_confirmation_enabled", False):
+                    diagnostics["gann_exit_confirmation_candidates"] += 1
+                    initial_risk = position.initial_risk_per_unit
+                    current_r = ((bar.close - position.entry_price) * position.direction) / initial_risk if initial_risk > 0 else 0.0
+                    adverse_escape_r = float(parameters.get("gann_exit_confirm_allow_if_unrealized_r_lte", -0.35))
+                    confirm_bars = max(1, int(parameters.get("gann_exit_confirm_bars", 1)))
+                    if current_r <= adverse_escape_r:
+                        diagnostics["gann_exit_confirmation_adverse_escapes"] += 1
+                        gann_exit_candidate_index = None
+                    elif gann_exit_candidate_index is None:
+                        gann_exit_candidate_index = index
+                        diagnostics["gann_exit_confirmation_suppressed"] += 1
+                        position.gann_exit_confirmation_suppressed += 1
+                        exit_allowed = False
+                    elif index - gann_exit_candidate_index < confirm_bars:
+                        diagnostics["gann_exit_confirmation_suppressed"] += 1
+                        position.gann_exit_confirmation_suppressed += 1
+                        exit_allowed = False
+                    else:
+                        diagnostics["gann_exit_confirmation_confirmed"] += 1
+                        gann_exit_candidate_index = None
+                if exit_allowed:
+                    if mt5_bar_proxy:
+                        if pending_market_exit_reason is None:
+                            pending_market_exit_reason = "gann_state_exit"
+                            pending_market_exit_index = index
+                            diagnostics["pending_gann_exits"] += 1
+                    else:
+                        exit_price = max(bar.close - slippage, 0.0) if position.direction == 1 else bar.close + slippage
+                        trade = self._close_trade(position, bar, index, exit_price, "gann_state_exit", commission_pct, equity)
+                        trades.append(trade)
+                        equity += trade["net_pnl"]
+                        diagnostics["gann_state_exits"] += 1
+                        position = None
+                        gann_exit_candidate_index = None
+            elif position and gann_exit_candidate_index is not None:
+                diagnostics["gann_exit_confirmation_recovered"] += 1
+                gann_exit_candidate_index = None
 
             if long_signal and parameters.get("allow_long", True):
                 diagnostics["signals_long"] += 1
@@ -3197,47 +3388,99 @@ class BacktestEngine:
                         short_signal = False
 
             if position and position.direction == 1 and short_signal:
-                trade = self._close_trade(position, bar, index, max(bar.close - slippage, 0.0), "reverse", commission_pct, equity)
-                trades.append(trade)
-                equity += trade["net_pnl"]
-                diagnostics["reverse_exits"] += 1
-                position = None
+                if mt5_bar_proxy:
+                    if pending_market_exit_reason is None:
+                        pending_market_exit_reason = "reverse"
+                        pending_market_exit_index = index
+                else:
+                    trade = self._close_trade(position, bar, index, max(bar.close - slippage, 0.0), "reverse", commission_pct, equity)
+                    trades.append(trade)
+                    equity += trade["net_pnl"]
+                    diagnostics["reverse_exits"] += 1
+                    position = None
+                    gann_exit_candidate_index = None
             elif position and position.direction == -1 and long_signal:
-                trade = self._close_trade(position, bar, index, bar.close + slippage, "reverse", commission_pct, equity)
-                trades.append(trade)
-                equity += trade["net_pnl"]
-                diagnostics["reverse_exits"] += 1
-                position = None
+                if mt5_bar_proxy:
+                    if pending_market_exit_reason is None:
+                        pending_market_exit_reason = "reverse"
+                        pending_market_exit_index = index
+                else:
+                    trade = self._close_trade(position, bar, index, bar.close + slippage, "reverse", commission_pct, equity)
+                    trades.append(trade)
+                    equity += trade["net_pnl"]
+                    diagnostics["reverse_exits"] += 1
+                    position = None
+                    gann_exit_candidate_index = None
 
             if position is None and (long_signal or short_signal):
                 direction = 1 if long_signal else -1
-                trigger_level = pending_long_breakout if direction == 1 else pending_short_breakdown
+                trigger_level = long_trigger_level if direction == 1 else short_trigger_level
                 if execution_model == "research_same_close":
                     reference = bar.close
+                    fill = reference + slippage if direction == 1 else max(reference - slippage, 0.0)
                 elif trigger_level is not None:
-                    reference = float(trigger_level)
+                    fill = self._ghl_dc_pending_fill_price(direction, bar, float(trigger_level), slippage, spread)
                 else:
-                    reference = bar.open
-                fill = reference + slippage if direction == 1 else max(reference - slippage, 0.0)
-                channel_opposite = dc_lower[index] if direction == 1 else dc_upper[index]
-                stop = self._ghl_dc_initial_stop(parameters, direction, fill, bar, float(atr_values[index] or 0.0), channel_opposite)
+                    fill = self._ghl_dc_market_open_fill_price(direction, bar, slippage, spread)
+                risk_index = index - 1 if mt5_bar_proxy and index > 0 else index
+                channel_opposite = dc_lower[risk_index] if direction == 1 else dc_upper[risk_index]
+                stop = self._ghl_dc_initial_stop(
+                    parameters,
+                    direction,
+                    fill,
+                    bars[risk_index],
+                    float(atr_values[risk_index] or 0.0),
+                    channel_opposite,
+                )
                 quantity = self._position_quantity(parameters, equity, fill, stop)
                 if quantity <= 0:
                     diagnostics["mt5_invalid_lot_skips"] += 1
-                    pending_long = pending_short = False
-                    pending_long_breakout = pending_short_breakdown = None
                     append_equity_point(bar)
                     continue
                 features = self._ghl_dc_entry_features(
-                    bars, index, direction, parameters, atr_values, sma_high, sma_low, hilo_values, state_values, dc_upper, dc_lower,
-                    pending_long_breakout if direction == 1 else pending_short_breakdown,
-                    long_age if direction == 1 else short_age,
+                    bars, risk_index, direction, parameters, atr_values, sma_high, sma_low, hilo_values, state_values, dc_upper, dc_lower,
+                    trigger_level,
+                    long_signal_age if direction == 1 else short_signal_age,
                     last_gann_flip_index, stop, fill,
                 )
-                position = self._open_position(direction, index, bar, fill, stop, quantity, commission_pct, equity, features)
+                features.update(
+                    {
+                        "execution_model": execution_model,
+                        "execution_ts": bar.ts.isoformat(),
+                        "setup_index": signal_long_setup_index if direction == 1 else signal_short_setup_index,
+                        "fill_index": index,
+                        "stop_active_from_index": index + 1 if mt5_bar_proxy else index,
+                        "utc_hour": bar.ts.hour,
+                        "weekday": bar.ts.weekday(),
+                        "spread_ticks": int(parameters.get("spread_ticks", 0)),
+                        "gap_fill": bool(
+                            mt5_bar_proxy
+                            and trigger_level is not None
+                            and self._ghl_dc_pending_order_gapped_at_open(direction, bar, float(trigger_level), spread)
+                        ),
+                    }
+                )
+                position = self._open_position(
+                    direction,
+                    index,
+                    bar,
+                    fill,
+                    stop,
+                    quantity,
+                    commission_pct,
+                    equity,
+                    features,
+                    account_conversion_mode=str(parameters.get("account_conversion_mode", "identity")),
+                    contract_size=float(parameters.get("contract_size", 0.0)),
+                    commission_per_lot_side=float(parameters.get("commission_per_lot_side", 0.0)),
+                )
+                gann_exit_candidate_index = None
                 diagnostics["entries"] += 1
-                pending_long = pending_short = False
-                pending_long_breakout = pending_short_breakdown = None
+                diagnostics["pending_order_fills"] += int(mt5_bar_proxy)
+                diagnostics["pending_order_gap_fills"] += int(features["gap_fill"])
+                if not mt5_bar_proxy:
+                    pending_long = pending_short = False
+                    pending_long_breakout = pending_short_breakdown = None
 
             append_equity_point(bar)
 
@@ -3264,7 +3507,51 @@ class BacktestEngine:
             buy_hold_end_price=buy_hold_end_price,
             buy_hold_max_drawdown_pct=buy_hold_drawdown_pct(bars, warmup),
         )
+        diagnostics["gann_exit_confirmation_suppressed_net_pnl"] = round(
+            sum(
+                trade["net_pnl"]
+                for trade in trades
+                if int(trade.get("gann_exit_confirmation_suppressed", 0)) > 0
+            ),
+            2,
+        )
         return {"metrics": metrics, "trades": trades, "equity_curve": equity_curve, "diagnostics": diagnostics}
+
+    @staticmethod
+    def _ghl_dc_pending_order_gapped_at_open(direction: int, bar: Bar, trigger: float, spread: float) -> bool:
+        if direction == 1:
+            return (bar.open + spread) >= trigger
+        return bar.open <= trigger
+
+    @staticmethod
+    def _ghl_dc_pending_fill_price(direction: int, bar: Bar, trigger: float, slippage: float, spread: float) -> float:
+        if direction == 1:
+            return max(bar.open + spread, trigger) + slippage
+        return max(min(bar.open, trigger) - slippage, 0.0)
+
+    @staticmethod
+    def _ghl_dc_market_open_fill_price(direction: int, bar: Bar, slippage: float, spread: float) -> float:
+        if direction == 1:
+            return max(bar.open - slippage, 0.0)
+        return bar.open + spread + slippage
+
+    @staticmethod
+    def _ghl_dc_stop_triggered(direction: int, bar: Bar, stop: float, spread: float) -> bool:
+        if direction == 1:
+            return bar.low <= stop
+        return (bar.high + spread) >= stop
+
+    @staticmethod
+    def _ghl_dc_stop_gapped_at_open(direction: int, bar: Bar, stop: float, spread: float) -> bool:
+        if direction == 1:
+            return bar.open <= stop
+        return (bar.open + spread) >= stop
+
+    @staticmethod
+    def _ghl_dc_stop_fill_price(direction: int, bar: Bar, stop: float, slippage: float, spread: float) -> float:
+        if direction == 1:
+            return max(min(bar.open, stop) - slippage, 0.0)
+        return max(bar.open + spread, stop) + slippage
 
     @staticmethod
     def _ghl_dc_initial_stop(parameters: dict[str, Any], direction: int, fill: float, bar: Bar, atr_value: float, channel_opposite: float | None) -> float:
@@ -3346,7 +3633,27 @@ class BacktestEngine:
         }
 
     @staticmethod
-    def _open_position(direction: int, index: int, bar: Bar, fill: float, stop: float, quantity: float, commission_pct: float, equity: float, features: dict[str, Any]) -> Position:
+    def _open_position(
+        direction: int,
+        index: int,
+        bar: Bar,
+        fill: float,
+        stop: float,
+        quantity: float,
+        commission_pct: float,
+        equity: float,
+        features: dict[str, Any],
+        account_conversion_mode: str = "identity",
+        contract_size: float = 0.0,
+        commission_per_lot_side: float = 0.0,
+    ) -> Position:
+        lots = quantity / contract_size if contract_size > 0 else 0.0
+        entry_commission = (
+            lots * commission_per_lot_side
+            if commission_per_lot_side > 0
+            else fill * quantity * commission_pct
+        )
+        entry_notional = quantity if account_conversion_mode == "quote_divide_price" else fill * quantity
         return Position(
             direction=direction,
             entry_index=index,
@@ -3354,12 +3661,15 @@ class BacktestEngine:
             entry_price=fill,
             stop_price=stop,
             quantity=quantity,
-            entry_commission=fill * quantity * commission_pct,
+            entry_commission=entry_commission,
             entry_equity=equity,
-            entry_notional=fill * quantity,
+            entry_notional=entry_notional,
             initial_risk_per_unit=abs(fill - stop),
             stop_initialized_on_index=index,
             entry_features=features,
+            account_conversion_mode=account_conversion_mode,
+            contract_size=contract_size,
+            commission_per_lot_side=commission_per_lot_side,
         )
 
     @staticmethod
@@ -3390,8 +3700,13 @@ class BacktestEngine:
             if risk_per_unit <= 0 or contract_size <= 0 or lot_step <= 0 or max_lot <= 0:
                 return 0.0
             risk_pct = max(0.0, float(parameters.get("risk_pct", 0.005)))
-            risk_lots = (equity * risk_pct) / (risk_per_unit * contract_size)
-            leverage_lots = max_notional / (entry_price * contract_size)
+            quote_divide_price = parameters.get("account_conversion_mode") == "quote_divide_price"
+            risk_per_lot = risk_per_unit * contract_size
+            if quote_divide_price:
+                risk_per_lot /= entry_price
+            risk_lots = (equity * risk_pct) / risk_per_lot
+            notional_per_lot = contract_size if quote_divide_price else entry_price * contract_size
+            leverage_lots = max_notional / notional_per_lot
             raw_lots = min(risk_lots, leverage_lots, max_lot)
             stepped_lots = math.floor(raw_lots / lot_step) * lot_step
             if stepped_lots < min_lot:
@@ -3475,14 +3790,27 @@ class BacktestEngine:
         commission_pct: float,
         equity_before: float,
     ) -> dict[str, Any]:
-        exit_commission = price * position.quantity * commission_pct
+        lots = position.quantity / position.contract_size if position.contract_size > 0 else 0.0
+        exit_commission = (
+            lots * position.commission_per_lot_side
+            if position.commission_per_lot_side > 0
+            else price * position.quantity * commission_pct
+        )
         if position.direction == 1:
             gross_pnl = (price - position.entry_price) * position.quantity
         else:
             gross_pnl = (position.entry_price - price) * position.quantity
+        if position.account_conversion_mode == "quote_divide_price" and price > 0:
+            gross_pnl /= price
         net_pnl = gross_pnl - position.entry_commission - exit_commission
         initial_risk = position.initial_risk_per_unit
         initial_risk_amount = initial_risk * position.quantity
+        mfe_amount = position.max_favorable_excursion * position.quantity
+        mae_amount = position.max_adverse_excursion * position.quantity
+        if position.account_conversion_mode == "quote_divide_price" and position.entry_price > 0:
+            initial_risk_amount /= position.entry_price
+            mfe_amount /= position.entry_price
+            mae_amount /= position.entry_price
         return {
             "trade_id": f"tr_{uuid.uuid4().hex[:12]}",
             "direction": "long" if position.direction == 1 else "short",
@@ -3504,13 +3832,14 @@ class BacktestEngine:
             "net_pnl": round(net_pnl, 2),
             "bars_held": index - position.entry_index,
             "reason": reason,
-            "mfe": round(position.max_favorable_excursion * position.quantity, 2),
-            "mae": round(position.max_adverse_excursion * position.quantity, 2),
+            "mfe": round(mfe_amount, 2),
+            "mae": round(mae_amount, 2),
             "mfe_r": round(position.max_favorable_excursion / initial_risk, 4) if initial_risk else 0.0,
             "mae_r": round(position.max_adverse_excursion / initial_risk, 4) if initial_risk else 0.0,
             "return_on_equity_pct": round((net_pnl / equity_before) * 100, 4) if equity_before else 0.0,
             "time_decay_confirmation_suppressed": position.time_decay_confirmation_suppressed,
             "reverse_confirmation_suppressed": position.reverse_confirmation_suppressed,
+            "gann_exit_confirmation_suppressed": position.gann_exit_confirmation_suppressed,
             "entry_features": position.entry_features,
         }
 

@@ -1,0 +1,565 @@
+{
+  "run_id": "run_87fcbd5dd9de",
+  "version_id": "ver_3230ea522e50",
+  "dataset_id": "ds_4e109af56413",
+  "frozen_parent_metrics": {
+    "net_pnl": 6539.61,
+    "return_pct": 130.79,
+    "profit_factor": 1.8493,
+    "max_equity_drawdown_pct": 4.63,
+    "expected_payoff": 5.58,
+    "total_trades": 1172,
+    "percent_profitable": 29.35,
+    "daily_sharpe": 2.1956,
+    "daily_sortino": 3.0895,
+    "worst_daily_return_pct": -1.1,
+    "calmar": 28.2337,
+    "max_initial_risk_pct": 0.9866,
+    "max_entry_exposure_pct": 99.99
+  },
+  "frozen_parent_diagnostics": {
+    "entries": 1172,
+    "stop_exits": 202,
+    "breakeven_stop_exits": 415,
+    "gann_state_exits": 554,
+    "failed_entry_triage_exits": 0,
+    "mt5_stop_modify_rejects": 37,
+    "mt5_invalid_lot_skips": 1
+  },
+  "frozen_parent_exit_summary": {
+    "breakeven_stop": {
+      "trades": 415,
+      "net_pnl": -290.12,
+      "profit_factor": 0.0
+    },
+    "gann_state_exit": {
+      "trades": 554,
+      "net_pnl": 11114.68,
+      "profit_factor": 4.5601
+    },
+    "stop": {
+      "trades": 202,
+      "net_pnl": -4287.72,
+      "profit_factor": 0.0
+    },
+    "time_exit": {
+      "trades": 1,
+      "net_pnl": 2.77,
+      "profit_factor": 2.77
+    }
+  },
+  "candidates": [
+    {
+      "mutation_name": "failed_entry_triage_3bar_mfe025_r0",
+      "parameter_overrides": {
+        "failed_entry_triage_enabled": true,
+        "failed_entry_triage_bars": 3,
+        "failed_entry_triage_min_mfe_r": 0.25,
+        "failed_entry_triage_max_current_r": 0.0
+      },
+      "metrics": {
+        "net_pnl": 3619.64,
+        "return_pct": 72.39,
+        "profit_factor": 1.5569,
+        "max_equity_drawdown_pct": 6.45,
+        "expected_payoff": 3.07,
+        "total_trades": 1180,
+        "percent_profitable": 24.49,
+        "daily_sharpe": 1.6211,
+        "daily_sortino": 2.2906,
+        "worst_daily_return_pct": -1.15,
+        "calmar": 11.2246,
+        "max_initial_risk_pct": 0.9795,
+        "max_entry_exposure_pct": 99.94
+      },
+      "diagnostics": {
+        "entries": 1180,
+        "stop_exits": 151,
+        "breakeven_stop_exits": 377,
+        "gann_state_exits": 387,
+        "failed_entry_triage_exits": 264,
+        "failed_entry_triage_candidates": 264,
+        "mt5_stop_modify_rejects": 37,
+        "mt5_invalid_lot_skips": 2
+      },
+      "exit_summary": {
+        "breakeven_stop": {
+          "trades": 377,
+          "net_pnl": -242.73,
+          "profit_factor": 0.0
+        },
+        "failed_entry_triage_exit": {
+          "trades": 264,
+          "net_pnl": -2240.98,
+          "profit_factor": 0.0
+        },
+        "gann_state_exit": {
+          "trades": 387,
+          "net_pnl": 8882.1,
+          "profit_factor": 8.1891
+        },
+        "stop": {
+          "trades": 151,
+          "net_pnl": -2780.14,
+          "profit_factor": 0.0
+        },
+        "time_exit": {
+          "trades": 1,
+          "net_pnl": 1.39,
+          "profit_factor": 1.39
+        }
+      },
+      "trade_count_retention_pct": 100.68,
+      "verdict": "rejected",
+      "reason": "net_pnl_not_above_parent, profit_factor_below_parent, drawdown_above_parent, gann_state_exit_pnl_damaged"
+    },
+    {
+      "mutation_name": "failed_entry_triage_4bar_mfe025_r0",
+      "parameter_overrides": {
+        "failed_entry_triage_enabled": true,
+        "failed_entry_triage_bars": 4,
+        "failed_entry_triage_min_mfe_r": 0.25,
+        "failed_entry_triage_max_current_r": 0.0
+      },
+      "metrics": {
+        "net_pnl": 3705.75,
+        "return_pct": 74.11,
+        "profit_factor": 1.5549,
+        "max_equity_drawdown_pct": 6.3,
+        "expected_payoff": 3.14,
+        "total_trades": 1180,
+        "percent_profitable": 25.68,
+        "daily_sharpe": 1.6507,
+        "daily_sortino": 2.2595,
+        "worst_daily_return_pct": -1.13,
+        "calmar": 11.7601,
+        "max_initial_risk_pct": 0.9558,
+        "max_entry_exposure_pct": 99.99
+      },
+      "diagnostics": {
+        "entries": 1180,
+        "stop_exits": 175,
+        "breakeven_stop_exits": 390,
+        "gann_state_exits": 413,
+        "failed_entry_triage_exits": 201,
+        "failed_entry_triage_candidates": 201,
+        "mt5_stop_modify_rejects": 37,
+        "mt5_invalid_lot_skips": 2
+      },
+      "exit_summary": {
+        "breakeven_stop": {
+          "trades": 390,
+          "net_pnl": -251.27,
+          "profit_factor": 0.0
+        },
+        "failed_entry_triage_exit": {
+          "trades": 201,
+          "net_pnl": -1705.32,
+          "profit_factor": 0.0
+        },
+        "gann_state_exit": {
+          "trades": 413,
+          "net_pnl": 8976.19,
+          "profit_factor": 7.3851
+        },
+        "stop": {
+          "trades": 175,
+          "net_pnl": -3315.24,
+          "profit_factor": 0.0
+        },
+        "time_exit": {
+          "trades": 1,
+          "net_pnl": 1.39,
+          "profit_factor": 1.39
+        }
+      },
+      "trade_count_retention_pct": 100.68,
+      "verdict": "rejected",
+      "reason": "net_pnl_not_above_parent, profit_factor_below_parent, drawdown_above_parent, gann_state_exit_pnl_damaged"
+    },
+    {
+      "mutation_name": "failed_entry_triage_3bar_mfe020_r0",
+      "parameter_overrides": {
+        "failed_entry_triage_enabled": true,
+        "failed_entry_triage_bars": 3,
+        "failed_entry_triage_min_mfe_r": 0.2,
+        "failed_entry_triage_max_current_r": 0.0
+      },
+      "metrics": {
+        "net_pnl": 3680.28,
+        "return_pct": 73.61,
+        "profit_factor": 1.5618,
+        "max_equity_drawdown_pct": 6.33,
+        "expected_payoff": 3.12,
+        "total_trades": 1180,
+        "percent_profitable": 25.0,
+        "daily_sharpe": 1.6315,
+        "daily_sortino": 2.2795,
+        "worst_daily_return_pct": -1.15,
+        "calmar": 11.631,
+        "max_initial_risk_pct": 0.9846,
+        "max_entry_exposure_pct": 99.96
+      },
+      "diagnostics": {
+        "entries": 1180,
+        "stop_exits": 157,
+        "breakeven_stop_exits": 389,
+        "gann_state_exits": 410,
+        "failed_entry_triage_exits": 223,
+        "failed_entry_triage_candidates": 223,
+        "mt5_stop_modify_rejects": 37,
+        "mt5_invalid_lot_skips": 2
+      },
+      "exit_summary": {
+        "breakeven_stop": {
+          "trades": 389,
+          "net_pnl": -249.46,
+          "profit_factor": 0.0
+        },
+        "failed_entry_triage_exit": {
+          "trades": 223,
+          "net_pnl": -1905.31,
+          "profit_factor": 0.0
+        },
+        "gann_state_exit": {
+          "trades": 410,
+          "net_pnl": 8745.67,
+          "profit_factor": 6.8947
+        },
+        "stop": {
+          "trades": 157,
+          "net_pnl": -2912.01,
+          "profit_factor": 0.0
+        },
+        "time_exit": {
+          "trades": 1,
+          "net_pnl": 1.39,
+          "profit_factor": 1.39
+        }
+      },
+      "trade_count_retention_pct": 100.68,
+      "verdict": "rejected",
+      "reason": "net_pnl_not_above_parent, profit_factor_below_parent, drawdown_above_parent, gann_state_exit_pnl_damaged"
+    },
+    {
+      "mutation_name": "failed_entry_triage_3bar_mfe025_r010",
+      "parameter_overrides": {
+        "failed_entry_triage_enabled": true,
+        "failed_entry_triage_bars": 3,
+        "failed_entry_triage_min_mfe_r": 0.25,
+        "failed_entry_triage_max_current_r": 0.1
+      },
+      "metrics": {
+        "net_pnl": 3555.35,
+        "return_pct": 71.11,
+        "profit_factor": 1.5552,
+        "max_equity_drawdown_pct": 6.69,
+        "expected_payoff": 3.01,
+        "total_trades": 1180,
+        "percent_profitable": 25.34,
+        "daily_sharpe": 1.6093,
+        "daily_sortino": 2.269,
+        "worst_daily_return_pct": -1.14,
+        "calmar": 10.6223,
+        "max_initial_risk_pct": 0.9765,
+        "max_entry_exposure_pct": 99.95
+      },
+      "diagnostics": {
+        "entries": 1180,
+        "stop_exits": 149,
+        "breakeven_stop_exits": 372,
+        "gann_state_exits": 377,
+        "failed_entry_triage_exits": 281,
+        "failed_entry_triage_candidates": 281,
+        "mt5_stop_modify_rejects": 37,
+        "mt5_invalid_lot_skips": 2
+      },
+      "exit_summary": {
+        "breakeven_stop": {
+          "trades": 372,
+          "net_pnl": -239.68,
+          "profit_factor": 0.0
+        },
+        "failed_entry_triage_exit": {
+          "trades": 281,
+          "net_pnl": -2217.71,
+          "profit_factor": 0.0048
+        },
+        "gann_state_exit": {
+          "trades": 377,
+          "net_pnl": 8761.63,
+          "profit_factor": 8.3905
+        },
+        "stop": {
+          "trades": 149,
+          "net_pnl": -2750.28,
+          "profit_factor": 0.0
+        },
+        "time_exit": {
+          "trades": 1,
+          "net_pnl": 1.39,
+          "profit_factor": 1.39
+        }
+      },
+      "trade_count_retention_pct": 100.68,
+      "verdict": "rejected",
+      "reason": "net_pnl_not_above_parent, profit_factor_below_parent, drawdown_above_parent, gann_state_exit_pnl_damaged"
+    },
+    {
+      "mutation_name": "failed_entry_triage_3bar_mfe015_rneg025",
+      "parameter_overrides": {
+        "failed_entry_triage_enabled": true,
+        "failed_entry_triage_bars": 3,
+        "failed_entry_triage_min_mfe_r": 0.15,
+        "failed_entry_triage_max_current_r": -0.25
+      },
+      "metrics": {
+        "net_pnl": 4162.87,
+        "return_pct": 83.26,
+        "profit_factor": 1.6,
+        "max_equity_drawdown_pct": 4.25,
+        "expected_payoff": 3.53,
+        "total_trades": 1179,
+        "percent_profitable": 26.89,
+        "daily_sharpe": 1.7809,
+        "daily_sortino": 2.4368,
+        "worst_daily_return_pct": -1.09,
+        "calmar": 19.5867,
+        "max_initial_risk_pct": 0.9802,
+        "max_entry_exposure_pct": 99.99
+      },
+      "diagnostics": {
+        "entries": 1179,
+        "stop_exits": 163,
+        "breakeven_stop_exits": 405,
+        "gann_state_exits": 452,
+        "failed_entry_triage_exits": 158,
+        "failed_entry_triage_candidates": 158,
+        "mt5_stop_modify_rejects": 37,
+        "mt5_invalid_lot_skips": 2
+      },
+      "exit_summary": {
+        "breakeven_stop": {
+          "trades": 405,
+          "net_pnl": -260.97,
+          "profit_factor": 0.0
+        },
+        "failed_entry_triage_exit": {
+          "trades": 158,
+          "net_pnl": -1874.36,
+          "profit_factor": 0.0
+        },
+        "gann_state_exit": {
+          "trades": 452,
+          "net_pnl": 9385.78,
+          "profit_factor": 6.4776
+        },
+        "stop": {
+          "trades": 163,
+          "net_pnl": -3088.97,
+          "profit_factor": 0.0
+        },
+        "time_exit": {
+          "trades": 1,
+          "net_pnl": 1.39,
+          "profit_factor": 1.39
+        }
+      },
+      "trade_count_retention_pct": 100.6,
+      "verdict": "rejected",
+      "reason": "net_pnl_not_above_parent, profit_factor_below_parent, gann_state_exit_pnl_damaged"
+    },
+    {
+      "mutation_name": "failed_entry_triage_4bar_mfe015_rneg025",
+      "parameter_overrides": {
+        "failed_entry_triage_enabled": true,
+        "failed_entry_triage_bars": 4,
+        "failed_entry_triage_min_mfe_r": 0.15,
+        "failed_entry_triage_max_current_r": -0.25
+      },
+      "metrics": {
+        "net_pnl": 4195.73,
+        "return_pct": 83.91,
+        "profit_factor": 1.5988,
+        "max_equity_drawdown_pct": 4.7,
+        "expected_payoff": 3.56,
+        "total_trades": 1177,
+        "percent_profitable": 27.44,
+        "daily_sharpe": 1.7902,
+        "daily_sortino": 2.4118,
+        "worst_daily_return_pct": -1.08,
+        "calmar": 17.8621,
+        "max_initial_risk_pct": 0.9788,
+        "max_entry_exposure_pct": 99.98
+      },
+      "diagnostics": {
+        "entries": 1177,
+        "stop_exits": 180,
+        "breakeven_stop_exits": 410,
+        "gann_state_exits": 470,
+        "failed_entry_triage_exits": 116,
+        "failed_entry_triage_candidates": 116,
+        "mt5_stop_modify_rejects": 37,
+        "mt5_invalid_lot_skips": 2
+      },
+      "exit_summary": {
+        "breakeven_stop": {
+          "trades": 410,
+          "net_pnl": -264.57,
+          "profit_factor": 0.0
+        },
+        "failed_entry_triage_exit": {
+          "trades": 116,
+          "net_pnl": -1417.31,
+          "profit_factor": 0.0
+        },
+        "gann_state_exit": {
+          "trades": 470,
+          "net_pnl": 9318.66,
+          "profit_factor": 5.9504
+        },
+        "stop": {
+          "trades": 180,
+          "net_pnl": -3442.44,
+          "profit_factor": 0.0
+        },
+        "time_exit": {
+          "trades": 1,
+          "net_pnl": 1.39,
+          "profit_factor": 1.39
+        }
+      },
+      "trade_count_retention_pct": 100.43,
+      "verdict": "rejected",
+      "reason": "net_pnl_not_above_parent, profit_factor_below_parent, drawdown_above_parent, gann_state_exit_pnl_damaged"
+    },
+    {
+      "mutation_name": "failed_entry_triage_5bar_mfe015_rneg025",
+      "parameter_overrides": {
+        "failed_entry_triage_enabled": true,
+        "failed_entry_triage_bars": 5,
+        "failed_entry_triage_min_mfe_r": 0.15,
+        "failed_entry_triage_max_current_r": -0.25
+      },
+      "metrics": {
+        "net_pnl": 4398.59,
+        "return_pct": 87.97,
+        "profit_factor": 1.6181,
+        "max_equity_drawdown_pct": 4.81,
+        "expected_payoff": 3.74,
+        "total_trades": 1177,
+        "percent_profitable": 27.7,
+        "daily_sharpe": 1.8319,
+        "daily_sortino": 2.4687,
+        "worst_daily_return_pct": -1.07,
+        "calmar": 18.2746,
+        "max_initial_risk_pct": 0.9907,
+        "max_entry_exposure_pct": 99.97
+      },
+      "diagnostics": {
+        "entries": 1177,
+        "stop_exits": 185,
+        "breakeven_stop_exits": 412,
+        "gann_state_exits": 480,
+        "failed_entry_triage_exits": 99,
+        "failed_entry_triage_candidates": 99,
+        "mt5_stop_modify_rejects": 37,
+        "mt5_invalid_lot_skips": 2
+      },
+      "exit_summary": {
+        "breakeven_stop": {
+          "trades": 412,
+          "net_pnl": -269.05,
+          "profit_factor": 0.0
+        },
+        "failed_entry_triage_exit": {
+          "trades": 99,
+          "net_pnl": -1178.17,
+          "profit_factor": 0.0
+        },
+        "gann_state_exit": {
+          "trades": 480,
+          "net_pnl": 9468.61,
+          "profit_factor": 5.6345
+        },
+        "stop": {
+          "trades": 185,
+          "net_pnl": -3625.57,
+          "profit_factor": 0.0
+        },
+        "time_exit": {
+          "trades": 1,
+          "net_pnl": 2.77,
+          "profit_factor": 2.77
+        }
+      },
+      "trade_count_retention_pct": 100.43,
+      "verdict": "rejected",
+      "reason": "net_pnl_not_above_parent, profit_factor_below_parent, drawdown_above_parent, gann_state_exit_pnl_damaged"
+    },
+    {
+      "mutation_name": "failed_entry_triage_3bar_mfe010_rneg050",
+      "parameter_overrides": {
+        "failed_entry_triage_enabled": true,
+        "failed_entry_triage_bars": 3,
+        "failed_entry_triage_min_mfe_r": 0.1,
+        "failed_entry_triage_max_current_r": -0.5
+      },
+      "metrics": {
+        "net_pnl": 5656.6,
+        "return_pct": 113.13,
+        "profit_factor": 1.7498,
+        "max_equity_drawdown_pct": 4.66,
+        "expected_payoff": 4.82,
+        "total_trades": 1174,
+        "percent_profitable": 28.62,
+        "daily_sharpe": 2.0723,
+        "daily_sortino": 2.8446,
+        "worst_daily_return_pct": -1.03,
+        "calmar": 24.2726,
+        "max_initial_risk_pct": 0.9993,
+        "max_entry_exposure_pct": 99.99
+      },
+      "diagnostics": {
+        "entries": 1174,
+        "stop_exits": 173,
+        "breakeven_stop_exits": 413,
+        "gann_state_exits": 505,
+        "failed_entry_triage_exits": 82,
+        "failed_entry_triage_candidates": 82,
+        "mt5_stop_modify_rejects": 37,
+        "mt5_invalid_lot_skips": 1
+      },
+      "exit_summary": {
+        "breakeven_stop": {
+          "trades": 413,
+          "net_pnl": -284.5,
+          "profit_factor": 0.0
+        },
+        "failed_entry_triage_exit": {
+          "trades": 82,
+          "net_pnl": -1404.05,
+          "profit_factor": 0.0
+        },
+        "gann_state_exit": {
+          "trades": 505,
+          "net_pnl": 10905.55,
+          "profit_factor": 5.7564
+        },
+        "stop": {
+          "trades": 173,
+          "net_pnl": -3563.17,
+          "profit_factor": 0.0
+        },
+        "time_exit": {
+          "trades": 1,
+          "net_pnl": 2.77,
+          "profit_factor": 2.77
+        }
+      },
+      "trade_count_retention_pct": 100.17,
+      "verdict": "rejected",
+      "reason": "net_pnl_not_above_parent, profit_factor_below_parent, drawdown_above_parent"
+    }
+  ]
+}
