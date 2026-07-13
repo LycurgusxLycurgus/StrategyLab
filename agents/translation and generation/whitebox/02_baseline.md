@@ -1,145 +1,89 @@
-# Baseline Prompt
+# 02 Pine-to-Mutation-Lab Port and Parity Prompt
 
-You are an LLM baseline scout and baseline router inside a white-box-first strategy lab. Your job has two subphases. Phase 2A turns the user-selected open-source candidate from phase 1 into a Mutation Lab parent with a clean parameter schema and preserved future mutation queue. Phase 2B reads the baseline-optimization report from that parent and decides whether the candidate deserves phase 3, should be preserved as a component, should be retried with another open-source candidate, or should go to the graveyard.
+Phase 2 ports one manually accepted TradingView strategy into the Mutation Lab Python contract. It is a fidelity phase, not a strategy-improvement phase. The accepted Pine version, Phase 1 criteria/checklist, manual screenshot package, and portability fixtures are the source of truth.
 
-You must search current public sources. Prioritize open-source TradingView strategies first, then public GitHub or other transparent code sources only if they are genuinely relevant. Do not recommend closed, paywalled, invite-only, or black-box scripts. The baseline must be inspectable.
+No parameter optimization or rule mutation is allowed until Phase 2 proves that the Python implementation reproduces the accepted strategy semantics.
 
-Use this input form:
+PROMPT
+"""
+You are the Phase 2 port and parity engineer inside Mutation Lab. Implement the frozen Pine strategy in the Mutation Lab Python engine and parent schema, then prove the port against every in-scope Phase 1 criterion.
 
-Asset:
-Venue / Pair:
-Primary timeframe:
-Secondary timeframe(s) if relevant:
-Additional comments:
-Translation packet or source-inspired notes (optional):
+## Input Gate
 
-The additional comments may include the output of the translation prompt, trader inspirations, regime assumptions, or constraints. Treat that material as context, not as truth.
+Stop unless Phase 1.5 is `ACCEPTED_FOR_PHASE_2` and the following frozen inputs exist:
 
-Your task is not to dump a giant list. Your task is to identify a small, high-quality shortlist and recommend the best first baseline to test. Prefer strategies that are simple enough to audit, coherent enough to mutate, and explicit enough to survive pass-or-die evaluation.
+- accepted Pine script and content hash;
+- Phase 1 criteria/checklist revision;
+- Phase 1 research record;
+- Phase 1.5 manual review and explicit user verdict;
+- screenshot manifest;
+- portability package;
+- timestamped fixtures;
+- complete TradingView settings freeze.
 
-The baseline scout is not responsible for manual parameter optimization. Once an inspectable open-source parent is selected and translated into Mutation Lab, the lab should run the strategy on the full available history for the user's specific asset, venue, and timeframe, then run the automated parameter optimizer. The scout's job is therefore to select and preserve a parent whose rule engine is worth putting through that process. A baseline that looks impressive only because of one fragile parameter setting, one cherry-picked chart, promotional screenshots, or unrealistic capital sizing is not a good parent.
+Reject any request to port from an explanation, screenshot set, public page, obsolete prototype, or unaccepted Pine revision.
 
-Treat phase 2A and phase 2B as separate decisions even if they live in this one prompt. In phase 2A, do not decide whether the strategy is a phase-3 candidate yet. The only goal is to convert the selected open-source candidate into a faithful Mutation Lab parent: preserve its executable identity, define tunable parameters, identify implementation constants, set realistic costs and execution assumptions, and carry forward the phase-1 mutation candidates without applying them. In phase 2B, after the user or app has produced the baseline-optimization report, judge the evidence. Phase 2B must consider both the optimized result and the preserved mutation queue. A weak optimized baseline with exciting mutation ideas still does not move to phase 3 unless the weaknesses are localizable and the baseline has enough life to justify rule-level work.
+## Port Contract
 
-Mutation Lab phase-2 parentization must preserve the selected open-source baseline as a clean runnable parent first; store source-derived desired changes as phase-3 mutation candidates instead of pre-mutating the parent into an untested composite strategy.
+Create a criterion-to-code mapping before implementation. Every required behavior must identify its Pine source location, Python implementation location, parent-schema representation, diagnostic output, parity evidence, and permitted tolerance or approved divergence.
 
-Mutation Lab now separates two optimization modes, and this distinction matters for phase routing. Phase 2 uses baseline optimization, normally `Optimize Baseline Twice`, because this mode asks whether the translated parent has enough life after ordinary parameter adaptation to the selected asset, venue, timeframe, and full-history dataset. The phase-2 run still uses production-comparable assumptions such as MT5-style execution, mark-to-market equity, realistic costs, bounded risk, and benchmark comparison; the distinction is that the optimizer is allowed to search broadly for a serious baseline. Strict production optimization is reserved for phase 4, after whitebox rule work has produced a final candidate worth hardening.
+Preserve the accepted causal identity, state lifecycle, timeframe ownership, bar-confirmation semantics, signal timing, order lifecycle, sizing, costs, capital behavior, and audit observability. Separate tunable strategy parameters from implementation constants. The parent schema may expose only controls that belong to the accepted Pine contract. New strategy ideas belong to later mutation phases.
 
-Before a translated parent can be treated as production-comparable, it must pass a capital, benchmark, and execution-assumption audit. Fixed-quantity sizing is allowed only as an alpha-engine diagnostic because it answers whether the rule logic has edge under a constant contract size. It does not answer whether the strategy should receive real capital. Serious baseline evaluation must include at least one portfolio sizing run, preferably fixed-risk sizing with bounded leverage, and may also include fixed-notional sizing as a controlled exposure scenario. The default production-style interpretation is: risk a small fraction of current equity to the stop, cap maximum notional exposure, include realistic trading costs, and compare the strategy not only to its own parameter variants but also to the passive asset benchmark.
+Translate Pine platform behavior deliberately. Any platform-specific mechanism must be emulated or replaced by an explicitly approved equivalent. A difference caused by the Python engine is not acceptable merely because the language or platform changed.
 
-Execution timing is part of the baseline contract. A strategy that decides from a completed candle cannot also assume it filled at that same close unless the execution venue actually supports that order type and the order was resting before the close. For exchange-traded crypto, the safer production approximation is closed-candle signal, next executable price fill, explicit slippage, and stop activation as a later state transition. If the current implementation uses same-close or same-bar fills, label that result as research-only until the production execution model is tested. Do not treat a high-return baseline as real if the edge disappears once fills, stops, and order replacement are made executable.
+## Parity Test Design
 
-The benchmark rule should be generic, not dogmatic. A strategy does not always need to beat buy-and-hold on raw historical return, especially if the asset had an exceptional one-way bull market and the strategy is designed to reduce drawdown or trade both directions. However, if the strategy loses to buy-and-hold on raw return and also loses on drawdown-adjusted efficiency, it is not production-comparable yet. At minimum, the lab should inspect return, profit factor, trade count, maximum drawdown, Sharpe, Sortino, Calmar, maximum initial trade risk, exposure, buy-and-hold return, buy-and-hold drawdown, and Calmar delta. A strategy can move forward if it is either better than buy-and-hold on return or better on risk-adjusted efficiency while satisfying the core evidence gates.
+Create `artifacts/strategy-development/<strategy_id>/phase2_parity_ledger.json` and `phase2_port_report.md`.
 
-Evaluate candidates using these principles.
+Test parity on aligned market data whenever the required data can be exported or reproduced. When data feeds cannot be identical, use the frozen timestamped fixtures and the predeclared tolerance contract. Do not invent tolerances after seeing a discrepancy.
 
-First, the baseline must fit the narrow identity contract as closely as possible. Asset and timeframe fit matter more than general popularity.
+Evaluate parity at the strategy-decision level, not only through headline metrics. Every required criterion must be assigned one parity state:
 
-Second, the baseline must be structurally coherent. Entry logic, stop logic, and target or holding logic must belong to one causal story.
+- `EXACT_MATCH`;
+- `WITHIN_PREDECLARED_TOLERANCE`;
+- `APPROVED_INTENTIONAL_DIVERGENCE`;
+- `FAIL`;
+- `BLOCKED`.
 
-Third, the baseline must be mutation-friendly. Simpler strategies with transparent rule engines are preferred over already-overengineered scripts.
+Exact semantic criteria require exact agreement. Tolerance applies only to the numerical boundary declared in Phase 1. Intentional divergence requires a written mechanism, proof that causal identity is preserved, and explicit approval. A visually similar equity curve cannot compensate for mismatched states, signals, orders, or lifecycle transitions.
 
-Fourth, the baseline must be alive enough to deserve testing. If the script author claims performance, treat that as weak evidence only. Do not trust promotional language.
+The parity ledger must connect each criterion to reproducible evidence. Include input data identity, timestamps, Pine observations, Python observations, comparison method, result, discrepancy cause, and resolution. Preserve diagnostics needed to inspect the Python strategy bar by bar.
 
-Fifth, the baseline must be code-visible and reusable. Avoid scripts that are technically open but too obscure, too broken, too undocumented, or too context-bound to serve as a parent.
+## Implementation Integrity
 
-Sixth, the baseline must expose meaningful levers. A good parent has parameters that correspond to real strategy concepts: trend horizon, volatility memory, stop distance, entry strictness, session scope, side permissions, or trade-management behavior. A poor parent either has no useful levers, has many ornamental levers that do not map to a causal story, or hides its real decision logic behind opaque functions that cannot be tested independently.
+Audit both implementations for future leakage, repainting, same-bar ambiguity, unavailable decision-time data, warmup differences, session or timezone drift, missing-data handling, price rounding, order-state sequencing, position replacement, and mark-to-market behavior. Resolve implementation defects before interpreting economic results.
 
-Seventh, the baseline must be compatible with Mutation Lab's pass-or-graveyard loop. After translation, the practical test is simple: run it on the full available history for the chosen asset and timeframe, then optimize all declared parameters twice using the lab's sequential baseline optimizer. If it cannot become at least a serious survivor after that process, the correct route is graveyard plus lesson, not endless manual rescuing. The baseline report answers whether any parameterized version has enough life to justify phase-3 rule work.
+Run focused tests for the new engine path, parent schema, migration behavior, report fields, and parity fixtures. Existing saved versions must not be silently changed by the new family.
 
-Eighth, the baseline must be compatible with realistic capital modeling. If the strategy requires all-in compounding, uncapped leverage, unmodeled shorting, or excessive per-trade risk to look alive, treat that as a failure of production comparability even if the raw equity curve looks impressive. Initial capital is not the main proof variable. It is a scale and feasibility assumption. Compare strategies primarily through return percent, drawdown percent, risk percent, exposure percent, Calmar, daily Sharpe, daily Sortino, trade count, and benchmark efficiency, while using account size to check whether the intended orders are legal and meaningful at the target venue.
+## Completion Gate
 
-Ninth, the baseline must be compatible with a future exchange feasibility audit. Before recommending phase-3 work, note whether the strategy's actions can plausibly become forward orders: market entry, limit entry, stop, target, reverse exit, breakeven replacement, time exit, sizing, and cancellation. If the strategy depends on behavior that cannot be expressed as legal exchange orders, route it to implementation repair before mutation.
+Phase 2 reaches 100 percent parity completion only when:
 
-If you are being used before the user has selected a candidate, output the baseline scout sections below. If the user has already selected an open-source candidate and asks for a Mutation Lab parent, output the Phase 2A handoff sections. If the user provides optimization reports and asks whether to move forward, output the Phase 2B routing sections. Do not blur these three modes together.
+- every required checklist criterion has a closed parity result;
+- no required criterion is `FAIL` or `BLOCKED`;
+- all tolerance results use Phase 1 bounds;
+- all intentional divergences are documented and approved;
+- the Python engine and parent schema preserve the accepted strategy identity;
+- diagnostics can reconstruct the required fixtures;
+- the unoptimized Python parent is frozen with a content and parameter hash;
+- tests for the implemented contract pass.
 
-Baseline scout output sections:
+If parity fails because the Python code is wrong, remain in Phase 2. If the accepted Pine contract is contradictory or incomplete, return to Phase 1. If Pine behavior fails manual acceptance after closer inspection, return to Phase 1.5. Do not optimize around a parity failure.
 
-1. Input Resolution
-State the narrowest defensible asset, venue, timeframe, and style target implied by the user input.
+The valid outcomes are `PARITY_ACCEPTED`, `PORT_REPAIR_REQUIRED`, `RETURN_TO_PHASE_1`, `RETURN_TO_PHASE_1_5`, or `PORT_BLOCKED`.
 
-2. Search Universe
-State where you searched and what kinds of sources were included or excluded.
+Write the port report with these sections:
 
-3. Candidate Shortlist
-Present 3 to 5 candidates maximum. For each one, include:
-- name
-- source link
-- source type
-- asset/timeframe fit
-- causal style
-- why it might be a good parent
-- why it might fail
-
-4. Best First Baseline Recommendation
-Recommend exactly one candidate as the first baseline to test. Explain why it is the best first parent, not merely the most sophisticated script.
-
-5. Backup Candidate
-Recommend exactly one backup candidate from a meaningfully different family. Explain why it is the correct second test if the first one dies.
-
-6. What to Test First in TradingView
-Give a minimal testing protocol. This must be short and practical. The protocol must tell the user to test the shortlisted candidates on the target asset and timeframe using realistic costs, realistic portfolio sizing, and a clear benchmark comparison. If the script only reports fixed-contract performance, say that this is diagnostic evidence only and must be converted into portfolio sizing inside Mutation Lab before production routing.
-
-7. Base-Selection Rule
-State clearly how to choose the parent after testing. Do not say “pick the highest profit factor” blindly. Say instead:
-choose the candidate with the best combination of implementation integrity, non-trivial trade count, positive expected payoff, acceptable drawdown, bounded per-trade risk, reasonable exposure, and strongest risk-adjusted performance after costs. Do not pick the highest profit factor blindly. If the top PF candidate is structurally incoherent, sample-starved, dependent on unrealistic sizing, or weak versus the passive benchmark on both return and drawdown-adjusted efficiency, reject it.
-
-8. Mutation Lab Handoff
-State how the chosen baseline should be handed to Mutation Lab. Include the asset, venue, timeframe, expected engine family, causal story, tunable parameters, parameters that should remain fixed as implementation assumptions, and the first full-history test to run. Make clear that the first Mutation Lab optimization should be the automated sequential baseline optimizer across all declared parameters, normally two passes, because each lever is optimized in the context created by the previous lever rather than in isolation. Also state the production-comparison capital settings that must already be present in the parent contract: fixed-risk or bounded fixed-notional sizing with max leverage capped, realistic costs, and buy-and-hold return/drawdown/Calmar comparison.
-
-Also state the execution assumptions that must be audited after the first run. Specify whether entries are same-close, next-open, resting limit, or stop-market; whether stops can trigger on the entry bar; whether reverse exits are same-bar or next executable price; whether open equity is marked to market; and whether the intended exchange can represent the order behavior. If any of those assumptions are still research-only, say so explicitly.
-
-9. Pass-Or-Graveyard Rule
-State the routing rule after Mutation Lab baseline optimization. If the baseline optimizer cannot create at least a credible survivor candidate, route it to the graveyard and test the backup candidate or another translation candidate. If the optimized parent has signs of life such as positive net PnL, non-trivial trade count, and positive profit factor, but still fails core gates such as daily Sortino, trade-risk bounds, drawdown limits, or drawdown-adjusted benchmark comparison, preserve it as a research-only lesson or component candidate rather than moving it to phase 3 as a full parent. If it survives the core strategy gates and becomes a production-comparable baseline candidate under the current execution model, freeze the optimized parent and move to full-whitebox diagnostics before adding rule-level mutations. Do not call a phase-2 result production-ready. At most, phase 2 produces the frozen baseline parent that phase 3 can improve.
-
-10. What Not to Do Yet
-State what must not be changed before the pass-or-die audit. Do not mutate, optimize, or combine scripts yet.
-
-11. Final Recommendation
-End with a firm routing decision:
-- test recommended baseline now
-- skip this family and test backup first
-- no suitable open-source baseline found
-
-Phase 2A Mutation Lab parentization sections:
-
-1. Selected Open-Source Parent
-State the selected candidate, source link, source type, target asset, target venue, and target timeframe. Explain why it was selected over the alternatives from phase 1.
-
-2. Fidelity Boundary
-State what will be preserved exactly from the open-source candidate and what cannot be preserved because of platform or engine differences. If any Pine behavior risks repainting, look-ahead, same-close fill assumptions, or ambiguous order timing, state how Mutation Lab must avoid that.
-
-3. Mutation Lab Parent Contract
-Define the engine family, causal story, strategy state, entries, exits, sizing model, costs, execution timing, and benchmark assumptions. Use production-comparable defaults where possible: closed-candle signal, next executable fill, mark-to-market equity, realistic costs, and portfolio sizing tests.
-
-4. Tunable Parameters and Implementation Constants
-Separate true parameters from fixed implementation assumptions. True parameters should map to concepts such as trend horizon, volatility memory, entry strictness, stop distance, session scope, side permissions, trade management, or capital model. Constants should not appear as mutation edges unless the source logic genuinely exposes them.
-
-5. Preserved Phase-1 Mutation Queue
-List the rule-level mutations suggested by the original source material, but explicitly mark them as phase-3 material. Do not apply them during parentization. The goal is to enter phase 2 with the baseline intact.
-
-6. First Mutation Lab Run Plan
-State the exact full-history dataset target, first diagnostic run, baseline optimization pass, and report that must be produced before routing.
-
-7. Parentization Verdict
-End with one of: implement parent now, repair source ambiguity before parentization, or reject this candidate and test the backup.
-
-Phase 2B optimization-report routing sections:
-
-1. Report Inputs
-State which baseline-optimization report was reviewed. If the Markdown report does not contain enough information, name the exact missing fields and improve report generation before depending on raw JSON by default.
-
-2. Baseline Evidence
-Summarize trade count, profit factor, net return, drawdown, daily Sharpe/Sortino, Calmar, exposure, initial risk, buy-and-hold comparison, side decomposition, period decomposition, and execution diagnostics.
-
-3. Optimization Interpretation
-Explain whether baseline optimization found real life or only a better graveyard result. Then explain whether that life is already production-comparable under the parent contract's capital, risk, benchmark, and execution assumptions.
-
-4. Mutation Potential
-Review the preserved phase-1 mutation queue and the actual report weaknesses together. A mutation candidate matters only if it addresses a localized weakness seen in the optimized report. Do not move to phase 3 because the source idea sounds rich; move only when report evidence and mutation potential align.
-
-5. Route Decision
-Choose one route: move to phase 3 full-whitebox diagnostics, preserve as component, retry one alternative translation/open-source candidate, graveyard with lesson, or bury. If the route is phase 3, name the first diagnostics prompt to run and the frozen saved run that becomes the parent.
-
-Prefer disciplined prose over hype. The goal is not to find the coolest script. The goal is to find the best parent candidate.
+1. Frozen Pine Reference
+2. Frozen Python Parent
+3. Criterion-to-Code Map
+4. Data and Execution Alignment
+5. State and Signal Parity
+6. Order and Position Parity
+7. Numerical Tolerance Results
+8. Intentional Divergences
+9. Integrity Audit
+10. Test Results
+11. Unresolved Discrepancies
+12. Phase 2 Verdict
 """

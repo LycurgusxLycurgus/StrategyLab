@@ -1,35 +1,35 @@
 # Mutation Lab
 
-Mutation Lab is a white-box-first strategy mutation workbench for repeatable parent -> single-mutation -> comparison -> promotion loops. It starts from a frozen baseline, downloads real data, generates one-step mutations from the canonical mutation space, and persists every run with report artifacts.
+Mutation Lab is a whitebox-first strategy creation, porting, qualification, and mutation workbench. TradingView is the canonical proving ground for chart-based strategies. Mutation Lab receives only a frozen Pine strategy that has passed a strategy-specific checklist and explicit manual user acceptance.
 
-## Core Flow
+## Lifecycle
 
-1. Freeze or register a baseline parent.
-2. Download at least `40000` real bars for the target asset and timeframe.
-3. Run the promoted parent.
-4. Tune one or more live parameters around the current parent.
-5. Run a preview without saving.
-6. Save only the tuned children that deserve to become real versions.
-7. Compare metrics and promote only real winners.
+1. Define the strategy, research Pine mechanisms and public precedents, and create the Phase 1 criteria/checklist.
+2. Create or adapt the Pine strategy and pass screenshot-heavy manual TradingView review.
+3. Port the accepted Pine strategy to Mutation Lab Python and prove criterion-level parity.
+4. Review fidelity quickly, run the faithful baseline, and perform authorized baseline optimization.
+5. Diagnose and test evidence-derived whitebox mutations.
+6. Add a bounded hybrid layer only when whitebox work is exhausted and live-engine reproduction succeeds.
+7. Use constrained viability discovery or successor reseeding only when the completed lineage justifies it.
+8. Complete robustness, execution-feasibility, forward-paper, and operational gates before production claims.
 
-## Seed Family
+Greenfield Pine and licensed source adaptation are equal creation routes. The route is selected by evidence. Existing strategy families remain available until the user explicitly requests removal.
 
-- Family id: `btc_intraday`
-- Seed source: [pre-strategies/BTC-intraday.txt](C:/Users/Baham/Documents/pre-nexuz/memecorp&starfish/markov_dove-red/StrategyLab/pre-strategies/BTC-intraday.txt)
-- Canonical spec: [strategies/btc_intraday_parent.json](C:/Users/Baham/Documents/pre-nexuz/memecorp&starfish/markov_dove-red/StrategyLab/strategies/btc_intraday_parent.json)
+## Phase Prompts
 
-## Prompts
+- `agents/translation and generation/whitebox/01_translation.md`
+- `agents/translation and generation/whitebox/01-5_baseline_transformation.md`
+- `agents/translation and generation/whitebox/02_baseline.md`
+- `agents/translation and generation/whitebox/02-5_baseline_qualification.md`
+- `agents/translation and generation/whitebox/03-1_whitebox_diagnostics.md`
+- `agents/translation and generation/whitebox/03_full-whitebox.md`
+- `agents/translation and generation/whitebox/04-1_hybrid_diagnostics.md`
+- `agents/translation and generation/whitebox/04_hybrid-blackbox.md`
+- `agents/translation and generation/whitebox/04-2_blackbox_viability.md`
+- `agents/translation and generation/whitebox/04-3_successor_baseline.md`
+- `agents/docs/universal_mutation_constitution.md`
 
-The mutation engine prompt set lives in:
-- [01_translation.md](C:/Users/Baham/Documents/pre-nexuz/memecorp&starfish/markov_dove-red/StrategyLab/agents/translation%20and%20generation/whitebox/01_translation.md)
-- [01-5_baseline_transformation.md](C:/Users/Baham/Documents/pre-nexuz/memecorp&starfish/markov_dove-red/StrategyLab/agents/translation%20and%20generation/whitebox/01-5_baseline_transformation.md)
-- [02_baseline.md](C:/Users/Baham/Documents/pre-nexuz/memecorp&starfish/markov_dove-red/StrategyLab/agents/translation%20and%20generation/whitebox/02_baseline.md)
-- [03_full-whitebox.md](C:/Users/Baham/Documents/pre-nexuz/memecorp&starfish/markov_dove-red/StrategyLab/agents/translation%20and%20generation/whitebox/03_full-whitebox.md)
-- [04_hybrid-blackbox.md](C:/Users/Baham/Documents/pre-nexuz/memecorp&starfish/markov_dove-red/StrategyLab/agents/translation%20and%20generation/whitebox/04_hybrid-blackbox.md)
-- [04-2_blackbox_viability.md](C:/Users/Baham/Documents/pre-nexuz/memecorp&starfish/markov_dove-red/StrategyLab/agents/translation%20and%20generation/whitebox/04-2_blackbox_viability.md)
-- [04-3_successor_baseline.md](C:/Users/Baham/Documents/pre-nexuz/memecorp&starfish/markov_dove-red/StrategyLab/agents/translation%20and%20generation/whitebox/04-3_successor_baseline.md)
-
-Prompt `01-5` is the baseline transformation route: start from an inspectable open-source baseline, use the desired strategy explanation as the target identity, and test each transformation layer before stacking the next. Prompt `03` now assumes one freeform research packet and derives the next white-box mutation from the winning baseline and evidence. Prompt `04` now assumes one surviving white-box parent and derives the first hybrid mutation from that parent’s remaining weakness without canned examples. Prompt `04-3` is the optional no-blind-restart route: use the completed lineage as evidence to find a stronger successor baseline, then send that successor back through phase 2.
+The operator contract is `agents/translation and generation/agents/codex_phase_operator.md`.
 
 ## Run
 
@@ -47,7 +47,9 @@ python -m venv .venv
 
 ## Artifacts
 
-Generated runtime artifacts are written to:
-- `artifacts/data`
-- `artifacts/runs`
-- `artifacts/reports`
+- Strategy-development contracts: `artifacts/strategy-development/<strategy_id>/`
+- Data: `artifacts/data/`
+- Runs: `artifacts/runs/`
+- Reports: `artifacts/reports/`
+- Diagnostics and preview ledgers: `artifacts/diagnostics/`
+- Original source and accepted Pine: `pre-strategies/`

@@ -1,205 +1,144 @@
 # Codex Phase Operator Guide for Mutation Lab
 
-This guide explains how a human operator and a Codex-like coding agent should run the four Mutation Lab phases in this repository. It is written to be usable by humans and LLM agents. The goal is repeatability: a new strategy idea should move through translation, baseline optimization, full-whitebox improvement, and hybrid/blackbox sharpening without inventing a new workflow each time.
-
-The core rule is simple: each phase must produce evidence before the next phase begins. Do not promote a strategy because it sounds plausible. Promote only after the app or scripts test it against the frozen parent and the same dataset contract. The final research label before live use is not "production-ready"; it is "production robustness candidate." A strategy earns that label only after the saved final candidate passes full-history portfolio gates, chronological walk-forward checks, execution-cost stress checks, and a realistic execution-model review. The current engine is a research engine until it can prove closed-candle order timing, mark-to-market portfolio equity, exchange feasibility, and forward paper execution.
+This guide is the active human and agent workflow for creating, validating, porting, qualifying, mutating, and hardening strategies in Mutation Lab. Each phase owns one evidence boundary. A later phase cannot compensate for an earlier phase that did not pass.
 
 ## Repository Map
 
-The phase prompts live in `agents/translation and generation/whitebox/`.
+Phase prompts live in `agents/translation and generation/whitebox/`.
 
-Use these prompts in order:
-
-| Phase | Prompt | Purpose |
+| Phase | Prompt | Owned outcome |
 |---:|---|---|
-| 1 | `01_translation.md` | Turn a vague strategy request or source strategy into an executable parent candidate. |
-| 1.5 | `01-5_baseline_transformation.md` | Transform an open-source baseline toward a desired strategy explanation one tested identity layer at a time. |
-| 2 | `02_baseline.md` | Optimize ordinary parameters on broad history until the candidate is either a serious baseline or a graveyard item. |
-| 3 | `03_full-whitebox.md` | Convert a serious baseline into an explainable full-whitebox strategy by adding rule-level mutations. |
-| 3.1 | `03-1_whitebox_diagnostics.md` | Produce diagnostics from a saved run report before coding full-whitebox mutations. |
-| 4 | `04_hybrid-blackbox.md` | Add one narrow hybrid or blackbox mutation to a surviving full-whitebox parent. |
-| 4.1 | `04-1_hybrid_diagnostics.md` | Produce the ranked hybrid mutation queue and validation contract before coding phase-4 experiments. |
-| 4.2 | `04-2_blackbox_viability.md` | Optionally scan trade/checkpoint rows for stable decision-time pockets after phase 4 has no more live-engine survivors. |
-| 4.3 | `04-3_successor_baseline.md` | Optionally loop a non-production finished lineage back to phase 1/1.5, either re-transforming the original saved source or searching a stronger open-source source with the lineage lessons. |
-| Final Gate | App robustness gate | Test the saved final candidate with walk-forward folds and cost/slippage stress before paper trading. |
-| Engine Audit | `agents/docs/production_backtest_engine_audit.md` | Confirm whether the current simulator assumptions are research-only or production-comparable. |
-| Phase 5 | Execution feasibility and paper runner | Convert the final candidate into legal exchange orders, then compare paper execution against backtest intent. |
+| 1 | `01_translation.md` | Strategy-specific research record and criteria/checklist. |
+| 1.5 | `01-5_baseline_transformation.md` | Complete Pine strategy, screenshot-heavy manual TradingView acceptance, and frozen portability package. |
+| 2 | `02_baseline.md` | Faithful Mutation Lab Python port with criterion-level parity evidence. |
+| 2.5 | `02-5_baseline_qualification.md` | Fast fidelity review, baseline run, authorized optimization, and qualification decision. |
+| 3.1 | `03-1_whitebox_diagnostics.md` | Evidence-derived whitebox diagnosis and mutation hypotheses. |
+| 3 | `03_full-whitebox.md` | One-by-one whitebox previews and an optimized survivor batch. |
+| 4.1 | `04-1_hybrid_diagnostics.md` | Hybrid justification and strategy-specific information, target, representation, and validation contracts. |
+| 4 | `04_hybrid-blackbox.md` | Offline previews, live-engine reproduction, and an optimized hybrid survivor batch. |
+| 4.2 | `04-2_blackbox_viability.md` | Optional constrained discovery and live reproduction of stable decision-time relationships. |
+| 4.3 | `04-3_successor_baseline.md` | Optional evidence-preserving reseed into Phase 1 or Pine revision through Phase 1.5. |
 
-Generated evidence belongs in `artifacts/`. Saved run JSON files live in `artifacts/runs/`, saved run Markdown reports live in `artifacts/reports/`, and phase diagnostics live in `artifacts/diagnostics/`. Do not put generated diagnostics into `bridgecode/`; that folder is only for execution playbooks such as `EYE.md`.
+Phases 3 through 4.3 also require `agents/docs/universal_mutation_constitution.md`.
 
-The default strategy seed is `strategies/btc_intraday_parent.json`. The app also persists versions in SQLite, so any phase upgrade that adds parameters or mutation edges must update both the seed JSON and existing `versions.spec_json` through the repository upgrade path.
+Strategy-development artifacts belong under `artifacts/strategy-development/<strategy_id>/`. Run evidence remains under `artifacts/runs/`, `artifacts/reports/`, and `artifacts/diagnostics/`. Original inspectable source and accepted canonical Pine versions belong under `pre-strategies/` with distinct filenames.
 
-## Operating Contract
+## Operating Constitution
 
-Always start by reading `AGENTS.md` and the requested bridgecode playbook. For execution work in this repo, the user usually invokes `EYE.md`, so the coding agent must read `bridgecode/EYE.md` and `bridgecode/plan-code-debug.md` before editing.
+- The Phase 1 criteria/checklist defines correctness before code exists.
+- TradingView is the canonical proving ground for chart-based strategies.
+- Greenfield Pine and source-derived Pine are equal routes selected by evidence.
+- Official TradingView documentation and open-source precedent research are mandatory for both routes.
+- The user alone approves the manual TradingView gate.
+- Screenshots are required evidence and must map to stable checklist IDs.
+- Mutation Lab receives only a frozen, manually accepted Pine strategy.
+- Phase 2 proves parity before economics or optimization are interpreted.
+- Phase 2.5 reviews successful parity quickly and never repeats the port without a discrepancy.
+- Later mutations are derived from the current strategy evidence, never from reusable catalogs.
+- Every test preserves the frozen parent and comparable context.
+- Offline evidence cannot promote live behavior.
+- Production claims require robustness, execution feasibility, forward reconciliation, and operational controls beyond the mutation phases.
+- Strategy families remain in the repo until the user explicitly requests removal.
 
-Keep the implementation vanilla-first and local. The app is intentionally a small Python/FastAPI/vanilla-JS research tool. Do not add frameworks or dependencies to solve process problems that can be solved with explicit Python, JSON, Markdown, and the existing app endpoints.
+## Phase 1: Strategy Definition and Research
 
-A report is enough for phase routing when it contains the frozen contract, parent comparison, headline metrics, buy-and-hold comparison, side decomposition, exit-reason decomposition, period decomposition, duration statistics, MFE/MAE, and diagnostic counters. Open the JSON only when the next task requires trade-level rows, exact parameter payloads, exported features, or model labels that are not present in the Markdown.
+Begin with a strategy idea, explanation, inspectable source, or completed-lineage research brief. Freeze one asset, venue, timeframe contract, execution context, and business objective.
 
-Before a strategy is described as production-ready, read `agents/docs/production_backtest_engine_audit.md`. The app can discover research edge before it has a fully production-grade execution simulator, but the labels must stay honest. Same-close fills, same-bar entry/exit behavior, realized-only equity, full-sample optimization, and simplified exchange costs are research assumptions unless the engine explicitly replaces them with an executable model. If a strategy looks excellent only under those assumptions, route it to engine hardening or paper-runner parity work instead of promoting it.
+Create:
 
-## Phase 1: Translation
+- `artifacts/strategy-development/<strategy_id>/phase1_criteria_checklist.md`
+- `artifacts/strategy-development/<strategy_id>/phase1_research_record.md`
 
-Phase 1 starts with a user idea, source code, open-source strategy, course notes, or a compact strategy description. The agent reads `01_translation.md` and first produces an inspectable open-source candidate shortlist before creating a Mutation Lab parent whenever the source is discretionary, transcript-derived, course-derived, screenshot-derived, or otherwise only partially codified. Once a candidate meets the criteria, the next required step is to save the actual inspectable source code under `pre-strategies/` before parentization, optimization, or Phase 1.5. A public script page description is discovery evidence, not an executable baseline. If Codex cannot extract the source code from the page after a real attempt, it must hand off explicitly to computer use or the human operator to copy the source into `pre-strategies/`, then stop until that artifact exists. The shortlist is the normal phase-1 output. Fresh Pine creation from scratch is a fallback, not the default: use it only when the source is already a formal rule set that can be translated without inventing mechanics, or when no suitable open-source baseline exists and the output is explicitly a visual/debug prototype rather than a parent.
+The criteria/checklist must assign stable IDs, scope class, pass condition, evidence method, artifact locator, status, and blocking severity to every in-scope requirement. It owns the semantic, visual, execution, economic, benchmark, regression, screenshot, and port-parity contracts.
 
-The output of this phase is not a promoted strategy. It is a tested candidate path backed by a source artifact. If source material is code and can be transformed cleanly, preserve the source logic and create the Pine or Mutation Lab handoff from that code. If source code cannot be transformed cleanly, find the closest inspectable open-source candidate, save that candidate's actual source under `pre-strategies/`, and keep any original-source-inspired mutations as tentative phase-3 ideas only. If the source is discretionary, transcript-based, or partially codified, provide several inspectable candidates for TradingView testing and tell the user to choose the one with the best behavior on the desired asset and timeframe; once chosen, save its source before any parentization. For each candidate, also state which future rule-level mutations would be needed to make it a fuller translation of the original source. Do not apply those mutations in phase 1. If source material is too vague to code honestly, the agent should ask for the specific missing trading rule rather than inventing one.
+Research current official Pine behavior for every nontrivial mechanism. Research inspectable public code for implementation precedent and record provenance and reuse status. Then select `GREENFIELD_PINE` or `SOURCE_DERIVED_PINE` from fit, auditability, and license evidence. A source-derived route cannot continue until the actual source is preserved under `pre-strategies/`.
 
-For this repo, phase-1 coding usually touches the strategy JSON, `app/backtest.py` if a new engine rule is needed, and tests in `app/tests.py`. If the candidate can be expressed with the existing engine, prefer only updating the JSON and mutation space.
+Phase 1 passes only as `READY_FOR_PINE_CREATION`. It cannot create a Python parent or qualify economics.
 
-The pass gate is that TradingView or the app can run the candidate on a valid dataset without crashing, produces non-empty metrics, exposes visually auditable behavior, and has enough tunable edges for phase 2. A direct Mutation Lab JSON parent without Pine/open-source validation is allowed only when the source is already explicit enough that the implementation can be audited bar by bar.
+## Phase 1.5: TradingView Creation and Manual Acceptance
 
-## Phase 1.5: Baseline Transformation
+Build or adapt the complete Pine strategy against the frozen criteria. Keep calculations, state, chart objects, diagnostics, and orders aligned. Make one semantic change per testable revision and preserve known-good versions.
 
-Phase 1.5 uses `01-5_baseline_transformation.md`. It exists for the common case where the lab has an inspectable open-source baseline source saved under `pre-strategies/`, a faithful executable parent for that source, and a desired strategy explanation, but the desired strategy does not have trustworthy code. The open-source baseline is the executable anchor. The explanation defines the target identity. Any previous from-scratch implementation of the desired explanation is evidence of what went wrong, not the source of truth.
+Prepare `phase1_5_manual_review.md` and a screenshot manifest. Freeze the Pine hash, chart environment, complete inputs, strategy properties, execution settings, checklist revision, and fixture locations.
 
-The goal is to transform the baseline into the desired identity one conceptual dependency at a time. For BOS Demand Pullback to ASM/Fib/liquidity, the ladder should separate higher-timeframe context, external dealing range, Fibonacci entry zone, FVG confluence, liquidity sweep, internal BOS/CHoCH confirmation, range-extreme target, and short-side symmetry. Do not add those all at once. A full composite can fail for ten different reasons and teach nothing.
+The user tests the exact candidate on the declared asset and timeframe. Required screenshot evidence must prove the strategy-specific accepted and rejected behavior, visual contract, settings, tester result, and state persistence demanded by Phase 1. Each image maps to checklist IDs and a reviewer verdict.
 
-Phase 1.5 is an execution loop. Each layer is tested against the frozen previous parent on the same dataset, same execution model, same sizing model, and same report contract. Persist the ledger as `artifacts/diagnostics/phase1_5_transformation_<baseline_family>_to_<target_family>.json` and write a matching Markdown memo. A layer can be accepted, rejected, branched, blocked by missing engine support, or used as the stop point. If the baseline is only a description-level proxy rather than a source-preserving parent, Phase 1.5 is blocked and the next route is Phase 2A parentization of the saved source. If a layer fails, do not keep stacking later layers on top of it unless the later layer can be tested independently.
+Phase 1.5 reaches 100 percent only when every required item passes, audit-only evidence exists, deferred behavior is isolated, hard failures are absent, and the user accepts the exact Pine hash. Save that script as `pre-strategies/<strategy_id>_accepted.pine` and create the portability package.
 
-The output is one of four honest states: complete transformation, partial transformation, failed transformation, or wrong carrier baseline. A complete or partial transformed candidate must still enter phase 2 and earn the baseline evidence bar before phase 3 begins. Phase 1.5 does not promote a strategy to production and does not allow a failed from-scratch target implementation to bypass open-source baseline evidence.
+## Phase 2: Pine-to-Python Port and Parity
 
-## Phase 2: Baseline Optimization
+Port only the accepted Pine version. Build a criterion-to-code map before implementation. The map connects every required behavior to Pine code, Python code, parent schema, diagnostics, fixtures, and comparison rules.
 
-Phase 2 uses `02_baseline.md`. The purpose is not to make clever rule changes. It has two subphases. Phase 2A turns the user-selected open-source candidate or phase-1.5 transformed candidate into a Mutation Lab parent while preserving the selected candidate's executable identity and carrying forward phase-1 mutation ideas as future-only notes. Phase 2B reads the baseline-optimization report and decides whether the optimized baseline deserves phase 3, should be preserved as a component, should be retried with a different open-source candidate, or should go to the graveyard.
+Create a parity ledger and report. Exact semantic behavior must match exactly. Numerical tolerance is valid only when Phase 1 declared it before implementation. Intentional platform divergence requires a documented mechanism, preserved causal identity, and explicit approval.
 
-In the app, choose the family, choose the dataset, and run live tuning or automated lever optimization. Use broad history whenever possible. For BTCUSDT 15m, use the full Binance history dataset rather than a small 40k-bar sample once the candidate becomes serious.
+No required item may remain failed or blocked. No optimization, mutation, or economic rescue is allowed during parity work. Freeze the unoptimized Python parent and route only `PARITY_ACCEPTED` ports to Phase 2.5.
 
-There are two full-pass optimizer buttons and they serve different purposes. `Optimize Baseline Twice` is the phase-2 and phase-3 optimizer. It is allowed to move to the best-scoring parameter set while still respecting evidence gates, because its job is to discover whether the translated parent or a survived whitebox rule mutation has enough life to justify further work. `Optimize Production Twice` is the strict gate-aware optimizer. It belongs to phase 4 and final hardening, after the full-whitebox parent is already strong enough that the task is no longer rescue but production-style selection. If every tested candidate fails the production contract, it must preserve the current values and may report that zero values were applied. Zero applied values in production mode is evidence, not necessarily a bug.
+## Phase 2.5: Fast Review and Baseline Qualification
 
-The agent should treat `Optimize`, `Optimize Baseline Twice`, and `Optimize Production Twice` as parameter search tools, not as proof of generalization. If a strategy cannot become at least a serious survivor after the phase-2 baseline pass, route it to graveyard and test another translation candidate. Do not proceed to phase 3 with a strategy that only has a small-sample artifact or a low-trade high-PF result. Reserve strict production optimization for phase 4 and final hardening.
+First verify hashes, checklist revision, parity status, approved divergences, dataset identity, and execution contract. A complete package receives `FIDELITY_REVIEW_PASS` without repeating Phase 2.
 
-The minimum evidence gate should include trade count, profit factor, max drawdown, net PnL, daily portfolio Sharpe and Sortino, maximum initial trade risk, outperformance versus buy-and-hold, Calmar delta, and chronological period decomposition. Raw profit factor is not enough. A high PF with too few trades, excess trade risk, weak daily portfolio quality, or narrow-period concentration is not a serious baseline.
+Run the exact unoptimized parent and preserve its report. If the Phase 1 contract authorizes search, use the baseline optimizer only over declared tunable parameters. State definitions, implementation constants, and accepted semantics remain frozen.
 
-The general routing principle is that partial life is not enough for phase 3. A candidate can have non-trivial trades, positive net PnL, positive profit factor, and low drawdown while still failing daily portfolio quality, trade-risk bounds, or benchmark efficiency. That is not a phase-3 parent. It is a research-only lesson or possible component, and the correct next move is to test a backup candidate or a structurally different translation rather than applying full-whitebox mutations to rescue a weak full-strategy baseline.
+Judge results using the strategy-specific evidence and benchmark contract. Fixed universal thresholds cannot replace that contract. A faithful, qualified parent advances to Phase 3. A parity defect returns to Phase 2, a Pine acceptance defect returns to Phase 1.5, and a contract defect returns to Phase 1. Economically rejected families remain preserved as research until the user directs cleanup.
 
-The output of phase 2A is a runnable parent in the app plus a first full-history run plan. The output of phase 2B is a saved run report in `artifacts/reports/`, JSON in `artifacts/runs/`, and a routing decision. Only a saved phase-2 run with credible research life and production-comparable evidence becomes the frozen parent for phase 3.
+## Phases 3 and 3.1: Whitebox Research
 
-## Phase 3: Full-Whitebox Diagnostics and Rule Mutations
+Run Phase 3.1 before mutation code. Diagnose the frozen parent, its economic engine, the decision boundary that departs from the declared objective, and rival causal explanations. Generate no candidate when evidence cannot distinguish a testable mechanism.
 
-Phase 3 starts by running `03-1_whitebox_diagnostics.md` against the saved phase-2 run report. The diagnostics memo should go to `artifacts/diagnostics/full-whitebox-diagnostics-<run_id>.md`. The diagnostics should identify localized weaknesses rather than proposing generic improvements.
+Phase 3 implements each justified candidate as the smallest active one-dependency test. Persist all preview results. Promote every independent survivor into one optimization batch, save the child only when it satisfies the strategy contract, and run Phase 3.1 again on materially changed behavior.
 
-A good phase-3 diagnostic asks: is the weakness side-specific, exit-specific, period-specific, duration-specific, timing-specific, excursion-specific, cost-sensitive, or implementation-related? It then proposes rule-level single mutations that preserve the parent contract. Do not use a canned mutation list. The mutation queue must be generated from the current report and any phase-1 source-derived mutation queue that was preserved during parentization.
+Phase 4 becomes eligible only when no explainable rule hypothesis has a better evidence-to-complexity ratio than a bounded statistical layer.
 
-Test each mutation one at a time as an unsaved preview immediately after the diagnostics queue is generated whenever the current codebase can support the test. Do not hand the operator a mutation queue and stop there unless the test requires missing data, a missing engine feature, or a manual visual audit. Persist the preview ledger as `artifacts/diagnostics/phase3_preview_candidates_<run_id>.json`, with the frozen parent metrics, every tested mutation name, overrides or experiment settings, metrics, diagnostics, verdict, and rejection or survivor reason. Failed previews should be rejected with numbers and left out of the parent schema. If a mutation survives against the frozen parent, implement it as explicit strategy parameters and mutation-space edges. The parent seed JSON and every saved child version in that family must inherit the new parameters and mutation edges without overwriting tuned child values; otherwise the operator cannot continue phase-3 optimization from the saved phase-2 child. After all proposed mutations are tested, run `Optimize Baseline Twice` again. Phase 3 is not complete when the parameters merely exist; it is complete only after the new rule parameters have been baseline-optimized and the saved child still survives or improves on broad history.
+## Phases 4 and 4.1: Hybrid Research
 
-When phase-3 rule mutations are added, default behavior matters. A newly added rule can start enabled if it is intentionally becoming the next parent branch and the operator will optimize it immediately. If uncertainty remains, keep it disabled and expose it in Mutation Edges. In all cases, saved child versions and the seed JSON must both inherit the new parameters and mutation edges.
+Phase 4.1 defines one diagnosed decision boundary, the information available before that decision, the target, ambiguity handling, representation, chronology, acceptance conditions, and live-engine contract. It chooses no feature or model from a stock catalog.
 
-Phase 3 normally has two diagnostic passes, just like optimization normally has two passes. The first pass diagnoses the saved phase-2 parent, generates the phase-3 mutation queue, and leads into one-by-one mutation previews. Every mutation that independently survives the preview gates is added to the survivor batch; the process does not discard a valid second survivor merely because a stronger first survivor exists. After the promising mutations have been added and baseline-optimized as a batch, run `03-1_whitebox_diagnostics.md` again on the optimized saved child. This second diagnostic pass is not paperwork; it checks whether the optimized child materially changed the strategy, whether the original weakness moved, whether new whitebox weaknesses emerged, and whether the family is now ready for phase 4. If the optimized child is clearly worse or no mutation survived, do not create another diagnostics memo just for formality.
+Phase 4 tests offline candidates, then implements every offline survivor through an explicit live-engine control. Only live reproduction permits promotion. Optimize the live survivor batch under the Phase 1 evidence contract and preserve the whitebox parent outside the bounded decision layer.
 
-The output of phase 3 is a full-whitebox saved run plus its second-pass diagnostic memo. The report must be rich enough that phase 4 can decide whether hybrid work is justified without opening JSON. If the report lacks frozen contract, parent comparison, side decomposition, exit decomposition, period decomposition, duration, MFE/MAE, and buy-and-hold comparison, improve report generation before continuing.
+## Phase 4.2: Constrained Viability Discovery
 
-## Phase 4: Hybrid/Blackbox Diagnostics and Mutations
+Use Phase 4.2 only when a strong parent has an unresolved boundary that earlier phases cannot express cleanly. Freeze the admissible decision-time information and untouched validation boundary before inspecting outcomes. Complexity is earned by evidence and constrained by the current sample and operational budget.
 
-Phase 4 begins only after the full-whitebox parent is already strong. Use `04-1_hybrid_diagnostics.md` first, not `04_hybrid-blackbox.md` directly. The diagnostic must decide whether hybrid work is justified and produce a ranked queue of narrow candidates. The hybrid layer is not the strategy. The whitebox parent remains the strategy; the hybrid layer can only score, filter, rank, size, or triage one bounded decision point.
+Discovery promotes nothing. Every viable relationship must become an auditable live-engine contract and reproduce its evidence against the frozen parent.
 
-The phase-4 diagnostic must state a feature contract, label contract, model contract, validation contract, acceptance rule, rejection rule, and live-engine promotion contract. The most important practical rule is that there are two gates:
+## Phase 4.3: Successor Reseed
 
-First, an offline preview can decide whether the idea deserves code. This preview may use exported trade rows, decision-time features, scorecards, labels, or counterfactual accounting.
+Use Phase 4.3 when a completed lineage is informative but structurally unable to meet its production objective. Convert the lineage into supported constraints, rejected assumptions, unresolved questions, and a comparable evaluation contract.
 
-Second, a live-engine test decides whether the idea deserves promotion. The offline survivor must be converted into explicit strategy parameters, exposed in Mutation Edges, optimized with `Optimize Production Twice` in the app, and compared against the frozen parent. If the live implementation does not reproduce the offline edge, keep it disabled or reject it.
+Choose a greenfield Phase 1 route, source-derived Phase 1 route, or Phase 1.5 revision from evidence. A material identity change always creates a new Phase 1 criteria/checklist. Every accepted successor repeats manual TradingView acceptance, Python parity, baseline qualification, and all later gates.
 
-As in phase 3, phase 4 must leave a preview ledger. Persist it as `artifacts/diagnostics/phase4_preview_candidates_<run_id>.json`, with the frozen parent metrics, every offline and live candidate tested, overrides or experiment settings, metrics, diagnostics, verdict, and rejection or survivor reason. The diagnostic memo must distinguish the pre-test ranked queue from the post-test survivor-batch selection. Every candidate that independently survives the preview gates becomes part of the batch to implement and optimize; choose none, one, or many based on evidence rather than forcing a single branch. Do not write as if the chosen hybrid roles were selected arbitrarily when they were selected because the preview ledger showed they survived.
+Carry constraints and questions forward. Do not carry tuned strategy content automatically.
 
-Derive phase-4 candidates from the current full-whitebox report and diagnostics. A candidate is valid when the report shows the failure mode it attacks, the decision point is bounded, the features are available at that decision point, and the preview ledger can compare it against the frozen parent. If an offline preview looks good but the first live proxy is broad or destructive, keep the branch tunable or reject it; promote only live-engine candidates that reproduce the edge. Save a phase-4 child only when production optimization confirms that the live-engine implementation improves the frozen parent without damaging trade evidence.
+## Final Production Gates
 
-The output of phase 4 is a saved hybrid/full strategy run. If it becomes the best current strategy, it can be promoted as the new parent for later research. Any rejected hybrid experiments should remain as disposable diagnostic artifacts only; do not add failed branches to the app unless they are useful disabled controls for future optimization.
+Freeze one exact final candidate, dataset, parameter set, execution model, and strategy contract. Run chronological robustness and adverse execution scenarios derived from the declared market and venue uncertainty. A universal stress multiplier is not a substitute for a context-specific stress design.
 
-## Phase 4.2: Black-Box Viability Scan
+Audit whether every intended action can become a legal venue order under the declared account and instrument constraints. Then run forward paper reconciliation until the strategy-specific calendar coverage, event coverage, trade evidence, regime exposure, and operational confidence requirements are met. A universal paper duration or trade count is not valid.
 
-Phase 4.2 is optional. Use it when phase 4 has either produced no additional live-engine survivors or when the remaining weakness appears to require trade-level pattern discovery rather than another hand-written rule. The prompt is `04-2_blackbox_viability.md`.
-
-The purpose is to detect stable decision-time pockets, not to promote an opaque model. A valid phase-4.2 scan freezes the current parent, exports trade or checkpoint rows, defines input features before inspecting outcomes, and tests simple transparent pockets with chronological validation. Useful features include side, timestamp fields, session, parent state, indicator state known at the decision point, volatility context, stop distance, exposure, and in-trade checkpoint state. Outcome fields such as final PnL, final exit reason, future MFE/MAE, and full-trade duration are labels or diagnostics, not features.
-
-Persist the ledger as `artifacts/diagnostics/phase4_2_blackbox_viability_<run_id>.json`. A viable pocket does not become a strategy by itself. It becomes a candidate for a live-engine parameter only after it improves both older training history and later test history, preserves credible trade count, maps to an order-time-safe rule, and can be re-tested against the frozen parent under the production execution model. If it fails the live-engine test, reject it even when the offline scan looked attractive.
-
-Phase 4.2 is an execution loop, not a memo-only phase. After the offline viability ledger identifies one or more viable pockets, Codex should immediately implement the smallest explicit live-engine parameter hook for every representable survivor, run frozen-parent versus candidate previews on the same dataset, and write a live preview ledger under `artifacts/diagnostics/`. Keep every candidate that reproduces the edge in the live engine, add its parameters and Mutation Edges to the parent schema, and migrate existing saved children without overwriting tuned values. If a candidate fails live-engine reproduction, remove the candidate hook unless the instrumentation is reusable outside that failed idea. If multiple candidates survive independently, keep all of them for the next optimization batch.
-
-After live-engine survivors are added, ask the operator to run the appropriate optimization pass before any second phase-4.2 scan. Run the second phase-4.2 pass only when the optimized child materially changes the trade population, exposes a new stable decision boundary, or leaves a clear black-box-compatible weakness. If no live-engine candidate survives, route to robustness, phase-1 restart, or abandonment according to the evidence instead of keeping unused controls.
-
-Phase 4.2 should usually be skipped when the current parent already has a robustness-candidate path and the scan would only search many calendar buckets for cosmetic improvements. It should be used when there is a concrete failure boundary, enough trades, and a realistic chance that a small decision-time veto, ranker, or checkpoint scorer can be implemented without hiding the whitebox thesis.
-
-## Phase 4.3: Successor Baseline Reseed
-
-Phase 4.3 is optional. Use it after phases 3, 4, and optionally 4.2 have taught the lab enough to search better, but before the operator either freezes the current candidate or starts over with no memory. It is the phase-loop valve: a candidate that reaches phase 4.2 and still is not production should normally either go to robustness repair if one exact weakness is actionable, or enter 4.3 so the learned constraints feed a new phase 1/1.5 pass. The prompt is `04-3_successor_baseline.md`.
-
-The purpose is to find or produce a better baseline using the completed lineage as evidence. This is different from phase 1 because the search is no longer vague. The finished run defines the target asset, timeframe, execution model, capital model, useful mechanisms, rejected mechanisms, unresolved weakness, and minimum evidence bar. Phase 4.3 has two valid loop routes. Route A reuses the original source already saved in `pre-strategies/` and sends it back through phase 1.5 with a more informed transformation ladder. Route B searches for a new inspectable open-source strategy, saves its source under `pre-strategies/`, parentizes it, and normally runs phase 1.5 before phase 2 so the new baseline is transformed by the lessons of the previous full lineage. Phase 1.5 can be skipped for Route B only when the new source already implements the learned target identity directly and the memo names the evidence. It is also different from another phase-4 mutation because the looped candidate must be a clean inspectable parent that re-earns every evidence gate; it does not inherit production status from the old survivor.
-
-Use phase 4.3 when the latest run is alive enough to be informative but appears structurally capped. Good triggers include repeated stop-loss drag that the current entry identity cannot repair, a persistent side or period weakness that requires a different source engine, a strong component that should live inside a better parent, or a phase-4/4.2 result that reveals the need for a baseline with a native decision layer instead of more patches. Skip phase 4.3 when the current candidate should go directly to robustness, when one obvious live-engine mutation remains, or when the current lineage is too weak to teach a useful search brief.
-
-The output is a phase-loop memo and, when Route B is chosen, a small shortlist. It is not a promoted strategy. The recommended next source enters phase 1 source preservation and, unless already fully aligned, phase 1.5 transformation first, then phase 2A parentization, phase 2B optimization, phase 3, phase 4, robustness, execution feasibility, and paper trading only if it earns them. Carry-forward lessons are constraints and future mutation notes, not automatic edits. This prevents the lab from turning a failed or capped lineage into an overfit parameter soup while still preserving what the research learned.
-
-## Final Research Gate: Robustness, Execution Feasibility, and Paper Trading
-
-After phase 4 is complete, after phase 4.2 is skipped or exhausted, or after phase 4.3 is skipped because the current candidate is stronger than any justified reseed path, the operator must freeze one exact saved version and dataset. Run the app's robustness gate on that exact candidate. The gate must pass chronological walk-forward folds and execution-cost stress scenarios. The current required stress scenarios are doubled commission, doubled slippage, and combined doubled commission plus doubled slippage.
-
-If the robustness gate fails, do not paper trade. Use the failed fold or failed stress scenario as the next research target. A candidate that cannot survive cost stress or chronological splits is still a research artifact even if the full-history metrics look excellent.
-
-If the robustness gate passes, label the strategy a production robustness candidate and create a candidate dossier. The dossier should reference the saved run report, saved run JSON, dataset id, parameter set, robustness output, capital model, benchmark comparison, known remaining risks, execution-model assumptions, and paper-trading plan. This freeze step prevents accidental continued tuning after the strategy has already passed the research gate.
-
-The next gate is execution feasibility. Convert the strategy's theoretical actions into exchange-compatible order instructions before paper trading. For an OKX-style perpetual route, audit instrument metadata, tick size, lot size, contract value, minimum order size, minimum notional, leverage or margin limits, stop trigger behavior, reduce-only behavior, position rounding, and whether breakeven or stop replacement can be represented safely. This audit does not prove profitability, but it prevents a backtest artifact from being sent to an exchange where its orders cannot legally or faithfully exist.
-
-TradingView plus an exchange signal bot is useful as Phase 5-lite for simple signal executability, but it is not the final proof of Mutation Lab parity. The full route is a native paper runner that uses the same Python strategy state, closed-candle timing, sizing rules, and stop-management logic, then reconciles intended orders against exchange responses and fill reports.
-
-Paper trading should not be "a few days" by default. Choose the duration from historical trade frequency. For a strategy with hundreds of trades over many years but only around one or two trades per week on average, paper trading should usually run for several weeks to a few months, or until at least 20 to 30 live paper trades are observed, whichever takes longer. A few days is acceptable only for much higher-frequency systems that can generate a meaningful sample quickly. During paper trading, track live frequency, fills, slippage, stop behavior, exposure, drawdown rhythm, execution errors, and whether the observed trades resemble the backtest diagnostics.
-
-Paper trading can end in three ways. If behavior is aligned and the sample is meaningful, move to operational integration or tiny-capital/live-sandbox planning. If behavior is aligned but the sample is too small, continue paper trading. If behavior breaks the thesis, route back to diagnostics or graveyard depending on the failure.
+Production readiness requires aligned backtest intent, forward decisions, submitted orders, venue responses, fills, position state, risk controls, and monitoring.
 
 ## Running the App and Tests
-
-Use the project virtual environment:
 
 ```powershell
 .venv\Scripts\python -m uvicorn app.main:app --reload
 ```
 
-Run the regression suite after changing strategy engine logic, report generation, mutation-space schema, version migration, or API behavior:
-
 ```powershell
 .venv\Scripts\python -m unittest discover -s app -p tests.py
 ```
 
-If the app is already running, reload the browser after backend code changes. If tuning edges do not show a newly added parameter, check both the seed JSON and the SQLite `versions.spec_json` migration path. The app reads persisted versions, not only the file under `strategies/`. Phase upgrades must migrate new parent parameters and mutation edges into existing child versions without overwriting their tuned values.
-
-## How to Use Reports
-
-Use the Markdown report first. It should answer these routing questions:
-
-Is the strategy profitable after costs? Does it beat buy-and-hold? Does it have enough trades? Is max drawdown acceptable? Are both sides useful or is one side degrading the parent? Which exit reason makes or loses money? Are weak years still survivable? Are losses caused by poor entries, poor exits, time decay, reverse exits, or regime pockets?
-
-Open JSON only if you need exact trade rows, exact parameters for reproduction, exported features for a model, or fields not summarized in the report. If a future diagnostics prompt cannot operate from the Markdown report, improve report generation rather than making every phase depend on raw JSON.
-
-## Promotion Rules
-
-A candidate can move from phase 2 to phase 3 when it is at least a serious survivor on broad history, with credible trade count, acceptable drawdown, and evidence that weaknesses are localizable.
-
-A phase-1.5 transformation can move into phase 2 only when the ledger shows which identity layers were accepted, rejected, or blocked. A partial transformation is allowed, but it must be labeled as partial and must preserve the open-source baseline's implementation integrity. A failed transformation should route back to a different baseline carrier rather than being rescued with a large phase-3 mutation stack.
-
-A candidate can move from phase 3 to phase 4 when it is a strong full-whitebox parent, already explainable, chronologically robust, and not obviously missing a simpler hand-written rule mutation.
-
-A phase-4 mutation can be saved only after live-engine optimization confirms the edge. Offline previews are not enough. A saved phase-4 child should show meaningful improvement in at least one major metric without damaging the others: PF, net PnL, max drawdown, expected payoff, trade count, buy-and-hold outperformance, side decomposition, and period robustness.
-
-A phase-4.3 loop can start only when the finished lineage is informative enough to constrain either a re-transformation of the original saved source or a new baseline search. It cannot promote the new baseline directly and it cannot preserve old tuned values as proof. The selected source must re-enter phase 1/1.5 as needed, then phase 2A/2B, and beat the old survivor under the same production-comparable contract before it becomes the new parent.
-
-A saved final candidate can move to paper trading only after the robustness gate and execution-feasibility audit pass. Passing the robustness gate means "production robustness candidate," not "production-ready." Production readiness requires paper-trading evidence, exchange-order parity, and operational controls.
-
-Reject a branch if it improves only by deleting most trades, relies on future information, concentrates gains in one short period, worsens drawdown materially, damages the best side, or cannot be explained as a narrow layer on top of the whitebox parent.
+Run the regression suite after engine, schema, migration, API, or report-generation changes. Prompt-only changes require reference and contract validation.
 
 ## Codex Execution Checklist
 
-When asked to operate this repo, Codex should:
+1. Read `AGENTS.md`, the active Bridgecode route, the phase prompt, and the universal mutation constitution when applicable.
+2. Verify the previous phase artifact and verdict before acting.
+3. Freeze the current strategy, data, and execution contracts.
+4. Read the Markdown evidence first and request raw data only for a named missing question.
+5. Make the smallest complete change for the active phase.
+6. Persist accepted and rejected evidence.
+7. Run focused validation and the full suite when implementation contracts changed.
+8. Report the exact verdict, evidence, unresolved boundary, and next phase.
+9. Preserve strategy families unless the user explicitly selects them for removal.
 
-1. Read `AGENTS.md`.
-2. Read the invoked bridgecode playbook, usually `bridgecode/EYE.md` and `bridgecode/plan-code-debug.md`.
-3. Read the relevant phase prompt.
-4. Read the latest saved run report before opening JSON.
-5. Decide whether the report is enough. If not, state what exact JSON/export field is required.
-6. For phase-1.5 work, first confirm the baseline's actual source exists in `pre-strategies/` and has a faithful executable parent; then freeze both the source-preserving baseline and the target explanation, and run each transformation layer one by one before stacking the next.
-7. Make the smallest local code or prompt change needed.
-8. If adding parameters, update engine logic, seed spec, migration path, API/UI exposure if necessary, and tests.
-9. Run focused validation first if available, then the full test suite for engine/schema changes.
-10. If the strategy is being routed beyond phase 4, run or instruct the operator to run the robustness gate on the exact saved version/dataset/parameters.
-11. If the latest lineage reaches phase 4.2 without becoming production, or is alive but structurally capped, consider `04-3_successor_baseline.md` before a blind restart; choose either re-transforming the original `pre-strategies/` source through phase 1.5 or searching a new open-source phase-1 source, and carry forward only evidence constraints and future mutation notes.
-12. Report exactly what survived, what failed, what was promoted, and whether the next action is more research, baseline transformation, successor-baseline reseed, robustness repair, candidate freeze, paper trading, or operational integration.
-
-This workflow is deliberately strict because Mutation Lab is vulnerable to false progress. A strategy research app can look productive while merely overfitting, deleting trades, or hiding broken assumptions. The phase structure exists to prevent that: translate honestly, optimize broadly, mutate one whitebox rule at a time, and add hybrid logic only after a living strategy gives enough evidence for a narrow diagnosable layer.
+The workflow prevents false progress by separating strategy definition, manual semantic proof, port fidelity, economic qualification, explainable mutation, bounded statistical discovery, and production validation.
