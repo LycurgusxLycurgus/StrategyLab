@@ -1,0 +1,23 @@
+{
+  "schema_version": "1.0",
+  "status": "CORROBORATED_AWAITING_USER_VERDICT",
+  "symbol": "BINANCE:BTCUSDT",
+  "timeframe": "15",
+  "source_sha256": "5dcb316ecb2cacff9995fda8b94e02ff264f06e8054ae3ad4d615c3902adce7c",
+  "instrumented_source_sha256": "717731b1d29fd67825f5f0f5a1cb04ec220d292518f13d5f91f6c4b5bf3d9d9c",
+  "proof_dashboard_match": true,
+  "compile": "PASS",
+  "historical_markers": "PASS",
+  "reviewer_reconstruction": "PASS",
+  "reload_stability": "PASS",
+  "trader_screenshot": {
+    "path": "tradingview-trader-v3.png",
+    "sha256": "f90223842197db41a3127d0ec4b2e195b8849c0daaa84b49f98d3ee1f119af07"
+  },
+  "proof_screenshot": {
+    "path": "tradingview-proof-dashboard-v3.png",
+    "sha256": "4cbcd11030c1ccad4da2af673001caf2dbd1eeb6e79da16b80e9a465be408c67"
+  },
+  "verdict": null,
+  "note": "Exact user/expert accept or reject is still required; corroboration is not acceptance."
+}

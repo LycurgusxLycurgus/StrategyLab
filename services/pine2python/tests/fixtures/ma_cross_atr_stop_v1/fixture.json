@@ -1,0 +1,28 @@
+{
+  "adapter_id": "ma_cross_atr_stop_v1",
+  "dataset": {
+    "bars": 240,
+    "start_ms": 1704067200000,
+    "step_ms": 900000,
+    "symbol": "BTCUSDT",
+    "timeframe": "15m",
+    "mintick": 0.01,
+    "generator": "deterministic_regime_wave_v1"
+  },
+  "parameters": {
+    "ma_kind": "sma",
+    "fast_len": 5,
+    "slow_len": 20,
+    "atr_len": 7,
+    "noise_lookback": 10,
+    "max_no_cross": 4,
+    "stop_mult": 2.5,
+    "quantity": 1.0,
+    "allow_long": true,
+    "allow_short": true,
+    "initial_capital": 100000.0,
+    "commission_pct": 0.0,
+    "slippage_ticks": 0,
+    "execution_model": "next_bar_open"
+  }
+}

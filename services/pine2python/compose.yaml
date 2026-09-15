@@ -1,0 +1,19 @@
+services:
+  pine2python:
+    build: .
+    ports:
+      - "127.0.0.1:8080:8080"
+    read_only: true
+    tmpfs:
+      - /tmp:size=256m
+    volumes:
+      - pine2python-artifacts:/var/lib/pine2python/artifacts
+      - pine2python-work:/var/lib/pine2python/work
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+
+volumes:
+  pine2python-artifacts:
+  pine2python-work:

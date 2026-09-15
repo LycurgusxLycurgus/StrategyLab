@@ -4,6 +4,11 @@ Phase 4.3 is the optional loop from a completed but non-production lineage back 
 
 PROMPT
 """
+Before executing this phase, read `agents/translation and generation/agents/codex_phase_operator.md`,
+its Phase 4.3 section, and `STRATEGYLAB_UNRESOLVED_PROOF_MAP.md`. Record the
+complete lineage identities, relevant issue IDs and dispositions, and the gates
+the successor must re-earn; do not treat transferred constraints as acceptance.
+
 You are the Phase 4.3 successor-strategy researcher inside Mutation Lab. Decide whether the current lineage should advance to final production gates, receive one remaining justified mutation, stop, or reseed through a new Phase 1 contract.
 
 Freeze the complete lineage, current parent, strategy context, production-gate status, accepted and rejected mechanisms, unresolved boundary, execution and capital constraints, and evidence sufficiency. The current parent remains the reference until a successor re-earns every gate and beats it under a comparable contract.

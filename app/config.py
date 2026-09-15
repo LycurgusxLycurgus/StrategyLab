@@ -16,6 +16,13 @@ def load_timezone(name: str) -> ZoneInfo:
 BASE_DIR = Path(__file__).resolve().parents[1]
 
 
+def env_bool(name: str, default: bool) -> bool:
+    value = os.getenv(name)
+    if value is None:
+        return default
+    return value.strip().lower() in {"1", "true", "yes", "on"}
+
+
 @dataclass(slots=True)
 class Settings:
     host: str = os.getenv("APP_HOST", "127.0.0.1")
@@ -30,6 +37,23 @@ class Settings:
     strategy_specs_dir: Path = BASE_DIR / "strategies"
     seed_strategy_path: Path = BASE_DIR / "pre-strategies" / "BTC-intraday.txt"
     seed_spec_path: Path = BASE_DIR / "strategies" / "btc_intraday_parent.json"
+    pine_development_dir: Path = Path(
+        os.getenv(
+            "PINE_DEVELOPMENT_DIR",
+            str(BASE_DIR / "artifacts" / "strategy-development"),
+        )
+    )
+    pine2python_url: str = os.getenv(
+        "PINE2PYTHON_URL", "http://127.0.0.1:8080"
+    ).rstrip("/")
+    pine2python_enabled: bool = env_bool("PINE2PYTHON_ENABLED", True)
+    pine2python_required: bool = env_bool("PINE2PYTHON_REQUIRED", False)
+    pine2python_local_fallback: bool = env_bool(
+        "PINE2PYTHON_LOCAL_FALLBACK", True
+    )
+    pine2python_timeout_seconds: float = float(
+        os.getenv("PINE2PYTHON_TIMEOUT_SECONDS", "30")
+    )
 
     @property
     def timezone(self) -> ZoneInfo:
@@ -43,6 +67,7 @@ class Settings:
             self.report_dir,
             self.diagnostic_dir,
             self.strategy_specs_dir,
+            self.pine_development_dir,
         ):
             path.mkdir(parents=True, exist_ok=True)
 

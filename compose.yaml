@@ -1,0 +1,57 @@
+services:
+  strategylab:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      APP_HOST: 0.0.0.0
+      APP_PORT: 8000
+      PINE2PYTHON_URL: http://pine2python:8080
+      PINE2PYTHON_ENABLED: "true"
+      PINE2PYTHON_REQUIRED: "true"
+      PINE2PYTHON_LOCAL_FALLBACK: "false"
+      PINE_DEVELOPMENT_DIR: /app/artifacts/strategy-development
+    ports:
+      - "127.0.0.1:8000:8000"
+    volumes:
+      - strategylab-artifacts:/app/artifacts
+    depends_on:
+      pine2python:
+        condition: service_healthy
+    networks:
+      - lab-edge
+      - lab-internal
+    security_opt:
+      - no-new-privileges:true
+
+  pine2python:
+    build:
+      context: ./services/pine2python
+      dockerfile: Dockerfile
+    environment:
+      P2P_HOST: 0.0.0.0
+      P2P_PORT: 8080
+      P2P_ARTIFACT_ROOT: /var/lib/pine2python/artifacts
+      P2P_WORK_ROOT: /var/lib/pine2python/work
+    read_only: true
+    tmpfs:
+      - /tmp:size=256m
+    volumes:
+      - pine2python-artifacts:/var/lib/pine2python/artifacts
+      - pine2python-work:/var/lib/pine2python/work
+    networks:
+      - lab-internal
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+
+networks:
+  lab-edge:
+  lab-internal:
+    internal: true
+
+volumes:
+  strategylab-artifacts:
+  pine2python-artifacts:
+  pine2python-work:

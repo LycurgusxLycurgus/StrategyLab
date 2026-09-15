@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1060" height="435" viewBox="0 0 1060 435">
+<rect width="1060" height="435" fill="#151b25"/>
+<text x="20" y="24" fill="#eeeeee" font-family="sans-serif" font-size="15">BTCUSDT-V61-5 | EARLY_TOUCH_STILL_REJECTED | SHORT</text>
+<line x1="45.00" x2="45.00" y1="190.23" y2="253.17" stroke="#57b99b"/>
+<rect x="43.00" y="215.13" width="4" height="28.91" fill="#57b99b"/>
+<line x1="91.67" x2="91.67" y1="202.66" y2="283.62" stroke="#df7781"/>
+<rect x="89.67" y="215.13" width="4" height="26.82" fill="#df7781"/>
+<line x1="138.33" x2="138.33" y1="136.83" y2="353.06" stroke="#57b99b"/>
+<rect x="136.33" y="136.83" width="4" height="105.12" fill="#57b99b"/>
+<line x1="185.00" x2="185.00" y1="135.31" y2="191.77" stroke="#df7781"/>
+<rect x="183.00" y="136.83" width="4" height="4.25" fill="#df7781"/>
+<line x1="231.67" x2="231.67" y1="133.62" y2="215.18" stroke="#df7781"/>
+<rect x="229.67" y="141.09" width="4" height="19.03" fill="#df7781"/>
+<line x1="278.33" x2="278.33" y1="148.53" y2="240.63" stroke="#df7781"/>
+<rect x="276.33" y="160.12" width="4" height="57.47" fill="#df7781"/>
+<line x1="325.00" x2="325.00" y1="98.03" y2="226.03" stroke="#57b99b"/>
+<rect x="323.00" y="98.03" width="4" height="119.56" fill="#57b99b"/>
+<line x1="371.67" x2="371.67" y1="98.03" y2="185.06" stroke="#df7781"/>
+<rect x="369.67" y="98.03" width="4" height="58.16" fill="#df7781"/>
+<line x1="418.33" x2="418.33" y1="123.89" y2="198.39" stroke="#57b99b"/>
+<rect x="416.33" y="126.81" width="4" height="28.57" fill="#57b99b"/>
+<line x1="465.00" x2="465.00" y1="86.94" y2="195.86" stroke="#57b99b"/>
+<rect x="463.00" y="86.94" width="4" height="39.87" fill="#57b99b"/>
+<line x1="511.67" x2="511.67" y1="86.94" y2="155.13" stroke="#df7781"/>
+<rect x="509.67" y="86.94" width="4" height="51.24" fill="#df7781"/>
+<line x1="558.33" x2="558.33" y1="127.83" y2="289.75" stroke="#df7781"/>
+<rect x="556.33" y="138.17" width="4" height="54.90" fill="#df7781"/>
+<line x1="605.00" x2="605.00" y1="140.16" y2="223.69" stroke="#57b99b"/>
+<rect x="603.00" y="164.16" width="4" height="28.91" fill="#57b99b"/>
+<line x1="651.67" x2="651.67" y1="139.46" y2="203.95" stroke="#df7781"/>
+<rect x="649.67" y="164.16" width="4" height="20.59" fill="#df7781"/>
+<line x1="698.33" x2="698.33" y1="156.36" y2="265.21" stroke="#df7781"/>
+<rect x="696.33" y="184.75" width="4" height="55.41" fill="#df7781"/>
+<line x1="745.00" x2="745.00" y1="186.73" y2="272.57" stroke="#57b99b"/>
+<rect x="743.00" y="229.86" width="4" height="10.30" fill="#57b99b"/>
+<line x1="791.67" x2="791.67" y1="222.23" y2="289.76" stroke="#df7781"/>
+<rect x="789.67" y="229.86" width="4" height="26.08" fill="#df7781"/>
+<line x1="838.33" x2="838.33" y1="124.88" y2="265.95" stroke="#57b99b"/>
+<rect x="836.33" y="159.26" width="4" height="96.67" fill="#57b99b"/>
+<line x1="885.00" x2="885.00" y1="131.51" y2="185.11" stroke="#df7781"/>
+<rect x="883.00" y="159.27" width="4" height="25.83" fill="#df7781"/>
+<line x1="45" x2="890" y1="240.63" y2="240.63" stroke="#a4b9e8" stroke-dasharray="4 5" opacity="0.65"/><text x="900" y="70" fill="#a4b9e8" font-family="sans-serif" font-size="11">bos_level 112037.98</text>
+<line x1="45" x2="890" y1="137.64" y2="137.64" stroke="#d3bd6d" stroke-dasharray="4 5" opacity="0.65"/><text x="900" y="116" fill="#d3bd6d" font-family="sans-serif" font-size="11">entry 112347.57</text>
+<line x1="45" x2="890" y1="86.94" y2="86.94" stroke="#df7781" stroke-dasharray="4 5" opacity="0.65"/><text x="900" y="139" fill="#df7781" font-family="sans-serif" font-size="11">stop 112500.00</text>
+<line x1="45" x2="890" y1="289.76" y2="289.76" stroke="#57b99b" stroke-dasharray="4 5" opacity="0.65"/><text x="900" y="162" fill="#57b99b" font-family="sans-serif" font-size="11">target 111890.29</text>
+<text x="25" y="415" fill="#bbbbbb" font-family="sans-serif" font-size="12">2025-10-11T10:45:00+00:00 — 2025-10-11T15:15:00+00:00 | decision only; no future candles</text></svg>

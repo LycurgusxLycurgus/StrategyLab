@@ -1,0 +1,61 @@
+{
+  "review_date": "2026-09-02",
+  "workbench_id": "pwb_f89ea6f3774a",
+  "parent_revision_id": "pvr_dfe72cd3eeaccde22e6e",
+  "revision_id": "pvr_5b403b82f40e83d6179d",
+  "proof_evidence_id": "pev_9f76443d1845534f9169",
+  "source_sha256": "49c8e7099c695f58a70aa16d905ca022c1bb05b2f6540e47d0857868a3526304",
+  "instrumented_source_sha256": "8e4a3e99161e5e6419ba449504e857d95a8ff10b4e9d82255308784c0131daac",
+  "symbol": "BINANCE:BTCUSDT",
+  "timeframe": "15",
+  "datasets": {"15m": "ds_207c4624f554", "1m": "ds_1e4ab545aa12"},
+  "verdicts": {
+    "readable_compile": "PASS",
+    "instrumented_compile": "PASS",
+    "declared_signature_comparison": "MATCH",
+    "focused_history_direct_jump_and_reload": "PASS",
+    "expert_golden_adjudication": "PENDING",
+    "user_exact_hash_acceptance": "PENDING",
+    "trading_edge": "REJECTED",
+    "official_tradingview_accepted_status": false
+  },
+  "transport": "Disk UTF-8 SHA-256 verified before paste. Monaco clipboard copy-back matches after CRLF-to-LF normalization for both sources; no other text differences. Readable source restored after proof.",
+  "observed_dashboard": {
+    "PROFILE": "basic_v1 / v2.12",
+    "SOURCE": "49c8e7099c695f58",
+    "SETTINGS": "b9a3e84831e5261e",
+    "EXPECTED CONTEXT": "BINANCE:BTCUSDT / 15",
+    "WINDOW": "1786181400000..1787081400000",
+    "BARS": "1000",
+    "FIRST/LAST": "1786181400000/1787080500000",
+    "DATA": "0996453-0739391-0249398",
+    "MINTICK": "0.01",
+    "FEATURES": "0982507-0053558-0236003",
+    "SIGNALS": "0139148-0933094-0197064",
+    "DATA SEG 1": "0826762-0624478-0741627",
+    "DATA SEG 2": "0877548-0363331-0417730",
+    "DATA SEG 3": "0972997-0725785-0130851",
+    "DATA SEG 4": "0939291-0634512-0858916",
+    "DATA SEG 5": "0652462-0870131-0621481",
+    "DATA SEG 6": "0310762-0789540-0748726",
+    "DATA SEG 7": "0865231-0210940-0358392",
+    "DATA SEG 8": "0348976-0894910-0841436"
+  },
+  "screenshots": [
+    {"file": "v8-readable-btc.png", "sha256": "46620023fbc5ce818701131c5304412f14df56ae6a9438c27279e2a7a94c5df1", "purpose": "Readable current candidate"},
+    {"file": "v8-btc-july28-direct.jpg", "sha256": "8127b90b9240aa46098026ded9b1741492846272cc2e17a9d57e2ff2416cbfaf", "purpose": "Direct jump to 2026-07-28 09:15 UTC-5; LQ/BOS, short geometry and SL visible without pan/zoom"},
+    {"file": "v8-btc-july28-reload.jpg", "sha256": "ed0e1e24d0066995a3e13b07fddc4f6e8d5b88daf7897ff28a23d567b21b9834", "purpose": "Same historical setup persists after reload"},
+    {"file": "v8-signature-match.jpg", "sha256": "a64a053631b4eeace65d5ca26bb3f6e06e62f58524f7b1b3ff437f997f01d063", "purpose": "All declared fingerprints visually match generated expected dashboard"}
+  ],
+  "approved_divergences": [],
+  "limitations": [
+    "Signature equality covers declared fields/window, not all possible behavior or expert strategy fidelity.",
+    "PineTS local runtime remains unavailable for this revision's request constructs.",
+    "No intrabar replay/first-appearance proof was performed in this review.",
+    "Golden BTC/gold cases are model-selected and await expert adjudication; video examples lack complete executable identity.",
+    "Exact FXCM gold video-feed correspondence and broader ETH/FX/index datasets were not established.",
+    "Economic results are indicator OHLC lifecycle estimates on reused research data, not broker/portfolio backtests.",
+    "No strategy child, optimization, or production promotion is authorized by this evidence."
+  ],
+  "next_phase": "Phase 1 detector adjudication: expert-label protected-owner and v7-only cases before accepting or rejecting this structural hypothesis. Preserve visuals and do not optimize poor gold results."
+}

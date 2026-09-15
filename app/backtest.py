@@ -432,19 +432,146 @@ def benchmark_warmup_index(parameters: dict[str, Any], bar_count: int) -> int:
 
 
 class BacktestEngine:
-    def run(self, spec: dict[str, Any], bars: list[Bar]) -> dict[str, Any]:
+    def run(
+        self,
+        spec: dict[str, Any],
+        bars: list[Bar],
+        *,
+        collect_trace: bool = False,
+    ) -> dict[str, Any]:
         engine_id = spec.get("engine_id")
         if engine_id == "ma_cross_atr_stop_v1":
-            return self._run_ma_cross_atr_stop(spec, bars)
-        if engine_id == "ghl_dc_breakout_v1":
-            return self._run_ghl_dc_breakout(spec, bars)
-        if engine_id == "bos_demand_pullback_v1":
-            return self._run_bos_demand_pullback(spec, bars)
-        if engine_id == "asm_fib_liquidity_fvg_v1":
-            return self._run_asm_fib_liquidity_fvg(spec, bars)
-        if engine_id == "quant_smc_strategy_v1":
-            return self._run_quant_smc_strategy(spec, bars)
-        raise HTTPException(status_code=400, detail=f"Unsupported engine: {engine_id}")
+            result = self._run_ma_cross_atr_stop(spec, bars)
+        elif engine_id == "ghl_dc_breakout_v1":
+            result = self._run_ghl_dc_breakout(spec, bars)
+        elif engine_id == "bos_demand_pullback_v1":
+            result = self._run_bos_demand_pullback(spec, bars)
+        elif engine_id == "asm_fib_liquidity_fvg_v1":
+            result = self._run_asm_fib_liquidity_fvg(spec, bars)
+        elif engine_id == "quant_smc_strategy_v1":
+            result = self._run_quant_smc_strategy(spec, bars)
+        else:
+            raise HTTPException(status_code=400, detail=f"Unsupported engine: {engine_id}")
+        if collect_trace:
+            result = {
+                **result,
+                "trace": self._standard_trace(spec, bars, result),
+            }
+        return result
+
+    @staticmethod
+    def _standard_trace(
+        spec: dict[str, Any],
+        bars: list[Bar],
+        result: dict[str, Any],
+    ) -> dict[str, Any]:
+        """Build an opt-in execution trace without changing engine behavior.
+
+        Existing engines do not all expose their internal feature streams yet.
+        This common layer records exact market bars, position lifecycle, order
+        events, and equity. Engine-specific ports can add feature/signal fields
+        while preserving this schema.
+        """
+
+        trades = result.get("trades", [])
+        entries: dict[str, list[dict[str, Any]]] = {}
+        exits: dict[str, list[dict[str, Any]]] = {}
+        for trade in trades:
+            entries.setdefault(str(trade.get("entry_ts")), []).append(trade)
+            exits.setdefault(str(trade.get("exit_ts")), []).append(trade)
+        equity_by_ts = {
+            str(point.get("ts")): point for point in result.get("equity_curve", [])
+        }
+        active: list[dict[str, Any]] = []
+        rows: list[dict[str, Any]] = []
+        for index, bar in enumerate(bars):
+            ts = bar.ts.isoformat()
+            entry_events = entries.get(ts, [])
+            exit_events = exits.get(ts, [])
+            for trade in entry_events:
+                active.append(trade)
+            lifecycle_exits = [
+                trade
+                for trade in exit_events
+                if trade.get("reason") != "time_exit"
+            ]
+            if lifecycle_exits:
+                exiting = {id(trade) for trade in lifecycle_exits}
+                active = [trade for trade in active if id(trade) not in exiting]
+            position_size = sum(
+                float(trade.get("quantity", 0.0))
+                * (1 if trade.get("direction") == "long" else -1)
+                for trade in active
+            )
+            equity_point = equity_by_ts.get(ts, {})
+            rows.append(
+                {
+                    "time": int(bar.ts.timestamp() * 1000),
+                    "bar_index": index,
+                    "market": {
+                        "open": bar.open,
+                        "high": bar.high,
+                        "low": bar.low,
+                        "close": bar.close,
+                        "volume": bar.volume,
+                    },
+                    "features": {},
+                    "signals": {},
+                    "rejections": {},
+                    "orders": {
+                        "entry_intent": bool(entry_events),
+                        "exit_intent": bool(exit_events),
+                    },
+                    "state": {
+                        "position_size": position_size,
+                        "equity": equity_point.get("equity"),
+                        "realized_equity": equity_point.get("realized_equity"),
+                    },
+                    "events": {
+                        "entries": [
+                            {
+                                "direction": trade.get("direction"),
+                                "price": trade.get("entry_price"),
+                                "quantity": trade.get("quantity"),
+                            }
+                            for trade in entry_events
+                        ],
+                        "exits": [
+                            {
+                                "direction": trade.get("direction"),
+                                "price": trade.get("exit_price"),
+                                "quantity": trade.get("quantity"),
+                                "reason": trade.get("reason"),
+                                "net_pnl": trade.get("net_pnl"),
+                            }
+                            for trade in exit_events
+                        ],
+                    },
+                }
+            )
+            synthetic_settlements = [
+                trade
+                for trade in exit_events
+                if trade.get("reason") == "time_exit"
+            ]
+            if synthetic_settlements:
+                settling = {id(trade) for trade in synthetic_settlements}
+                active = [trade for trade in active if id(trade) not in settling]
+        return {
+            "schema_version": "1.0",
+            "engine_id": spec.get("engine_id"),
+            "rows": rows,
+            "capabilities": {
+                "market": True,
+                "position": True,
+                "orders": True,
+                "trades": True,
+                "equity": True,
+                "features": False,
+                "signals": False,
+                "rejections": False,
+            },
+        }
 
     def _run_bos_demand_pullback(self, spec: dict[str, Any], bars: list[Bar]) -> dict[str, Any]:
         parameters = spec["parameters"]

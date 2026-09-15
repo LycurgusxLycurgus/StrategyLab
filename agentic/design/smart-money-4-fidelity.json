@@ -1,0 +1,106 @@
+{
+  "schema_version": "1.0",
+  "product": "SmartMoney-4",
+  "parent": {
+    "source": "pre-strategies/smart-money-indicator-first.pine",
+    "revision_id": "pvr_28090860d3444b575353",
+    "source_sha256": "449f4c298751e4cb5e4edff8d85de8bd2a20fb208c6ae92e5d36ba82e580cecf",
+    "status": "SMARTMONEY_3_PRESERVED_USER_VERDICT_PENDING"
+  },
+  "candidate": {
+    "source": "pre-strategies/smart-money-4/smart-money-4-indicator-first.pine",
+    "workbench_id": "pwb_6994ce1e623d",
+    "revision_id": "pvr_d74f2a2bfe9a19e11f8d",
+    "parent_revision_id": "pvr_412e28f408611644c233",
+    "source_sha256": "bdb0f5e43a3b99c7edc8445b6b6dd1758fc5ca05e7c6273ab03bb77d39159ed3",
+    "status": "TRADINGVIEW_SIGNATURE_MATCH_USER_VERDICT_PENDING"
+  },
+  "evidence": {
+    "dataset_id": "ds_f6f2d4ba05c4",
+    "bars": 5000,
+    "review_evidence_id": "pev_2da57f0d7001d0488326",
+    "proof_evidence_id": "pev_e78575983dd76190d01b",
+    "observation_evidence_id": "pev_84deaabf572a5e482f8e",
+    "instrumentation_version": "tv_table_v2_12",
+    "instrumented_source_sha256": "d2bd9d5801326748b8f37be74c66e921356f6eb3ce152ee076347e4de7887931",
+    "readable_screenshot_sha256": "f21e8298cf2376d1d9d4183a68ac1fb7c811fa968c1f2a286e752714a95ef3c5",
+    "proof_screenshot_sha256": "60c5f4c4a6995f74902220acdeeb2fab75db337b0247c2fb62d19c2fdb9b6e0b",
+    "signature_status": "TRADINGVIEW_SIGNATURE_MATCH",
+    "user_verdict": "pending"
+  },
+  "authority": {
+    "transcript": "pre-strategies/smart-money-4/The ONLY 15 Minute Trading Strategy You Need in 2026/Transcript con timestamps.txt",
+    "screenshots": "pre-strategies/smart-money-4/The ONLY 15 Minute Trading Strategy You Need in 2026/Capturas"
+  },
+  "protected_parent_behavior": [
+    "confirmed-only previous-completed 4h ownership",
+    "confirmed 15m alternating pivots and body-close breaks",
+    "source-known-confirmation sweep provenance",
+    "locked post-break range ownership",
+    "independent concurrent setup lifecycle",
+    "no Pine strategy orders"
+  ],
+  "intentional_branch_changes": [
+    "15m default entry changes from 67% to 75%",
+    "71% becomes a visible optional 15m companion/alternate",
+    "raw three-candle imbalance is canonical and ATR filtering is optional",
+    "four visible criteria contribute exactly 25 points each",
+    "75 and 100 scores may emit setups",
+    "HTF alignment, sweep, and imbalance are score components rather than hidden vetoes",
+    "active setup geometry collapses to LONG or SHORT after terminal outcome",
+    "compact video checklist is enabled by default"
+  ],
+  "prohibited_changes": [
+    "modify SmartMoney-3 source bytes",
+    "backdate a setup before its known time",
+    "use a developing 4h candle",
+    "emit a setup without confirmed BOS and locked entry geometry",
+    "invent POC, scanner, order, fill, or performance behavior",
+    "treat local execution as TradingView acceptance"
+  ],
+  "protected_regions": [
+    {
+      "name": "base_visual_fractal_engine",
+      "start_marker": "// Base Visual Fractal Engine",
+      "end_marker": "// LTF / Internal Structure"
+    },
+    {
+      "name": "confirmed_ltf_and_htf_structure_engines",
+      "start_marker": "// LTF / Internal Structure",
+      "end_marker": "// Fair Value Gaps — chart timeframe"
+    }
+  ],
+  "score_fields": [
+    "features.video_htf_alignment",
+    "features.video_bos",
+    "features.video_sweep",
+    "features.video_imbalance",
+    "features.video_trade_score"
+  ],
+  "visual_references": [
+    "00-00-38.270.png",
+    "00-01-04.290.png",
+    "00-04-13.390.png",
+    "00-05-10.650.png",
+    "00-06-56.130.png",
+    "00-07-21.670.png",
+    "00-07-36.450.png",
+    "00-08-13.950.png"
+  ],
+  "fixture_criteria": [
+    {"name": "confirmed_4h_update", "field": "signals.htf_confirmed_source_update"},
+    {"name": "discount_context", "field": "signals.htf_discount_gate"},
+    {"name": "premium_context", "field": "signals.htf_premium_gate"},
+    {"name": "15m_bull_break", "field": "signals.ltf_bull_break"},
+    {"name": "15m_bear_break", "field": "signals.ltf_bear_break"},
+    {"name": "confirmed_sweep", "field": "signals.ltf_manipulation_confirmed"},
+    {"name": "raw_imbalance", "field": "signals.ltf_raw_fvg"},
+    {"name": "score_75", "field": "features.video_trade_score", "equals": 75},
+    {"name": "score_100", "field": "features.video_trade_score", "equals": 100},
+    {"name": "long_setup", "field": "signals.long_setup_ready"},
+    {"name": "short_setup", "field": "signals.short_setup_ready"},
+    {"name": "late_setup", "field": "rejections.setup_entry_touched_before_ready"},
+    {"name": "terminal_setup", "field": "states.setup_terminal"}
+  ],
+  "object_policy": "Use tables, lines, boxes, and labels; add no plot-count calls. Bound historical LONG/SHORT markers FIFO."
+}

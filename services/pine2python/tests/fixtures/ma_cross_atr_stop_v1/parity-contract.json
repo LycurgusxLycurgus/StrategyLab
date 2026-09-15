@@ -1,0 +1,13 @@
+{
+  "key": "time",
+  "exact_fields": [
+    "market.open",
+    "market.high",
+    "market.low",
+    "market.close",
+    "market.volume",
+    "state.position_size"
+  ],
+  "tolerance_fields": {},
+  "require_same_keys": true
+}

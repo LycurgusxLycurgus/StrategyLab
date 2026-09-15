@@ -1,0 +1,1565 @@
+//@version=5
+indicator("SmartMoney-4 Structural Memory 15m v6.1 Candidate", overlay=true, max_labels_count=500, max_lines_count=500, max_boxes_count=300)
+
+// Clean-sheet implementation. Authority: the timestamped 15-minute strategy
+// transcript, its mandatory frames, and the approved SmartMoney-4 contract.
+
+const string GROUP_SETUP = "Setup"
+const string GROUP_RISK = "Risk Calculator"
+const string GROUP_REVIEW = "Reviewer"
+const int PIVOT_LEN = 2
+const int HTF_PIVOT_LEN = 2
+const int PROFILE_MIN_ROWS = 32
+const int PROFILE_MAX_ROWS = 72
+const int PROFILE_LOOKBACK_BARS = 500
+const float PROFILE_ATR_FRACTION = 0.20
+const int POC_ROW_TOLERANCE = 2
+const int MAX_STRUCTURE_LEVELS = 96
+const int MAX_SWEEP_CANDIDATES = 64
+const int MAX_CAUSAL_FVGS = 8
+const int MAX_ARCHIVED_FULL_SETUPS = 45
+const int HISTORY_PROFILE_BANDS = 4
+const int BAR_MS = 900000
+
+viewMode = input.string("Trader", "View", options=["Trader", "Reviewer"], group=GROUP_SETUP)
+fibChoice = input.string("75%", "Fibonacci entry", options=["71%", "75%"], group=GROUP_SETUP)
+checklistMode = input.string("Video", "Checklist", options=["Video", "POC Extended"], group=GROUP_SETUP)
+qualityMode = input.string("Standard", "Setup quality", options=["Standard", "Perfect"], group=GROUP_SETUP)
+riskBudgetInput = input.float(2000.0, "Risk budget", minval=0.0, step=50.0, group=GROUP_RISK)
+quantityModeInput = input.string("Base asset", "Position unit", options=["Base asset", "Lots"], group=GROUP_RISK)
+unitsPerLotInput = input.float(1.0, "Base units per lot", minval=0.00000001, step=0.1, group=GROUP_RISK)
+reviewSourceInput = input.string("Setups", "Review source", options=["Setups", "All candidates"], group=GROUP_REVIEW)
+reviewOffsetInput = input.int(0, "Review offset (0 = latest)", minval=0, maxval=500, group=GROUP_REVIEW)
+
+float fibPct = fibChoice == "71%" ? 0.71 : 0.75
+bool includePoc = checklistMode == "POC Extended"
+int requiredScore = qualityMode == "Perfect" ? 100 : includePoc ? 80 : 75
+bool eventBar = barstate.isconfirmed
+bool is15m = timeframe.isminutes and timeframe.multiplier == 15
+
+// Drawing timestamps must outlive Pine's 5,000-bar series buffer.
+// Bounded metadata only: no price, structure, score or timing calculations.
+var array<int> barTimes = array.new_int()
+if eventBar
+    if array.size(barTimes) < 100000
+        array.push(barTimes, time)
+    else
+        array.set(barTimes, bar_index % 100000, time)
+f_time_at(int sourceBar) =>
+    not na(sourceBar) and sourceBar >= math.max(0, bar_index - 99999) and sourceBar <= bar_index ? array.get(barTimes, sourceBar % 100000) : na
+
+if barstate.isfirst and not is15m
+    runtime.error("SmartMoney-4 Clean must run on a 15-minute chart.")
+
+color panelBg = color.rgb(20, 23, 28)
+color panelAlt = color.rgb(30, 34, 40)
+color panelText = color.rgb(232, 234, 238)
+color panelMuted = color.rgb(151, 157, 166)
+color gold = color.rgb(196, 174, 72)
+color passColor = color.rgb(43, 168, 107)
+color failColor = color.rgb(197, 73, 79)
+color lineColor = color.rgb(178, 183, 190)
+color profileColor = color.new(color.rgb(139, 146, 156), 72)
+color imbalanceColor = color.new(color.rgb(128, 139, 151), 82)
+color imbalancePassColor = color.new(color.rgb(196, 174, 72), 78)
+color longColor = color.rgb(48, 178, 125)
+color shortColor = color.rgb(214, 82, 88)
+
+f_price(float value) =>
+    na(value) ? "—" : str.tostring(value, format.mintick)
+
+f_mark(bool value) =>
+    value ? "✓" : "✕"
+
+f_mark_color(bool value) =>
+    value ? passColor : failColor
+
+f_missing(bool htf, bool bos, bool sweep, bool imbalance, bool poc, bool withPoc) =>
+    string result = ""
+    result := not htf ? "HTF" : result
+    result := not bos ? (str.length(result) > 0 ? result + ", BOS" : "BOS") : result
+    result := not sweep ? (str.length(result) > 0 ? result + ", LQ" : "LQ") : result
+    result := not imbalance ? (str.length(result) > 0 ? result + ", FVG" : "FVG") : result
+    result := withPoc and not poc ? (str.length(result) > 0 ? result + ", POC" : "POC") : result
+    str.length(result) == 0 ? "NONE" : result
+
+f_delete_line(line object) =>
+    if not na(object)
+        line.delete(object)
+
+f_delete_label(label object) =>
+    if not na(object)
+        label.delete(object)
+
+f_delete_box(box object) =>
+    if not na(object)
+        box.delete(object)
+
+f_confirmed_htf_context() =>
+    float ph = ta.pivothigh(high, HTF_PIVOT_LEN, HTF_PIVOT_LEN)
+    float pl = ta.pivotlow(low, HTF_PIVOT_LEN, HTF_PIVOT_LEN)
+    float swingHigh = ta.valuewhen(not na(ph), ph, 0)
+    float swingLow = ta.valuewhen(not na(pl), pl, 0)
+    int swingHighTime = ta.valuewhen(not na(ph), time[HTF_PIVOT_LEN], 0)
+    int swingLowTime = ta.valuewhen(not na(pl), time[HTF_PIVOT_LEN], 0)
+    [swingHigh[1], swingLow[1], swingHighTime[1], swingLowTime[1]]
+
+// Previous-completed structural 4h context only. The offset/lookahead pair
+// keeps historical and realtime ownership identical.
+[htfHigh, htfLow, htfHighTime, htfLowTime] = request.security(syminfo.tickerid, "240", f_confirmed_htf_context(), lookahead=barmerge.lookahead_on)
+float htfMid = (htfHigh + htfLow) * 0.5
+float profileAtr = ta.atr(14)
+
+// One-minute data powers the custom frozen profile.
+[oneHigh, oneLow, oneVolume] = request.security_lower_tf(syminfo.tickerid, "1", [high, low, volume])
+var array<int> rollBar = array.new_int()
+var array<float> rollHigh = array.new_float()
+var array<float> rollLow = array.new_float()
+var array<float> rollVolume = array.new_float()
+
+if eventBar
+    int intrabars = array.size(oneHigh)
+    if intrabars > 0
+        for i = 0 to intrabars - 1
+            array.push(rollBar, bar_index)
+            array.push(rollHigh, array.get(oneHigh, i))
+            array.push(rollLow, array.get(oneLow, i))
+            array.push(rollVolume, nz(array.get(oneVolume, i)))
+    int cutoff = bar_index - PROFILE_LOOKBACK_BARS
+    while array.size(rollBar) > 0
+        if array.get(rollBar, 0) < cutoff
+            array.shift(rollBar)
+            array.shift(rollHigh)
+            array.shift(rollLow)
+            array.shift(rollVolume)
+        else
+            break
+
+float pivotHigh = ta.pivothigh(high, PIVOT_LEN, PIVOT_LEN)
+float pivotLow = ta.pivotlow(low, PIVOT_LEN, PIVOT_LEN)
+// Every confirmed Williams-style 2/2 fractal remains independently addressable.
+// A level ends only through a body break or the bounded state budget; same-side
+// pivots never erase each other merely to force alternation.
+var array<float> structureHighPrice = array.new_float()
+var array<int> structureHighSourceBar = array.new_int()
+var array<int> structureHighKnownBar = array.new_int()
+var array<bool> structureHighActive = array.new_bool()
+var array<float> structureLowPrice = array.new_float()
+var array<int> structureLowSourceBar = array.new_int()
+var array<int> structureLowKnownBar = array.new_int()
+var array<bool> structureLowActive = array.new_bool()
+var float latestConfirmedHigh = na
+var int latestConfirmedHighBar = na
+var float latestConfirmedLow = na
+var int latestConfirmedLowBar = na
+
+// Multiple wick/reclaim candidates survive until a structural invalidation or
+// an opposite BOS causally consumes one. No fixed bar timeout changes meaning.
+var array<int> sweepDirection = array.new_int()
+var array<int> sweepBar = array.new_int()
+var array<int> sweepLevelBar = array.new_int()
+var array<float> sweepLevel = array.new_float()
+var array<float> sweepExtreme = array.new_float()
+var array<bool> sweepValid = array.new_bool()
+
+// Rolling, still-open three-candle gaps. Detection precedes BOS so the
+// displacement gap that creates the break is not discarded.
+var array<int> openFvgDirection = array.new_int()
+var array<float> openFvgBottom = array.new_float()
+var array<float> openFvgTop = array.new_float()
+var array<int> openFvgSourceBar = array.new_int()
+var array<int> openFvgDetectBar = array.new_int()
+var array<bool> openFvgValid = array.new_bool()
+
+// Candidate displacement state: +1 bullish, -1 bearish, 0 none.
+var int legDirection = 0
+var int legBosBar = na
+var int legBosLevelBar = na
+var float legBosLevel = na
+var int legStartBar = na
+var float legStop = na
+var bool legSweep = false
+var int legSweepBar = na
+var int legSweepLevelBar = na
+var float legSweepLevel = na
+var array<float> legFvgBottom = array.new_float()
+var array<float> legFvgTop = array.new_float()
+var array<int> legFvgBar = array.new_int()
+var array<bool> legFvgValid = array.new_bool()
+
+// Latest frozen candidate powers the visible checklist whether or not it passes.
+var int candidateDirection = 0
+var int candidateReadyBar = na
+var int candidateStartBar = na
+var int candidateEndBar = na
+var float candidateLow = na
+var float candidateHigh = na
+var float candidateEntry = na
+var float candidateStop = na
+var float candidateTarget = na
+var float candidatePoc = na
+var float candidatePocLow = na
+var float candidatePocHigh = na
+var int candidateProfileRows = 0
+var float candidateRowHeight = na
+var int candidatePocRow = na
+var int candidatePocDistanceRows = na
+var float candidateFibNodeRatio = na
+var bool candidateProfileTruncated = false
+var float candidateHtfHigh = na
+var float candidateHtfLow = na
+var float candidateHtfMid = na
+var int candidateHtfHighTime = na
+var int candidateHtfLowTime = na
+var bool candidateHtf = false
+var bool candidateBos = false
+var bool candidateSweep = false
+var bool candidateImbalance = false
+var bool candidatePocPass = false
+var int candidateFvgCount = 0
+var int candidateFvgPassCount = 0
+var bool candidateBreakFvg = false
+var int candidateScore = 0
+var bool candidateLate = false
+var bool candidateEligible = false
+var string candidateMissing = "—"
+var int candidateSweepBar = na
+var int candidateSweepLevelBar = na
+var float candidateSweepLevel = na
+var int candidateBosBar = na
+var int candidateBosLevelBar = na
+var float candidateBosLevel = na
+var array<float> candidateProfile = array.new_float()
+var array<float> candidateFvgBottoms = array.new_float()
+var array<float> candidateFvgTops = array.new_float()
+var array<int> candidateFvgBars = array.new_int()
+var array<bool> candidateFvgPasses = array.new_bool()
+
+// Trade ledger. 0 pending, 1 filled, 2 TP, 3 SL, 4 missed/invalid, 5 ambiguous.
+var array<int> setupDirection = array.new_int()
+var array<int> setupReadyBar = array.new_int()
+var array<int> setupReadyTime = array.new_int()
+var array<int> setupState = array.new_int()
+var array<float> setupEntry = array.new_float()
+var array<float> setupStop = array.new_float()
+var array<float> setupTarget = array.new_float()
+var array<int> setupScore = array.new_int()
+var array<int> setupCandidateIndex = array.new_int()
+var array<int> setupFillBar = array.new_int()
+var array<int> setupFillTime = array.new_int()
+var array<int> setupExitBar = array.new_int()
+var array<int> setupExitTime = array.new_int()
+
+// Frozen candidate ledger. Profiles and FVGs are flattened into fixed-width
+// lanes so one historical event can be reconstructed without global clutter.
+var array<int> ledgerDirection = array.new_int()
+var array<int> ledgerReadyBar = array.new_int()
+var array<int> ledgerStartBar = array.new_int()
+var array<int> ledgerStartTime = array.new_int()
+var array<int> ledgerEndBar = array.new_int()
+var array<float> ledgerLow = array.new_float()
+var array<float> ledgerHigh = array.new_float()
+var array<float> ledgerEntry = array.new_float()
+var array<float> ledgerStop = array.new_float()
+var array<float> ledgerTarget = array.new_float()
+var array<float> ledgerPoc = array.new_float()
+var array<float> ledgerPocLow = array.new_float()
+var array<float> ledgerPocHigh = array.new_float()
+var array<int> ledgerProfileRows = array.new_int()
+var array<float> ledgerRowHeight = array.new_float()
+var array<int> ledgerPocDistance = array.new_int()
+var array<float> ledgerFibNodeRatio = array.new_float()
+var array<bool> ledgerProfileTruncated = array.new_bool()
+var array<bool> ledgerHtf = array.new_bool()
+var array<bool> ledgerBos = array.new_bool()
+var array<bool> ledgerSweep = array.new_bool()
+var array<bool> ledgerImbalance = array.new_bool()
+var array<bool> ledgerPocPass = array.new_bool()
+var array<int> ledgerScore = array.new_int()
+var array<bool> ledgerLate = array.new_bool()
+var array<bool> ledgerEligible = array.new_bool()
+var array<string> ledgerMissing = array.new_string()
+var array<float> ledgerHtfHigh = array.new_float()
+var array<float> ledgerHtfLow = array.new_float()
+var array<float> ledgerHtfMid = array.new_float()
+var array<int> ledgerHtfHighTime = array.new_int()
+var array<int> ledgerHtfLowTime = array.new_int()
+var array<int> ledgerSweepBar = array.new_int()
+var array<int> ledgerSweepTime = array.new_int()
+var array<int> ledgerSweepLevelBar = array.new_int()
+var array<int> ledgerSweepLevelTime = array.new_int()
+var array<float> ledgerSweepLevel = array.new_float()
+var array<int> ledgerBosBar = array.new_int()
+var array<int> ledgerBosTime = array.new_int()
+var array<int> ledgerBosLevelBar = array.new_int()
+var array<int> ledgerBosLevelTime = array.new_int()
+var array<float> ledgerBosLevel = array.new_float()
+var array<int> ledgerFvgCount = array.new_int()
+var array<float> ledgerProfiles = array.new_float()
+var array<float> ledgerFvgBottoms = array.new_float()
+var array<float> ledgerFvgTops = array.new_float()
+var array<int> ledgerFvgBars = array.new_int()
+var array<int> ledgerFvgTimes = array.new_int()
+var array<bool> ledgerFvgPasses = array.new_bool()
+
+// Reviewer structure ledgers.
+var array<int> auditPivotBar = array.new_int()
+var array<float> auditPivotPrice = array.new_float()
+var array<int> auditPivotType = array.new_int()
+var array<bool> auditPivotAccepted = array.new_bool()
+var array<int> auditBosBar = array.new_int()
+var array<int> auditBosLevelBar = array.new_int()
+var array<float> auditBosLevel = array.new_float()
+var array<int> auditBosDirection = array.new_int()
+var array<int> auditSweepBar = array.new_int()
+var array<float> auditSweepLevel = array.new_float()
+var array<int> auditSweepDirection = array.new_int()
+
+// Trader history is rebuilt from the frozen setup ledger, independent of the
+// visible window. The automatic cap is derived from Pine drawing budgets and
+// is not a trader-facing deletion/count setting.
+var array<line> historyLines = array.new_line()
+var array<box> historyBoxes = array.new_box()
+var array<label> historyLabels = array.new_label()
+var int renderedHistoryKey = na
+
+f_clear_history(array<line> lines, array<box> boxes, array<label> labels) =>
+    if array.size(lines) > 0
+        for i = 0 to array.size(lines) - 1
+            line.delete(array.get(lines, i))
+    array.clear(lines)
+    if array.size(boxes) > 0
+        for i = 0 to array.size(boxes) - 1
+            box.delete(array.get(boxes, i))
+    array.clear(boxes)
+    if array.size(labels) > 0
+        for i = 0 to array.size(labels) - 1
+            label.delete(array.get(labels, i))
+    array.clear(labels)
+
+f_draw_history_setup(int setupIndex, string fibLabel, bool withPoc, array<line> lines, array<box> boxes, array<label> labels) =>
+    int ci = array.get(setupCandidateIndex, setupIndex)
+    int direction = array.get(setupDirection, setupIndex)
+    int readyBar = array.get(setupReadyBar, setupIndex)
+    int exitBar = array.get(setupExitBar, setupIndex)
+    int readyTime = array.get(setupReadyTime, setupIndex)
+    int exitTime = array.get(setupExitTime, setupIndex)
+    int state = array.get(setupState, setupIndex)
+    int visualRightTime = na(exitTime) ? time : math.max(readyTime + 4 * BAR_MS, exitTime)
+    float rangeLow = array.get(ledgerLow, ci)
+    float rangeHigh = array.get(ledgerHigh, ci)
+    float entryPrice = array.get(ledgerEntry, ci)
+    float stopPrice = array.get(ledgerStop, ci)
+    float targetPrice = array.get(ledgerTarget, ci)
+    float pocPrice = array.get(ledgerPoc, ci)
+    int rangeStartTime = array.get(ledgerStartTime, ci)
+    float labelPad = math.max(syminfo.mintick * 10.0, (rangeHigh - rangeLow) * 0.025)
+
+    array.push(lines, line.new(rangeStartTime, rangeHigh, visualRightTime, rangeHigh, xloc=xloc.bar_time, color=color.new(lineColor, 48), width=1))
+    array.push(lines, line.new(rangeStartTime, rangeLow, visualRightTime, rangeLow, xloc=xloc.bar_time, color=color.new(lineColor, 48), width=1))
+    array.push(lines, line.new(rangeStartTime, entryPrice, visualRightTime, entryPrice, xloc=xloc.bar_time, color=color.new(gold, 18), width=2))
+    array.push(lines, line.new(rangeStartTime, pocPrice, visualRightTime, pocPrice, xloc=xloc.bar_time, color=color.new(panelText, 42), style=line.style_dashed, width=1))
+    array.push(labels, label.new(visualRightTime, pocPrice, "POC", xloc=xloc.bar_time, style=label.style_none, textcolor=panelMuted, size=size.tiny))
+
+    int bosTime = array.get(ledgerBosTime, ci)
+    int bosLevelTime = array.get(ledgerBosLevelTime, ci)
+    float bosLevel = array.get(ledgerBosLevel, ci)
+    int bosLabelTime = bosLevelTime + int(math.floor((bosTime - bosLevelTime) * 0.5))
+    array.push(lines, line.new(bosLevelTime, bosLevel, bosTime, bosLevel, xloc=xloc.bar_time, color=color.new(lineColor, 28), width=1))
+    array.push(labels, label.new(bosLabelTime, bosLevel, "BOS", xloc=xloc.bar_time, style=direction == 1 ? label.style_label_up : label.style_label_down, color=color.new(panelBg, 8), textcolor=panelText, size=size.tiny))
+
+    bool sweepPass = array.get(ledgerSweep, ci)
+    if sweepPass
+        int sweepTime = array.get(ledgerSweepTime, ci)
+        int sweepLevelTime = array.get(ledgerSweepLevelTime, ci)
+        float ownedSweepLevel = array.get(ledgerSweepLevel, ci)
+        int sweepLabelTime = sweepLevelTime + int(math.floor((sweepTime - sweepLevelTime) * 0.5))
+        array.push(lines, line.new(sweepLevelTime, ownedSweepLevel, sweepTime, ownedSweepLevel, xloc=xloc.bar_time, color=color.new(lineColor, 28), width=1))
+        array.push(labels, label.new(sweepLabelTime, ownedSweepLevel, "LQ", xloc=xloc.bar_time, style=direction == 1 ? label.style_label_up : label.style_label_down, color=color.new(panelBg, 8), textcolor=panelText, size=size.tiny))
+
+    int fvgCount = array.get(ledgerFvgCount, ci)
+    int fvgDrawn = 0
+    if fvgCount > 0
+        for slot = 0 to fvgCount - 1
+            int fi = ci * MAX_CAUSAL_FVGS + slot
+            bool fvgPass = array.get(ledgerFvgPasses, fi)
+            if fvgPass and fvgDrawn < 2
+                int fvgTime = array.get(ledgerFvgTimes, fi)
+                array.push(boxes, box.new(fvgTime, array.get(ledgerFvgTops, fi), math.min(fvgTime + 4 * BAR_MS, visualRightTime), array.get(ledgerFvgBottoms, fi), xloc=xloc.bar_time, bgcolor=imbalancePassColor, border_color=color.new(gold, 42)))
+                fvgDrawn += 1
+        if fvgDrawn == 0
+            int fi = ci * MAX_CAUSAL_FVGS
+            int fvgTime = array.get(ledgerFvgTimes, fi)
+            array.push(boxes, box.new(fvgTime, array.get(ledgerFvgTops, fi), math.min(fvgTime + 4 * BAR_MS, visualRightTime), array.get(ledgerFvgBottoms, fi), xloc=xloc.bar_time, bgcolor=imbalanceColor, border_color=color.new(lineColor, 75)))
+
+    array.push(boxes, box.new(readyTime, math.max(entryPrice, targetPrice), visualRightTime, math.min(entryPrice, targetPrice), xloc=xloc.bar_time, bgcolor=color.new(longColor, 91), border_color=color.new(longColor, 68)))
+    array.push(boxes, box.new(readyTime, math.max(entryPrice, stopPrice), visualRightTime, math.min(entryPrice, stopPrice), xloc=xloc.bar_time, bgcolor=color.new(shortColor, 91), border_color=color.new(shortColor, 68)))
+
+    int profileRows = array.get(ledgerProfileRows, ci)
+    float rowHeight = array.get(ledgerRowHeight, ci)
+    array<float> bands = array.new_float(HISTORY_PROFILE_BANDS, 0.0)
+    for row = 0 to profileRows - 1
+        int band = math.min(HISTORY_PROFILE_BANDS - 1, int(math.floor(HISTORY_PROFILE_BANDS * row / profileRows)))
+        float rowVolume = array.get(ledgerProfiles, ci * PROFILE_MAX_ROWS + row)
+        array.set(bands, band, array.get(bands, band) + nz(rowVolume))
+    float maxBand = array.max(bands)
+    for band = 0 to HISTORY_PROFILE_BANDS - 1
+        float bandVolume = array.get(bands, band)
+        int widthBars = maxBand > 0 ? int(math.round(8.0 * bandVolume / maxBand)) : 0
+        float bandPrice = rangeLow + (band + 0.5) * profileRows * rowHeight / HISTORY_PROFILE_BANDS
+        array.push(lines, line.new(visualRightTime - widthBars * BAR_MS, bandPrice, visualRightTime, bandPrice, xloc=xloc.bar_time, color=color.new(panelMuted, 58), width=2))
+
+    bool htfPass = array.get(ledgerHtf, ci)
+    bool bosPass = array.get(ledgerBos, ci)
+    bool imbalancePass = array.get(ledgerImbalance, ci)
+    bool pocPass = array.get(ledgerPocPass, ci)
+    int score = array.get(setupScore, setupIndex)
+    string sideText = direction == 1 ? "LONG" : "SHORT"
+    string resultText = state == 1 ? "OPEN" : state == 2 ? "TP" : state == 3 ? "SL" : state == 5 ? "AMB · ORDER" : "—"
+    string card = sideText + " " + str.tostring(score) + " · " + fibLabel + " · H" + f_mark(htfPass) + " B" + f_mark(bosPass) + " L" + f_mark(sweepPass) + " F" + f_mark(imbalancePass)
+    card += withPoc ? " P" + f_mark(pocPass) : ""
+    int cardTime = readyTime + int(math.floor((visualRightTime - readyTime) * 0.5))
+    float cardPrice = direction == 1 ? rangeLow - 1.5 * labelPad : rangeHigh + 1.5 * labelPad
+    array.push(labels, label.new(cardTime, cardPrice, card, xloc=xloc.bar_time, style=direction == 1 ? label.style_label_up : label.style_label_down, color=color.new(direction == 1 ? longColor : shortColor, 6), textcolor=color.white, size=size.tiny))
+    if not na(exitTime)
+        float resultPrice = state == 2 ? (direction == 1 ? targetPrice + 2.0 * labelPad : targetPrice - 2.0 * labelPad) : state == 3 ? (direction == 1 ? stopPrice - 6.0 * labelPad : stopPrice + 6.0 * labelPad) : (direction == 1 ? rangeHigh + 2.0 * labelPad : rangeLow - 2.0 * labelPad)
+        color resultColor = state == 2 ? longColor : state == 3 ? shortColor : color.rgb(111, 83, 143)
+        string resultStyle = state == 2 ? (direction == 1 ? label.style_label_down : label.style_label_up) : state == 3 ? (direction == 1 ? label.style_label_up : label.style_label_down) : (direction == 1 ? label.style_label_down : label.style_label_up)
+        array.push(labels, label.new(exitTime, resultPrice, resultText, xloc=xloc.bar_time, style=resultStyle, color=color.new(resultColor, 6), textcolor=color.white, size=size.tiny))
+
+bool bullBreakSignal = false
+bool bearBreakSignal = false
+bool setupReadySignal = false
+bool candidateUpdatedSignal = false
+bool longReadySignal = false
+bool shortReadySignal = false
+bool fillSignal = false
+bool longFillSignal = false
+bool shortFillSignal = false
+bool targetSignal = false
+bool stopSignal = false
+bool ambiguousSignal = false
+bool rawHighPivotSignal = eventBar and not na(pivotHigh)
+bool rawLowPivotSignal = eventBar and not na(pivotLow)
+bool sweepCandidateSignal = false
+
+if eventBar
+    bool confirmedHigh = not na(pivotHigh)
+    bool confirmedLow = not na(pivotLow)
+    bool pivotHighAccepted = confirmedHigh
+    bool pivotLowAccepted = confirmedLow
+    if confirmedHigh
+        int sourceBar = bar_index - PIVOT_LEN
+        latestConfirmedHigh := pivotHigh
+        latestConfirmedHighBar := sourceBar
+        array.push(structureHighPrice, pivotHigh)
+        array.push(structureHighSourceBar, sourceBar)
+        array.push(structureHighKnownBar, bar_index)
+        array.push(structureHighActive, true)
+        array.push(auditPivotBar, sourceBar)
+        array.push(auditPivotPrice, pivotHigh)
+        array.push(auditPivotType, 1)
+        array.push(auditPivotAccepted, true)
+        while array.size(structureHighPrice) > MAX_STRUCTURE_LEVELS
+            int removeAt = 0
+            for i = 0 to array.size(structureHighActive) - 1
+                if not array.get(structureHighActive, i)
+                    removeAt := i
+                    break
+            array.remove(structureHighPrice, removeAt)
+            array.remove(structureHighSourceBar, removeAt)
+            array.remove(structureHighKnownBar, removeAt)
+            array.remove(structureHighActive, removeAt)
+    if confirmedLow
+        int sourceBar = bar_index - PIVOT_LEN
+        latestConfirmedLow := pivotLow
+        latestConfirmedLowBar := sourceBar
+        array.push(structureLowPrice, pivotLow)
+        array.push(structureLowSourceBar, sourceBar)
+        array.push(structureLowKnownBar, bar_index)
+        array.push(structureLowActive, true)
+        array.push(auditPivotBar, sourceBar)
+        array.push(auditPivotPrice, pivotLow)
+        array.push(auditPivotType, -1)
+        array.push(auditPivotAccepted, true)
+        while array.size(structureLowPrice) > MAX_STRUCTURE_LEVELS
+            int removeAt = 0
+            for i = 0 to array.size(structureLowActive) - 1
+                if not array.get(structureLowActive, i)
+                    removeAt := i
+                    break
+            array.remove(structureLowPrice, removeAt)
+            array.remove(structureLowSourceBar, removeAt)
+            array.remove(structureLowKnownBar, removeAt)
+            array.remove(structureLowActive, removeAt)
+
+    // A body close through a swept level invalidates that reversal candidate.
+    if array.size(sweepValid) > 0
+        for i = 0 to array.size(sweepValid) - 1
+            if array.get(sweepValid, i)
+                int direction = array.get(sweepDirection, i)
+                float level = array.get(sweepLevel, i)
+                if (direction == -1 and close > level) or (direction == 1 and close < level)
+                    array.set(sweepValid, i, false)
+
+    bool sweptHighNow = false
+    bool sweptLowNow = false
+    if array.size(structureHighPrice) > 0
+        for i = 0 to array.size(structureHighPrice) - 1
+            sweptHighNow := sweptHighNow or (array.get(structureHighActive, i) and array.get(structureHighKnownBar, i) < bar_index and high > array.get(structureHighPrice, i) and close <= array.get(structureHighPrice, i))
+    if array.size(structureLowPrice) > 0
+        for i = 0 to array.size(structureLowPrice) - 1
+            sweptLowNow := sweptLowNow or (array.get(structureLowActive, i) and array.get(structureLowKnownBar, i) < bar_index and low < array.get(structureLowPrice, i) and close >= array.get(structureLowPrice, i))
+
+    if sweptHighNow and not sweptLowNow and array.size(structureHighPrice) > 0
+        sweepCandidateSignal := true
+        for i = 0 to array.size(structureHighPrice) - 1
+            bool swept = array.get(structureHighActive, i) and array.get(structureHighKnownBar, i) < bar_index and high > array.get(structureHighPrice, i) and close <= array.get(structureHighPrice, i)
+            if swept
+                int levelBar = array.get(structureHighSourceBar, i)
+                int existing = na
+                if array.size(sweepValid) > 0
+                    for j = 0 to array.size(sweepValid) - 1
+                        if array.get(sweepValid, j) and array.get(sweepDirection, j) == -1 and array.get(sweepLevelBar, j) == levelBar
+                            existing := j
+                            break
+                if na(existing)
+                    array.push(sweepDirection, -1)
+                    array.push(sweepBar, bar_index)
+                    array.push(sweepLevelBar, levelBar)
+                    array.push(sweepLevel, array.get(structureHighPrice, i))
+                    array.push(sweepExtreme, high)
+                    array.push(sweepValid, true)
+                    array.push(auditSweepBar, bar_index)
+                    array.push(auditSweepLevel, array.get(structureHighPrice, i))
+                    array.push(auditSweepDirection, -1)
+                else
+                    array.set(sweepBar, existing, bar_index)
+                    array.set(sweepExtreme, existing, math.max(array.get(sweepExtreme, existing), high))
+    if sweptLowNow and not sweptHighNow and array.size(structureLowPrice) > 0
+        sweepCandidateSignal := true
+        for i = 0 to array.size(structureLowPrice) - 1
+            bool swept = array.get(structureLowActive, i) and array.get(structureLowKnownBar, i) < bar_index and low < array.get(structureLowPrice, i) and close >= array.get(structureLowPrice, i)
+            if swept
+                int levelBar = array.get(structureLowSourceBar, i)
+                int existing = na
+                if array.size(sweepValid) > 0
+                    for j = 0 to array.size(sweepValid) - 1
+                        if array.get(sweepValid, j) and array.get(sweepDirection, j) == 1 and array.get(sweepLevelBar, j) == levelBar
+                            existing := j
+                            break
+                if na(existing)
+                    array.push(sweepDirection, 1)
+                    array.push(sweepBar, bar_index)
+                    array.push(sweepLevelBar, levelBar)
+                    array.push(sweepLevel, array.get(structureLowPrice, i))
+                    array.push(sweepExtreme, low)
+                    array.push(sweepValid, true)
+                    array.push(auditSweepBar, bar_index)
+                    array.push(auditSweepLevel, array.get(structureLowPrice, i))
+                    array.push(auditSweepDirection, 1)
+                else
+                    array.set(sweepBar, existing, bar_index)
+                    array.set(sweepExtreme, existing, math.min(array.get(sweepExtreme, existing), low))
+    while array.size(sweepValid) > MAX_SWEEP_CANDIDATES
+        int removeAt = 0
+        for i = 0 to array.size(sweepValid) - 1
+            if not array.get(sweepValid, i)
+                removeAt := i
+                break
+        array.remove(sweepDirection, removeAt)
+        array.remove(sweepBar, removeAt)
+        array.remove(sweepLevelBar, removeAt)
+        array.remove(sweepLevel, removeAt)
+        array.remove(sweepExtreme, removeAt)
+        array.remove(sweepValid, removeAt)
+
+    // Age and invalidate open gaps before detecting the current bar's gap.
+    if array.size(openFvgValid) > 0
+        for i = 0 to array.size(openFvgValid) - 1
+            if array.get(openFvgValid, i) and bar_index > array.get(openFvgDetectBar, i)
+                int fvgDirection = array.get(openFvgDirection, i)
+                float fvgBottom = array.get(openFvgBottom, i)
+                float fvgTop = array.get(openFvgTop, i)
+                bool mitigated = fvgDirection == 1 ? low <= fvgBottom : high >= fvgTop
+                if mitigated
+                    array.set(openFvgValid, i, false)
+    if array.size(legFvgValid) > 0
+        for i = 0 to array.size(legFvgValid) - 1
+            if array.get(legFvgValid, i)
+                int fvgSource = array.get(legFvgBar, i)
+                float fvgBottom = array.get(legFvgBottom, i)
+                float fvgTop = array.get(legFvgTop, i)
+                bool mitigated = bar_index > fvgSource + 2 and (legDirection == 1 ? low <= fvgBottom : high >= fvgTop)
+                if mitigated
+                    array.set(legFvgValid, i, false)
+
+    bool bullFvgNow = low > high[2]
+    bool bearFvgNow = high < low[2]
+    if bullFvgNow or bearFvgNow
+        int fvgDirection = bullFvgNow ? 1 : -1
+        float fvgBottom = bullFvgNow ? high[2] : high
+        float fvgTop = bullFvgNow ? low : low[2]
+        array.push(openFvgDirection, fvgDirection)
+        array.push(openFvgBottom, fvgBottom)
+        array.push(openFvgTop, fvgTop)
+        array.push(openFvgSourceBar, bar_index - 2)
+        array.push(openFvgDetectBar, bar_index)
+        array.push(openFvgValid, true)
+        if legDirection == fvgDirection and bar_index > legBosBar
+            array.push(legFvgBottom, fvgBottom)
+            array.push(legFvgTop, fvgTop)
+            array.push(legFvgBar, bar_index - 2)
+            array.push(legFvgValid, true)
+    while array.size(openFvgDirection) > 96
+        array.shift(openFvgDirection)
+        array.shift(openFvgBottom)
+        array.shift(openFvgTop)
+        array.shift(openFvgSourceBar)
+        array.shift(openFvgDetectBar)
+        array.shift(openFvgValid)
+
+    int bullLevelIndex = na
+    int bearLevelIndex = na
+    if array.size(structureHighPrice) > 0
+        for i = 0 to array.size(structureHighPrice) - 1
+            if array.get(structureHighActive, i) and array.get(structureHighKnownBar, i) <= bar_index and close > array.get(structureHighPrice, i)
+                if na(bullLevelIndex) or array.get(structureHighPrice, i) > array.get(structureHighPrice, bullLevelIndex) or (array.get(structureHighPrice, i) == array.get(structureHighPrice, bullLevelIndex) and array.get(structureHighSourceBar, i) > array.get(structureHighSourceBar, bullLevelIndex))
+                    bullLevelIndex := i
+    if array.size(structureLowPrice) > 0
+        for i = 0 to array.size(structureLowPrice) - 1
+            if array.get(structureLowActive, i) and array.get(structureLowKnownBar, i) <= bar_index and close < array.get(structureLowPrice, i)
+                if na(bearLevelIndex) or array.get(structureLowPrice, i) < array.get(structureLowPrice, bearLevelIndex) or (array.get(structureLowPrice, i) == array.get(structureLowPrice, bearLevelIndex) and array.get(structureLowSourceBar, i) > array.get(structureLowSourceBar, bearLevelIndex))
+                    bearLevelIndex := i
+
+    bullBreakSignal := not na(bullLevelIndex)
+    bearBreakSignal := not na(bearLevelIndex)
+
+    if bullBreakSignal and not bearBreakSignal
+        int bosLevelBar = array.get(structureHighSourceBar, bullLevelIndex)
+        float bosLevel = array.get(structureHighPrice, bullLevelIndex)
+        int selectedSweep = na
+        if array.size(sweepValid) > 0
+            for i = 0 to array.size(sweepValid) - 1
+                bool causal = array.get(sweepValid, i) and array.get(sweepDirection, i) == 1 and array.get(sweepBar, i) > bosLevelBar and array.get(sweepBar, i) < bar_index
+                if causal and (na(selectedSweep) or array.get(sweepExtreme, i) < array.get(sweepExtreme, selectedSweep) or (array.get(sweepExtreme, i) == array.get(sweepExtreme, selectedSweep) and array.get(sweepBar, i) > array.get(sweepBar, selectedSweep)))
+                    selectedSweep := i
+        bool linkedSweep = not na(selectedSweep)
+        bool startNewLeg = legDirection != 1
+        if startNewLeg
+            legDirection := 1
+            legBosBar := bar_index
+            legBosLevelBar := bosLevelBar
+            legBosLevel := bosLevel
+            legSweep := linkedSweep
+            legSweepBar := linkedSweep ? array.get(sweepBar, selectedSweep) : na
+            legSweepLevelBar := linkedSweep ? array.get(sweepLevelBar, selectedSweep) : na
+            legSweepLevel := linkedSweep ? array.get(sweepLevel, selectedSweep) : na
+            legStartBar := linkedSweep ? array.get(sweepBar, selectedSweep) : latestConfirmedLowBar
+            legStop := linkedSweep ? array.get(sweepExtreme, selectedSweep) : latestConfirmedLow
+            array.clear(legFvgBottom)
+            array.clear(legFvgTop)
+            array.clear(legFvgBar)
+            array.clear(legFvgValid)
+            if not na(legStartBar) and array.size(openFvgDirection) > 0
+                for i = 0 to array.size(openFvgDirection) - 1
+                    bool causal = array.get(openFvgDirection, i) == 1 and array.get(openFvgValid, i) and array.get(openFvgDetectBar, i) >= legStartBar and array.get(openFvgDetectBar, i) <= bar_index
+                    if causal
+                        array.push(legFvgBottom, array.get(openFvgBottom, i))
+                        array.push(legFvgTop, array.get(openFvgTop, i))
+                        array.push(legFvgBar, array.get(openFvgSourceBar, i))
+                        array.push(legFvgValid, true)
+            if linkedSweep
+                array.set(sweepValid, selectedSweep, false)
+        if array.size(structureHighPrice) > 0
+            for i = 0 to array.size(structureHighPrice) - 1
+                if array.get(structureHighActive, i) and close > array.get(structureHighPrice, i)
+                    array.set(structureHighActive, i, false)
+        array.push(auditBosBar, bar_index)
+        array.push(auditBosLevelBar, bosLevelBar)
+        array.push(auditBosLevel, bosLevel)
+        array.push(auditBosDirection, 1)
+    else if bearBreakSignal and not bullBreakSignal
+        int bosLevelBar = array.get(structureLowSourceBar, bearLevelIndex)
+        float bosLevel = array.get(structureLowPrice, bearLevelIndex)
+        int selectedSweep = na
+        if array.size(sweepValid) > 0
+            for i = 0 to array.size(sweepValid) - 1
+                bool causal = array.get(sweepValid, i) and array.get(sweepDirection, i) == -1 and array.get(sweepBar, i) > bosLevelBar and array.get(sweepBar, i) < bar_index
+                if causal and (na(selectedSweep) or array.get(sweepExtreme, i) > array.get(sweepExtreme, selectedSweep) or (array.get(sweepExtreme, i) == array.get(sweepExtreme, selectedSweep) and array.get(sweepBar, i) > array.get(sweepBar, selectedSweep)))
+                    selectedSweep := i
+        bool linkedSweep = not na(selectedSweep)
+        bool startNewLeg = legDirection != -1
+        if startNewLeg
+            legDirection := -1
+            legBosBar := bar_index
+            legBosLevelBar := bosLevelBar
+            legBosLevel := bosLevel
+            legSweep := linkedSweep
+            legSweepBar := linkedSweep ? array.get(sweepBar, selectedSweep) : na
+            legSweepLevelBar := linkedSweep ? array.get(sweepLevelBar, selectedSweep) : na
+            legSweepLevel := linkedSweep ? array.get(sweepLevel, selectedSweep) : na
+            legStartBar := linkedSweep ? array.get(sweepBar, selectedSweep) : latestConfirmedHighBar
+            legStop := linkedSweep ? array.get(sweepExtreme, selectedSweep) : latestConfirmedHigh
+            array.clear(legFvgBottom)
+            array.clear(legFvgTop)
+            array.clear(legFvgBar)
+            array.clear(legFvgValid)
+            if not na(legStartBar) and array.size(openFvgDirection) > 0
+                for i = 0 to array.size(openFvgDirection) - 1
+                    bool causal = array.get(openFvgDirection, i) == -1 and array.get(openFvgValid, i) and array.get(openFvgDetectBar, i) >= legStartBar and array.get(openFvgDetectBar, i) <= bar_index
+                    if causal
+                        array.push(legFvgBottom, array.get(openFvgBottom, i))
+                        array.push(legFvgTop, array.get(openFvgTop, i))
+                        array.push(legFvgBar, array.get(openFvgSourceBar, i))
+                        array.push(legFvgValid, true)
+            if linkedSweep
+                array.set(sweepValid, selectedSweep, false)
+        if array.size(structureLowPrice) > 0
+            for i = 0 to array.size(structureLowPrice) - 1
+                if array.get(structureLowActive, i) and close < array.get(structureLowPrice, i)
+                    array.set(structureLowActive, i, false)
+        array.push(auditBosBar, bar_index)
+        array.push(auditBosLevelBar, bosLevelBar)
+        array.push(auditBosLevel, bosLevel)
+        array.push(auditBosDirection, -1)
+
+    // The BOS candle may own the impulse extreme; it still needs PIVOT_LEN
+    // later closed candles to confirm. This never backdates setup readiness.
+    bool lockLong = legDirection == 1 and pivotHighAccepted and bar_index - PIVOT_LEN >= legBosBar
+    bool lockShort = legDirection == -1 and pivotLowAccepted and bar_index - PIVOT_LEN >= legBosBar
+    if lockLong or lockShort
+        int direction = lockLong ? 1 : -1
+        int endpointBar = bar_index - PIVOT_LEN
+        float endpoint = lockLong ? pivotHigh : pivotLow
+        float rangeLow = direction == 1 ? legStop : endpoint
+        float rangeHigh = direction == 1 ? endpoint : legStop
+        bool geometryValid = not na(rangeLow) and not na(rangeHigh) and rangeHigh > rangeLow and not na(legStartBar)
+        if geometryValid
+            float rangeSize = rangeHigh - rangeLow
+            float entryPrice = direction == 1 ? rangeHigh - fibPct * rangeSize : rangeLow + fibPct * rangeSize
+            float stopPrice = direction == 1 ? rangeLow : rangeHigh
+            float targetPrice = direction == 1 ? rangeHigh : rangeLow
+
+            bool imbalancePass = false
+            int fvgPassCount = 0
+            bool breakFvgPresent = false
+            float chosenFvgBottom = na
+            float chosenFvgTop = na
+            int chosenFvgBar = na
+            array.clear(candidateFvgBottoms)
+            array.clear(candidateFvgTops)
+            array.clear(candidateFvgBars)
+            array.clear(candidateFvgPasses)
+            if array.size(legFvgBottom) > 0
+                for i = 0 to array.size(legFvgBottom) - 1
+                    float fvgBottom = array.get(legFvgBottom, i)
+                    float fvgTop = array.get(legFvgTop, i)
+                    bool fvgValid = array.get(legFvgValid, i)
+                    bool fvgPass = fvgValid and entryPrice >= fvgBottom and entryPrice <= fvgTop
+                    if fvgValid
+                        breakFvgPresent := breakFvgPresent or array.get(legFvgBar, i) + 2 <= legBosBar
+                        if array.size(candidateFvgBottoms) >= MAX_CAUSAL_FVGS
+                            array.shift(candidateFvgBottoms)
+                            array.shift(candidateFvgTops)
+                            array.shift(candidateFvgBars)
+                            array.shift(candidateFvgPasses)
+                        array.push(candidateFvgBottoms, fvgBottom)
+                        array.push(candidateFvgTops, fvgTop)
+                        array.push(candidateFvgBars, array.get(legFvgBar, i))
+                        array.push(candidateFvgPasses, fvgPass)
+                    if fvgPass
+                        imbalancePass := true
+                        fvgPassCount += 1
+                        chosenFvgBottom := fvgBottom
+                        chosenFvgTop := fvgTop
+                        chosenFvgBar := array.get(legFvgBar, i)
+
+            array.clear(candidateProfile)
+            float targetRowHeight = math.max(syminfo.mintick, nz(profileAtr, rangeSize / PROFILE_MIN_ROWS) * PROFILE_ATR_FRACTION)
+            int profileRows = int(math.ceil(rangeSize / targetRowHeight))
+            profileRows := math.max(PROFILE_MIN_ROWS, math.min(PROFILE_MAX_ROWS, profileRows))
+            for row = 0 to profileRows - 1
+                array.push(candidateProfile, 0.0)
+            float rowHeight = rangeSize / profileRows
+            bool profileTruncated = legStartBar < bar_index - PROFILE_LOOKBACK_BARS
+            if array.size(rollBar) > 0
+                for i = 0 to array.size(rollBar) - 1
+                    int sourceBar = array.get(rollBar, i)
+                    if sourceBar >= legStartBar and sourceBar <= endpointBar
+                        float intrabarHigh = math.min(array.get(rollHigh, i), rangeHigh)
+                        float intrabarLow = math.max(array.get(rollLow, i), rangeLow)
+                        float intrabarVolume = array.get(rollVolume, i)
+                        if intrabarHigh >= intrabarLow and intrabarVolume > 0
+                            int firstRow = int(math.floor((intrabarLow - rangeLow) / rowHeight))
+                            int lastRow = int(math.floor((intrabarHigh - rangeLow) / rowHeight))
+                            firstRow := math.max(0, math.min(profileRows - 1, firstRow))
+                            lastRow := math.max(0, math.min(profileRows - 1, lastRow))
+                            int touchedRows = math.max(1, lastRow - firstRow + 1)
+                            float share = intrabarVolume / touchedRows
+                            for row = firstRow to lastRow
+                                array.set(candidateProfile, row, array.get(candidateProfile, row) + share)
+
+            float maxVolume = 0.0
+            int pocRow = 0
+            for row = 0 to profileRows - 1
+                float rowVolume = array.get(candidateProfile, row)
+                if rowVolume > maxVolume
+                    maxVolume := rowVolume
+                    pocRow := row
+            int fibRow = int(math.floor((entryPrice - rangeLow) / rowHeight))
+            fibRow := math.max(0, math.min(profileRows - 1, fibRow))
+            int pocDistanceRows = math.abs(pocRow - fibRow)
+            float pocLow = rangeLow + pocRow * rowHeight
+            float pocHigh = pocLow + rowHeight
+            float pocPrice = (pocLow + pocHigh) * 0.5
+            bool pocPass = maxVolume > 0 and pocDistanceRows <= POC_ROW_TOLERANCE
+            float goldenA = direction == 1 ? rangeHigh - 0.71 * rangeSize : rangeLow + 0.71 * rangeSize
+            float goldenB = direction == 1 ? rangeHigh - 0.75 * rangeSize : rangeLow + 0.75 * rangeSize
+            float goldenLow = math.min(goldenA, goldenB)
+            float goldenHigh = math.max(goldenA, goldenB)
+            int goldenFirstRow = math.max(0, math.min(profileRows - 1, int(math.floor((goldenLow - rangeLow) / rowHeight))))
+            int goldenLastRow = math.max(0, math.min(profileRows - 1, int(math.floor((goldenHigh - rangeLow) / rowHeight))))
+            float fibNodeVolume = 0.0
+            for row = goldenFirstRow to goldenLastRow
+                fibNodeVolume := math.max(fibNodeVolume, array.get(candidateProfile, row))
+            float fibNodeRatio = maxVolume > 0 ? fibNodeVolume / maxVolume : na
+            bool htfPass = direction == 1 ? close <= htfMid : close >= htfMid
+            bool bosPass = not na(legBosBar) and not na(legBosLevelBar) and not na(legBosLevel)
+            int passed = (htfPass ? 1 : 0) + (bosPass ? 1 : 0) + (legSweep ? 1 : 0) + (imbalancePass ? 1 : 0) + (includePoc and pocPass ? 1 : 0)
+            int score = includePoc ? passed * 20 : passed * 25
+            bool late = false
+            for offset = 0 to PIVOT_LEN - 1
+                late := late or (direction == 1 ? low[offset] <= entryPrice : high[offset] >= entryPrice)
+            bool eligible = score >= requiredScore and not late
+
+            candidateDirection := direction
+            candidateReadyBar := bar_index
+            candidateStartBar := legStartBar
+            candidateEndBar := endpointBar
+            candidateLow := rangeLow
+            candidateHigh := rangeHigh
+            candidateEntry := entryPrice
+            candidateStop := stopPrice
+            candidateTarget := targetPrice
+            candidatePoc := pocPrice
+            candidatePocLow := pocLow
+            candidatePocHigh := pocHigh
+            candidateProfileRows := profileRows
+            candidateRowHeight := rowHeight
+            candidatePocRow := pocRow
+            candidatePocDistanceRows := pocDistanceRows
+            candidateFibNodeRatio := fibNodeRatio
+            candidateProfileTruncated := profileTruncated
+            candidateHtfHigh := htfHigh
+            candidateHtfLow := htfLow
+            candidateHtfMid := htfMid
+            candidateHtfHighTime := htfHighTime
+            candidateHtfLowTime := htfLowTime
+            candidateHtf := htfPass
+            candidateBos := bosPass
+            candidateSweep := legSweep
+            candidateImbalance := imbalancePass
+            candidatePocPass := pocPass
+            candidateFvgCount := array.size(candidateFvgBottoms)
+            candidateFvgPassCount := fvgPassCount
+            candidateBreakFvg := breakFvgPresent
+            candidateScore := score
+            candidateLate := late
+            candidateEligible := eligible
+            candidateMissing := f_missing(htfPass, bosPass, legSweep, imbalancePass, pocPass, includePoc)
+            candidateSweepBar := legSweepBar
+            candidateSweepLevelBar := legSweepLevelBar
+            candidateSweepLevel := legSweepLevel
+            candidateBosBar := legBosBar
+            candidateBosLevelBar := legBosLevelBar
+            candidateBosLevel := legBosLevel
+            candidateUpdatedSignal := true
+
+            int candidateIndex = array.size(ledgerDirection)
+            array.push(ledgerDirection, direction)
+            array.push(ledgerReadyBar, bar_index)
+            array.push(ledgerStartBar, legStartBar)
+            array.push(ledgerStartTime, f_time_at(legStartBar))
+            array.push(ledgerEndBar, endpointBar)
+            array.push(ledgerLow, rangeLow)
+            array.push(ledgerHigh, rangeHigh)
+            array.push(ledgerEntry, entryPrice)
+            array.push(ledgerStop, stopPrice)
+            array.push(ledgerTarget, targetPrice)
+            array.push(ledgerPoc, pocPrice)
+            array.push(ledgerPocLow, pocLow)
+            array.push(ledgerPocHigh, pocHigh)
+            array.push(ledgerProfileRows, profileRows)
+            array.push(ledgerRowHeight, rowHeight)
+            array.push(ledgerPocDistance, pocDistanceRows)
+            array.push(ledgerFibNodeRatio, fibNodeRatio)
+            array.push(ledgerProfileTruncated, profileTruncated)
+            array.push(ledgerHtf, htfPass)
+            array.push(ledgerBos, bosPass)
+            array.push(ledgerSweep, legSweep)
+            array.push(ledgerImbalance, imbalancePass)
+            array.push(ledgerPocPass, pocPass)
+            array.push(ledgerScore, score)
+            array.push(ledgerLate, late)
+            array.push(ledgerEligible, eligible)
+            array.push(ledgerMissing, candidateMissing)
+            array.push(ledgerHtfHigh, htfHigh)
+            array.push(ledgerHtfLow, htfLow)
+            array.push(ledgerHtfMid, htfMid)
+            array.push(ledgerHtfHighTime, htfHighTime)
+            array.push(ledgerHtfLowTime, htfLowTime)
+            array.push(ledgerSweepBar, legSweep ? legSweepBar : na)
+            array.push(ledgerSweepTime, legSweep ? f_time_at(legSweepBar) : na)
+            array.push(ledgerSweepLevelBar, legSweep ? legSweepLevelBar : na)
+            array.push(ledgerSweepLevelTime, legSweep ? f_time_at(legSweepLevelBar) : na)
+            array.push(ledgerSweepLevel, legSweep ? legSweepLevel : na)
+            array.push(ledgerBosBar, legBosBar)
+            array.push(ledgerBosTime, f_time_at(legBosBar))
+            array.push(ledgerBosLevelBar, legBosLevelBar)
+            array.push(ledgerBosLevelTime, f_time_at(legBosLevelBar))
+            array.push(ledgerBosLevel, legBosLevel)
+            array.push(ledgerFvgCount, array.size(candidateFvgBottoms))
+            for row = 0 to PROFILE_MAX_ROWS - 1
+                array.push(ledgerProfiles, row < profileRows ? array.get(candidateProfile, row) : na)
+            for slot = 0 to MAX_CAUSAL_FVGS - 1
+                bool hasFvg = slot < array.size(candidateFvgBottoms)
+                array.push(ledgerFvgBottoms, hasFvg ? array.get(candidateFvgBottoms, slot) : na)
+                array.push(ledgerFvgTops, hasFvg ? array.get(candidateFvgTops, slot) : na)
+                array.push(ledgerFvgBars, hasFvg ? array.get(candidateFvgBars, slot) : na)
+                array.push(ledgerFvgTimes, hasFvg ? f_time_at(array.get(candidateFvgBars, slot)) : na)
+                array.push(ledgerFvgPasses, hasFvg ? array.get(candidateFvgPasses, slot) : false)
+
+            if eligible
+                array.push(setupDirection, direction)
+                array.push(setupReadyBar, bar_index)
+                array.push(setupReadyTime, time)
+                array.push(setupState, 0)
+                array.push(setupEntry, entryPrice)
+                array.push(setupStop, stopPrice)
+                array.push(setupTarget, targetPrice)
+                array.push(setupScore, score)
+                array.push(setupCandidateIndex, candidateIndex)
+                array.push(setupFillBar, na)
+                array.push(setupFillTime, na)
+                array.push(setupExitBar, na)
+                array.push(setupExitTime, na)
+                setupReadySignal := true
+                longReadySignal := direction == 1
+                shortReadySignal := direction == -1
+        legDirection := 0
+        array.clear(legFvgBottom)
+        array.clear(legFvgTop)
+        array.clear(legFvgBar)
+        array.clear(legFvgValid)
+
+    // Independent lifecycle evaluation for every emitted setup.
+    if array.size(setupState) > 0
+        for i = 0 to array.size(setupState) - 1
+            int state = array.get(setupState, i)
+            int readyBar = array.get(setupReadyBar, i)
+            if bar_index > readyBar and state <= 1
+                int direction = array.get(setupDirection, i)
+                float entryPrice = array.get(setupEntry, i)
+                float stopPrice = array.get(setupStop, i)
+                float targetPrice = array.get(setupTarget, i)
+                bool entryTouched = direction == 1 ? low <= entryPrice : high >= entryPrice
+                bool stopTouched = direction == 1 ? low <= stopPrice : high >= stopPrice
+                bool targetTouched = direction == 1 ? high >= targetPrice : low <= targetPrice
+                bool gapPastStop = direction == 1 ? open <= stopPrice : open >= stopPrice
+                if state == 0
+                    if entryTouched
+                        array.set(setupFillBar, i, bar_index)
+                        array.set(setupFillTime, i, time)
+                        fillSignal := true
+                        longFillSignal := direction == 1
+                        shortFillSignal := direction == -1
+                        if targetTouched or (stopTouched and gapPastStop)
+                            array.set(setupExitBar, i, bar_index)
+                            array.set(setupExitTime, i, time)
+                            array.set(setupState, i, 5)
+                            ambiguousSignal := true
+                        else if stopTouched
+                            array.set(setupExitBar, i, bar_index)
+                            array.set(setupExitTime, i, time)
+                            array.set(setupState, i, 3)
+                            stopSignal := true
+                        else
+                            array.set(setupState, i, 1)
+                    else if stopTouched or targetTouched
+                        array.set(setupState, i, 4)
+                        array.set(setupExitBar, i, bar_index)
+                        array.set(setupExitTime, i, time)
+                else if state == 1
+                    if stopTouched and targetTouched
+                        array.set(setupExitBar, i, bar_index)
+                        array.set(setupExitTime, i, time)
+                        array.set(setupState, i, 5)
+                        ambiguousSignal := true
+                    else if targetTouched
+                        array.set(setupExitBar, i, bar_index)
+                        array.set(setupExitTime, i, time)
+                        array.set(setupState, i, 2)
+                        targetSignal := true
+                    else if stopTouched
+                        array.set(setupExitBar, i, bar_index)
+                        array.set(setupExitTime, i, time)
+                        array.set(setupState, i, 3)
+                        stopSignal := true
+
+var int displaySetupState = na
+var int displayFillBar = na
+var int displayExitBar = na
+var int displayCandidateIndex = na
+
+if barstate.islast
+    displayCandidateIndex := array.size(ledgerDirection) > 0 ? array.size(ledgerDirection) - 1 : na
+    if viewMode == "Reviewer"
+        if reviewSourceInput == "Setups" and array.size(setupCandidateIndex) > 0
+            int setupSelection = math.max(0, array.size(setupCandidateIndex) - 1 - math.min(reviewOffsetInput, array.size(setupCandidateIndex) - 1))
+            displayCandidateIndex := array.get(setupCandidateIndex, setupSelection)
+            displaySetupState := array.get(setupState, setupSelection)
+            displayFillBar := array.get(setupFillBar, setupSelection)
+            displayExitBar := array.get(setupExitBar, setupSelection)
+        else if array.size(ledgerDirection) > 0
+            displayCandidateIndex := math.max(0, array.size(ledgerDirection) - 1 - math.min(reviewOffsetInput, array.size(ledgerDirection) - 1))
+    if not na(displayCandidateIndex) and na(displaySetupState) and array.size(setupCandidateIndex) > 0
+        for i = 0 to array.size(setupCandidateIndex) - 1
+            if array.get(setupCandidateIndex, i) == displayCandidateIndex
+                displaySetupState := array.get(setupState, i)
+                displayFillBar := array.get(setupFillBar, i)
+                displayExitBar := array.get(setupExitBar, i)
+    if not na(displayCandidateIndex)
+        int ci = displayCandidateIndex
+        candidateDirection := array.get(ledgerDirection, ci)
+        candidateReadyBar := array.get(ledgerReadyBar, ci)
+        candidateStartBar := array.get(ledgerStartBar, ci)
+        candidateEndBar := array.get(ledgerEndBar, ci)
+        candidateLow := array.get(ledgerLow, ci)
+        candidateHigh := array.get(ledgerHigh, ci)
+        candidateEntry := array.get(ledgerEntry, ci)
+        candidateStop := array.get(ledgerStop, ci)
+        candidateTarget := array.get(ledgerTarget, ci)
+        candidatePoc := array.get(ledgerPoc, ci)
+        candidatePocLow := array.get(ledgerPocLow, ci)
+        candidatePocHigh := array.get(ledgerPocHigh, ci)
+        candidateProfileRows := array.get(ledgerProfileRows, ci)
+        candidateRowHeight := array.get(ledgerRowHeight, ci)
+        candidatePocDistanceRows := array.get(ledgerPocDistance, ci)
+        candidateFibNodeRatio := array.get(ledgerFibNodeRatio, ci)
+        candidateProfileTruncated := array.get(ledgerProfileTruncated, ci)
+        candidateHtf := array.get(ledgerHtf, ci)
+        candidateBos := array.get(ledgerBos, ci)
+        candidateSweep := array.get(ledgerSweep, ci)
+        candidateImbalance := array.get(ledgerImbalance, ci)
+        candidatePocPass := array.get(ledgerPocPass, ci)
+        candidateScore := array.get(ledgerScore, ci)
+        candidateLate := array.get(ledgerLate, ci)
+        candidateEligible := array.get(ledgerEligible, ci)
+        candidateMissing := array.get(ledgerMissing, ci)
+        candidateHtfHigh := array.get(ledgerHtfHigh, ci)
+        candidateHtfLow := array.get(ledgerHtfLow, ci)
+        candidateHtfMid := array.get(ledgerHtfMid, ci)
+        candidateHtfHighTime := array.get(ledgerHtfHighTime, ci)
+        candidateHtfLowTime := array.get(ledgerHtfLowTime, ci)
+        candidateSweepBar := array.get(ledgerSweepBar, ci)
+        candidateSweepLevelBar := array.get(ledgerSweepLevelBar, ci)
+        candidateSweepLevel := array.get(ledgerSweepLevel, ci)
+        candidateBosBar := array.get(ledgerBosBar, ci)
+        candidateBosLevelBar := array.get(ledgerBosLevelBar, ci)
+        candidateBosLevel := array.get(ledgerBosLevel, ci)
+        candidateFvgCount := array.get(ledgerFvgCount, ci)
+        array.clear(candidateProfile)
+        for row = 0 to candidateProfileRows - 1
+            array.push(candidateProfile, array.get(ledgerProfiles, ci * PROFILE_MAX_ROWS + row))
+        array.clear(candidateFvgBottoms)
+        array.clear(candidateFvgTops)
+        array.clear(candidateFvgBars)
+        array.clear(candidateFvgPasses)
+        if candidateFvgCount > 0
+            for slot = 0 to candidateFvgCount - 1
+                int fi = ci * MAX_CAUSAL_FVGS + slot
+                array.push(candidateFvgBottoms, array.get(ledgerFvgBottoms, fi))
+                array.push(candidateFvgTops, array.get(ledgerFvgTops, fi))
+                array.push(candidateFvgBars, array.get(ledgerFvgBars, fi))
+                array.push(candidateFvgPasses, array.get(ledgerFvgPasses, fi))
+        if viewMode == "Reviewer"
+            candidateUpdatedSignal := true
+
+// The selected locked structural narrative is always visible. Trader mode
+// selects the latest event; Reviewer mode reconstructs one indexed event.
+var line rangeHighLine = na
+var line rangeLowLine = na
+var line entryLine = na
+var line pocLine = na
+var line lqLine = na
+var line bosLine = na
+var label rangeHighLabel = na
+var label rangeLowLabel = na
+var label entryLevelLabel = na
+var label pocLevelLabel = na
+var label lqLabel = na
+var label bosLabel = na
+var box rewardBox = na
+var box riskBox = na
+var array<box> profileBoxes = array.new_box()
+var array<box> fvgBoxes = array.new_box()
+var array<line> reviewLines = array.new_line()
+var array<label> reviewLabels = array.new_label()
+
+if candidateUpdatedSignal
+    f_delete_line(rangeHighLine)
+    f_delete_line(rangeLowLine)
+    f_delete_line(entryLine)
+    f_delete_line(pocLine)
+    f_delete_line(lqLine)
+    f_delete_line(bosLine)
+    f_delete_label(rangeHighLabel)
+    f_delete_label(rangeLowLabel)
+    f_delete_label(entryLevelLabel)
+    f_delete_label(pocLevelLabel)
+    f_delete_label(lqLabel)
+    f_delete_label(bosLabel)
+    f_delete_box(rewardBox)
+    f_delete_box(riskBox)
+    if array.size(profileBoxes) > 0
+        for i = 0 to array.size(profileBoxes) - 1
+            box.delete(array.get(profileBoxes, i))
+    array.clear(profileBoxes)
+    if array.size(fvgBoxes) > 0
+        for i = 0 to array.size(fvgBoxes) - 1
+            box.delete(array.get(fvgBoxes, i))
+    array.clear(fvgBoxes)
+    if array.size(reviewLines) > 0
+        for i = 0 to array.size(reviewLines) - 1
+            line.delete(array.get(reviewLines, i))
+    array.clear(reviewLines)
+    if array.size(reviewLabels) > 0
+        for i = 0 to array.size(reviewLabels) - 1
+            label.delete(array.get(reviewLabels, i))
+    array.clear(reviewLabels)
+    rangeHighLine := na
+    rangeLowLine := na
+    entryLine := na
+    pocLine := na
+    lqLine := na
+    bosLine := na
+    rangeHighLabel := na
+    rangeLowLabel := na
+    entryLevelLabel := na
+    pocLevelLabel := na
+    lqLabel := na
+    bosLabel := na
+    rewardBox := na
+    riskBox := na
+
+if not na(candidateReadyBar)
+    int visualRight = viewMode == "Reviewer" and not na(displayExitBar) ? math.max(candidateReadyBar + 6, displayExitBar) : bar_index + 15
+    if na(rangeHighLine)
+        rangeHighLine := line.new(candidateStartBar, candidateHigh, visualRight, candidateHigh, xloc=xloc.bar_index, color=lineColor, width=1)
+        rangeLowLine := line.new(candidateStartBar, candidateLow, visualRight, candidateLow, xloc=xloc.bar_index, color=lineColor, width=1)
+        entryLine := line.new(candidateStartBar, candidateEntry, visualRight, candidateEntry, xloc=xloc.bar_index, color=gold, width=2)
+        pocLine := line.new(candidateStartBar, candidatePoc, visualRight, candidatePoc, xloc=xloc.bar_index, color=color.new(panelText, 20), style=line.style_dashed, width=1)
+        string highText = candidateDirection == 1 ? "0" : "1"
+        string lowText = candidateDirection == 1 ? "1" : "0"
+        rangeHighLabel := label.new(visualRight, candidateHigh, highText, xloc=xloc.bar_index, style=label.style_none, textcolor=panelMuted, size=size.tiny)
+        rangeLowLabel := label.new(visualRight, candidateLow, lowText, xloc=xloc.bar_index, style=label.style_none, textcolor=panelMuted, size=size.tiny)
+        entryLevelLabel := label.new(visualRight, candidateEntry, fibChoice, xloc=xloc.bar_index, style=label.style_none, textcolor=gold, size=size.tiny)
+        pocLevelLabel := label.new(visualRight, candidatePoc, "POC est.", xloc=xloc.bar_index, style=label.style_none, textcolor=panelMuted, size=size.tiny)
+        if candidateSweep and not na(candidateSweepLevelBar)
+            int selectedLqLabelBar = candidateSweepLevelBar + int(math.floor((candidateSweepBar - candidateSweepLevelBar) * 0.5))
+            lqLine := line.new(candidateSweepLevelBar, candidateSweepLevel, candidateSweepBar, candidateSweepLevel, xloc=xloc.bar_index, color=lineColor, width=1)
+            lqLabel := label.new(selectedLqLabelBar, candidateSweepLevel, "LQ", xloc=xloc.bar_index, style=candidateDirection == 1 ? label.style_label_up : label.style_label_down, color=color.new(panelBg, 8), textcolor=panelText, size=size.tiny, textalign=text.align_center)
+        int selectedBosLabelBar = candidateBosLevelBar + int(math.floor((candidateBosBar - candidateBosLevelBar) * 0.5))
+        bosLine := line.new(candidateBosLevelBar, candidateBosLevel, candidateBosBar, candidateBosLevel, xloc=xloc.bar_index, color=lineColor, width=1)
+        bosLabel := label.new(selectedBosLabelBar, candidateBosLevel, "BOS", xloc=xloc.bar_index, style=candidateDirection == 1 ? label.style_label_up : label.style_label_down, color=color.new(panelBg, 8), textcolor=panelText, size=size.tiny, textalign=text.align_center)
+        if array.size(candidateFvgBottoms) > 0
+            for i = 0 to array.size(candidateFvgBottoms) - 1
+                int fvgBar = array.get(candidateFvgBars, i)
+                bool fvgPass = array.get(candidateFvgPasses, i)
+                box fvgObject = box.new(fvgBar, array.get(candidateFvgTops, i), math.min(fvgBar + 4, visualRight), array.get(candidateFvgBottoms, i), xloc=xloc.bar_index, bgcolor=fvgPass ? imbalancePassColor : imbalanceColor, border_color=fvgPass ? color.new(gold, 35) : color.new(lineColor, 70))
+                array.push(fvgBoxes, fvgObject)
+        if candidateEligible
+            rewardBox := box.new(candidateReadyBar, math.max(candidateEntry, candidateTarget), visualRight, math.min(candidateEntry, candidateTarget), xloc=xloc.bar_index, bgcolor=color.new(longColor, 88), border_color=color.new(longColor, 60))
+            riskBox := box.new(candidateReadyBar, math.max(candidateEntry, candidateStop), visualRight, math.min(candidateEntry, candidateStop), xloc=xloc.bar_index, bgcolor=color.new(shortColor, 88), border_color=color.new(shortColor, 60))
+        float maxProfile = array.max(candidateProfile)
+        float rowHeight = candidateRowHeight
+        for row = 0 to candidateProfileRows - 1
+            float rowVolume = array.get(candidateProfile, row)
+            int widthBars = maxProfile > 0 ? int(math.round(12.0 * rowVolume / maxProfile)) : 0
+            float rowBottom = candidateLow + row * rowHeight
+            float rowTop = rowBottom + rowHeight
+            box profileBox = box.new(visualRight - widthBars, rowTop, visualRight, rowBottom, xloc=xloc.bar_index, bgcolor=profileColor, border_color=color.new(profileColor, 100))
+            array.push(profileBoxes, profileBox)
+        if viewMode == "Reviewer"
+            int reviewWindowStart = candidateStartBar - 12
+            int reviewWindowEnd = candidateReadyBar + 12
+            if array.size(auditPivotBar) > 0
+                for i = 0 to array.size(auditPivotBar) - 1
+                    int pbar = array.get(auditPivotBar, i)
+                    if pbar >= reviewWindowStart and pbar <= reviewWindowEnd
+                        int ptype = array.get(auditPivotType, i)
+                        bool accepted = array.get(auditPivotAccepted, i)
+                        string ptext = accepted ? (ptype == 1 ? "▲" : "▼") : "·"
+                        label plabel = label.new(pbar, array.get(auditPivotPrice, i), ptext, xloc=xloc.bar_index, style=label.style_none, textcolor=accepted ? gold : panelMuted, size=size.tiny)
+                        array.push(reviewLabels, plabel)
+            if array.size(auditBosBar) > 0
+                for i = 0 to array.size(auditBosBar) - 1
+                    int bbar = array.get(auditBosBar, i)
+                    if bbar >= reviewWindowStart and bbar <= reviewWindowEnd
+                        float blevel = array.get(auditBosLevel, i)
+                        int blevelBar = array.get(auditBosLevelBar, i)
+                        int bmid = blevelBar + int(math.floor((bbar - blevelBar) * 0.5))
+                        int bdirection = array.get(auditBosDirection, i)
+                        line bline = line.new(blevelBar, blevel, bbar, blevel, xloc=xloc.bar_index, color=color.new(lineColor, 45), width=1)
+                        label blabel = label.new(bmid, blevel, "BOS", xloc=xloc.bar_index, style=bdirection == 1 ? label.style_label_up : label.style_label_down, color=color.new(panelBg, 18), textcolor=panelMuted, size=size.tiny)
+                        array.push(reviewLines, bline)
+                        array.push(reviewLabels, blabel)
+            if array.size(auditSweepBar) > 0
+                for i = 0 to array.size(auditSweepBar) - 1
+                    int sbar = array.get(auditSweepBar, i)
+                    if sbar >= reviewWindowStart and sbar <= reviewWindowEnd
+                        int sdirection = array.get(auditSweepDirection, i)
+                        label slabel = label.new(sbar, array.get(auditSweepLevel, i), "LQ?", xloc=xloc.bar_index, style=sdirection == 1 ? label.style_label_down : label.style_label_up, color=color.new(panelBg, 18), textcolor=panelMuted, size=size.tiny)
+                        array.push(reviewLabels, slabel)
+    else
+        line.set_x2(rangeHighLine, visualRight)
+        line.set_x2(rangeLowLine, visualRight)
+        line.set_x2(entryLine, visualRight)
+        line.set_x2(pocLine, visualRight)
+        label.set_x(rangeHighLabel, visualRight)
+        label.set_x(rangeLowLabel, visualRight)
+        label.set_x(entryLevelLabel, visualRight)
+        label.set_x(pocLevelLabel, visualRight)
+        if not na(rewardBox)
+            box.set_right(rewardBox, visualRight)
+        if not na(riskBox)
+            box.set_right(riskBox, visualRight)
+        if array.size(profileBoxes) == candidateProfileRows
+            float maxProfile = array.max(candidateProfile)
+            for row = 0 to candidateProfileRows - 1
+                float rowVolume = array.get(candidateProfile, row)
+                int widthBars = maxProfile > 0 ? int(math.round(12.0 * rowVolume / maxProfile)) : 0
+                box.set_left(array.get(profileBoxes, row), visualRight - widthBars)
+                box.set_right(array.get(profileBoxes, row), visualRight)
+
+// Full historical setup cards are materialized from the ledger once, so zoom,
+// Go-to-date, and history loading never own their existence. The automatic
+// cap fits Pine's drawing budgets; older events remain available in Reviewer.
+if barstate.islast
+    int historyKey = array.size(setupState) + (nz(displayCandidateIndex, -1) + 2) * 7919
+    if array.size(setupState) > 0
+        for i = 0 to array.size(setupState) - 1
+            historyKey += (i + 1) * (array.get(setupState, i) + 1)
+    bool historyChanged = na(renderedHistoryKey) or renderedHistoryKey != historyKey
+    if viewMode == "Trader" and historyChanged
+        f_clear_history(historyLines, historyBoxes, historyLabels)
+        int historyDrawn = 0
+        if array.size(setupState) > 0
+            for offset = 0 to array.size(setupState) - 1
+                int si = array.size(setupState) - 1 - offset
+                int fillBar = array.get(setupFillBar, si)
+                int setupCi = array.get(setupCandidateIndex, si)
+                if historyDrawn < MAX_ARCHIVED_FULL_SETUPS and not na(fillBar) and setupCi != displayCandidateIndex
+                    f_draw_history_setup(si, fibChoice, includePoc, historyLines, historyBoxes, historyLabels)
+                    historyDrawn += 1
+        renderedHistoryKey := historyKey
+    else if viewMode != "Trader"
+        if array.size(historyLines) + array.size(historyBoxes) + array.size(historyLabels) > 0
+            f_clear_history(historyLines, historyBoxes, historyLabels)
+        renderedHistoryKey := na
+
+// A terminal setup collapses only its position geometry. LQ/BOS/FVG/Fib/POC
+// remain visible until a newer locked narrative supersedes them.
+if viewMode == "Trader" and array.size(setupState) > 0
+    int newest = array.size(setupState) - 1
+    int newestState = array.get(setupState, newest)
+    if newestState >= 2
+        f_delete_box(rewardBox)
+        f_delete_box(riskBox)
+        rewardBox := na
+        riskBox := na
+
+// P2P_PROOF_COMPACT_BEGIN human_dashboards
+p2p_source_compact_human_dashboards() =>
+    // These tables are pure presentation. Pine2Python removes this named block only
+    // from proof-dashboard children so its signature table cannot overlap them.
+    var table checklist = table.new(position.top_right, 2, 11, bgcolor=panelBg, frame_color=gold, frame_width=1, border_color=color.new(gold, 30), border_width=1)
+    var table riskTable = table.new(position.bottom_right, 2, 4, bgcolor=panelBg, frame_color=gold, frame_width=1, border_color=color.new(gold, 30), border_width=1)
+    
+    if barstate.islast
+        string directionText = candidateDirection == 1 ? "BUY" : candidateDirection == -1 ? "SELL" : "—"
+        string locationText = candidateDirection == 1 ? (candidateHtf ? "Discount" : "Premium") : candidateDirection == -1 ? (candidateHtf ? "Premium" : "Discount") : "—"
+        table.cell(checklist, 0, 0, viewMode == "Reviewer" ? "REVIEW" : "4H", bgcolor=panelBg, text_color=panelMuted, text_size=size.small)
+        table.cell(checklist, 1, 0, locationText, bgcolor=panelAlt, text_color=panelText, text_size=size.small)
+        table.cell(checklist, 0, 1, directionText, bgcolor=panelBg, text_color=candidateDirection == 1 ? longColor : candidateDirection == -1 ? shortColor : panelMuted, text_size=size.small)
+        table.cell(checklist, 1, 1, "Checklist", bgcolor=panelBg, text_color=panelText, text_size=size.small)
+        table.cell(checklist, 0, 2, f_mark(candidateHtf), bgcolor=panelBg, text_color=f_mark_color(candidateHtf), text_size=size.small)
+        table.cell(checklist, 1, 2, "HTF Alignment", bgcolor=panelBg, text_color=panelText, text_size=size.small)
+        table.cell(checklist, 0, 3, f_mark(candidateBos), bgcolor=panelAlt, text_color=f_mark_color(candidateBos), text_size=size.small)
+        table.cell(checklist, 1, 3, "Break of Structure", bgcolor=panelAlt, text_color=panelText, text_size=size.small)
+        table.cell(checklist, 0, 4, f_mark(candidateSweep), bgcolor=panelBg, text_color=f_mark_color(candidateSweep), text_size=size.small)
+        table.cell(checklist, 1, 4, "Liquidity Sweep", bgcolor=panelBg, text_color=panelText, text_size=size.small)
+        table.cell(checklist, 0, 5, f_mark(candidateImbalance), bgcolor=panelAlt, text_color=f_mark_color(candidateImbalance), text_size=size.small)
+        table.cell(checklist, 1, 5, "Imbalance", bgcolor=panelAlt, text_color=panelText, text_size=size.small)
+        table.cell(checklist, 0, 6, includePoc ? f_mark(candidatePocPass) : "—", bgcolor=panelBg, text_color=includePoc ? f_mark_color(candidatePocPass) : panelMuted, text_size=size.small)
+        table.cell(checklist, 1, 6, includePoc ? "POC near Fib" : "POC disabled", bgcolor=panelBg, text_color=panelText, text_size=size.small)
+        table.cell(checklist, 0, 7, str.tostring(candidateScore), bgcolor=panelAlt, text_color=candidateScore >= requiredScore ? passColor : failColor, text_size=size.small)
+        table.cell(checklist, 1, 7, "Score / " + str.tostring(requiredScore), bgcolor=panelAlt, text_color=panelText, text_size=size.small)
+        string lifecycleText = na(displaySetupState) ? "—" : displaySetupState == 0 ? "PENDING" : displaySetupState == 1 ? "OPEN" : displaySetupState == 2 ? "TP" : displaySetupState == 3 ? "SL" : displaySetupState == 4 ? "MISSED" : "AMBIG"
+        string statusText = viewMode == "Reviewer" and not na(displaySetupState) ? lifecycleText : candidateLate ? "LATE" : candidateEligible ? "READY" : "WAIT"
+        table.cell(checklist, 0, 8, statusText, bgcolor=panelBg, text_color=candidateEligible ? passColor : candidateLate ? failColor : panelMuted, text_size=size.tiny)
+        table.cell(checklist, 1, 8, candidateMissing == "NONE" ? "All passed" : "Miss: " + candidateMissing, bgcolor=panelBg, text_color=panelMuted, text_size=size.tiny)
+        table.cell(checklist, 0, 9, na(candidatePocDistanceRows) ? "—" : str.tostring(candidatePocDistanceRows), bgcolor=panelAlt, text_color=candidatePocPass ? passColor : panelMuted, text_size=size.tiny)
+        table.cell(checklist, 1, 9, "POC rows · ±" + str.tostring(POC_ROW_TOLERANCE), bgcolor=panelAlt, text_color=panelMuted, text_size=size.tiny)
+        string nodeText = na(candidateFibNodeRatio) ? "—" : str.tostring(candidateFibNodeRatio * 100.0, "#.0") + "%"
+        table.cell(checklist, 0, 10, nodeText, bgcolor=panelBg, text_color=panelMuted, text_size=size.tiny)
+        table.cell(checklist, 1, 10, candidateProfileTruncated ? "Fib node · PROFILE CUT" : "Fib node / POC", bgcolor=panelBg, text_color=candidateProfileTruncated ? failColor : panelMuted, text_size=size.tiny)
+    
+        float stopDistance = math.abs(candidateEntry - candidateStop)
+        float baseQuantity = stopDistance > 0 ? riskBudgetInput / stopDistance : na
+        float quantity = quantityModeInput == "Lots" and not na(baseQuantity) ? baseQuantity / unitsPerLotInput : baseQuantity
+        float stopPercent = not na(candidateEntry) and candidateEntry != 0 ? 100.0 * stopDistance / candidateEntry : na
+        string baseAsset = syminfo.basecurrency == "" ? "Units" : syminfo.basecurrency
+        string quantityUnit = quantityModeInput == "Lots" ? "Lots" : baseAsset
+        string quoteAsset = syminfo.currency == "" ? "Price" : syminfo.currency
+        table.cell(riskTable, 0, 0, quantityModeInput == "Lots" ? "Auto Lot" : "Auto Risk", bgcolor=panelBg, text_color=panelText, text_size=size.small)
+        table.cell(riskTable, 1, 0, fibChoice, bgcolor=panelAlt, text_color=gold, text_size=size.small)
+        table.cell(riskTable, 0, 1, na(quantity) ? "—" : str.tostring(quantity, "#.####"), bgcolor=panelAlt, text_color=panelText, text_size=size.small)
+        table.cell(riskTable, 1, 1, quantityUnit, bgcolor=panelAlt, text_color=panelMuted, text_size=size.small)
+        table.cell(riskTable, 0, 2, na(stopPercent) ? "—" : f_price(stopDistance) + " · " + str.tostring(stopPercent, "#.##") + "%", bgcolor=panelBg, text_color=panelText, text_size=size.small)
+        table.cell(riskTable, 1, 2, quoteAsset + " Stop", bgcolor=panelBg, text_color=panelMuted, text_size=size.small)
+        table.cell(riskTable, 0, 3, str.tostring(riskBudgetInput, "#.##") + " USD", bgcolor=panelAlt, text_color=panelText, text_size=size.small)
+        table.cell(riskTable, 1, 3, "Risk", bgcolor=panelAlt, text_color=panelMuted, text_size=size.small)
+p2p_source_compact_human_dashboards()
+// P2P_PROOF_COMPACT_END human_dashboards
+
+alertcondition(longReadySignal, "SmartMoney-4 LONG ready", "SmartMoney-4 clean LONG setup ready")
+alertcondition(shortReadySignal, "SmartMoney-4 SHORT ready", "SmartMoney-4 clean SHORT setup ready")
+
+// Historical fills/outcomes are rendered as complete visibility-driven setup
+// cards above, not as detached entry/result plotshape labels.
+
+// Stable hidden fields consumed by Pine2Python proof generation.
+plot(candidateDirection, "p2p_direction", display=display.none)
+plot(candidateScore, "p2p_score", display=display.none)
+plot(candidateEntry, "p2p_entry", display=display.none)
+plot(candidateStop, "p2p_stop", display=display.none)
+plot(candidateTarget, "p2p_target", display=display.none)
+plot(candidatePoc, "p2p_poc", display=display.none)
+plot(candidatePocDistanceRows, "p2p_poc_distance_rows", display=display.none)
+plot(candidateProfileRows, "p2p_profile_rows", display=display.none)
+plot(candidateFibNodeRatio, "p2p_fib_node_ratio", display=display.none)
+plot(candidateHtfHigh, "p2p_htf_high", display=display.none)
+plot(candidateHtfLow, "p2p_htf_low", display=display.none)
+plot(candidateHtfMid, "p2p_htf_mid", display=display.none)
+plot(candidateHtf ? 1 : 0, "p2p_htf", display=display.none)
+plot(candidateBos ? 1 : 0, "p2p_bos", display=display.none)
+plot(candidateSweep ? 1 : 0, "p2p_sweep", display=display.none)
+plot(candidateImbalance ? 1 : 0, "p2p_imbalance", display=display.none)
+plot(candidatePocPass ? 1 : 0, "p2p_poc_pass", display=display.none)
+plot(candidateFvgCount, "p2p_fvg_count", display=display.none)
+plot(candidateFvgPassCount, "p2p_fvg_pass_count", display=display.none)
+plot(candidateBreakFvg ? 1 : 0, "p2p_break_fvg", display=display.none)
+plot(not na(candidateReadyBar) ? 1 : 0, "p2p_narrative_ready", display=display.none)
+plot(candidateUpdatedSignal ? 1 : 0, "p2p_candidate_updated", display=display.none)
+plot(setupReadySignal ? 1 : 0, "p2p_setup_ready", display=display.none)
+plot(fillSignal ? 1 : 0, "p2p_fill", display=display.none)
+plot(targetSignal ? 1 : 0, "p2p_target_hit", display=display.none)
+plot(stopSignal ? 1 : 0, "p2p_stop_hit", display=display.none)
+plot(ambiguousSignal ? 1 : 0, "p2p_ambiguous", display=display.none)
+plot(rawHighPivotSignal ? 1 : 0, "p2p_raw_high_pivot", display=display.none)
+plot(rawLowPivotSignal ? 1 : 0, "p2p_raw_low_pivot", display=display.none)
+plot(sweepCandidateSignal ? 1 : 0, "p2p_sweep_candidate", display=display.none)
+
+// === Pine2Python TradingView Parity Proof Dashboard v2 ===
+p2p_start = input.time(1786181400000, "P2P proof start")
+p2p_end = input.time(1787081400000, "P2P proof end")
+p2p_mintick = input.float(0.01, "P2P expected minimum tick", minval=0.000000000001)
+p2p_posmod(int value, int modulus) =>
+    ((value % modulus) + modulus) % modulus
+p2p_round(float value) =>
+    int(math.floor(value + 0.500000001))
+p2p_mix(int current, int value, int modulus, int multiplier, int tag) =>
+    p2p_posmod(p2p_posmod(current * multiplier, modulus) + p2p_posmod(value, modulus) + tag * 17, modulus)
+p2p_mix3(matrix<int> target, int row, int value, int tag) =>
+    matrix.set(target, row, 0, p2p_mix(matrix.get(target, row, 0), value, 1000003, 257, tag))
+    matrix.set(target, row, 1, p2p_mix(matrix.get(target, row, 1), value, 1000033, 263, tag))
+    matrix.set(target, row, 2, p2p_mix(matrix.get(target, row, 2), value, 1000037, 269, tag))
+p2p_init_hashes(int rows) =>
+    result = matrix.new<int>(rows, 3, 0)
+    for row = 0 to rows - 1
+        matrix.set(result, row, 0, 17)
+        matrix.set(result, row, 1, 19)
+        matrix.set(result, row, 2, 23)
+    result
+p2p_triplet(int h1, int h2, int h3) =>
+    str.tostring(h1, "0000000") + "-" + str.tostring(h2, "0000000") + "-" + str.tostring(h3, "0000000")
+p2p_triplet_row(matrix<int> target, int row) =>
+    p2p_triplet(matrix.get(target, row, 0), matrix.get(target, row, 1), matrix.get(target, row, 2))
+p2p_cell(table target, int row, string label, string value) =>
+    table.cell(target, 0, row, label, text_color=color.silver, text_halign=text.align_left)
+    table.cell(target, 1, row, value, text_color=color.white, text_halign=text.align_right)
+p2p_hash_data(matrix<int> p2p_hashes, int p2p_bar_count) =>
+    int p2p_value = 0
+    p2p_value := p2p_bar_count
+    p2p_mix3(p2p_hashes, 0, p2p_value, 1)
+    p2p_value := int(time / 1000)
+    p2p_mix3(p2p_hashes, 0, p2p_value, 2)
+    p2p_value := p2p_round(open / p2p_mintick)
+    p2p_mix3(p2p_hashes, 0, p2p_value, 3)
+    p2p_value := p2p_round(high / p2p_mintick)
+    p2p_mix3(p2p_hashes, 0, p2p_value, 4)
+    p2p_value := p2p_round(low / p2p_mintick)
+    p2p_mix3(p2p_hashes, 0, p2p_value, 5)
+    p2p_value := p2p_round(close / p2p_mintick)
+    p2p_mix3(p2p_hashes, 0, p2p_value, 6)
+    p2p_seg = 1 + math.min(7, math.max(0, int((time - p2p_start) * 8 / math.max(p2p_end - p2p_start, 1))))
+    p2p_s1 = matrix.get(p2p_hashes, p2p_seg, 0)
+    p2p_s2 = matrix.get(p2p_hashes, p2p_seg, 1)
+    p2p_s3 = matrix.get(p2p_hashes, p2p_seg, 2)
+    p2p_value := p2p_bar_count
+    p2p_s1 := p2p_mix(p2p_s1, p2p_value, 1000003, 257, 1)
+    p2p_s2 := p2p_mix(p2p_s2, p2p_value, 1000033, 263, 1)
+    p2p_s3 := p2p_mix(p2p_s3, p2p_value, 1000037, 269, 1)
+    p2p_value := int(time / 1000)
+    p2p_s1 := p2p_mix(p2p_s1, p2p_value, 1000003, 257, 2)
+    p2p_s2 := p2p_mix(p2p_s2, p2p_value, 1000033, 263, 2)
+    p2p_s3 := p2p_mix(p2p_s3, p2p_value, 1000037, 269, 2)
+    p2p_value := p2p_round(open / p2p_mintick)
+    p2p_s1 := p2p_mix(p2p_s1, p2p_value, 1000003, 257, 3)
+    p2p_s2 := p2p_mix(p2p_s2, p2p_value, 1000033, 263, 3)
+    p2p_s3 := p2p_mix(p2p_s3, p2p_value, 1000037, 269, 3)
+    p2p_value := p2p_round(high / p2p_mintick)
+    p2p_s1 := p2p_mix(p2p_s1, p2p_value, 1000003, 257, 4)
+    p2p_s2 := p2p_mix(p2p_s2, p2p_value, 1000033, 263, 4)
+    p2p_s3 := p2p_mix(p2p_s3, p2p_value, 1000037, 269, 4)
+    p2p_value := p2p_round(low / p2p_mintick)
+    p2p_s1 := p2p_mix(p2p_s1, p2p_value, 1000003, 257, 5)
+    p2p_s2 := p2p_mix(p2p_s2, p2p_value, 1000033, 263, 5)
+    p2p_s3 := p2p_mix(p2p_s3, p2p_value, 1000037, 269, 5)
+    p2p_value := p2p_round(close / p2p_mintick)
+    p2p_s1 := p2p_mix(p2p_s1, p2p_value, 1000003, 257, 6)
+    p2p_s2 := p2p_mix(p2p_s2, p2p_value, 1000033, 263, 6)
+    p2p_s3 := p2p_mix(p2p_s3, p2p_value, 1000037, 269, 6)
+    matrix.set(p2p_hashes, p2p_seg, 0, p2p_s1)
+    matrix.set(p2p_hashes, p2p_seg, 1, p2p_s2)
+    matrix.set(p2p_hashes, p2p_seg, 2, p2p_s3)
+p2p_hash_features(matrix<int> p2p_hashes, int p2p_bar_count) =>
+    int p2p_value = 0
+    p2p_value := p2p_bar_count
+    p2p_mix3(p2p_hashes, 9, p2p_value, 1)
+    p2p_value := int(time / 1000)
+    p2p_mix3(p2p_hashes, 9, p2p_value, 2)
+    p2p_value := (na(candidateDirection) ? -2000000011 : p2p_round(candidateDirection))
+    p2p_mix3(p2p_hashes, 9, p2p_value, 10)
+    p2p_value := (na(candidateScore) ? -2000000011 : p2p_round(candidateScore))
+    p2p_mix3(p2p_hashes, 9, p2p_value, 11)
+    p2p_value := (na(candidateEntry) ? -2000000011 : p2p_round((candidateEntry) / p2p_mintick))
+    p2p_mix3(p2p_hashes, 9, p2p_value, 12)
+    p2p_value := (na(candidateStop) ? -2000000011 : p2p_round((candidateStop) / p2p_mintick))
+    p2p_mix3(p2p_hashes, 9, p2p_value, 13)
+    p2p_value := (na(candidateTarget) ? -2000000011 : p2p_round((candidateTarget) / p2p_mintick))
+    p2p_mix3(p2p_hashes, 9, p2p_value, 14)
+    p2p_value := (na(candidateBosLevel) ? -2000000011 : p2p_round((candidateBosLevel) / p2p_mintick))
+    p2p_mix3(p2p_hashes, 9, p2p_value, 15)
+    p2p_value := (na(candidateSweepLevel) ? -2000000011 : p2p_round((candidateSweepLevel) / p2p_mintick))
+    p2p_mix3(p2p_hashes, 9, p2p_value, 16)
+    p2p_value := (na(candidatePoc) ? -2000000011 : p2p_round((candidatePoc) / p2p_mintick))
+    p2p_mix3(p2p_hashes, 9, p2p_value, 17)
+    p2p_value := (na(candidatePocDistanceRows) ? -2000000011 : p2p_round(candidatePocDistanceRows))
+    p2p_mix3(p2p_hashes, 9, p2p_value, 18)
+    p2p_value := (na(candidateProfileRows) ? -2000000011 : p2p_round(candidateProfileRows))
+    p2p_mix3(p2p_hashes, 9, p2p_value, 19)
+    p2p_value := (na(candidateFibNodeRatio) ? -2000000011 : p2p_round((candidateFibNodeRatio) * 1000000))
+    p2p_mix3(p2p_hashes, 9, p2p_value, 20)
+    p2p_value := (na(candidateHtfHigh) ? -2000000011 : p2p_round((candidateHtfHigh) / p2p_mintick))
+    p2p_mix3(p2p_hashes, 9, p2p_value, 21)
+    p2p_value := (na(candidateHtfLow) ? -2000000011 : p2p_round((candidateHtfLow) / p2p_mintick))
+    p2p_mix3(p2p_hashes, 9, p2p_value, 22)
+    p2p_value := (na(candidateHtfMid) ? -2000000011 : p2p_round((candidateHtfMid) / p2p_mintick))
+    p2p_mix3(p2p_hashes, 9, p2p_value, 23)
+    p2p_value := (candidateHtf ? 1 : 0)
+    p2p_mix3(p2p_hashes, 9, p2p_value, 24)
+    p2p_value := (candidateBos ? 1 : 0)
+    p2p_mix3(p2p_hashes, 9, p2p_value, 25)
+    p2p_value := (candidateSweep ? 1 : 0)
+    p2p_mix3(p2p_hashes, 9, p2p_value, 26)
+    p2p_value := (candidateImbalance ? 1 : 0)
+    p2p_mix3(p2p_hashes, 9, p2p_value, 27)
+    p2p_value := (candidatePocPass ? 1 : 0)
+    p2p_mix3(p2p_hashes, 9, p2p_value, 28)
+    p2p_value := (na(candidateFvgCount) ? -2000000011 : p2p_round(candidateFvgCount))
+    p2p_mix3(p2p_hashes, 9, p2p_value, 29)
+    p2p_value := (na(candidateFvgPassCount) ? -2000000011 : p2p_round(candidateFvgPassCount))
+    p2p_mix3(p2p_hashes, 9, p2p_value, 30)
+    p2p_value := (candidateBreakFvg ? 1 : 0)
+    p2p_mix3(p2p_hashes, 9, p2p_value, 31)
+    p2p_value := (not na(candidateReadyBar) ? 1 : 0)
+    p2p_mix3(p2p_hashes, 9, p2p_value, 32)
+p2p_hash_signals(matrix<int> p2p_hashes, int p2p_bar_count) =>
+    int p2p_value = 0
+    p2p_value := p2p_bar_count
+    p2p_mix3(p2p_hashes, 10, p2p_value, 1)
+    p2p_value := int(time / 1000)
+    p2p_mix3(p2p_hashes, 10, p2p_value, 2)
+    p2p_value := (bullBreakSignal ? 1 : 0)
+    p2p_mix3(p2p_hashes, 10, p2p_value, 10)
+    p2p_value := (bearBreakSignal ? 1 : 0)
+    p2p_mix3(p2p_hashes, 10, p2p_value, 11)
+    p2p_value := (rawHighPivotSignal ? 1 : 0)
+    p2p_mix3(p2p_hashes, 10, p2p_value, 12)
+    p2p_value := (rawLowPivotSignal ? 1 : 0)
+    p2p_mix3(p2p_hashes, 10, p2p_value, 13)
+    p2p_value := (sweepCandidateSignal ? 1 : 0)
+    p2p_mix3(p2p_hashes, 10, p2p_value, 14)
+    p2p_value := (candidateUpdatedSignal ? 1 : 0)
+    p2p_mix3(p2p_hashes, 10, p2p_value, 15)
+    p2p_value := (setupReadySignal ? 1 : 0)
+    p2p_mix3(p2p_hashes, 10, p2p_value, 16)
+    p2p_value := (longReadySignal ? 1 : 0)
+    p2p_mix3(p2p_hashes, 10, p2p_value, 17)
+    p2p_value := (shortReadySignal ? 1 : 0)
+    p2p_mix3(p2p_hashes, 10, p2p_value, 18)
+    p2p_value := (fillSignal ? 1 : 0)
+    p2p_mix3(p2p_hashes, 10, p2p_value, 19)
+    p2p_value := (targetSignal ? 1 : 0)
+    p2p_mix3(p2p_hashes, 10, p2p_value, 20)
+    p2p_value := (stopSignal ? 1 : 0)
+    p2p_mix3(p2p_hashes, 10, p2p_value, 21)
+    p2p_value := (ambiguousSignal ? 1 : 0)
+    p2p_mix3(p2p_hashes, 10, p2p_value, 22)
+p2p_render_dashboard(table p2p_table, array<int> p2p_meta, matrix<int> p2p_hashes) =>
+    p2p_cell(p2p_table, 0, "P2P PROOF", "basic_v1 / v2.12")
+    p2p_cell(p2p_table, 1, "SOURCE", "6f2b4709ad818ea3")
+    p2p_cell(p2p_table, 2, "SETTINGS", "6da3f17b1fc6a052")
+    p2p_cell(p2p_table, 3, "EXPECTED CONTEXT", "BINANCE:BTCUSDT / 15")
+    p2p_cell(p2p_table, 4, "WINDOW", str.tostring(p2p_start) + ".." + str.tostring(p2p_end))
+    p2p_cell(p2p_table, 5, "BARS", str.tostring(array.get(p2p_meta, 0)))
+    p2p_cell(p2p_table, 6, "FIRST/LAST", str.tostring(array.get(p2p_meta, 1)) + "/" + str.tostring(array.get(p2p_meta, 2)))
+    p2p_cell(p2p_table, 7, "DATA", p2p_triplet_row(p2p_hashes, 0))
+    p2p_cell(p2p_table, 8, "MINTICK", str.tostring(p2p_mintick))
+    p2p_cell(p2p_table, 9, "FEATURES", p2p_triplet_row(p2p_hashes, 9))
+    p2p_cell(p2p_table, 10, "SIGNALS", p2p_triplet_row(p2p_hashes, 10))
+    p2p_cell(p2p_table, 11, "DATA SEG 1", p2p_triplet_row(p2p_hashes, 1))
+    p2p_cell(p2p_table, 12, "DATA SEG 2", p2p_triplet_row(p2p_hashes, 2))
+    p2p_cell(p2p_table, 13, "DATA SEG 3", p2p_triplet_row(p2p_hashes, 3))
+    p2p_cell(p2p_table, 14, "DATA SEG 4", p2p_triplet_row(p2p_hashes, 4))
+    p2p_cell(p2p_table, 15, "DATA SEG 5", p2p_triplet_row(p2p_hashes, 5))
+    p2p_cell(p2p_table, 16, "DATA SEG 6", p2p_triplet_row(p2p_hashes, 6))
+    p2p_cell(p2p_table, 17, "DATA SEG 7", p2p_triplet_row(p2p_hashes, 7))
+    p2p_cell(p2p_table, 18, "DATA SEG 8", p2p_triplet_row(p2p_hashes, 8))
+var p2p_meta = array.from(0, int(na), int(na))
+var p2p_hashes = p2p_init_hashes(11)
+p2p_in_window = time >= p2p_start and time < p2p_end
+if p2p_in_window
+    p2p_bar_count = array.get(p2p_meta, 0) + 1
+    array.set(p2p_meta, 0, p2p_bar_count)
+    array.set(p2p_meta, 1, na(array.get(p2p_meta, 1)) ? time : array.get(p2p_meta, 1))
+    array.set(p2p_meta, 2, time)
+    p2p_hash_data(p2p_hashes, p2p_bar_count)
+    p2p_hash_features(p2p_hashes, p2p_bar_count)
+    p2p_hash_signals(p2p_hashes, p2p_bar_count)
+var table p2p_table = table.new(position.bottom_right, 2, 19, bgcolor=color.new(color.black, 5), frame_color=color.gray, frame_width=1)
+if barstate.islast
+    p2p_render_dashboard(p2p_table, p2p_meta, p2p_hashes)

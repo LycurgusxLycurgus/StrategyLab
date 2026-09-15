@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1060" height="435" viewBox="0 0 1060 435">
+<rect width="1060" height="435" fill="#151b25"/>
+<text x="20" y="24" fill="#eeeeee" font-family="sans-serif" font-size="15">BTC_REFERENCE-V61-5 | EARLY_TOUCH_STILL_REJECTED | SHORT</text>
+<line x1="45.00" x2="45.00" y1="142.80" y2="220.12" stroke="#57b99b"/>
+<rect x="43.00" y="211.83" width="4" height="1.00" fill="#57b99b"/>
+<line x1="105.00" x2="105.00" y1="122.79" y2="251.21" stroke="#57b99b"/>
+<rect x="103.00" y="145.08" width="4" height="66.75" fill="#57b99b"/>
+<line x1="165.00" x2="165.00" y1="128.49" y2="182.07" stroke="#df7781"/>
+<rect x="163.00" y="145.08" width="4" height="5.51" fill="#df7781"/>
+<line x1="225.00" x2="225.00" y1="88.88" y2="172.31" stroke="#57b99b"/>
+<rect x="223.00" y="115.82" width="4" height="34.77" fill="#57b99b"/>
+<line x1="285.00" x2="285.00" y1="86.94" y2="240.61" stroke="#df7781"/>
+<rect x="283.00" y="115.81" width="4" height="99.14" fill="#df7781"/>
+<line x1="345.00" x2="345.00" y1="182.01" y2="283.42" stroke="#df7781"/>
+<rect x="343.00" y="214.96" width="4" height="60.28" fill="#df7781"/>
+<line x1="405.00" x2="405.00" y1="194.72" y2="275.25" stroke="#57b99b"/>
+<rect x="403.00" y="209.73" width="4" height="65.52" fill="#57b99b"/>
+<line x1="465.00" x2="465.00" y1="200.52" y2="275.40" stroke="#df7781"/>
+<rect x="463.00" y="209.73" width="4" height="26.72" fill="#df7781"/>
+<line x1="525.00" x2="525.00" y1="172.10" y2="259.56" stroke="#57b99b"/>
+<rect x="523.00" y="204.52" width="4" height="31.92" fill="#57b99b"/>
+<line x1="585.00" x2="585.00" y1="177.70" y2="244.03" stroke="#df7781"/>
+<rect x="583.00" y="204.52" width="4" height="2.43" fill="#df7781"/>
+<line x1="645.00" x2="645.00" y1="197.80" y2="249.47" stroke="#df7781"/>
+<rect x="643.00" y="206.95" width="4" height="23.19" fill="#df7781"/>
+<line x1="705.00" x2="705.00" y1="196.70" y2="255.73" stroke="#57b99b"/>
+<rect x="703.00" y="209.39" width="4" height="20.75" fill="#57b99b"/>
+<line x1="765.00" x2="765.00" y1="209.39" y2="353.06" stroke="#df7781"/>
+<rect x="763.00" y="209.39" width="4" height="123.43" fill="#df7781"/>
+<line x1="825.00" x2="825.00" y1="269.71" y2="332.82" stroke="#57b99b"/>
+<rect x="823.00" y="272.32" width="4" height="60.50" fill="#57b99b"/>
+<line x1="885.00" x2="885.00" y1="186.91" y2="273.79" stroke="#57b99b"/>
+<rect x="883.00" y="213.21" width="4" height="59.11" fill="#57b99b"/>
+<line x1="45" x2="890" y1="283.42" y2="283.42" stroke="#a4b9e8" stroke-dasharray="4 5" opacity="0.65"/><text x="900" y="70" fill="#a4b9e8" font-family="sans-serif" font-size="11">bos_level 61394.49</text>
+<line x1="45" x2="890" y1="217.34" y2="217.34" stroke="#d3bd6d" stroke-dasharray="4 5" opacity="0.65"/><text x="900" y="116" fill="#d3bd6d" font-family="sans-serif" font-size="11">entry 61665.39</text>
+<line x1="45" x2="890" y1="172.10" y2="172.10" stroke="#df7781" stroke-dasharray="4 5" opacity="0.65"/><text x="900" y="139" fill="#df7781" font-family="sans-serif" font-size="11">stop 61850.86</text>
+<line x1="45" x2="890" y1="353.06" y2="353.06" stroke="#57b99b" stroke-dasharray="4 5" opacity="0.65"/><text x="900" y="162" fill="#57b99b" font-family="sans-serif" font-size="11">target 61108.99</text>
+<text x="25" y="415" fill="#bbbbbb" font-family="sans-serif" font-size="12">2026-07-02T13:15:00+00:00 — 2026-07-02T16:45:00+00:00 | decision only; no future candles</text></svg>

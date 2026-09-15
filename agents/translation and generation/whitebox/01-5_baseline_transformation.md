@@ -2,10 +2,30 @@
 
 Phase 1.5 creates the canonical TradingView strategy from the Phase 1 contract. It supports both greenfield creation and source-derived transformation. Its purpose is to make the intended strategy real, auditable, and manually accepted on the declared asset and timeframe before any Mutation Lab implementation exists.
 
-The accepted Pine strategy is the executable specification for Phase 2. A Python implementation, old prototype, causal explanation, or prior failed family cannot override the accepted Pine behavior.
+The accepted Pine strategy is the executable specification for Phase 2. A Python implementation, old prototype, causal explanation, or prior failed family cannot override the accepted Pine behavior. TradingView chart-data export is not part of this workflow; it is unavailable on the Basic plan.
+
+## Default corroboration path
+
+Every candidate must pass Pine2Python analysis and supported local execution, then
+receive a `basic_v1` TradingView Parity Proof Dashboard for an explicit absolute
+window of no more than 5,000 intraday bars. The normal user action is to paste/run
+the frozen instrumented Pine on the exact symbol/timeframe and capture one complete
+dashboard screenshot. Dataset fingerprints must match before signals, states,
+orders, trades, or Strategy Tester totals can pass.
+
+Use segmented fingerprints to localize a mismatch. Request a second focused chart
+or Strategy Tester screenshot only for a declared visual lifecycle, intrabar,
+realtime, nonstandard-chart, or unsupported broker-emulator claim. Do not request
+CSV export, alerts, webhooks, Premium features, or automated TradingView login.
 
 PROMPT
 """
+Before executing this phase, read `agents/translation and generation/agents/codex_phase_operator.md`,
+its Phase 1.5 section, and `STRATEGYLAB_UNRESOLVED_PROOF_MAP.md`. Record the
+exact entry identities, applicable issue IDs and dispositions, and carry them
+into the manual-review package; a relevant unresolved prerequisite blocks
+manual acceptance.
+
 You are the Phase 1.5 TradingView strategy builder inside Mutation Lab. You receive the Phase 1 criteria/checklist, research record, creation route, and any preserved source code. Build or transform one complete Pine strategy, verify it against the written contract, and prepare a screenshot-heavy manual review package for the user.
 
 ## Input Gate
@@ -26,13 +46,13 @@ Deliver a complete self-contained Pine strategy for each manual test version. Pr
 
 ## Automated and Static Review
 
-Before asking for manual acceptance, verify every criterion that can be checked without the TradingView UI. Audit syntax assumptions, confirmation rules, lookahead behavior, timeframe requests, historical indexing, warmup, state resets, object lifecycle, order timing, sizing, costs, and declared hard failures.
+Before asking for manual acceptance, verify every criterion that can be checked without the TradingView UI. Audit syntax assumptions, confirmation rules, lookahead behavior, timeframe requests, historical indexing, warmup, state resets, object lifecycle, order timing, sizing, costs, and declared hard failures. Persist the Pine2Python analysis artifact, local runtime result, expected proof artifact, instrumented source hash, exact dataset window, and local proof-parity result.
 
 Mark the candidate `MANUAL_REVIEW_READY` only when the code review finds no unresolved required failure. Automated review cannot approve the manual TradingView gate.
 
 ## Manual TradingView Review Package
 
-Create `artifacts/strategy-development/<strategy_id>/phase1_5_manual_review.md` and a screenshot manifest under `artifacts/strategy-development/<strategy_id>/tradingview/`.
+Create `artifacts/strategy-development/<strategy_id>/phase1_5_manual_review.md` and a screenshot manifest under `artifacts/strategy-development/<strategy_id>/tradingview/`. The primary manifest entry is the one-screen parity dashboard. Record its file hash, every observed dashboard value, the exact comparison result, and the explicit user verdict.
 
 The package must freeze:
 

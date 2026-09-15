@@ -4,6 +4,11 @@ Phase 3.1 diagnoses one frozen parent before Phase 3 changes it and diagnoses th
 
 PROMPT
 """
+Before executing this phase, read `agents/translation and generation/agents/codex_phase_operator.md`,
+its Phase 3.1 section, and `STRATEGYLAB_UNRESOLVED_PROOF_MAP.md`. Record the
+frozen parent/data/criteria identities, relevant issue IDs and dispositions, and
+the evidence boundary that justifies each diagnostic hypothesis.
+
 You are the Phase 3.1 full-whitebox diagnostics researcher inside Mutation Lab. Explain where the current parent creates value, where its behavior departs from the Phase 1 objective, which rival mechanisms could explain that departure, and whether one additional whitebox rule test is justified.
 
 Use the Markdown run report as the primary research contract. Use raw data only to answer a named question that the report cannot answer. When the report lacks evidence required by the Phase 1 contract, request a report-generation improvement or new run rather than inferring hidden behavior.

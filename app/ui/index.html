@@ -4,7 +4,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>MUTATION LAB | Production Cockpit</title>
-    <link rel="stylesheet" href="/ui/style.css?v=20260520-production-rail" />
+    <link rel="stylesheet" href="/ui/style.css?v=20260723-pine-workbench" />
   </head>
   <body>
     <header class="topbar" aria-label="Mutation Lab context">
@@ -67,6 +67,12 @@
             <rect x="9.5" y="15" width="5" height="5" />
             <path d="M9 6.5h6" />
             <path d="M12 9v6" />
+          </svg>
+        </a>
+        <a href="#pine-evidence" aria-label="Pine evidence">
+          <svg class="rail-svg" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M5 18V6l7 4 7-4v12l-7-4z" />
+            <path d="M12 10v4" />
           </svg>
         </a>
         <a href="#advanced" aria-label="Terminal">
@@ -253,6 +259,76 @@
           </div>
         </section>
 
+        <section id="pine-evidence" class="panel pine-panel" aria-labelledby="pineEvidenceTitle">
+          <div class="section-head">
+            <div>
+              <span class="eyebrow">Pre-Phase 1 Workbench</span>
+              <strong id="pineEvidenceTitle">Pine Evidence</strong>
+            </div>
+            <div class="pine-service-state">
+              <span id="pineServiceBadge" class="badge">Checking service</span>
+              <span id="pineServiceDetail">Pine2Python status pending</span>
+            </div>
+          </div>
+
+          <div class="pine-layout">
+            <div class="form-stack pine-source-form">
+              <div class="control-grid pine-controls">
+                <label>
+                  <span>Revision</span>
+                  <select id="pineRevisionSelect"></select>
+                </label>
+                <label>
+                  <span>Creation Mode</span>
+                  <select id="pineModeSelect">
+                    <option value="greenfield_strategy">Greenfield strategy</option>
+                    <option value="source_adaptation">Open-source adaptation</option>
+                    <option value="indicator_first">Indicator first</option>
+                  </select>
+                </label>
+                <label>
+                  <span>Source Name</span>
+                  <input id="pineSourceName" value="strategy.pine" />
+                </label>
+                <label>
+                  <span>Trading Tick Size</span>
+                  <input id="pineMintickInput" type="number" value="0.01" min="0.00000001" step="any" />
+                </label>
+              </div>
+              <div class="control-grid pine-provenance">
+                <label>
+                  <span>Source URL (required for adaptation)</span>
+                  <input id="pineSourceUrl" placeholder="https://..." />
+                </label>
+                <label>
+                  <span>License (required for adaptation)</span>
+                  <input id="pineSourceLicense" placeholder="MPL-2.0" />
+                </label>
+              </div>
+              <label>
+                <span>Frozen Pine Source</span>
+                <textarea id="pineSourceCode" spellcheck="false" placeholder="//@version=6&#10;strategy(&quot;Candidate&quot;, overlay=true)"></textarea>
+              </label>
+              <div class="action-row pine-actions">
+                <button id="pineAnalyzeButton" class="outline-action" type="button">Analyze &amp; Freeze Revision</button>
+                <button id="pineGenerateButton" class="outline-action" type="button">Generate MA / ATR Candidate</button>
+                <button id="pinePrepareProofButton" class="commit-action" type="button">Prepare Manual Review</button>
+              </div>
+            </div>
+
+            <div class="pine-evidence-side">
+              <div id="pineEvidenceGrid" class="pine-evidence-grid"></div>
+              <div class="action-row pine-actions">
+                <button id="pineCopyProofButton" class="ghost-action" type="button" disabled>Copy TradingView Source</button>
+                <button id="pinePythonTraceButton" class="ghost-action" type="button">Run Python Trace</button>
+                <button id="pineCompareButton" class="ghost-action" type="button" disabled>Compare Pine / Python</button>
+                <button id="pineOpenEvidenceButton" class="ghost-action" type="button" disabled>Open Evidence Report</button>
+              </div>
+              <p id="pineStatus" class="status" aria-live="polite"></p>
+            </div>
+          </div>
+        </section>
+
         <section id="advanced" class="advanced-grid">
           <details class="panel prompt-panel">
             <summary><span>Prompt Core</span></summary>
@@ -300,6 +376,6 @@
       </div>
     </footer>
 
-    <script src="/ui/app.js?v=20260520-production-rail-fix1" defer></script>
+    <script src="/ui/app.js?v=20260723-pine-workbench" defer></script>
   </body>
 </html>

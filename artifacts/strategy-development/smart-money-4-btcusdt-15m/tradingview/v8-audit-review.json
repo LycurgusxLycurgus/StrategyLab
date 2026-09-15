@@ -1,0 +1,41 @@
+{
+  "review_date": "2026-09-02",
+  "workbench_id": "pwb_f89ea6f3774a",
+  "revision_id": "pvr_5b403b82f40e83d6179d",
+  "proof_evidence_id": "pev_9f76443d1845534f9169",
+  "source_sha256": "49c8e7099c695f58a70aa16d905ca022c1bb05b2f6540e47d0857868a3526304",
+  "new_pine_revision": false,
+  "changes": "Python audit/data contract only; Pine trading rules and visuals unchanged.",
+  "browser": "Authenticated in-app TradingView UI",
+  "verdicts": {
+    "existing_declared_dashboard_visual_recheck": "MATCH",
+    "recomputed_python_declared_dashboard": "MATCH",
+    "readable_editor_copyback": "MATCH_AFTER_CRLF_NORMALIZATION",
+    "readable_compile": "PASS at 14:57:11 UTC-5",
+    "readable_only_restored_on_btc_15m": true,
+    "exact_fxcm_gold": "BLOCKED_SYMBOL_DOES_NOT_EXIST",
+    "new_event_ledger_cross_runtime_parity": "NOT_YET_PROVEN",
+    "expert_case_adjudication": "PENDING",
+    "user_exact_hash_acceptance": "PENDING",
+    "official_tradingview_accepted": false
+  },
+  "screenshots": [
+    {"file": "v8-audit-fxcm-unavailable.png", "sha256": "de554b8d9e312f0a82e9b4be4c867b4a40fc877394956f5d9f82c9637bdce4a9", "purpose": "Exact FXCM:XAUUSD feed unavailable in current session"},
+    {"file": "v8-audit-signature.png", "sha256": "a2d3d477a3c35ee1a018d40786f0784ce12a2d0c267c5897490706ab2292cdda", "purpose": "Existing declared data, segments, feature and signal dashboard visually rechecked"},
+    {"file": "v8-audit-readable-restored.png", "sha256": "391e5a68bcd022603e6d5ae947013bd70288d9d78fe2b353786cef235e7fe43b", "purpose": "Only the readable v8 candidate remains; proof overlay removed"}
+  ],
+  "gold_data_limitations": {
+    "original_mt5_server_timezone": "UNKNOWN",
+    "native_provider_4h_data": "MISSING",
+    "local_data_end": "2026-05-01",
+    "video_case_date": "2026-07-29",
+    "substitute_feed_used_as_exact_parity": false
+  },
+  "limitations": [
+    "Existing signature does not include new Python event IDs, terminal accounting or owner timestamps.",
+    "No new Bar Replay first-appearance evidence or expert acceptance was obtained.",
+    "PineTS request support remains unavailable; native HTF support has fixture evidence only.",
+    "Twelve casebook charts are model observations awaiting expert annotations, not golden truth.",
+    "No strategy port, parameter optimization or economic acceptance."
+  ]
+}

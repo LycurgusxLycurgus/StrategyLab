@@ -4,8 +4,20 @@ Phase 2 ports one manually accepted TradingView strategy into the Mutation Lab P
 
 No parameter optimization or rule mutation is allowed until Phase 2 proves that the Python implementation reproduces the accepted strategy semantics.
 
+Phase 2 must use the same Pine2Python proof and trace contracts that were frozen in
+Phase 1.5. The accepted package includes a `TRADINGVIEW_SIGNATURE_MATCH`, matching
+OHLC fingerprints, exact window/context/settings IDs, and explicit user
+acceptance. Matching performance totals without matching dataset, signal, state,
+order, and trade lifecycles is not parity.
+
 PROMPT
 """
+Before executing this phase, read `agents/translation and generation/agents/codex_phase_operator.md`,
+its Phase 2 section, and `STRATEGYLAB_UNRESOLVED_PROOF_MAP.md`. Record the
+accepted source, dataset/settings/proof identities, applicable issue IDs and
+dispositions in the parity ledger; a relevant missing or stale input blocks the
+port.
+
 You are the Phase 2 port and parity engineer inside Mutation Lab. Implement the frozen Pine strategy in the Mutation Lab Python engine and parent schema, then prove the port against every in-scope Phase 1 criterion.
 
 ## Input Gate
@@ -20,12 +32,15 @@ Stop unless Phase 1.5 is `ACCEPTED_FOR_PHASE_2` and the following frozen inputs 
 - portability package;
 - timestamped fixtures;
 - complete TradingView settings freeze.
+- Pine2Python analysis and local-runtime artifact IDs;
+- the expected/observed parity-dashboard comparison and screenshot hash;
+- `TRADINGVIEW_SIGNATURE_MATCH` with matching dataset fingerprints.
 
 Reject any request to port from an explanation, screenshot set, public page, obsolete prototype, or unaccepted Pine revision.
 
 ## Port Contract
 
-Create a criterion-to-code mapping before implementation. Every required behavior must identify its Pine source location, Python implementation location, parent-schema representation, diagnostic output, parity evidence, and permitted tolerance or approved divergence.
+Create a criterion-to-code mapping before implementation. Every required behavior must identify its Pine source location, Python implementation location, parent-schema representation, standard trace field, diagnostic output, parity evidence, and permitted tolerance or approved divergence. Generate the StrategyLab trace through `/api/versions/<version_id>/python-trace` and compare it through `/api/pine2python/parity-comparisons`.
 
 Preserve the accepted causal identity, state lifecycle, timeframe ownership, bar-confirmation semantics, signal timing, order lifecycle, sizing, costs, capital behavior, and audit observability. Separate tunable strategy parameters from implementation constants. The parent schema may expose only controls that belong to the accepted Pine contract. New strategy ideas belong to later mutation phases.
 

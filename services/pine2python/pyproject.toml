@@ -1,0 +1,45 @@
+[build-system]
+requires = ["setuptools==75.8.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "strategylab-pine2python"
+version = "0.1.0"
+description = "Local-first Pine analysis, proof, trace, parity, and adapter service for StrategyLab."
+requires-python = ">=3.10"
+license = { text = "AGPL-3.0-only" }
+dependencies = [
+  "antlr4-python3-runtime==4.13.2",
+  "fastapi==0.115.14",
+  "pydantic==2.12.5",
+  "pynescript==0.3.0",
+  "uvicorn==0.30.6",
+]
+
+[project.optional-dependencies]
+dev = [
+  "mypy==2.3.0",
+  "ruff==0.16.0",
+]
+
+[project.scripts]
+pine2python = "pine2python.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+pine2python = ["templates/*.pine"]
+
+[tool.ruff]
+line-length = 88
+target-version = "py312"
+
+[tool.ruff.lint]
+ignore = ["BLE001", "RUF009"]
+
+[tool.mypy]
+python_version = "3.12"
+check_untyped_defs = true
+ignore_missing_imports = true
+warn_unused_ignores = true

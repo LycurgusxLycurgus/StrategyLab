@@ -1,12 +1,12 @@
 # Universal Mutation Constitution
 
-This constitution governs Phases 3, 3.1, 4, 4.1, 4.2, and 4.3. It prevents strategy research from converging on a reusable mutation catalog. Every candidate must be derived from the current strategy, current market context, current evidence, and current decision boundary.
+This constitution governs Phases 3, 3.1, 4, 4.1, 4.2, and 4.3. It prevents strategy research from converging on a reusable mutation catalog. Every candidate must be derived from the current strategy, current market context, current evidence, and current decision boundary. Before acting, read `agents/translation and generation/agents/codex_phase_operator.md` and the current `STRATEGYLAB_UNRESOLVED_PROOF_MAP.md`; carry relevant issue IDs and evidence dispositions into the phase artifact.
 
 ## Required Inputs
 
 A mutation phase begins with one frozen parent, its full lineage, the Phase 1 criteria/checklist, the Phase 2 parity package, the Phase 2.5 qualification report, the current asset and venue, the current timeframe contract, the current execution and capital model, and the current validation policy.
 
-If any controlling input is missing or stale, repair the evidence contract before generating candidates.
+If any controlling input is missing or stale, repair the evidence contract before generating candidates. A Pine-deployable lineage also requires the accepted Pine source hash, Pine2Python analysis ID, matching TradingView dataset/proof fingerprints, explicit user acceptance, and Phase 2 Python trace-parity evidence. Optimization or mutation must not begin from an exploratory workbench revision or a dashboard mismatch.
 
 ## Universal Do Constitution
 

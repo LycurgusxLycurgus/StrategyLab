@@ -1,0 +1,189 @@
+{
+  "artifact": {
+    "artifact_id": "tradingview-proof_a26c2719e213aa7bf7da",
+    "artifact_path": "tradingview-proof/a2/a26c2719e213aa7bf7da4e4f93193c548215be155c1232e5a4c6fa7fadfa101b",
+    "content_hash": "a26c2719e213aa7bf7da4e4f93193c548215be155c1232e5a4c6fa7fadfa101b",
+    "files": [
+      {
+        "bytes": 48092,
+        "path": "instrumented.pine",
+        "sha256": "5446e4fd7c7c81c62aa02c787af3cc02c1874cba0f8ff50e666d1da0efbd8cda"
+      },
+      {
+        "bytes": 50357,
+        "path": "local-runtime-instrumented.pine",
+        "sha256": "cacdb40d2f1888afa86bc82273ddffc58e443c1c7032fe186ab6d4c9dc7cd604"
+      },
+      {
+        "bytes": 643,
+        "path": "local-runtime.json",
+        "sha256": "37db763870cc09bb17cd6906c2793c08d6856995e2f8ec8f280d7ac0bb0f9c8c"
+      },
+      {
+        "bytes": 2,
+        "path": "local-trace-summary.json",
+        "sha256": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a"
+      },
+      {
+        "bytes": 0,
+        "path": "local-trace.jsonl",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "bytes": 3013,
+        "path": "proof.json",
+        "sha256": "bc65ca036d399ef5070613f23db3df4997d75559d9566d8397c33cf420503dcd"
+      },
+      {
+        "bytes": 1062957,
+        "path": "request.json",
+        "sha256": "a26c2719e213aa7bf7da4e4f93193c548215be155c1232e5a4c6fa7fadfa101b"
+      }
+    ],
+    "kind": "tradingview-proof",
+    "schema_version": "1.0"
+  },
+  "dashboard_values": {
+    "BARS": "1000",
+    "DATA": "0996453-0739391-0249398",
+    "DATA SEG 1": "0826762-0624478-0741627",
+    "DATA SEG 2": "0877548-0363331-0417730",
+    "DATA SEG 3": "0972997-0725785-0130851",
+    "DATA SEG 4": "0939291-0634512-0858916",
+    "DATA SEG 5": "0652462-0870131-0621481",
+    "DATA SEG 6": "0310762-0789540-0748726",
+    "DATA SEG 7": "0865231-0210940-0358392",
+    "DATA SEG 8": "0348976-0894910-0841436",
+    "FEATURES": "0746923-0375167-0191183",
+    "FIRST/LAST": "1786181400000/1787080500000",
+    "PROFILE": "basic_v1 / v2.12",
+    "SETTINGS": "22d38ef711dbe29c",
+    "SOURCE": "f89ea6f3774a60b3",
+    "WINDOW": "1786181400000..1787081400000"
+  },
+  "dataset": {
+    "fingerprint": [
+      996453,
+      739391,
+      249398
+    ],
+    "segments": [
+      [
+        826762,
+        624478,
+        741627
+      ],
+      [
+        877548,
+        363331,
+        417730
+      ],
+      [
+        972997,
+        725785,
+        130851
+      ],
+      [
+        939291,
+        634512,
+        858916
+      ],
+      [
+        652462,
+        870131,
+        621481
+      ],
+      [
+        310762,
+        789540,
+        748726
+      ],
+      [
+        865231,
+        210940,
+        358392
+      ],
+      [
+        348976,
+        894910,
+        841436
+      ]
+    ],
+    "volume_included": false
+  },
+  "identity": {
+    "dataset_file_sha256": "0829fbc3ca7dd1a22e04f47a184f4b9edb8921fdfc66b9a0df6e696b99bb4a46",
+    "instrumentation_version": "tv_table_v2_12",
+    "instrumented_source_sha256": "5446e4fd7c7c81c62aa02c787af3cc02c1874cba0f8ff50e666d1da0efbd8cda",
+    "settings_sha256": "22d38ef711dbe29c4a033abf66cf3fb4dab460c072b5c731bd97c961ce606016",
+    "source_id": "pvr_a7925630e5ecfc6d022f",
+    "source_sha256": "f89ea6f3774a60b3a5da60cd2238bfbb8b7d24bd6f5e76641189c352ae4cc171",
+    "symbol": "BINANCE:BTCUSDT",
+    "timeframe": "15"
+  },
+  "instrumented_source": null,
+  "local_runtime": {
+    "error": {
+      "code": "LOCAL_RUNTIME_SKIPPED_FROM_REVISION_ANALYSIS",
+      "details": {
+        "blockers": [
+          {
+            "code": "REQUEST_RUNTIME_UNVERIFIED",
+            "message": "Network-free local runtime does not execute request.* by default."
+          }
+        ]
+      },
+      "message": "Local runtime was skipped because the immutable revision already records unsupported constructs.",
+      "request_id": null
+    },
+    "instrumented_source_sha256": "cacdb40d2f1888afa86bc82273ddffc58e443c1c7032fe186ab6d4c9dc7cd604",
+    "matched": null,
+    "runtime_window": {
+      "bar_count": 5000,
+      "basis": "declared_state_reset",
+      "end_exclusive_ms": 1787081400000,
+      "start_ms": 1782581400000,
+      "state_start_ms": 1782581400000
+    },
+    "status": "LOCAL_PROOF_RUNTIME_UNAVAILABLE"
+  },
+  "local_trace": null,
+  "profile": {
+    "appended_tradingview_plot_calls": 0,
+    "compacted_source_blocks": [],
+    "id": "basic_v1",
+    "instrumentation_transforms": [
+      "pack proof fingerprints into one hash matrix and one metadata array",
+      "split hashing and rendering into bounded helper functions"
+    ],
+    "instrumentation_version": "tv_table_v2_12",
+    "manual_steps": [
+      "Open the exact TradingView symbol and timeframe.",
+      "Paste/add the table-only instrumented frozen Pine and set the supplied proof window and strategy inputs.",
+      "Capture the complete parity-proof dashboard in one screenshot.",
+      "Submit the displayed values and screenshot hash to StrategyLab."
+    ],
+    "max_bars": 5000,
+    "removed_hidden_trace_plot_calls": 0,
+    "tradingview_plot_limit": 64
+  },
+  "schema_version": "1.2",
+  "status": "TRADINGVIEW_REVIEW_REQUIRED",
+  "streams": {
+    "features": {
+      "fingerprint": [
+        746923,
+        375167,
+        191183
+      ]
+    }
+  },
+  "window": {
+    "bar_count": 1000,
+    "end_ms": 1787081400000,
+    "first_time_ms": 1786181400000,
+    "last_time_ms": 1787080500000,
+    "mintick": 0.01,
+    "start_ms": 1786181400000
+  }
+}

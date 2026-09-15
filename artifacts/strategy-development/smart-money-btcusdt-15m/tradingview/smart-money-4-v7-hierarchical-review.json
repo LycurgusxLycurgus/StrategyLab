@@ -1,0 +1,26 @@
+{
+  "schema_version": "1.0",
+  "workbench_id": "pwb_f89ea6f3774a",
+  "parent_revision_id": "pvr_35b4dee03de37a299c7e",
+  "revision_id": "pvr_dfe72cd3eeaccde22e6e",
+  "proof_id": "pev_60ce84c062e39a4240cf",
+  "source_sha256": "75749b8d6c9993e2b0fabce9a4d08424b1297236354109da0d98273e4d979578",
+  "instrumented_source_sha256": "2afa3ea2b9ae525719da1c33dce2cc66e2affa963369fbcf9c1182479a8be469",
+  "symbol": "BINANCE:BTCUSDT",
+  "timeframe": "15",
+  "browser_compile": "PASS",
+  "readable_visual_review": "PASS_RENDERER_FREEZE",
+  "signature_dashboard_parity": "NOT_RUN",
+  "user_expert_verdict": "PENDING",
+  "tradingview_accepted": false,
+  "strategy_viability": "REJECTED",
+  "strategy_viability_reason": "Gross PF does not generalize to older BTC or XAUUSD and becomes sub-one after two basis points per side; chronological out-of-sample halves also fail.",
+  "protected_regions": {
+    "historical_renderer_sha256": "b8394bca3c6746053c424f34195ce6f8edc22ca9c93b9e17524b90eb2e484f05",
+    "current_dashboard_risk_renderer_sha256": "07b3b8a927ba6d88b4f2796f42dc6ede400ffbcd7ec8c1b909f2acee0ceb5eeb"
+  },
+  "screenshot": {
+    "path": "artifacts/strategy-development/smart-money-btcusdt-15m/tradingview/smart-money-4-v7-hierarchical-binance-15m.png",
+    "sha256": "d22805b630a611dc6b35a4dba3c3354cbeb14403d6c954e0c135714df13ed21e"
+  }
+}

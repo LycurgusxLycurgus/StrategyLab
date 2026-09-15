@@ -1,0 +1,75 @@
+{
+  "schema_version": "1.0",
+  "status": "TRADINGVIEW_SIGNATURE_MATCH_USER_VERDICT_PENDING",
+  "workbench_id": "pwb_f89ea6f3774a",
+  "revision_id": "pvr_35b4dee03de37a299c7e",
+  "semantic_parent_revision_id": "pvr_4921345c3f055b48d0a2",
+  "visual_parent_revision_id": "pvr_4d1dc599c889bffc9815",
+  "proof_evidence_id": "pev_114ac8a85a0b16e6c93d",
+  "source_sha256": "900ce8a712bbadb98a790532614af71087fd45f2e28b4c9d120fe228b9037820",
+  "instrumented_source_sha256": "a4055c84c38970f9f3a6bf43d0a8d5ad1838ca179d0c88ac2225abc02cba6348",
+  "chart": {
+    "symbol": "BINANCE:BTCUSDT",
+    "timeframe": "15",
+    "inputs": "Trader / 75% / Video / Standard / 2000 USD / Base asset"
+  },
+  "browser_checks": {
+    "readable_source_compiles": true,
+    "instrumented_source_compiles": true,
+    "runtime_errors": 0,
+    "historical_full_setup_geometry_visible": true,
+    "historical_lq_and_bos_visible": true,
+    "historical_long_and_short_visible": true,
+    "proof_dashboard_matches": true,
+    "readable_source_restored": true
+  },
+  "regression": {
+    "bars_15m": 5000,
+    "bars_1m": 75001,
+    "raw_high_pivots": 707,
+    "raw_low_pivots": 684,
+    "sweep_candidate_bars": 761,
+    "bull_bos": 383,
+    "bear_bos": 377,
+    "candidates": 409,
+    "setups": 75,
+    "fills": 29,
+    "long": 37,
+    "short": 38,
+    "sweep_pass_setups": 58,
+    "tp": 8,
+    "sl": 21,
+    "missed_or_invalid": 45,
+    "ambiguous": 1,
+    "ambiguous_reason": "ENTRY_TARGET_SAME_BAR",
+    "ambiguous_ready_utc": "2026-07-30T23:00:00Z",
+    "ambiguous_fill_exit_utc": "2026-07-30T23:30:00Z",
+    "mirror_structure_symmetry": true,
+    "mirror_setup_symmetry": true
+  },
+  "proof_dashboard": {
+    "profile": "basic_v1 / v2.12",
+    "window": "1786181400000..1787081400000",
+    "bars": "1000",
+    "first_last": "1786181400000/1787080500000",
+    "source": "900ce8a712bbadb9",
+    "settings": "98bbb818673253d6",
+    "data": "0996453-0739391-0249398",
+    "features": "0118059-0092157-0330764",
+    "signals": "0854802-0916943-0023382",
+    "segments_match": true
+  },
+  "screenshots": [
+    {
+      "kind": "readable_structural_memory_candidate",
+      "path": "smart-money-4-v6-readable-final.png",
+      "sha256": "a2b7f16eb025892676af84b1734a84e36fb2020c223346667906b39c6f68299d"
+    },
+    {
+      "kind": "proof_dashboard",
+      "path": "smart-money-4-v6-proof-dashboard.png",
+      "sha256": "a9c90359e4b6f217a1515453a84d47ee6dc4062e731e4353d7958acf94f88b8c"
+    }
+  ],
+  "user_verdict": "PENDING"
+}

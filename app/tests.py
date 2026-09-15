@@ -1,23 +1,25 @@
 from __future__ import annotations
 
-import math
 import json
-import socket
+import math
 import tempfile
 import unittest
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
+from types import SimpleNamespace
 from typing import Any
 from unittest.mock import patch
 
 from fastapi import HTTPException
 
 from app.backtest import BacktestEngine, Position
-from app.config import settings
-from app.backtest import BacktestEngine, Position
+from app.config import Settings, settings
 from app.data import Bar, DataService
 from app.lab import MutationLabService
 from app.main import DatasetDownloadRequest
+from app.pine2python_client import Pine2PythonClient, Pine2PythonClientError
+from app.pine_review import compare_protected_regions, select_review_fixtures
+from app.pine_workbench import PineWorkbenchService
 from app.storage import Repository
 
 
@@ -384,6 +386,129 @@ def build_quant_smc_spec(**overrides: object) -> dict[str, object]:
     return spec
 
 
+class FakePine2PythonClient:
+    def __init__(self) -> None:
+        self.last_proof_payload: dict[str, object] | None = None
+
+    def status(self) -> dict[str, object]:
+        return {
+            "status": "ready",
+            "required": False,
+            "transport": "test",
+        }
+
+    def analyze(self, payload: dict[str, object]) -> dict[str, object]:
+        source = str(payload["source"])
+        declaration = "indicator" if "indicator(" in source else "strategy"
+        return {
+            "status": [
+                "SOURCE_ACCEPTED",
+                "PARSE_COMPLETE",
+                "STATIC_REVIEW_COMPLETE",
+                "LOCAL_RUNTIME_SUPPORTED",
+            ],
+            "artifact": {"artifact_id": "analysis_fixture"},
+            "inventory": {"declaration": declaration, "pine_version": 6},
+            "temporal_findings": [],
+            "capabilities": {"local_runtime": "supported"},
+            "parser": {"status": "PARSE_COMPLETE"},
+        }
+
+    def proof(self, payload: dict[str, object]) -> dict[str, object]:
+        self.last_proof_payload = payload
+        candles = list(payload["candles"])
+        dashboard = {
+            "PROFILE": "basic_v1 / v1",
+            "BARS": str(len(candles)),
+            "DATA": "0000001-0000002-0000003",
+        }
+        return {
+            "status": "TRADINGVIEW_REVIEW_REQUIRED",
+            "dashboard_values": dashboard,
+            "instrumented_source": str(payload["source"]) + "\n// proof\n",
+            "artifact": {"artifact_id": "proof_fixture"},
+            "local_runtime": {
+                "status": "LOCAL_PROOF_PARITY_PASS",
+                "matched": True,
+            },
+            "local_trace": {
+                "schema_version": "1.0",
+                "engine_id": "pinets-test",
+                "capabilities": {
+                    "market": True,
+                    "position": True,
+                    "orders": False,
+                    "trades": False,
+                    "equity": False,
+                    "features": False,
+                    "signals": False,
+                    "rejections": False,
+                },
+                "rows": [
+                    {
+                        "time": int(candle["time"]),
+                        "market": {
+                            key: candle[key]
+                            for key in ("open", "high", "low", "close", "volume")
+                        },
+                    }
+                    for candle in candles
+                ],
+            },
+        }
+
+    def observe(self, payload: dict[str, object]) -> dict[str, object]:
+        expected = dict(payload["expected"]["dashboard_values"])
+        observed = dict(payload["observed"])
+        exact = expected == observed
+        statuses = [
+            "TRADINGVIEW_SIGNATURE_MATCH"
+            if exact
+            else "TRADINGVIEW_SIGNATURE_MISMATCH"
+        ]
+        verdict = payload.get("user_verdict")
+        if verdict == "accepted":
+            statuses.append("TRADINGVIEW_ACCEPTED")
+        elif verdict == "rejected":
+            statuses.append("TRADINGVIEW_REJECTED")
+        else:
+            statuses.append("TRADINGVIEW_REVIEW_REQUIRED")
+        return {
+            "status": statuses,
+            "exact_match": exact,
+            "dataset_match": exact,
+            "artifact": {"artifact_id": "observation_fixture"},
+        }
+
+    def parity(self, payload: dict[str, object]) -> dict[str, object]:
+        passed = payload["reference_rows"] == payload["candidate_rows"]
+        return {
+            "status": "PARITY_PASS" if passed else "PARITY_FAIL",
+            "passed": passed,
+            "artifact": {"artifact_id": "parity_fixture"},
+        }
+
+    def generate(
+        self, adapter_id: str, payload: dict[str, object]
+    ) -> dict[str, object]:
+        return {
+            "adapter_id": adapter_id,
+            "source": '//@version=6\nstrategy("Generated")\n',
+            "settings": {"adapter_id": adapter_id, **payload["parameters"]},
+            "trace_contract": {
+                "signals": [
+                    {
+                        "name": "signals.long",
+                        "expression": "longSignal",
+                        "kind": "bool",
+                    }
+                ]
+            },
+            "artifact": {"artifact_id": "generation_fixture"},
+            "status": "TRADINGVIEW_REVIEW_REQUIRED",
+        }
+
+
 class MutationLabTests(unittest.TestCase):
     def setUp(self) -> None:
         self.temp_dir = tempfile.TemporaryDirectory()
@@ -396,6 +521,7 @@ class MutationLabTests(unittest.TestCase):
             "diagnostic_dir": settings.diagnostic_dir,
             "strategy_specs_dir": settings.strategy_specs_dir,
             "seed_spec_path": settings.seed_spec_path,
+            "pine_development_dir": settings.pine_development_dir,
         }
         settings.db_path = self.root / "artifacts" / "mutation_lab.sqlite3"
         settings.data_dir = self.root / "artifacts" / "data"
@@ -404,6 +530,9 @@ class MutationLabTests(unittest.TestCase):
         settings.diagnostic_dir = self.root / "artifacts" / "diagnostics"
         settings.strategy_specs_dir = self.root / "strategies"
         settings.seed_spec_path = self.root / "strategies" / "btc_intraday_parent.json"
+        settings.pine_development_dir = (
+            self.root / "artifacts" / "strategy-development"
+        )
         settings.ensure_dirs()
         self.repo = Repository(settings.db_path)
         self.data_service = DataService(self.repo)
@@ -418,6 +547,7 @@ class MutationLabTests(unittest.TestCase):
         settings.diagnostic_dir = self.original["diagnostic_dir"]
         settings.strategy_specs_dir = self.original["strategy_specs_dir"]
         settings.seed_spec_path = self.original["seed_spec_path"]
+        settings.pine_development_dir = self.original["pine_development_dir"]
         self.temp_dir.cleanup()
 
     def test_seed_family_and_version_exist(self) -> None:
@@ -427,6 +557,454 @@ class MutationLabTests(unittest.TestCase):
         version = self.repo.get_version("ver_btc_intraday_parent")
         self.assertIsNotNone(version)
         self.assertTrue(settings.seed_spec_path.exists())
+
+    def test_pine_workbench_persists_immutable_indicator_revision(self) -> None:
+        workbench = PineWorkbenchService(
+            self.repo,
+            self.data_service,
+            FakePine2PythonClient(),
+        )
+        source = '//@version=6\nindicator("Structure")\nplot(close)\n'
+        first = workbench.create_revision(
+            source_code=source,
+            source_name="structure.pine",
+            mode="indicator_first",
+            settings_payload={"length": 20},
+            provenance={"origin": "greenfield"},
+            workbench_id=None,
+            parent_revision_id=None,
+        )
+        second = workbench.create_revision(
+            source_code=source,
+            source_name="structure.pine",
+            mode="indicator_first",
+            settings_payload={"length": 20},
+            provenance={"origin": "greenfield"},
+            workbench_id=first["workbench_id"],
+            parent_revision_id=None,
+        )
+        self.assertEqual(first["revision_id"], second["revision_id"])
+        self.assertEqual("pre_phase_1", first["stage"])
+        self.assertTrue(
+            (
+                settings.pine_development_dir
+                / first["workbench_id"]
+                / first["revision_id"]
+                / "source.pine"
+            ).exists()
+        )
+        source_artifact = (
+            settings.pine_development_dir
+            / first["workbench_id"]
+            / first["revision_id"]
+            / "source.pine"
+        )
+        self.assertEqual(source.encode("utf-8"), source_artifact.read_bytes())
+
+    def test_pine_review_protects_source_and_selects_event_fixtures(self) -> None:
+        baseline = (
+            '//@version=6\nindicator("x")\n'
+            "// PROTECTED START\nplot(close)\n// PROTECTED END\n"
+            "plot(open)\n"
+        )
+        candidate = baseline.replace("plot(open)", "plot(high)")
+        contract = [
+            {
+                "name": "protected",
+                "start_marker": "// PROTECTED START",
+                "end_marker": "// PROTECTED END",
+            }
+        ]
+        comparison = compare_protected_regions(
+            baseline, candidate, contract
+        )
+        self.assertEqual("SOURCE_FIDELITY_PASS", comparison["status"])
+        changed_protected = candidate.replace("plot(close)", "plot(low)")
+        comparison = compare_protected_regions(
+            baseline, changed_protected, contract
+        )
+        self.assertEqual("SOURCE_FIDELITY_FAIL", comparison["status"])
+
+        rows = [
+            {
+                "time": index,
+                "signals": {"break": index in (2, 5, 8)},
+                "features": {"level": 100 + index},
+            }
+            for index in range(10)
+        ]
+        fixtures = select_review_fixtures(
+            rows,
+            [{"name": "break", "field": "signals.break"}],
+            max_fixtures=10,
+        )
+        self.assertEqual([2, 5, 8], [item["time"] for item in fixtures])
+        self.assertEqual(105, fixtures[1]["snapshot"]["features"]["level"])
+
+    def test_pine_workbench_prepares_fidelity_first_review_package(self) -> None:
+        workbench = PineWorkbenchService(
+            self.repo,
+            self.data_service,
+            FakePine2PythonClient(),
+        )
+        baseline_source = (
+            '//@version=6\nindicator("baseline")\n'
+            "// HTF START\nplot(close)\n// HTF END\n"
+            "plot(open)\n"
+        )
+        baseline = workbench.create_revision(
+            source_code=baseline_source,
+            source_name="baseline.pine",
+            mode="indicator_first",
+            settings_payload={},
+            provenance={"origin": "existing_source_baseline"},
+            workbench_id=None,
+            parent_revision_id=None,
+        )
+        candidate = workbench.create_revision(
+            source_code=baseline_source.replace("plot(open)", "plot(high)"),
+            source_name="candidate.pine",
+            mode="indicator_first",
+            settings_payload={},
+            provenance={"origin": "isolated_repair"},
+            workbench_id=baseline["workbench_id"],
+            parent_revision_id=baseline["revision_id"],
+        )
+        package = workbench.prepare_review_package(
+            candidate["revision_id"],
+            baseline_revision_id=baseline["revision_id"],
+            fidelity_contract={
+                "protected_regions": [
+                    {
+                        "name": "htf",
+                        "start_marker": "// HTF START",
+                        "end_marker": "// HTF END",
+                    }
+                ],
+                "repair_targets": ["LTF only"],
+                "visual_requirements": ["Preserve the baseline chart"],
+                "review_timeframes": ["240", "15"],
+            },
+            trace_evidence_id=None,
+            trace_rows=None,
+            max_fixtures=10,
+        )
+        self.assertIn("SOURCE_FIDELITY_PASS", package["status"])
+        self.assertIn(
+            "FOCUSED_REVIEW_FIXTURES_REQUIRED", package["status"]
+        )
+        self.assertIn(
+            "TRADINGVIEW_VISUAL_REVIEW_REQUIRED", package["status"]
+        )
+        self.assertTrue(
+            Path(package["artifact"]["review_package_path"]).is_file()
+        )
+
+    def test_rejected_tradingview_verdict_is_explicit(self) -> None:
+        client = FakePine2PythonClient()
+        workbench = PineWorkbenchService(
+            self.repo,
+            self.data_service,
+            client,
+        )
+        revision = workbench.create_revision(
+            source_code='//@version=6\nindicator("Rejected")\n',
+            source_name="rejected.pine",
+            mode="indicator_first",
+            settings_payload={},
+            provenance={"origin": "greenfield"},
+            workbench_id=None,
+            parent_revision_id=None,
+        )
+        bars = build_fixture_bars(120)
+        dataset = self.data_service.import_fixture_dataset(
+            bars,
+            symbol="BTCUSDT",
+            timeframe="15m",
+            name="rejected-proof-fixture",
+        )
+        proof = workbench.create_proof(
+            revision["revision_id"],
+            dataset_id=dataset["dataset_id"],
+            start_ms=int(bars[10].ts.timestamp() * 1000),
+            end_ms=int((bars[99].ts + timedelta(minutes=15)).timestamp() * 1000),
+            mintick=0.01,
+            trace_rows=[],
+            stream_expressions={},
+            profile="basic_v1",
+        )
+        observation = workbench.observe_tradingview(
+            revision["revision_id"],
+            proof_evidence_id=proof["evidence_id"],
+            observed=proof["payload"]["dashboard_values"],
+            screenshot_sha256="b" * 64,
+            user_verdict="rejected",
+        )
+        self.assertIn("TRADINGVIEW_REJECTED", observation["status"])
+
+    def test_local_pine_client_skips_repeated_remote_timeout_after_status(
+        self,
+    ) -> None:
+        client = Pine2PythonClient(
+            Settings(
+                pine2python_enabled=True,
+                pine2python_required=False,
+                pine2python_local_fallback=True,
+                pine_development_dir=settings.pine_development_dir,
+            )
+        )
+        remote_error = Pine2PythonClientError(
+            "PINE2PYTHON_UNAVAILABLE",
+            "offline",
+            {},
+            503,
+        )
+        local = SimpleNamespace(
+            version=lambda: {"service_version": "test"},
+            capabilities=lambda: {"operations": {}},
+            analyze=lambda request: {"name": request.name},
+        )
+        with (
+            patch.object(client, "_http", side_effect=remote_error) as remote,
+            patch.object(client, "_local", return_value=local),
+        ):
+            self.assertEqual("ready", client.status()["status"])
+            result = client.analyze(
+                {"source": '//@version=6\nindicator("x")\n', "name": "x.pine"}
+            )
+        self.assertEqual({"name": "x.pine"}, result)
+        self.assertEqual(1, remote.call_count)
+
+    def test_source_adaptation_requires_license_and_url(self) -> None:
+        workbench = PineWorkbenchService(
+            self.repo,
+            self.data_service,
+            FakePine2PythonClient(),
+        )
+        with self.assertRaises(HTTPException) as context:
+            workbench.create_revision(
+                source_code='//@version=6\nstrategy("Public")\n',
+                source_name="public.pine",
+                mode="source_adaptation",
+                settings_payload={},
+                provenance={"author": "unknown"},
+                workbench_id=None,
+                parent_revision_id=None,
+            )
+        self.assertEqual(400, context.exception.status_code)
+
+    def test_basic_pine_proof_window_selects_latest_5000_exact_csv_bars(
+        self,
+    ) -> None:
+        bars = build_fixture_bars(5_100)
+        dataset = self.data_service.import_fixture_dataset(
+            bars,
+            symbol="BTCUSDT",
+            timeframe="15m",
+            name="basic-proof-window",
+        )
+        window = self.data_service.pine_proof_window(dataset["dataset_id"])
+        self.assertEqual(5_000, window["rows"])
+        self.assertEqual(
+            int(bars[100].ts.timestamp() * 1_000),
+            window["start_ms"],
+        )
+        self.assertEqual(
+            int((bars[-1].ts + timedelta(minutes=15)).timestamp() * 1_000),
+            window["end_ms"],
+        )
+        self.assertEqual(
+            self.data_service.dataset_content_hash(dataset["dataset_id"])[
+                "sha256"
+            ],
+            window["dataset_sha256"],
+        )
+
+    def test_generated_revision_preserves_registered_trace_contract(self) -> None:
+        workbench = PineWorkbenchService(
+            self.repo,
+            self.data_service,
+            FakePine2PythonClient(),
+        )
+        result = workbench.generate_revision(
+            "ma_cross_atr_stop_v1",
+            generator_payload={
+                "parameters": {"fast_length": 10, "slow_length": 30},
+                "title": "Fixture",
+                "symbol": "BTCUSDT",
+                "timeframe": "15m",
+                "mintick": 0.01,
+                "start_ms": 1,
+                "end_ms": 2,
+                "profile": "basic_v1",
+            },
+            workbench_id=None,
+            parent_revision_id=None,
+        )
+        contract = result["provenance"]["trace_contract"]
+        self.assertEqual("signals.long", contract["signals"][0]["name"])
+        self.assertEqual(
+            "ma_cross_atr_stop_v1",
+            result["provenance"]["adapter_id"],
+        )
+
+    def test_pine_workbench_proof_and_tradingview_observation_are_linked(
+        self,
+    ) -> None:
+        client = FakePine2PythonClient()
+        workbench = PineWorkbenchService(
+            self.repo,
+            self.data_service,
+            client,
+        )
+        revision = workbench.create_revision(
+            source_code='//@version=6\nstrategy("Fixture")\n',
+            source_name="fixture.pine",
+            mode="greenfield_strategy",
+            settings_payload={
+                "tradingview_symbol": "BINANCE:BTCUSDT",
+                "chart_timeframe": "15",
+            },
+            provenance={"origin": "greenfield"},
+            workbench_id=None,
+            parent_revision_id=None,
+        )
+        bars = build_fixture_bars(120)
+        dataset = self.data_service.import_fixture_dataset(
+            bars,
+            symbol="BTCUSDT",
+            timeframe="15m",
+            name="pine-proof-fixture",
+        )
+        proof = workbench.create_proof(
+            revision["revision_id"],
+            dataset_id=dataset["dataset_id"],
+            start_ms=int(bars[10].ts.timestamp() * 1000),
+            end_ms=int((bars[99].ts + timedelta(minutes=15)).timestamp() * 1000),
+            mintick=0.01,
+            trace_rows=[],
+            stream_expressions={},
+            profile="basic_v1",
+        )
+        self.assertEqual(90, len(client.last_proof_payload["candles"]))
+        self.assertEqual(
+            int(bars[10].ts.timestamp() * 1000),
+            client.last_proof_payload["candles"][0]["time"],
+        )
+        self.assertEqual(
+            int(bars[99].ts.timestamp() * 1000),
+            client.last_proof_payload["candles"][-1]["time"],
+        )
+        self.assertEqual(
+            "BINANCE:BTCUSDT",
+            client.last_proof_payload["symbol"],
+        )
+        self.assertEqual("15", client.last_proof_payload["timeframe"])
+        self.assertEqual(
+            "tv_table_v2_12",
+            client.last_proof_payload["instrumentation_version"],
+        )
+        instrumented_path = (
+            Path(proof["artifact"]["strategy_path"]) / "instrumented.pine"
+        )
+        self.assertEqual(
+            proof["instrumented_source"].encode("utf-8"),
+            instrumented_path.read_bytes(),
+        )
+        observed = proof["payload"]["dashboard_values"]
+        observation = workbench.observe_tradingview(
+            revision["revision_id"],
+            proof_evidence_id=proof["evidence_id"],
+            observed=observed,
+            screenshot_sha256="a" * 64,
+            user_verdict="accepted",
+        )
+        self.assertIn("TRADINGVIEW_SIGNATURE_MATCH", observation["status"])
+        evidence = self.repo.list_pine_evidence(
+            revision_id=revision["revision_id"]
+        )
+        self.assertEqual(
+            [
+                "tradingview_proof",
+                "pine_trace",
+                "tradingview_observation",
+            ],
+            [item["kind"] for item in evidence],
+        )
+        self.assertTrue(
+            Path(evidence[1]["artifact"]["trace_path"]).exists()
+        )
+
+    def test_pine_workbench_proof_includes_declared_state_history(self) -> None:
+        client = FakePine2PythonClient()
+        workbench = PineWorkbenchService(
+            self.repo,
+            self.data_service,
+            client,
+        )
+        bars = build_fixture_bars(160)
+        state_start_ms = int(bars[10].ts.timestamp() * 1000)
+        proof_start_ms = int(bars[60].ts.timestamp() * 1000)
+        revision = workbench.create_revision(
+            source_code='//@version=6\nindicator("Stateful")\n',
+            source_name="stateful.pine",
+            mode="indicator_first",
+            settings_payload={
+                "tradingview_symbol": "BINANCE:BTCUSDT",
+                "tradingview_timeframe": "15",
+                "state_start_ms": state_start_ms,
+            },
+            provenance={"origin": "fixture"},
+            workbench_id=None,
+            parent_revision_id=None,
+        )
+        dataset = self.data_service.import_fixture_dataset(
+            bars,
+            symbol="BTCUSDT",
+            timeframe="15m",
+            name="stateful-proof-history",
+        )
+        workbench.create_proof(
+            revision["revision_id"],
+            dataset_id=dataset["dataset_id"],
+            start_ms=proof_start_ms,
+            end_ms=int(
+                (bars[119].ts + timedelta(minutes=15)).timestamp() * 1000
+            ),
+            mintick=0.01,
+            trace_rows=[],
+            stream_expressions={},
+            profile="basic_v1",
+        )
+        self.assertEqual(110, len(client.last_proof_payload["candles"]))
+        self.assertEqual(
+            state_start_ms,
+            client.last_proof_payload["candles"][0]["time"],
+        )
+        self.assertEqual(
+            proof_start_ms,
+            client.last_proof_payload["start_ms"],
+        )
+
+    def test_opt_in_python_trace_preserves_default_backtest_result(self) -> None:
+        bars = build_mt5_proxy_bars()
+        spec = build_ma_proxy_spec(execution_model="mt5_bar_proxy")
+        engine = BacktestEngine()
+        default = engine.run(spec, bars)
+        traced = engine.run(spec, bars, collect_trace=True)
+        self.assertEqual(default["metrics"], traced["metrics"])
+        self.assertEqual(default["diagnostics"], traced["diagnostics"])
+        default_trades = [
+            {key: value for key, value in trade.items() if key != "trade_id"}
+            for trade in default["trades"]
+        ]
+        traced_trades = [
+            {key: value for key, value in trade.items() if key != "trade_id"}
+            for trade in traced["trades"]
+        ]
+        self.assertEqual(default_trades, traced_trades)
+        self.assertEqual(len(bars), len(traced["trace"]["rows"]))
+        self.assertTrue(traced["trace"]["capabilities"]["position"])
 
     def test_additional_parent_json_specs_are_registered(self) -> None:
         spec = {
@@ -2705,11 +3283,75 @@ class MutationLabTests(unittest.TestCase):
         self.assertFalse(meta["history_truncated"])
         self.assertTrue(urls)
         self.assertIn("startTime=", urls[0])
+        self.assertIn("endTime=", urls[0])
+
+    def test_binance_downloader_excludes_open_candle_from_payload(self) -> None:
+        interval_ms = 900_000
+        now_ms = int(datetime.now(UTC).timestamp() * 1_000)
+        current_open_ms = (now_ms // interval_ms) * interval_ms
+        payload = [
+            [
+                current_open_ms - interval_ms,
+                "100.0",
+                "101.0",
+                "99.0",
+                "100.5",
+                "123.0",
+                current_open_ms - 1,
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+            ],
+            [
+                current_open_ms,
+                "100.5",
+                "102.0",
+                "100.0",
+                "101.0",
+                "50.0",
+                current_open_ms + interval_ms - 1,
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+            ],
+        ]
+
+        class FakeResponse:
+            def __enter__(self):
+                return self
+
+            def __exit__(self, exc_type, exc, tb):
+                return False
+
+        with patch(
+            "app.data.urlopen",
+            return_value=FakeResponse(),
+        ), patch("app.data.json.load", return_value=payload):
+            bars, _ = self.data_service._download_klines(
+                "BTCUSDT",
+                "15m",
+                40_000,
+                full_history=False,
+            )
+        self.assertEqual(1, len(bars))
+        self.assertEqual(
+            current_open_ms - interval_ms,
+            int(bars[0].ts.timestamp() * 1_000),
+        )
 
     def test_binance_full_history_timeout_is_wrapped_in_operator_friendly_http_error(self) -> None:
-        with patch("app.data.urlopen", side_effect=socket.timeout("timed out")), patch("app.data.time.sleep"):
-            with self.assertRaises(HTTPException) as ctx:
-                self.data_service.download_binance_dataset("BTCUSDT", "15m", 40000, True, None)
+        with (
+            patch("app.data.urlopen", side_effect=TimeoutError("timed out")),
+            patch("app.data.time.sleep"),
+            self.assertRaises(HTTPException) as ctx,
+        ):
+            self.data_service.download_binance_dataset(
+                "BTCUSDT", "15m", 40000, True, None
+            )
         self.assertEqual(ctx.exception.status_code, 502)
         self.assertIn("full-history download timed out", ctx.exception.detail)
 

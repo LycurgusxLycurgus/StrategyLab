@@ -1,0 +1,775 @@
+{
+  "analysis": {
+    "artifact": {
+      "artifact_id": "analysis_88f96f4eebf89c597c85",
+      "artifact_path": "analysis/88/88f96f4eebf89c597c857617c0dded63c2945bd9f55247dc23f8330fd1342c1c",
+      "content_hash": "88f96f4eebf89c597c857617c0dded63c2945bd9f55247dc23f8330fd1342c1c",
+      "files": [
+        {
+          "bytes": 455006,
+          "path": "analysis.json",
+          "sha256": "628e6816923f13681f56a2d3a93ff3b27795ccc09e9b76d8fd14856858eb14ee"
+        },
+        {
+          "bytes": 398278,
+          "path": "ast.txt",
+          "sha256": "0e439c35559f5ac59c83c2b48433c3d41054e36afa41986234d394782888149f"
+        },
+        {
+          "bytes": 39967,
+          "path": "normalized.pine",
+          "sha256": "7603d731d298de50b53aede7fce8d11dfad031f0da6150b2e8099029d04fb4ab"
+        },
+        {
+          "bytes": 44855,
+          "path": "request.json",
+          "sha256": "88f96f4eebf89c597c857617c0dded63c2945bd9f55247dc23f8330fd1342c1c"
+        },
+        {
+          "bytes": 41550,
+          "path": "source.pine",
+          "sha256": "f89ea6f3774a60b3a5da60cd2238bfbb8b7d24bd6f5e76641189c352ae4cc171"
+        }
+      ],
+      "kind": "analysis",
+      "schema_version": "1.0"
+    },
+    "capabilities": {
+      "arbitrary_python_translation": "unsupported",
+      "local_runtime": "blocked",
+      "runtime_blockers": [
+        {
+          "code": "REQUEST_RUNTIME_UNVERIFIED",
+          "message": "Network-free local runtime does not execute request.* by default."
+        }
+      ],
+      "static_analysis": "supported",
+      "tradingview_blockers": [],
+      "tradingview_compile": "external_required",
+      "tradingview_parity_proof": "instrumentation_supported"
+    },
+    "inventory": {
+      "alert_calls": [],
+      "all_namespace_calls": [
+        "array.clear",
+        "array.get",
+        "array.max",
+        "array.new_bool",
+        "array.new_box",
+        "array.new_float",
+        "array.new_int",
+        "array.new_label",
+        "array.new_string",
+        "array.push",
+        "array.set",
+        "array.shift",
+        "array.size",
+        "box.delete",
+        "box.new",
+        "box.set_left",
+        "box.set_right",
+        "color.new",
+        "color.rgb",
+        "input.float",
+        "input.int",
+        "input.string",
+        "label.delete",
+        "label.new",
+        "label.set_x",
+        "line.delete",
+        "line.new",
+        "line.set_x2",
+        "math.abs",
+        "math.floor",
+        "math.max",
+        "math.min",
+        "math.round",
+        "request.security",
+        "request.security_lower_tf",
+        "runtime.error",
+        "str.length",
+        "str.tostring",
+        "ta.highest",
+        "ta.lowest",
+        "ta.pivothigh",
+        "ta.pivotlow",
+        "table.cell",
+        "table.new"
+      ],
+      "declaration": "indicator",
+      "drawing_calls": [
+        "box.delete",
+        "box.new",
+        "box.set_left",
+        "box.set_right",
+        "label.delete",
+        "label.new",
+        "label.set_x",
+        "line.delete",
+        "line.new",
+        "line.set_x2",
+        "table.cell",
+        "table.new"
+      ],
+      "functions": [
+        "f_delete_box",
+        "f_delete_label",
+        "f_delete_line",
+        "f_mark",
+        "f_mark_color",
+        "f_missing",
+        "f_price"
+      ],
+      "history_references": [
+        {
+          "offset": "2",
+          "series": "high"
+        },
+        {
+          "offset": "2",
+          "series": "low"
+        },
+        {
+          "offset": "2",
+          "series": "high"
+        },
+        {
+          "offset": "2",
+          "series": "low"
+        },
+        {
+          "offset": "offset",
+          "series": "low"
+        },
+        {
+          "offset": "offset",
+          "series": "high"
+        }
+      ],
+      "inputs": [
+        "checklistMode",
+        "fibChoice",
+        "historyCountInput",
+        "qualityMode",
+        "quantityModeInput",
+        "riskBudgetInput",
+        "unitsPerLotInput"
+      ],
+      "pine_version": 5,
+      "plot_budget": {
+        "call_counts": {
+          "alertcondition": 2,
+          "plot": 21
+        },
+        "limit": 64,
+        "minimum_count": 23,
+        "remaining_minimum": 41
+      },
+      "request_calls": [
+        "request.security",
+        "request.security_lower_tf"
+      ],
+      "stateful_variables": [
+        {
+          "kind": "var",
+          "name": "array"
+        },
+        {
+          "kind": "var",
+          "name": "array"
+        },
+        {
+          "kind": "var",
+          "name": "array"
+        },
+        {
+          "kind": "var",
+          "name": "array"
+        },
+        {
+          "kind": "var",
+          "name": "activeHigh"
+        },
+        {
+          "kind": "var",
+          "name": "activeLow"
+        },
+        {
+          "kind": "var",
+          "name": "activeHighBar"
+        },
+        {
+          "kind": "var",
+          "name": "activeLowBar"
+        },
+        {
+          "kind": "var",
+          "name": "highConsumed"
+        },
+        {
+          "kind": "var",
+          "name": "lowConsumed"
+        },
+        {
+          "kind": "var",
+          "name": "lastPivotType"
+        },
+        {
+          "kind": "var",
+          "name": "buySweepBar"
+        },
+        {
+          "kind": "var",
+          "name": "buySweepLevelBar"
+        },
+        {
+          "kind": "var",
+          "name": "buySweepLevel"
+        },
+        {
+          "kind": "var",
+          "name": "buySweepExtreme"
+        },
+        {
+          "kind": "var",
+          "name": "sellSweepBar"
+        },
+        {
+          "kind": "var",
+          "name": "sellSweepLevelBar"
+        },
+        {
+          "kind": "var",
+          "name": "sellSweepLevel"
+        },
+        {
+          "kind": "var",
+          "name": "sellSweepExtreme"
+        },
+        {
+          "kind": "var",
+          "name": "array"
+        },
+        {
+          "kind": "var",
+          "name": "array"
+        },
+        {
+          "kind": "var",
+          "name": "array"
+        },
+        {
+          "kind": "var",
+          "name": "array"
+        },
+        {
+          "kind": "var",
+          "name": "array"
+        },
+        {
+          "kind": "var",
+          "name": "array"
+        },
+        {
+          "kind": "var",
+          "name": "legDirection"
+        },
+        {
+          "kind": "var",
+          "name": "legBosBar"
+        },
+        {
+          "kind": "var",
+          "name": "legBosLevelBar"
+        },
+        {
+          "kind": "var",
+          "name": "legBosLevel"
+        },
+        {
+          "kind": "var",
+          "name": "legStartBar"
+        },
+        {
+          "kind": "var",
+          "name": "legStop"
+        },
+        {
+          "kind": "var",
+          "name": "legSweep"
+        },
+        {
+          "kind": "var",
+          "name": "legSweepBar"
+        },
+        {
+          "kind": "var",
+          "name": "legSweepLevelBar"
+        },
+        {
+          "kind": "var",
+          "name": "legSweepLevel"
+        },
+        {
+          "kind": "var",
+          "name": "array"
+        },
+        {
+          "kind": "var",
+          "name": "array"
+        },
+        {
+          "kind": "var",
+          "name": "array"
+        },
+        {
+          "kind": "var",
+          "name": "array"
+        },
+        {
+          "kind": "var",
+          "name": "candidateDirection"
+        },
+        {
+          "kind": "var",
+          "name": "candidateReadyBar"
+        },
+        {
+          "kind": "var",
+          "name": "candidateStartBar"
+        },
+        {
+          "kind": "var",
+          "name": "candidateEndBar"
+        },
+        {
+          "kind": "var",
+          "name": "candidateLow"
+        },
+        {
+          "kind": "var",
+          "name": "candidateHigh"
+        },
+        {
+          "kind": "var",
+          "name": "candidateEntry"
+        },
+        {
+          "kind": "var",
+          "name": "candidateStop"
+        },
+        {
+          "kind": "var",
+          "name": "candidateTarget"
+        },
+        {
+          "kind": "var",
+          "name": "candidatePoc"
+        },
+        {
+          "kind": "var",
+          "name": "candidateHtf"
+        },
+        {
+          "kind": "var",
+          "name": "candidateBos"
+        },
+        {
+          "kind": "var",
+          "name": "candidateSweep"
+        },
+        {
+          "kind": "var",
+          "name": "candidateImbalance"
+        },
+        {
+          "kind": "var",
+          "name": "candidatePocPass"
+        },
+        {
+          "kind": "var",
+          "name": "candidateFvgCount"
+        },
+        {
+          "kind": "var",
+          "name": "candidateFvgPassCount"
+        },
+        {
+          "kind": "var",
+          "name": "candidateBreakFvg"
+        },
+        {
+          "kind": "var",
+          "name": "candidateScore"
+        },
+        {
+          "kind": "var",
+          "name": "candidateLate"
+        },
+        {
+          "kind": "var",
+          "name": "candidateEligible"
+        },
+        {
+          "kind": "var",
+          "name": "candidateMissing"
+        },
+        {
+          "kind": "var",
+          "name": "candidateFvgBottom"
+        },
+        {
+          "kind": "var",
+          "name": "candidateFvgTop"
+        },
+        {
+          "kind": "var",
+          "name": "candidateFvgBar"
+        },
+        {
+          "kind": "var",
+          "name": "candidateSweepBar"
+        },
+        {
+          "kind": "var",
+          "name": "candidateSweepLevelBar"
+        },
+        {
+          "kind": "var",
+          "name": "candidateSweepLevel"
+        },
+        {
+          "kind": "var",
+          "name": "candidateBosBar"
+        },
+        {
+          "kind": "var",
+          "name": "candidateBosLevelBar"
+        },
+        {
+          "kind": "var",
+          "name": "candidateBosLevel"
+        },
+        {
+          "kind": "var",
+          "name": "array"
+        },
+        {
+          "kind": "var",
+          "name": "array"
+        },
+        {
+          "kind": "var",
+          "name": "array"
+        },
+        {
+          "kind": "var",
+          "name": "array"
+        },
+        {
+          "kind": "var",
+          "name": "array"
+        },
+        {
+          "kind": "var",
+          "name": "array"
+        },
+        {
+          "kind": "var",
+          "name": "array"
+        },
+        {
+          "kind": "var",
+          "name": "array"
+        },
+        {
+          "kind": "var",
+          "name": "array"
+        },
+        {
+          "kind": "var",
+          "name": "array"
+        },
+        {
+          "kind": "var",
+          "name": "array"
+        },
+        {
+          "kind": "var",
+          "name": "array"
+        },
+        {
+          "kind": "var",
+          "name": "array"
+        },
+        {
+          "kind": "var",
+          "name": "array"
+        },
+        {
+          "kind": "var",
+          "name": "array"
+        },
+        {
+          "kind": "var",
+          "name": "rangeHighLine"
+        },
+        {
+          "kind": "var",
+          "name": "rangeLowLine"
+        },
+        {
+          "kind": "var",
+          "name": "entryLine"
+        },
+        {
+          "kind": "var",
+          "name": "pocLine"
+        },
+        {
+          "kind": "var",
+          "name": "lqLine"
+        },
+        {
+          "kind": "var",
+          "name": "bosLine"
+        },
+        {
+          "kind": "var",
+          "name": "rangeHighLabel"
+        },
+        {
+          "kind": "var",
+          "name": "rangeLowLabel"
+        },
+        {
+          "kind": "var",
+          "name": "entryLevelLabel"
+        },
+        {
+          "kind": "var",
+          "name": "pocLevelLabel"
+        },
+        {
+          "kind": "var",
+          "name": "lqLabel"
+        },
+        {
+          "kind": "var",
+          "name": "bosLabel"
+        },
+        {
+          "kind": "var",
+          "name": "rewardBox"
+        },
+        {
+          "kind": "var",
+          "name": "riskBox"
+        },
+        {
+          "kind": "var",
+          "name": "array"
+        },
+        {
+          "kind": "var",
+          "name": "array"
+        },
+        {
+          "kind": "var",
+          "name": "checklist"
+        },
+        {
+          "kind": "var",
+          "name": "riskTable"
+        }
+      ],
+      "strategy_calls": []
+    },
+    "parser": {
+      "adapter": "pynescript",
+      "ast_dump": null,
+      "error": null,
+      "normalized_source": null,
+      "status": "PARSE_COMPLETE",
+      "version": "0.3.0"
+    },
+    "temporal_findings": [
+      {
+        "code": "CONFIRMED_HTF_LOOKAHEAD_PATTERN",
+        "message": "Every request.security lookahead_on call uses a positive source-history offset; TradingView review must still confirm timeframe ownership.",
+        "severity": "low"
+      },
+      {
+        "code": "BARSTATE_DEPENDENCE",
+        "message": "Behavior depends on historical/realtime confirmation state.",
+        "severity": "medium"
+      },
+      {
+        "code": "TIME_OWNERSHIP_REQUEST",
+        "message": "request.* changes symbol/timeframe ownership and is not locally assumed safe.",
+        "severity": "medium"
+      }
+    ]
+  },
+  "created_at": "2026-08-19T13:06:24.597961+00:00",
+  "mode": "indicator_first",
+  "parent_revision_id": null,
+  "provenance": {
+    "authority": "timestamped transcript plus mandatory frames",
+    "contract": "C:\\Users\\Baham\\Documents\\pre-nexuz\\memecorp&starfish\\markov_dove-red\\StrategyLab\\agentic\\design\\smart-money-4-clean-contract.md",
+    "contract_sha256": "2db6ff2a5aee6761b80d1edffbc0aacd85dc2c5c4a08678b3a4eae48fe867be8",
+    "origin": "smart_money_4_visual_audit_correction",
+    "supersedes_without_inheriting": [
+      "smart-money-3",
+      "smart-money-4-video-checklist-v1",
+      "pvr_04ff2cab409e735251f6"
+    ],
+    "trace_contract": {
+      "features": [
+        {
+          "expression": "candidateDirection",
+          "kind": "int",
+          "name": "features.direction"
+        },
+        {
+          "expression": "candidateScore",
+          "kind": "int",
+          "name": "features.score"
+        },
+        {
+          "expression": "candidateEntry",
+          "kind": "price",
+          "name": "features.entry"
+        },
+        {
+          "expression": "candidateStop",
+          "kind": "price",
+          "name": "features.stop"
+        },
+        {
+          "expression": "candidateTarget",
+          "kind": "price",
+          "name": "features.target"
+        },
+        {
+          "expression": "candidatePoc",
+          "kind": "price",
+          "name": "features.poc"
+        },
+        {
+          "expression": "candidateHtf",
+          "kind": "bool",
+          "name": "features.htf"
+        },
+        {
+          "expression": "candidateBos",
+          "kind": "bool",
+          "name": "features.bos"
+        },
+        {
+          "expression": "candidateSweep",
+          "kind": "bool",
+          "name": "features.sweep"
+        },
+        {
+          "expression": "candidateImbalance",
+          "kind": "bool",
+          "name": "features.imbalance"
+        },
+        {
+          "expression": "candidatePocPass",
+          "kind": "bool",
+          "name": "features.poc_pass"
+        },
+        {
+          "expression": "candidateFvgCount",
+          "kind": "int",
+          "name": "features.fvg_count"
+        },
+        {
+          "expression": "candidateFvgPassCount",
+          "kind": "int",
+          "name": "features.fvg_pass_count"
+        },
+        {
+          "expression": "candidateBreakFvg",
+          "kind": "bool",
+          "name": "features.break_fvg"
+        },
+        {
+          "expression": "not na(candidateReadyBar)",
+          "kind": "bool",
+          "name": "features.narrative_ready"
+        }
+      ],
+      "signals": [
+        {
+          "expression": "candidateUpdatedSignal",
+          "kind": "bool",
+          "name": "signals.candidate_updated"
+        },
+        {
+          "expression": "setupReadySignal",
+          "kind": "bool",
+          "name": "signals.setup_ready"
+        },
+        {
+          "expression": "longReadySignal",
+          "kind": "bool",
+          "name": "signals.long_ready"
+        },
+        {
+          "expression": "shortReadySignal",
+          "kind": "bool",
+          "name": "signals.short_ready"
+        },
+        {
+          "expression": "fillSignal",
+          "kind": "bool",
+          "name": "signals.fill"
+        },
+        {
+          "expression": "targetSignal",
+          "kind": "bool",
+          "name": "signals.target"
+        },
+        {
+          "expression": "stopSignal",
+          "kind": "bool",
+          "name": "signals.stop"
+        },
+        {
+          "expression": "ambiguousSignal",
+          "kind": "bool",
+          "name": "signals.ambiguous"
+        }
+      ]
+    }
+  },
+  "revision_id": "pvr_a7925630e5ecfc6d022f",
+  "settings": {
+    "checklist": "core_plus_poc",
+    "dataset_15m": "ds_207c4624f554",
+    "dataset_1m": "ds_1e4ab545aa12",
+    "execution": "confirmed_close_actionable_next_bar",
+    "fib_entry": 0.75,
+    "intrabar_dataset_sha256": "5980a8c16af7eaea4e0a635e9b8ec05b0cfa33cd181436db739ad09463455a55",
+    "position_unit": "base_asset_default_lots_with_explicit_multiplier",
+    "quality": "standard_80",
+    "risk_budget": 2000,
+    "risk_currency": "USD",
+    "state_start_ms": 1782581400000,
+    "tradingview_symbol": "BINANCE:BTCUSDT",
+    "tradingview_timeframe": "15"
+  },
+  "source_code": null,
+  "source_sha256": "f89ea6f3774a60b3a5da60cd2238bfbb8b7d24bd6f5e76641189c352ae4cc171",
+  "stage": "pre_phase_1",
+  "status": [
+    "SOURCE_ACCEPTED",
+    "PARSE_COMPLETE",
+    "STATIC_REVIEW_COMPLETE",
+    "TRADINGVIEW_REVIEW_REQUIRED"
+  ],
+  "workbench_id": "pwb_f89ea6f3774a"
+}

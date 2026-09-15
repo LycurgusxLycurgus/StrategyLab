@@ -1,0 +1,118 @@
+{
+  "status": "CORROBORATED_NOT_ACCEPTED",
+  "workbench_id": "pwb_f89ea6f3774a",
+  "parent_revision_id": "pvr_35b4dee03de37a299c7e",
+  "revision_id": "pvr_122d076db526ae8f9628",
+  "source_sha256": "8665c5570b1370d674c9a6b8705375fcf4d50010acad75650c08e4cc3456cbb4",
+  "proof_evidence_id": "pev_6c3a7d0102a0c3b5bd15",
+  "instrumented_source_sha256": "296d7df19ba222957e78e2c1894fd29c150f00a7da560a37886f3c1094430a7d",
+  "browser": "User-authenticated TradingView in-app browser",
+  "tradingview_user_verdict": "PENDING",
+  "expert_case_verdict": "PENDING",
+  "strategy_acceptance": "NOT_REQUESTED_OR_GRANTED",
+  "python_strategy_parent": "NOT_CREATED",
+  "identity": {
+    "symbol": "BINANCE:BTCUSDT",
+    "timeframe": "15",
+    "fib": "75%",
+    "checklist": "Video",
+    "quality": "Standard",
+    "poc_veto": false,
+    "view": "Trader"
+  },
+  "proof": {
+    "bars": 1000,
+    "window": [
+      1786181400000,
+      1787081400000
+    ],
+    "first_last": [
+      1786181400000,
+      1787080500000
+    ],
+    "data": "0996453-0739391-0249398",
+    "features": "0485674-0206445-0305144",
+    "signals": "0258084-0569769-0943111",
+    "all_eight_data_segments_match": true,
+    "source_and_settings_match": true,
+    "readable_and_instrumented_compile": true,
+    "source_copyback": "CRLF clipboard normalized to LF exactly equals original supplied source; LF SHA-256 matches. No text/equation edits."
+  },
+  "dataset": {
+    "fifteen_id": "ds_207c4624f554",
+    "one_id": "ds_1e4ab545aa12",
+    "fifteen_file_sha256": "0829fbc3ca7dd1a22e04f47a184f4b9edb8921fdfc66b9a0df6e696b99bb4a46",
+    "one_file_sha256": "5980a8c16af7eaea4e0a635e9b8ec05b0cfa33cd181436db739ad09463455a55",
+    "local_supplied_state_history_bars": 5000
+  },
+  "observations": [
+    {
+      "id": "gold-runtime",
+      "symbol": "OANDA:XAUUSD",
+      "timeframe": "15",
+      "before": "v6 RE10007 bar5417 time[] beyond5000; timestamp-only intermediate RE10026 old line x1=137",
+      "after": "Both repairs applied; current and historical visuals render without runtime error.",
+      "scope": "UI runtime only; not legacy MT5 parity"
+    },
+    {
+      "id": "short-on-bos",
+      "symbol": "BINANCE:BTCUSDT",
+      "ready_bar_open_utc": "2026-08-05T11:15:00Z",
+      "ready_close_utc": "2026-08-05T11:30:00Z",
+      "direction": -1,
+      "entry": 64183.8225,
+      "stop": 64238.43,
+      "target": 64020,
+      "score": 75,
+      "missing": "FVG",
+      "observation": "Direct date navigation and focused zoom show BOS-source extreme, LQ, range, entry, profile and short card. Observed losing lifecycle; not selected for winning outcome.",
+      "replay": false
+    },
+    {
+      "id": "long-on-bos-no-sweep",
+      "symbol": "BINANCE:BTCUSDT",
+      "ready_bar_open_utc": "2026-08-11T12:30:00Z",
+      "ready_close_utc": "2026-08-11T12:45:00Z",
+      "direction": 1,
+      "entry": 64278.8575,
+      "stop": 64200,
+      "target": 64515.43,
+      "score": 75,
+      "missing": "LQ",
+      "observation": "Direct navigation shows BOS, causal imbalance, range, profile and 75-point card explicitly missing LQ. Geometry remains after reload and repeated direct navigation.",
+      "replay": false
+    }
+  ],
+  "screenshots": [
+    {
+      "path": "v61-btc-long-20260811.png",
+      "sha256": "7f2d05c038edfe975e020f8a6983a65ed6e3ae6a3f72240b8b187388c47ba2fb"
+    },
+    {
+      "path": "v61-btc-long-reload.png",
+      "sha256": "262e9680c1fc3715ef90557205e030ba45a5bc932b82a87993cbc66de022dfca"
+    },
+    {
+      "path": "v61-btc-short-20260805.png",
+      "sha256": "d33787e11b6f8f0a8c513bccc1f3fa4de5d19d568dad9957c27dda43f4c34590"
+    },
+    {
+      "path": "v61-btc-signature.png",
+      "sha256": "7291cf49cc0adeaca47efdc3278180156b8b9022dfa48e55d4071e6077c8170f"
+    },
+    {
+      "path": "v61-oanda-runtime.png",
+      "sha256": "f217fb339c98a8f4ff4d911d4bc1adaee1a0cb6dd249eb309ed01700e204476c"
+    }
+  ],
+  "limitations": [
+    "No replay/live first-appearance proof",
+    "Declared fingerprints are bounded corroboration, not exhaustive per-bar proof of every internal state",
+    "New owner/audit fields not in declared dashboard",
+    "PineTS request.* full runtime unsupported; local evaluator traces supplied",
+    "Gold legacy MT5 timezone/session unverified; no OANDA identical dataset",
+    "Some v6 setups reprice/retime or lose eligibility; four downstream old setups lose sweep after an earlier scored candidate",
+    "Gross PF below1 on all candidate windows; no edge accepted",
+    "45 full filled-history cards is a rendering cap, not a setup detector cap"
+  ]
+}

@@ -1,0 +1,71 @@
+{
+  "schema_version": "1.0",
+  "status": "TRADINGVIEW_SIGNATURE_MATCH_USER_VERDICT_PENDING",
+  "workbench_id": "pwb_f89ea6f3774a",
+  "revision_id": "pvr_4d1dc599c889bffc9815",
+  "parent_revision_id": "pvr_bb9a35d7bfe27b2cbad4",
+  "proof_evidence_id": "pev_fd5255bb80ee6204e403",
+  "source_sha256": "b210b289e2361cde68f0074963017d8dcdbd92e9b98bf587962093d771711dbf",
+  "instrumented_source_sha256": "b4b36543027c9acdc74c8fb1458dcccb3f3f45940593ace97d58d6bcf8b59875",
+  "chart": {
+    "symbol": "BINANCE:BTCUSDT",
+    "timeframe": "15",
+    "inputs": "Trader / 75% / Video / Standard / 2000 USD / Base asset"
+  },
+  "browser_checks": {
+    "readable_source_compiles": true,
+    "runtime_errors": 0,
+    "direct_date_load_without_pan_or_zoom": true,
+    "reload_then_direct_date_load_without_pan_or_zoom": true,
+    "historical_coordinates_use_bar_time": true,
+    "lq_bos_midpoint_labels": true,
+    "setup_and_result_labels_separated": true,
+    "ordered_entry_stop_classified_sl": true,
+    "true_entry_target_order_classified_ambiguous": true
+  },
+  "regression": {
+    "bars_15m": 5000,
+    "bars_1m": 75001,
+    "candidates": 355,
+    "setups": 42,
+    "fills": 18,
+    "long": 19,
+    "short": 23,
+    "tp": 4,
+    "sl": 13,
+    "missed_or_invalid": 24,
+    "ambiguous": 1,
+    "ambiguous_reason": "ENTRY_TARGET_SAME_BAR",
+    "ambiguous_fill_exit_utc": "2026-07-30T23:30:00Z"
+  },
+  "proof_dashboard": {
+    "profile": "basic_v1 / v2.12",
+    "window": "1786181400000..1787081400000",
+    "bars": "1000",
+    "first_last": "1786181400000/1787080500000",
+    "source": "b210b289e2361cde",
+    "settings": "009aee07c014827f",
+    "data": "0996453-0739391-0249398",
+    "features": "0082880-0530521-0736352",
+    "signals": "0730212-0185853-0640791",
+    "segments_match": true
+  },
+  "screenshots": [
+    {
+      "kind": "ordered_same_bar_stop_now_sl",
+      "path": "smart-money-4-v5-ordered-sl-2026-08-17.png",
+      "sha256": "26557049fc93de3958b6054f688bb03ec26daf61bfe244d91a2a69bcda603f5d"
+    },
+    {
+      "kind": "true_entry_target_order_ambiguity",
+      "path": "smart-money-4-v5-true-amb-2026-07-30.png",
+      "sha256": "ab3908e791cf17fa441a1b2bd74a1bf31662bc9ae59b9bc2f9abedfa247683d2"
+    },
+    {
+      "kind": "proof_dashboard",
+      "path": "smart-money-4-v5-proof-dashboard.png",
+      "sha256": "01c0e4ac70c109e423aa029f6df4ac6edf1138a34accbf231b0d40749b7008bf"
+    }
+  ],
+  "user_verdict": "PENDING"
+}

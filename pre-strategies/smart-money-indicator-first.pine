@@ -1,0 +1,2711 @@
+//@version=5
+indicator("Clean Market Structure Engine v3.9 - Independent Setup Ledger", overlay=true, max_labels_count=500, max_lines_count=500, max_boxes_count=500)
+
+//──────────────────────────────────────────────────────────────────────────────
+// Constants
+//──────────────────────────────────────────────────────────────────────────────
+
+const string GROUP_CORE = "1. Core Structure Engine"
+const string GROUP_STRUCTURE = "2. Structure Logic"
+const string GROUP_FVG = "3. Fair Value Gaps"
+const string GROUP_FIB = "4. Fib Audit"
+const string GROUP_SWEEP = "5. Sweep Confluence"
+const string GROUP_DASH = "6. Dashboard"
+const string GROUP_VISUALS = "7. Visuals"
+const string GROUP_ALERTS = "8. Alerts"
+
+const string FILTER_ALL = "All"
+const string FILTER_BOS = "BOS only"
+const string FILTER_CHOCH = "CHoCH only"
+const string FILTER_HIDDEN = "Hidden"
+
+const string MIT_WICK = "Wick-based mitigation"
+const string MIT_CLOSE = "Close-based mitigation"
+
+const string FVG_LIQ_MID = "Midpoint (50%)"
+const string FVG_LIQ_FULL = "Full fill (100%)"
+
+const string STATUS_NA = "n/a"
+const string EVENT_BOS = "BOS"
+const string EVENT_CHOCH = "CHoCH"
+
+const string VIS_REVIEW = "Review / Production"
+const string VIS_DEBUG = "Debug"
+
+const string FVG_ACTIVE_ONLY = "Active only"
+const string FVG_HISTORICAL = "Historical and active"
+
+const string LABEL_NONE = "No labels"
+const string LABEL_LATEST = "Latest label only"
+const string LABEL_ALL = "All event labels"
+
+const string SWEEP_BUY = "Buy-side"
+const string SWEEP_SELL = "Sell-side"
+
+const string SWEEP_VIEW_CONFIRMED = "Confirmed only"
+const string SWEEP_VIEW_AUDIT = "Audit candidates and rejections"
+
+const string SETUP_PENDING = "PENDING"
+const string SETUP_ACTIVE = "ACTIVE"
+const string SETUP_FILLED = "FILLED"
+const string SETUP_TARGET = "TARGET"
+const string SETUP_STOP = "STOP"
+const string SETUP_MISSED = "MISSED_TP_BEFORE_FILL"
+const string SETUP_INVALID = "INVALIDATED_BEFORE_FILL"
+const string SETUP_AMBIGUOUS = "AMBIGUOUS"
+const int MAX_ACTIVE_SETUP_DRAWINGS = 100
+
+const int DASH_ROWS = 120
+
+//──────────────────────────────────────────────────────────────────────────────
+// Inputs
+//──────────────────────────────────────────────────────────────────────────────
+
+baseSwingLen = input.int(3, "Visual fractal confirmation length", minval=1, group=GROUP_CORE)
+internalLen = input.int(2, "LTF / execution structure sensitivity", minval=1, group=GROUP_CORE)
+swingLen = input.int(5, "HTF / external swing sensitivity", minval=1, group=GROUP_CORE)
+entryStructureTfInput = input.timeframe("15", "LTF execution timeframe", group=GROUP_CORE)
+swingStructureTfInput = input.timeframe("240", "HTF external swing timeframe", group=GROUP_CORE)
+useHtfSwingStructure = input.bool(true, "Use imported HTF external swing structure", group=GROUP_CORE)
+
+enableInternalStructure = input.bool(true, "Enable LTF/internal structure", group=GROUP_STRUCTURE)
+enableSwingStructure = input.bool(true, "Enable HTF/external swing structure", group=GROUP_STRUCTURE)
+internalBullFilter = input.string(FILTER_ALL, "LTF bullish event filter", options=[FILTER_ALL, FILTER_BOS, FILTER_CHOCH, FILTER_HIDDEN], group=GROUP_STRUCTURE)
+internalBearFilter = input.string(FILTER_ALL, "LTF bearish event filter", options=[FILTER_ALL, FILTER_BOS, FILTER_CHOCH, FILTER_HIDDEN], group=GROUP_STRUCTURE)
+swingBullFilter = input.string(FILTER_ALL, "HTF bullish event filter", options=[FILTER_ALL, FILTER_BOS, FILTER_CHOCH, FILTER_HIDDEN], group=GROUP_STRUCTURE)
+swingBearFilter = input.string(FILTER_ALL, "HTF bearish event filter", options=[FILTER_ALL, FILTER_BOS, FILTER_CHOCH, FILTER_HIDDEN], group=GROUP_STRUCTURE)
+
+enableFvgLogic = input.bool(true, "Enable FVG logic", group=GROUP_FVG)
+useFvgValidity = input.bool(true, "Use FVG validity filter", group=GROUP_FVG)
+fvgValiditySensitivity = input.float(0.80, "Validity sensitivity: body[1] must exceed ATR14[1] x this value", minval=0.0, step=0.05, group=GROUP_FVG)
+mitigationMethod = input.string(MIT_WICK, "Liquidation touch method", options=[MIT_WICK, MIT_CLOSE], group=GROUP_FVG)
+fvgLiquidationDepthInput = input.string(FVG_LIQ_MID, "FVG liquidation depth", options=[FVG_LIQ_MID, FVG_LIQ_FULL], group=GROUP_FVG)
+
+showFibAuditInput = input.bool(true, "Show Fib audit", group=GROUP_FIB)
+fibDrawOnlyLockedInput = input.bool(false, "Draw Fib only after range lock", group=GROUP_FIB)
+swingFibEntryPctInput = input.float(0.71, "Swing / 4H Fib entry", minval=0.01, maxval=0.99, step=0.01, group=GROUP_FIB)
+dayFibEntryPctInput = input.float(0.67, "Day / 15M Fib entry", minval=0.01, maxval=0.99, step=0.01, group=GROUP_FIB)
+showFibEntryLabelInput = input.bool(true, "Show Fib entry label", group=GROUP_FIB)
+
+enableSweepLogicInput = input.bool(true, "Enable sweep confluence", group=GROUP_SWEEP)
+showSweepLabelsInput = input.bool(true, "Show latest sweep labels", group=GROUP_SWEEP)
+sweepRequiresRejectionInput = input.bool(true, "Sweep requires close back inside level", group=GROUP_SWEEP)
+sweepHistoryModeInput = input.string(SWEEP_VIEW_CONFIRMED, "Historical sweep display", options=[SWEEP_VIEW_CONFIRMED, SWEEP_VIEW_AUDIT], group=GROUP_SWEEP)
+maxHistoricalSweepsInput = input.int(25, "Max finalized sweep records", minval=5, maxval=60, group=GROUP_SWEEP)
+
+showDashboard = input.bool(false, "Show dashboard", group=GROUP_DASH)
+dashboardPositionInput = input.string("Top Right", "Dashboard position", options=["Top Left", "Top Center", "Top Right", "Middle Left", "Middle Center", "Middle Right", "Bottom Left", "Bottom Center", "Bottom Right"], group=GROUP_DASH)
+dashboardTextSizeInput = input.string("Tiny", "Dashboard text size", options=["Tiny", "Small", "Normal", "Large"], group=GROUP_DASH)
+dashboardDetailInput = input.string("Production checklist", "Dashboard detail", options=["Production checklist", "Review audit", "Full debug audit"], group=GROUP_DASH)
+
+visualModeInput = input.string(VIS_REVIEW, "Visual mode", options=[VIS_REVIEW, VIS_DEBUG], group=GROUP_VISUALS)
+showBaseFractalMarkersInput = input.bool(false, "Show raw visual fractal markers", group=GROUP_VISUALS)
+showActiveSwingLevelsInput = input.bool(true, "Show HTF active structure guide lines", group=GROUP_VISUALS)
+showActiveSwingGuideLabelsInput = input.bool(false, "Show HTF active guide labels", group=GROUP_VISUALS)
+showCurrentRangeInput = input.bool(true, "Show current trading range lines", group=GROUP_VISUALS)
+showRangeLabelsInput = input.bool(true, "Show range endpoint labels", group=GROUP_VISUALS)
+showRangeBackgroundInput = input.bool(false, "Show range background box in debug only", group=GROUP_VISUALS)
+showInternalStructureInput = input.bool(true, "Show LTF BOS/CHoCH structure lines", group=GROUP_VISUALS)
+showSwingStructureInput = input.bool(true, "Show HTF BOS/CHoCH structure lines", group=GROUP_VISUALS)
+showFvgBoxesInput = input.bool(true, "Show FVG boxes", group=GROUP_VISUALS)
+showFvgMidlinesInput = input.bool(true, "Show FVG 50% liquidation midlines", group=GROUP_VISUALS)
+visualObjectModeInput = input.string(FVG_ACTIVE_ONLY, "FVG object mode", options=[FVG_ACTIVE_ONLY, FVG_HISTORICAL], group=GROUP_VISUALS)
+ltfLabelModeInput = input.string(LABEL_LATEST, "LTF event label mode", options=[LABEL_NONE, LABEL_LATEST, LABEL_ALL], group=GROUP_VISUALS)
+htfLabelModeInput = input.string(LABEL_LATEST, "HTF event label mode", options=[LABEL_NONE, LABEL_LATEST, LABEL_ALL], group=GROUP_VISUALS)
+styleThemeInput = input.string("Balanced", "Style theme", options=["Balanced", "Light", "Dark", "Minimal"], group=GROUP_VISUALS)
+maxLtfReviewEventsInput = input.int(12, "Max recent LTF structure lines in review mode", minval=3, maxval=80, group=GROUP_VISUALS)
+maxStructureEventsInput = input.int(100, "Max structure break lines in debug mode", minval=20, maxval=240, group=GROUP_VISUALS)
+maxFvgBoxesInput = input.int(4, "Max visible active FVG boxes per direction", minval=1, maxval=100, group=GROUP_VISUALS)
+maxMitigatedFvgBoxesInput = input.int(12, "Max faded liquidated FVG boxes", minval=0, maxval=250, group=GROUP_VISUALS)
+showSetupLedgerInput = input.bool(true, "Show pending setup position drawings", group=GROUP_VISUALS)
+maxHistoricalSetupsInput = input.int(25, "Max finalized setup drawings", minval=5, maxval=60, group=GROUP_VISUALS)
+
+enableAlertsInput = input.bool(true, "Enable alert conditions", group=GROUP_ALERTS)
+
+// All persistent indicator state commits on closed chart bars. Realtime
+// calculations may inspect the developing candle, but they cannot create,
+// replace, consume, invalidate, or lock an event until that candle is final.
+bool confirmedEventBar = barstate.isconfirmed
+
+//──────────────────────────────────────────────────────────────────────────────
+// Helpers
+//──────────────────────────────────────────────────────────────────────────────
+
+f_dashboardPosition(string _pos) =>
+    _pos == "Top Left" ? position.top_left : _pos == "Top Center" ? position.top_center : _pos == "Top Right" ? position.top_right : _pos == "Middle Left" ? position.middle_left : _pos == "Middle Center" ? position.middle_center : _pos == "Middle Right" ? position.middle_right : _pos == "Bottom Left" ? position.bottom_left : _pos == "Bottom Center" ? position.bottom_center : position.bottom_right
+
+f_textSize(string _size) =>
+    _size == "Tiny" ? size.tiny : _size == "Small" ? size.small : _size == "Large" ? size.large : size.normal
+
+f_bool(bool _v) =>
+    _v ? "Yes" : "No"
+
+f_int(int _v) =>
+    na(_v) ? STATUS_NA : str.tostring(_v)
+
+f_price(float _v) =>
+    na(_v) ? STATUS_NA : str.tostring(_v, format.mintick)
+
+f_time(int _t) =>
+    na(_t) ? STATUS_NA : str.format_time(_t, "yyyy-MM-dd HH:mm", syminfo.timezone)
+
+f_priceAt(float _price, int _time, int _bar) =>
+    na(_price) ? STATUS_NA : f_price(_price) + " | bar " + f_int(_bar) + " | " + f_time(_time)
+
+f_bias(int _bias) =>
+    _bias == 1 ? "Bullish" : _bias == -1 ? "Bearish" : "Neutral"
+
+f_directionGate(int _direction) =>
+    _direction == 1 ? "DISCOUNT: LONG ONLY" : _direction == -1 ? "PREMIUM: SHORT ONLY" : "WAIT: CONFIRMED RANGE"
+
+f_dirEvent(string _dir, string _type, float _price, int _time) =>
+    _type == STATUS_NA or na(_price) ? STATUS_NA : _dir + " " + _type + " @ " + f_price(_price) + " | " + f_time(_time)
+
+f_filterAllows(string _filter, string _eventType) =>
+    _filter == FILTER_ALL ? true : _filter == FILTER_BOS and _eventType == EVENT_BOS ? true : _filter == FILTER_CHOCH and _eventType == EVENT_CHOCH ? true : false
+
+f_section(table _tbl, int _row, string _title, string _sizeInput) =>
+    table.cell(_tbl, 0, _row, _title, bgcolor=color.new(color.blue, 80), text_color=color.white, text_size=f_textSize(_sizeInput))
+    table.cell(_tbl, 1, _row, "", bgcolor=color.new(color.blue, 80), text_color=color.white, text_size=f_textSize(_sizeInput))
+    table.cell(_tbl, 2, _row, "", bgcolor=color.new(color.blue, 80), text_color=color.white, text_size=f_textSize(_sizeInput))
+    table.cell(_tbl, 3, _row, "", bgcolor=color.new(color.blue, 80), text_color=color.white, text_size=f_textSize(_sizeInput))
+    _row + 1
+
+f_row(table _tbl, int _row, string _section, string _metric, string _value, string _note, string _sizeInput) =>
+    table.cell(_tbl, 0, _row, _section, bgcolor=color.new(color.gray, 92), text_color=color.white, text_size=f_textSize(_sizeInput))
+    table.cell(_tbl, 1, _row, _metric, bgcolor=color.new(color.black, 0), text_color=color.white, text_size=f_textSize(_sizeInput))
+    table.cell(_tbl, 2, _row, _value, bgcolor=color.new(color.black, 0), text_color=color.white, text_size=f_textSize(_sizeInput))
+    table.cell(_tbl, 3, _row, _note, bgcolor=color.new(color.black, 0), text_color=color.silver, text_size=f_textSize(_sizeInput))
+    _row + 1
+
+f_earlierTime(int _a, int _b) =>
+    na(_a) ? _b : na(_b) ? _a : int(math.min(_a, _b))
+
+f_tfLabel(string _tf) =>
+    _tf == "1" ? "1m" : _tf == "3" ? "3m" : _tf == "5" ? "5m" : _tf == "15" ? "15m" : _tf == "30" ? "30m" : _tf == "45" ? "45m" : _tf == "60" ? "1H" : _tf == "120" ? "2H" : _tf == "180" ? "3H" : _tf == "240" ? "4H" : _tf == "D" ? "1D" : _tf == "W" ? "1W" : _tf == "M" ? "1M" : _tf
+
+f_classReason(string _dir, string _eventType, int _priorBias) =>
+    _eventType == STATUS_NA ? STATUS_NA : _eventType == EVENT_CHOCH ? _dir + " break reversed prior " + f_bias(_priorBias) + " bias." : _priorBias == 0 ? _dir + " break set initial structure bias." : _dir + " break continued prior " + f_bias(_priorBias) + " bias."
+
+f_rangeText(float _hi, int _hiTime, float _lo, int _loTime) =>
+    na(_hi) or na(_lo) ? STATUS_NA : "H " + f_price(_hi) + " / L " + f_price(_lo)
+
+f_levelPair(float _hi, float _lo) =>
+    na(_hi) or na(_lo) ? STATUS_NA : "H " + f_price(_hi) + " / L " + f_price(_lo)
+
+f_rangeStateText(int _dir, bool _locked, string _eventType) =>
+    _dir == 1 ? (_locked ? "Locked bullish range after " + _eventType : "Draft bullish range") : _dir == -1 ? (_locked ? "Locked bearish range after " + _eventType : "Draft bearish range") : STATUS_NA
+
+f_fibEntry(int _dir, float _hi, float _lo, float _pct) =>
+    na(_hi) or na(_lo) ? na : _dir == 1 ? _hi - (_hi - _lo) * _pct : _dir == -1 ? _lo + (_hi - _lo) * _pct : na
+
+f_fibSl(int _dir, float _hi, float _lo) =>
+    na(_hi) or na(_lo) ? na : _dir == 1 ? _lo : _dir == -1 ? _hi : na
+
+f_fibTp(int _dir, float _hi, float _lo) =>
+    na(_hi) or na(_lo) ? na : _dir == 1 ? _hi : _dir == -1 ? _lo : na
+
+f_fibRr(int _dir, float _entry, float _sl, float _tp) =>
+    na(_entry) or na(_sl) or na(_tp) ? na : _dir == 1 ? (_tp - _entry) / math.max(_entry - _sl, syminfo.mintick) : _dir == -1 ? (_entry - _tp) / math.max(_sl - _entry, syminfo.mintick) : na
+
+f_fibPackText(float _entry, float _sl, float _tp, float _rr) =>
+    na(_entry) ? STATUS_NA : "E " + f_price(_entry) + " | SL " + f_price(_sl) + " | TP " + f_price(_tp) + " | RR " + str.tostring(_rr, "#.##")
+
+f_sweepText(string _side, float _level, int _time) =>
+    _side == STATUS_NA or na(_level) ? STATUS_NA : _side + " sweep @ " + f_price(_level) + " | " + f_time(_time)
+
+f_sweepStateText(string _side, float _level, int _time, bool _active, string _state) =>
+    _side == STATUS_NA or na(_level) ? STATUS_NA : _side + " @ " + f_price(_level) + " | " + (_active ? "ACTIVE" : _state) + " | " + f_time(_time)
+
+f_sweepConfluenceText(string _dir, bool _hasSweep, string _side, int _time) =>
+    _dir == STATUS_NA ? STATUS_NA : _hasSweep ? "YES: prior " + _side + " sweep" : "NO: no prior opposite-side sweep"
+
+f_pass(bool _v) =>
+    _v ? "PASS" : "WAIT"
+
+f_manualStatus(bool _rangeOk, bool _directionOk, bool _breakOk, bool _sweepOk, bool _fvgOk, bool _fibOk) =>
+    not _rangeOk ? "WAIT: confirmed range" : not _directionOk ? "WAIT: HTF premium/discount" : not _breakOk ? "WAIT: break" : not _fibOk ? "WAIT: Fib" : not _sweepOk ? "WEAK: no sweep" : not _fvgOk ? "WEAK: no active FVG" : "MANUAL REVIEW READY"
+
+//──────────────────────────────────────────────────────────────────────────────
+// Visual theme, mode flags, and timeframe gates
+//──────────────────────────────────────────────────────────────────────────────
+
+bool reviewMode = visualModeInput == VIS_REVIEW
+bool debugMode = visualModeInput == VIS_DEBUG
+
+string chartTfLabel = f_tfLabel(timeframe.period)
+string entryTfLabel = f_tfLabel(entryStructureTfInput)
+string swingTfLabel = f_tfLabel(swingStructureTfInput)
+
+bool isEntryTf = timeframe.period == entryStructureTfInput
+bool isHtfChart = timeframe.period == swingStructureTfInput
+bool isSupportedReviewTf = isEntryTf or isHtfChart
+// Imported HTF data is already the previous completed source bar. On the 4H
+// chart it may safely commit at the opening of the next 4H bar, preserving the
+// accepted 4H behavior. On the 15M execution chart it commits at that chart
+// bar's close so source and known time remain explicit and replay-stable.
+bool swingSourceCommitAllowed = useHtfSwingStructure and isHtfChart ? barstate.isnew : confirmedEventBar
+
+string reviewModeName = isHtfChart ? "Swing / HTF context mode" : isEntryTf ? "Day / LTF execution mode" : "Unsupported review timeframe"
+
+bool allowBaseFractals = showBaseFractalMarkersInput and (debugMode or isSupportedReviewTf)
+bool allowLtfStructureVisuals = showInternalStructureInput and enableInternalStructure and (debugMode or isEntryTf)
+bool allowHtfStructureVisuals = showSwingStructureInput and enableSwingStructure and (debugMode or isSupportedReviewTf)
+bool allowHtfGuides = showActiveSwingLevelsInput and enableSwingStructure and (debugMode or isSupportedReviewTf)
+bool allowHtfRangeVisual = showCurrentRangeInput and enableSwingStructure and (debugMode or isSupportedReviewTf)
+bool allowLtfRangeVisual = showCurrentRangeInput and enableInternalStructure and (debugMode or isEntryTf)
+bool allowFvgVisuals = showFvgBoxesInput and enableFvgLogic and (debugMode or isSupportedReviewTf)
+bool allowLtfSweepVisuals = enableSweepLogicInput and showSweepLabelsInput and (debugMode or isEntryTf)
+bool allowHtfSweepVisuals = enableSweepLogicInput and showSweepLabelsInput and (debugMode or isSupportedReviewTf)
+
+color bullColor = styleThemeInput == "Dark" ? color.lime : styleThemeInput == "Light" ? color.green : styleThemeInput == "Minimal" ? color.gray : color.lime
+color bearColor = styleThemeInput == "Dark" ? color.red : styleThemeInput == "Light" ? color.maroon : styleThemeInput == "Minimal" ? color.gray : color.red
+
+color internalBullColor = color.new(bullColor, 32)
+color internalBearColor = color.new(bearColor, 32)
+color swingBullColor = color.new(bullColor, 0)
+color swingBearColor = color.new(bearColor, 0)
+
+color activeSwingHighColor = color.new(bearColor, 35)
+color activeSwingLowColor = color.new(bullColor, 35)
+color consumedSwingHighColor = color.new(bearColor, 80)
+color consumedSwingLowColor = color.new(bullColor, 80)
+
+color htfRangeColor = color.new(color.yellow, 12)
+color ltfRangeColor = color.new(color.aqua, 8)
+color htfFibColor = color.new(color.orange, 0)
+color ltfFibColor = color.new(color.fuchsia, 0)
+
+color buySweepColor = color.new(color.red, 0)
+color sellSweepColor = color.new(color.lime, 0)
+
+int activeFvgOpacity = styleThemeInput == "Minimal" ? 97 : styleThemeInput == "Light" ? 94 : 93
+int mitigatedFvgOpacity = 98
+
+color bullFvgFill = color.new(bullColor, activeFvgOpacity)
+color bearFvgFill = color.new(bearColor, activeFvgOpacity)
+color bullFvgMitigatedFill = color.new(bullColor, mitigatedFvgOpacity)
+color bearFvgMitigatedFill = color.new(bearColor, mitigatedFvgOpacity)
+
+color neutralText = color.white
+float chartAtr = nz(ta.atr(14), syminfo.mintick * 10.0)
+
+//──────────────────────────────────────────────────────────────────────────────
+// Persistent dashboard
+//──────────────────────────────────────────────────────────────────────────────
+
+var table dash = table.new(f_dashboardPosition(dashboardPositionInput), 4, DASH_ROWS, bgcolor=color.new(color.black, 0), frame_color=color.gray, frame_width=1, border_color=color.gray, border_width=1)
+
+//──────────────────────────────────────────────────────────────────────────────
+// Base Visual Fractal Engine — chart timeframe only
+//──────────────────────────────────────────────────────────────────────────────
+
+var float[] baseSwingHighPrices = array.new_float()
+var int[] baseSwingHighTimes = array.new_int()
+var int[] baseSwingHighBars = array.new_int()
+
+var float[] baseSwingLowPrices = array.new_float()
+var int[] baseSwingLowTimes = array.new_int()
+var int[] baseSwingLowBars = array.new_int()
+
+var float baseLastHighPrice = na
+var int baseLastHighTime = na
+var int baseLastHighBar = na
+
+var float baseLastLowPrice = na
+var int baseLastLowTime = na
+var int baseLastLowBar = na
+
+float basePivotHigh = ta.pivothigh(high, baseSwingLen, baseSwingLen)
+float basePivotLow = ta.pivotlow(low, baseSwingLen, baseSwingLen)
+
+if not na(basePivotHigh)
+    int pivotBarHigh = bar_index - baseSwingLen
+    int pivotTimeHigh = time[baseSwingLen]
+    baseLastHighPrice := basePivotHigh
+    baseLastHighTime := pivotTimeHigh
+    baseLastHighBar := pivotBarHigh
+    array.push(baseSwingHighPrices, basePivotHigh)
+    array.push(baseSwingHighTimes, pivotTimeHigh)
+    array.push(baseSwingHighBars, pivotBarHigh)
+
+if not na(basePivotLow)
+    int pivotBarLow = bar_index - baseSwingLen
+    int pivotTimeLow = time[baseSwingLen]
+    baseLastLowPrice := basePivotLow
+    baseLastLowTime := pivotTimeLow
+    baseLastLowBar := pivotBarLow
+    array.push(baseSwingLowPrices, basePivotLow)
+    array.push(baseSwingLowTimes, pivotTimeLow)
+    array.push(baseSwingLowBars, pivotBarLow)
+
+//──────────────────────────────────────────────────────────────────────────────
+// LTF / Internal Structure
+
+// Finalized sweep records are append-only evidence. Source time identifies the
+// wick candle; known time identifies when that closed candle became available;
+// confirmation time identifies the later break or invalidation that finalized
+// the record. The visual layer renders these arrays without backdating state.
+var int nextLtfSweepRecordId = 0
+var int nextHtfSweepRecordId = 0
+var int[] finalizedSweepIds = array.new_int()
+var string[] finalizedSweepScopes = array.new_string()
+var string[] finalizedSweepSides = array.new_string()
+var string[] finalizedSweepStates = array.new_string()
+var float[] finalizedSweepLevels = array.new_float()
+var float[] finalizedSweepWicks = array.new_float()
+var int[] finalizedSweepSourceTimes = array.new_int()
+var int[] finalizedSweepKnownTimes = array.new_int()
+var int[] finalizedSweepConfirmationTimes = array.new_int()
+
+f_archiveSweep(int _id, string _scope, string _side, string _state, float _level, float _wick, int _sourceTime, int _knownTime, int _confirmationTime) =>
+    array.push(finalizedSweepIds, _id)
+    array.push(finalizedSweepScopes, _scope)
+    array.push(finalizedSweepSides, _side)
+    array.push(finalizedSweepStates, _state)
+    array.push(finalizedSweepLevels, _level)
+    array.push(finalizedSweepWicks, _wick)
+    array.push(finalizedSweepSourceTimes, _sourceTime)
+    array.push(finalizedSweepKnownTimes, _knownTime)
+    array.push(finalizedSweepConfirmationTimes, _confirmationTime)
+    array.size(finalizedSweepIds)
+//──────────────────────────────────────────────────────────────────────────────
+
+var float internalLastHighPrice = na
+var int internalLastHighTime = na
+var int internalLastHighBar = na
+var bool internalHighConsumed = false
+
+var float internalLastLowPrice = na
+var int internalLastLowTime = na
+var int internalLastLowBar = na
+var bool internalLowConsumed = false
+
+var int internalBias = 0
+
+var string internalLastBullType = STATUS_NA
+var float internalLastBullPrice = na
+var int internalLastBullTime = na
+
+var string internalLastBearType = STATUS_NA
+var float internalLastBearPrice = na
+var int internalLastBearTime = na
+
+var string internalLastEventType = STATUS_NA
+var string internalLastEventDirection = STATUS_NA
+var float internalLastEventPrice = na
+var int internalLastEventTime = na
+var int internalLastEventBar = na
+var float internalLastEventClose = na
+var int internalLastEventPriorBias = 0
+var string internalLastEventReason = STATUS_NA
+var string internalLastEventSweepStatus = STATUS_NA
+var bool internalLastEventHasSweep = false
+var int internalLastEventSweepId = na
+var int internalLastEventSweepSourceTime = na
+var int internalLastEventSweepKnownTime = na
+var int internalLastEventSweepConfirmationTime = na
+var int internalLinkedFvgId = na
+var int internalLinkedFvgTime = na
+var float internalLinkedFvgTop = na
+var float internalLinkedFvgBottom = na
+
+var int internalBullBosCount = 0
+var int internalBullChochCount = 0
+var int internalBearBosCount = 0
+var int internalBearChochCount = 0
+
+// Event-level checklist audit. These counters are intentionally independent
+// from the setup ledger so a low setup count can be attributed to detection,
+// checklist filtering, timing, or ledger suppression instead of merely being
+// accepted because at least one long and one short exist.
+var int checklistEventCount = 0
+var int checklistContinuationCount = 0
+var int checklistReversalCount = 0
+var int checklistFreshSweepCount = 0
+var int checklistLinkedFvgCount = 0
+var int checklistRangeLockedCount = 0
+var int checklistRawFvgCount = 0
+var int checklistAcceptedFvgCount = 0
+var int checklistAtrRejectedFvgCount = 0
+var int checklistCurrentEventId = na
+var int checklistCurrentClassCode = 0 // 1 continuation/BOS, 2 reversal/CHoCH.
+var bool checklistCurrentFvgCounted = false
+var bool checklistCurrentRangeCounted = false
+
+var int internalRangeDir = 0
+var bool internalRangeLocked = false
+var string internalRangeEventType = STATUS_NA
+var string internalRangeEventDirection = STATUS_NA
+var int internalRangeEventTime = na
+var float internalRangeBrokenLevel = na
+var int internalRangeBrokenLevelTime = na
+var float internalRangeHigh = na
+var int internalRangeHighTime = na
+var int internalRangeHighBar = na
+var float internalRangeLow = na
+var int internalRangeLowTime = na
+var int internalRangeLowBar = na
+
+var string latestInternalSweepSide = STATUS_NA
+var float latestInternalSweepLevel = na
+var int latestInternalSweepTime = na
+var float latestInternalSweepWick = na
+
+var float latestInternalBuySweepLevel = na
+var int latestInternalBuySweepTime = na
+var int latestInternalBuySweepKnownTime = na
+var float latestInternalBuySweepWick = na
+var int latestInternalBuySweepId = na
+var float latestInternalSellSweepLevel = na
+var int latestInternalSellSweepTime = na
+var int latestInternalSellSweepKnownTime = na
+var float latestInternalSellSweepWick = na
+var int latestInternalSellSweepId = na
+var bool latestInternalBuySweepActive = false
+var bool latestInternalSellSweepActive = false
+var string latestInternalBuySweepState = STATUS_NA
+var string latestInternalSellSweepState = STATUS_NA
+
+bool internalBuySweepConsumed = false
+bool internalSellSweepConsumed = false
+bool internalBuySweepInvalidated = false
+bool internalSellSweepInvalidated = false
+
+// The original engine replaced active 15M levels with every confirmed
+// same-side fractal. The repaired engine owns an alternating structural
+// sequence. A same-side candidate may only replace the active point when it is
+// more extreme; otherwise it is rejected as internal noise.
+var int internalLastPivotDirection = 0
+var string internalLastPivotDecision = STATUS_NA
+var float internalLastPivotDecisionPrice = na
+var int internalLastPivotSourceTime = na
+var int internalLastPivotConfirmTime = na
+var int internalAcceptedPivotCount = 0
+var int internalReplacementPivotCount = 0
+var int internalRejectedPivotCount = 0
+
+float internalPivotHigh = ta.pivothigh(high, internalLen, internalLen)
+float internalPivotLow = ta.pivotlow(low, internalLen, internalLen)
+int internalPivotHighTime = time[internalLen]
+int internalPivotLowTime = time[internalLen]
+int internalPivotHighBar = bar_index - internalLen
+int internalPivotLowBar = bar_index - internalLen
+
+bool internalRawHighPivot = confirmedEventBar and enableInternalStructure and not na(internalPivotHigh)
+bool internalRawLowPivot = confirmedEventBar and enableInternalStructure and not na(internalPivotLow)
+bool internalHighPivotAccepted = false
+bool internalLowPivotAccepted = false
+bool internalPivotReplaced = false
+bool internalPivotRejected = false
+int internalPivotDecisionCode = 0
+
+int internalCandidateDirection = 0
+float internalCandidatePrice = na
+int internalCandidateTime = na
+int internalCandidateBar = na
+
+if internalRawHighPivot and internalRawLowPivot
+    if internalLastPivotDirection == 1
+        internalCandidateDirection := -1
+        internalCandidatePrice := internalPivotLow
+        internalCandidateTime := internalPivotLowTime
+        internalCandidateBar := internalPivotLowBar
+    else if internalLastPivotDirection == -1
+        internalCandidateDirection := 1
+        internalCandidatePrice := internalPivotHigh
+        internalCandidateTime := internalPivotHighTime
+        internalCandidateBar := internalPivotHighBar
+    else
+        float internalPivotClose = close[internalLen]
+        internalCandidateDirection := math.abs(internalPivotHigh - internalPivotClose) >= math.abs(internalPivotClose - internalPivotLow) ? 1 : -1
+        internalCandidatePrice := internalCandidateDirection == 1 ? internalPivotHigh : internalPivotLow
+        internalCandidateTime := internalCandidateDirection == 1 ? internalPivotHighTime : internalPivotLowTime
+        internalCandidateBar := internalCandidateDirection == 1 ? internalPivotHighBar : internalPivotLowBar
+else if internalRawHighPivot
+    internalCandidateDirection := 1
+    internalCandidatePrice := internalPivotHigh
+    internalCandidateTime := internalPivotHighTime
+    internalCandidateBar := internalPivotHighBar
+else if internalRawLowPivot
+    internalCandidateDirection := -1
+    internalCandidatePrice := internalPivotLow
+    internalCandidateTime := internalPivotLowTime
+    internalCandidateBar := internalPivotLowBar
+
+if internalCandidateDirection != 0
+    bool internalSameSide = internalCandidateDirection == internalLastPivotDirection
+    bool internalMoreExtreme = internalCandidateDirection == 1 ? na(internalLastHighPrice) or internalCandidatePrice > internalLastHighPrice : na(internalLastLowPrice) or internalCandidatePrice < internalLastLowPrice
+    bool internalAcceptCandidate = not internalSameSide or internalMoreExtreme
+
+    internalLastPivotDecisionPrice := internalCandidatePrice
+    internalLastPivotSourceTime := internalCandidateTime
+    internalLastPivotConfirmTime := time
+
+    if internalAcceptCandidate
+        internalLastPivotDirection := internalCandidateDirection
+        if internalSameSide
+            internalPivotReplaced := true
+            internalPivotDecisionCode := internalCandidateDirection == 1 ? 2 : -2
+            internalReplacementPivotCount += 1
+            internalLastPivotDecision := internalCandidateDirection == 1 ? "REPLACE HIGH: more extreme same-side pivot" : "REPLACE LOW: more extreme same-side pivot"
+        else
+            internalPivotDecisionCode := internalCandidateDirection
+            internalAcceptedPivotCount += 1
+            internalLastPivotDecision := internalCandidateDirection == 1 ? "ACCEPT HIGH: alternating structural pivot" : "ACCEPT LOW: alternating structural pivot"
+
+        if internalCandidateDirection == 1
+            if latestInternalBuySweepActive
+                f_archiveSweep(latestInternalBuySweepId, "LTF", SWEEP_BUY, "INVALIDATED: LEVEL REPLACED", latestInternalBuySweepLevel, latestInternalBuySweepWick, latestInternalBuySweepTime, latestInternalBuySweepKnownTime, time)
+                latestInternalBuySweepActive := false
+                latestInternalBuySweepState := "INVALID: HIGH REPLACED"
+                internalBuySweepInvalidated := true
+            internalLastHighPrice := internalCandidatePrice
+            internalLastHighTime := internalCandidateTime
+            internalLastHighBar := internalCandidateBar
+            internalHighConsumed := false
+            internalHighPivotAccepted := true
+        else
+            if latestInternalSellSweepActive
+                f_archiveSweep(latestInternalSellSweepId, "LTF", SWEEP_SELL, "INVALIDATED: LEVEL REPLACED", latestInternalSellSweepLevel, latestInternalSellSweepWick, latestInternalSellSweepTime, latestInternalSellSweepKnownTime, time)
+                latestInternalSellSweepActive := false
+                latestInternalSellSweepState := "INVALID: LOW REPLACED"
+                internalSellSweepInvalidated := true
+            internalLastLowPrice := internalCandidatePrice
+            internalLastLowTime := internalCandidateTime
+            internalLastLowBar := internalCandidateBar
+            internalLowConsumed := false
+            internalLowPivotAccepted := true
+    else
+        internalPivotRejected := true
+        internalPivotDecisionCode := internalCandidateDirection == 1 ? 3 : -3
+        internalRejectedPivotCount += 1
+        internalLastPivotDecision := internalCandidateDirection == 1 ? "REJECT HIGH: weaker same-side pivot" : "REJECT LOW: weaker same-side pivot"
+
+bool internalRawBuySideSweep = confirmedEventBar and enableSweepLogicInput and enableInternalStructure and not latestInternalBuySweepActive and not na(internalLastHighPrice) and not internalHighConsumed and high > internalLastHighPrice and (sweepRequiresRejectionInput ? close <= internalLastHighPrice : close < high)
+bool internalRawSellSideSweep = confirmedEventBar and enableSweepLogicInput and enableInternalStructure and not latestInternalSellSweepActive and not na(internalLastLowPrice) and not internalLowConsumed and low < internalLastLowPrice and (sweepRequiresRejectionInput ? close >= internalLastLowPrice : close > low)
+bool internalDualSideSweep = internalRawBuySideSweep and internalRawSellSideSweep
+bool internalBuySideSweep = internalRawBuySideSweep and not internalDualSideSweep
+bool internalSellSideSweep = internalRawSellSideSweep and not internalDualSideSweep
+
+if internalDualSideSweep
+    nextLtfSweepRecordId += 1
+    f_archiveSweep(nextLtfSweepRecordId, "LTF", SWEEP_BUY, "AMBIGUOUS: BOTH SIDES SWEPT", internalLastHighPrice, high, time, time, time)
+    nextLtfSweepRecordId += 1
+    f_archiveSweep(nextLtfSweepRecordId, "LTF", SWEEP_SELL, "AMBIGUOUS: BOTH SIDES SWEPT", internalLastLowPrice, low, time, time, time)
+
+if internalBuySideSweep
+    nextLtfSweepRecordId += 1
+    latestInternalSweepSide := SWEEP_BUY
+    latestInternalSweepLevel := internalLastHighPrice
+    latestInternalSweepTime := time
+    latestInternalSweepWick := high
+    latestInternalBuySweepLevel := internalLastHighPrice
+    latestInternalBuySweepTime := time
+    latestInternalBuySweepKnownTime := time
+    latestInternalBuySweepWick := high
+    latestInternalBuySweepId := nextLtfSweepRecordId
+    latestInternalBuySweepActive := true
+    latestInternalBuySweepState := "ACTIVE"
+
+if internalSellSideSweep
+    nextLtfSweepRecordId += 1
+    latestInternalSweepSide := SWEEP_SELL
+    latestInternalSweepLevel := internalLastLowPrice
+    latestInternalSweepTime := time
+    latestInternalSweepWick := low
+    latestInternalSellSweepLevel := internalLastLowPrice
+    latestInternalSellSweepTime := time
+    latestInternalSellSweepKnownTime := time
+    latestInternalSellSweepWick := low
+    latestInternalSellSweepId := nextLtfSweepRecordId
+    latestInternalSellSweepActive := true
+    latestInternalSellSweepState := "ACTIVE"
+
+bool internalBullBreak = confirmedEventBar and enableInternalStructure and not na(internalLastHighPrice) and not internalHighConsumed and close > internalLastHighPrice
+bool internalBearBreak = confirmedEventBar and enableInternalStructure and not na(internalLastLowPrice) and not internalLowConsumed and close < internalLastLowPrice
+
+if internalBullBreak
+    int priorBias = internalBias
+    string internalBullEventType = priorBias == -1 ? EVENT_CHOCH : EVENT_BOS
+    bool hasSellSweep = latestInternalSellSweepActive and not na(latestInternalSellSweepTime) and latestInternalSellSweepTime <= time
+    if latestInternalBuySweepActive
+        f_archiveSweep(latestInternalBuySweepId, "LTF", SWEEP_BUY, "INVALIDATED: BODY BROKE SWEPT LEVEL", latestInternalBuySweepLevel, latestInternalBuySweepWick, latestInternalBuySweepTime, latestInternalBuySweepKnownTime, time)
+        latestInternalBuySweepActive := false
+        latestInternalBuySweepState := "INVALID: BODY BROKE HIGH"
+        internalBuySweepInvalidated := true
+    if hasSellSweep
+        f_archiveSweep(latestInternalSellSweepId, "LTF", SWEEP_SELL, "CONFIRMED MANIPULATION BY " + internalBullEventType, latestInternalSellSweepLevel, latestInternalSellSweepWick, latestInternalSellSweepTime, latestInternalSellSweepKnownTime, time)
+        latestInternalSellSweepActive := false
+        latestInternalSellSweepState := "CONSUMED BY BULL " + internalBullEventType
+        internalSellSweepConsumed := true
+    internalHighConsumed := true
+    internalBias := 1
+    internalLastBullType := internalBullEventType
+    internalLastBullPrice := internalLastHighPrice
+    internalLastBullTime := time
+    internalLastEventType := internalBullEventType
+    internalLastEventDirection := "Bullish"
+    internalLastEventPrice := internalLastHighPrice
+    internalLastEventTime := time
+    internalLastEventBar := bar_index
+    internalLastEventClose := close
+    internalLastEventPriorBias := priorBias
+    internalLastEventReason := f_classReason("Bullish", internalBullEventType, priorBias)
+    internalLastEventSweepStatus := f_sweepConfluenceText("Bullish", hasSellSweep, SWEEP_SELL, latestInternalSellSweepTime)
+    internalLastEventHasSweep := hasSellSweep
+    internalLastEventSweepId := hasSellSweep ? latestInternalSellSweepId : na
+    internalLastEventSweepSourceTime := hasSellSweep ? latestInternalSellSweepTime : na
+    internalLastEventSweepKnownTime := hasSellSweep ? latestInternalSellSweepKnownTime : na
+    internalLastEventSweepConfirmationTime := hasSellSweep ? time : na
+    internalLinkedFvgId := na
+    internalLinkedFvgTime := na
+    internalLinkedFvgTop := na
+    internalLinkedFvgBottom := na
+    internalRangeDir := 1
+    internalRangeLocked := false
+    internalRangeEventType := internalBullEventType
+    internalRangeEventDirection := "Bullish"
+    internalRangeEventTime := time
+    internalRangeBrokenLevel := internalLastHighPrice
+    internalRangeBrokenLevelTime := internalLastHighTime
+    internalRangeLow := internalLastLowPrice
+    internalRangeLowTime := internalLastLowTime
+    internalRangeLowBar := internalLastLowBar
+    internalRangeHigh := high
+    internalRangeHighTime := time
+    internalRangeHighBar := bar_index
+    checklistEventCount += 1
+    checklistCurrentEventId := checklistEventCount
+    checklistCurrentClassCode := internalBullEventType == EVENT_CHOCH ? 2 : 1
+    checklistContinuationCount += internalBullEventType == EVENT_BOS ? 1 : 0
+    checklistReversalCount += internalBullEventType == EVENT_CHOCH ? 1 : 0
+    checklistFreshSweepCount += hasSellSweep ? 1 : 0
+    checklistCurrentFvgCounted := false
+    checklistCurrentRangeCounted := false
+    if internalBullEventType == EVENT_CHOCH
+        internalBullChochCount += 1
+    else
+        internalBullBosCount += 1
+
+if internalBearBreak
+    int priorBias = internalBias
+    string internalBearEventType = priorBias == 1 ? EVENT_CHOCH : EVENT_BOS
+    bool hasBuySweep = latestInternalBuySweepActive and not na(latestInternalBuySweepTime) and latestInternalBuySweepTime <= time
+    if latestInternalSellSweepActive
+        f_archiveSweep(latestInternalSellSweepId, "LTF", SWEEP_SELL, "INVALIDATED: BODY BROKE SWEPT LEVEL", latestInternalSellSweepLevel, latestInternalSellSweepWick, latestInternalSellSweepTime, latestInternalSellSweepKnownTime, time)
+        latestInternalSellSweepActive := false
+        latestInternalSellSweepState := "INVALID: BODY BROKE LOW"
+        internalSellSweepInvalidated := true
+    if hasBuySweep
+        f_archiveSweep(latestInternalBuySweepId, "LTF", SWEEP_BUY, "CONFIRMED MANIPULATION BY " + internalBearEventType, latestInternalBuySweepLevel, latestInternalBuySweepWick, latestInternalBuySweepTime, latestInternalBuySweepKnownTime, time)
+        latestInternalBuySweepActive := false
+        latestInternalBuySweepState := "CONSUMED BY BEAR " + internalBearEventType
+        internalBuySweepConsumed := true
+    internalLowConsumed := true
+    internalBias := -1
+    internalLastBearType := internalBearEventType
+    internalLastBearPrice := internalLastLowPrice
+    internalLastBearTime := time
+    internalLastEventType := internalBearEventType
+    internalLastEventDirection := "Bearish"
+    internalLastEventPrice := internalLastLowPrice
+    internalLastEventTime := time
+    internalLastEventBar := bar_index
+    internalLastEventClose := close
+    internalLastEventPriorBias := priorBias
+    internalLastEventReason := f_classReason("Bearish", internalBearEventType, priorBias)
+    internalLastEventSweepStatus := f_sweepConfluenceText("Bearish", hasBuySweep, SWEEP_BUY, latestInternalBuySweepTime)
+    internalLastEventHasSweep := hasBuySweep
+    internalLastEventSweepId := hasBuySweep ? latestInternalBuySweepId : na
+    internalLastEventSweepSourceTime := hasBuySweep ? latestInternalBuySweepTime : na
+    internalLastEventSweepKnownTime := hasBuySweep ? latestInternalBuySweepKnownTime : na
+    internalLastEventSweepConfirmationTime := hasBuySweep ? time : na
+    internalLinkedFvgId := na
+    internalLinkedFvgTime := na
+    internalLinkedFvgTop := na
+    internalLinkedFvgBottom := na
+    internalRangeDir := -1
+    internalRangeLocked := false
+    internalRangeEventType := internalBearEventType
+    internalRangeEventDirection := "Bearish"
+    internalRangeEventTime := time
+    internalRangeBrokenLevel := internalLastLowPrice
+    internalRangeBrokenLevelTime := internalLastLowTime
+    internalRangeHigh := internalLastHighPrice
+    internalRangeHighTime := internalLastHighTime
+    internalRangeHighBar := internalLastHighBar
+    internalRangeLow := low
+    internalRangeLowTime := time
+    internalRangeLowBar := bar_index
+    checklistEventCount += 1
+    checklistCurrentEventId := checklistEventCount
+    checklistCurrentClassCode := internalBearEventType == EVENT_CHOCH ? 2 : 1
+    checklistContinuationCount += internalBearEventType == EVENT_BOS ? 1 : 0
+    checklistReversalCount += internalBearEventType == EVENT_CHOCH ? 1 : 0
+    checklistFreshSweepCount += hasBuySweep ? 1 : 0
+    checklistCurrentFvgCounted := false
+    checklistCurrentRangeCounted := false
+    if internalBearEventType == EVENT_CHOCH
+        internalBearChochCount += 1
+    else
+        internalBearBosCount += 1
+
+if confirmedEventBar and enableInternalStructure and internalRangeDir == 1 and not internalRangeLocked and not na(internalRangeEventTime)
+    if na(internalRangeHigh) or high > internalRangeHigh
+        internalRangeHigh := high
+        internalRangeHighTime := time
+        internalRangeHighBar := bar_index
+    if not na(internalPivotHigh) and internalPivotHighTime >= internalRangeEventTime
+        internalRangeHigh := internalPivotHigh
+        internalRangeHighTime := internalPivotHighTime
+        internalRangeHighBar := internalPivotHighBar
+        internalRangeLocked := true
+        if not checklistCurrentRangeCounted
+            checklistRangeLockedCount += 1
+            checklistCurrentRangeCounted := true
+
+if confirmedEventBar and enableInternalStructure and internalRangeDir == -1 and not internalRangeLocked and not na(internalRangeEventTime)
+    if na(internalRangeLow) or low < internalRangeLow
+        internalRangeLow := low
+        internalRangeLowTime := time
+        internalRangeLowBar := bar_index
+    if not na(internalPivotLow) and internalPivotLowTime >= internalRangeEventTime
+        internalRangeLow := internalPivotLow
+        internalRangeLowTime := internalPivotLowTime
+        internalRangeLowBar := internalPivotLowBar
+        internalRangeLocked := true
+        if not checklistCurrentRangeCounted
+            checklistRangeLockedCount += 1
+            checklistCurrentRangeCounted := true
+
+//──────────────────────────────────────────────────────────────────────────────
+// HTF / External Swing Structure
+//──────────────────────────────────────────────────────────────────────────────
+
+var float swingLastHighPrice = na
+var int swingLastHighTime = na
+var int swingLastHighBar = na
+var bool swingHighConsumed = false
+
+var float swingLastLowPrice = na
+var int swingLastLowTime = na
+var int swingLastLowBar = na
+var bool swingLowConsumed = false
+
+var int swingBias = 0
+
+var string swingLastBullType = STATUS_NA
+var float swingLastBullPrice = na
+var int swingLastBullTime = na
+
+var string swingLastBearType = STATUS_NA
+var float swingLastBearPrice = na
+var int swingLastBearTime = na
+
+var string swingLastEventType = STATUS_NA
+var string swingLastEventDirection = STATUS_NA
+var float swingLastEventPrice = na
+var int swingLastEventTime = na
+var float swingLastEventClose = na
+var int swingLastEventPriorBias = 0
+var string swingLastEventReason = STATUS_NA
+var string swingLastEventSweepStatus = STATUS_NA
+var bool swingLastEventHasSweep = false
+var int swingLastEventKnownTime = na
+var int swingLastEventSweepId = na
+var int swingLastEventSweepSourceTime = na
+var int swingLastEventSweepKnownTime = na
+var int swingLastEventSweepConfirmationTime = na
+var int swingLinkedFvgId = na
+var int swingLinkedFvgTime = na
+
+var int swingBullBosCount = 0
+var int swingBullChochCount = 0
+var int swingBearBosCount = 0
+var int swingBearChochCount = 0
+
+var int swingRangeDir = 0
+var bool swingRangeLocked = false
+var string swingRangeEventType = STATUS_NA
+var string swingRangeEventDirection = STATUS_NA
+var int swingRangeEventTime = na
+var float swingRangeBrokenLevel = na
+var int swingRangeBrokenLevelTime = na
+var float swingRangeHigh = na
+var int swingRangeHighTime = na
+var int swingRangeHighBar = na
+var float swingRangeLow = na
+var int swingRangeLowTime = na
+var int swingRangeLowBar = na
+
+var string latestSwingSweepSide = STATUS_NA
+var float latestSwingSweepLevel = na
+var int latestSwingSweepTime = na
+var float latestSwingSweepWick = na
+
+var float latestSwingBuySweepLevel = na
+var int latestSwingBuySweepTime = na
+var int latestSwingBuySweepKnownTime = na
+var float latestSwingBuySweepWick = na
+var int latestSwingBuySweepId = na
+var float latestSwingSellSweepLevel = na
+var int latestSwingSellSweepTime = na
+var int latestSwingSellSweepKnownTime = na
+var float latestSwingSellSweepWick = na
+var int latestSwingSellSweepId = na
+var bool latestSwingBuySweepActive = false
+var bool latestSwingSellSweepActive = false
+var string latestSwingBuySweepState = STATUS_NA
+var string latestSwingSellSweepState = STATUS_NA
+
+bool swingBuySweepConsumed = false
+bool swingSellSweepConsumed = false
+bool swingBuySweepInvalidated = false
+bool swingSellSweepInvalidated = false
+
+var int lastImportedSwingHighPivotTime = na
+var int lastImportedSwingLowPivotTime = na
+var int lastSwingBuySweepEventTime = na
+var int lastSwingSellSweepEventTime = na
+
+float swingPivotHighChart = ta.pivothigh(high, swingLen, swingLen)
+float swingPivotLowChart = ta.pivotlow(low, swingLen, swingLen)
+int swingPivotHighChartTime = time[swingLen]
+int swingPivotLowChartTime = time[swingLen]
+
+// The imported series intentionally expose the previous completed HTF bar at
+// the opening of the next HTF period. `lookahead_off` alone can expose a
+// developing realtime HTF bar; the one-bar source offset and lookahead-on
+// pairing is TradingView's confirmed-only request pattern.
+float swingPivotHighHtf = request.security(syminfo.tickerid, swingStructureTfInput, ta.pivothigh(high, swingLen, swingLen)[1], barmerge.gaps_off, barmerge.lookahead_on)
+float swingPivotLowHtf = request.security(syminfo.tickerid, swingStructureTfInput, ta.pivotlow(low, swingLen, swingLen)[1], barmerge.gaps_off, barmerge.lookahead_on)
+int swingPivotHighHtfTime = request.security(syminfo.tickerid, swingStructureTfInput, not na(ta.pivothigh(high, swingLen, swingLen)[1]) ? time[swingLen + 1] : na, barmerge.gaps_off, barmerge.lookahead_on)
+int swingPivotLowHtfTime = request.security(syminfo.tickerid, swingStructureTfInput, not na(ta.pivotlow(low, swingLen, swingLen)[1]) ? time[swingLen + 1] : na, barmerge.gaps_off, barmerge.lookahead_on)
+
+float swingBreakCloseHtf = request.security(syminfo.tickerid, swingStructureTfInput, close[1], barmerge.gaps_off, barmerge.lookahead_on)
+float swingBreakHighHtf = request.security(syminfo.tickerid, swingStructureTfInput, high[1], barmerge.gaps_off, barmerge.lookahead_on)
+float swingBreakLowHtf = request.security(syminfo.tickerid, swingStructureTfInput, low[1], barmerge.gaps_off, barmerge.lookahead_on)
+int swingBreakTimeHtf = request.security(syminfo.tickerid, swingStructureTfInput, time[1], barmerge.gaps_off, barmerge.lookahead_on)
+
+float swingPivotHighSource = useHtfSwingStructure ? swingPivotHighHtf : swingPivotHighChart
+float swingPivotLowSource = useHtfSwingStructure ? swingPivotLowHtf : swingPivotLowChart
+int swingPivotHighSourceTime = useHtfSwingStructure ? swingPivotHighHtfTime : swingPivotHighChartTime
+int swingPivotLowSourceTime = useHtfSwingStructure ? swingPivotLowHtfTime : swingPivotLowChartTime
+float swingBreakCloseSource = useHtfSwingStructure ? swingBreakCloseHtf : close
+float swingBreakHighSource = useHtfSwingStructure ? swingBreakHighHtf : high
+float swingBreakLowSource = useHtfSwingStructure ? swingBreakLowHtf : low
+int swingBreakTimeSource = useHtfSwingStructure ? swingBreakTimeHtf : time
+bool confirmedSwingSourceUpdate = swingSourceCommitAllowed and not na(swingBreakTimeSource) and (na(swingBreakTimeSource[1]) or swingBreakTimeSource != swingBreakTimeSource[1])
+
+bool newSwingPivotHigh = swingSourceCommitAllowed and enableSwingStructure and (useHtfSwingStructure ? not na(swingPivotHighSource) and not na(swingPivotHighSourceTime) and (na(lastImportedSwingHighPivotTime) or swingPivotHighSourceTime != lastImportedSwingHighPivotTime) : not na(swingPivotHighSource))
+bool newSwingPivotLow = swingSourceCommitAllowed and enableSwingStructure and (useHtfSwingStructure ? not na(swingPivotLowSource) and not na(swingPivotLowSourceTime) and (na(lastImportedSwingLowPivotTime) or swingPivotLowSourceTime != lastImportedSwingLowPivotTime) : not na(swingPivotLowSource))
+
+if newSwingPivotHigh
+    if latestSwingBuySweepActive
+        f_archiveSweep(latestSwingBuySweepId, "HTF", SWEEP_BUY, "INVALIDATED: LEVEL REPLACED", latestSwingBuySweepLevel, latestSwingBuySweepWick, latestSwingBuySweepTime, latestSwingBuySweepKnownTime, time)
+        latestSwingBuySweepActive := false
+        latestSwingBuySweepState := "INVALID: HIGH REPLACED"
+        swingBuySweepInvalidated := true
+    swingLastHighPrice := swingPivotHighSource
+    swingLastHighTime := swingPivotHighSourceTime
+    swingLastHighBar := useHtfSwingStructure ? na : bar_index - swingLen
+    swingHighConsumed := false
+    if useHtfSwingStructure
+        lastImportedSwingHighPivotTime := swingPivotHighSourceTime
+
+if newSwingPivotLow
+    if latestSwingSellSweepActive
+        f_archiveSweep(latestSwingSellSweepId, "HTF", SWEEP_SELL, "INVALIDATED: LEVEL REPLACED", latestSwingSellSweepLevel, latestSwingSellSweepWick, latestSwingSellSweepTime, latestSwingSellSweepKnownTime, time)
+        latestSwingSellSweepActive := false
+        latestSwingSellSweepState := "INVALID: LOW REPLACED"
+        swingSellSweepInvalidated := true
+    swingLastLowPrice := swingPivotLowSource
+    swingLastLowTime := swingPivotLowSourceTime
+    swingLastLowBar := useHtfSwingStructure ? na : bar_index - swingLen
+    swingLowConsumed := false
+    if useHtfSwingStructure
+        lastImportedSwingLowPivotTime := swingPivotLowSourceTime
+
+bool rawSwingBuySideSweep = swingSourceCommitAllowed and enableSweepLogicInput and enableSwingStructure and not na(swingLastHighPrice) and not swingHighConsumed and swingBreakHighSource > swingLastHighPrice and (sweepRequiresRejectionInput ? swingBreakCloseSource <= swingLastHighPrice : swingBreakCloseSource < swingBreakHighSource)
+bool rawSwingSellSideSweep = swingSourceCommitAllowed and enableSweepLogicInput and enableSwingStructure and not na(swingLastLowPrice) and not swingLowConsumed and swingBreakLowSource < swingLastLowPrice and (sweepRequiresRejectionInput ? swingBreakCloseSource >= swingLastLowPrice : swingBreakCloseSource > swingBreakLowSource)
+
+bool rawNewSwingBuySideSweep = rawSwingBuySideSweep and not latestSwingBuySweepActive and (not useHtfSwingStructure or na(lastSwingBuySweepEventTime) or swingBreakTimeSource != lastSwingBuySweepEventTime)
+bool rawNewSwingSellSideSweep = rawSwingSellSideSweep and not latestSwingSellSweepActive and (not useHtfSwingStructure or na(lastSwingSellSweepEventTime) or swingBreakTimeSource != lastSwingSellSweepEventTime)
+bool swingDualSideSweep = rawNewSwingBuySideSweep and rawNewSwingSellSideSweep
+bool swingBuySideSweep = rawNewSwingBuySideSweep and not swingDualSideSweep
+bool swingSellSideSweep = rawNewSwingSellSideSweep and not swingDualSideSweep
+
+if swingDualSideSweep
+    nextHtfSweepRecordId += 1
+    f_archiveSweep(nextHtfSweepRecordId, "HTF", SWEEP_BUY, "AMBIGUOUS: BOTH SIDES SWEPT", swingLastHighPrice, swingBreakHighSource, swingBreakTimeSource, time, time)
+    nextHtfSweepRecordId += 1
+    f_archiveSweep(nextHtfSweepRecordId, "HTF", SWEEP_SELL, "AMBIGUOUS: BOTH SIDES SWEPT", swingLastLowPrice, swingBreakLowSource, swingBreakTimeSource, time, time)
+
+if swingBuySideSweep
+    nextHtfSweepRecordId += 1
+    latestSwingSweepSide := SWEEP_BUY
+    latestSwingSweepLevel := swingLastHighPrice
+    latestSwingSweepTime := swingBreakTimeSource
+    latestSwingSweepWick := swingBreakHighSource
+    latestSwingBuySweepLevel := swingLastHighPrice
+    latestSwingBuySweepTime := swingBreakTimeSource
+    latestSwingBuySweepKnownTime := time
+    latestSwingBuySweepWick := swingBreakHighSource
+    latestSwingBuySweepId := nextHtfSweepRecordId
+    latestSwingBuySweepActive := true
+    latestSwingBuySweepState := "ACTIVE"
+    lastSwingBuySweepEventTime := swingBreakTimeSource
+
+if swingSellSideSweep
+    nextHtfSweepRecordId += 1
+    latestSwingSweepSide := SWEEP_SELL
+    latestSwingSweepLevel := swingLastLowPrice
+    latestSwingSweepTime := swingBreakTimeSource
+    latestSwingSweepWick := swingBreakLowSource
+    latestSwingSellSweepLevel := swingLastLowPrice
+    latestSwingSellSweepTime := swingBreakTimeSource
+    latestSwingSellSweepKnownTime := time
+    latestSwingSellSweepWick := swingBreakLowSource
+    latestSwingSellSweepId := nextHtfSweepRecordId
+    latestSwingSellSweepActive := true
+    latestSwingSellSweepState := "ACTIVE"
+    lastSwingSellSweepEventTime := swingBreakTimeSource
+
+bool swingBullBreak = swingSourceCommitAllowed and enableSwingStructure and not na(swingLastHighPrice) and not swingHighConsumed and swingBreakCloseSource > swingLastHighPrice
+bool swingBearBreak = swingSourceCommitAllowed and enableSwingStructure and not na(swingLastLowPrice) and not swingLowConsumed and swingBreakCloseSource < swingLastLowPrice
+
+if swingBullBreak
+    int priorBias = swingBias
+    string swingBullEventType = priorBias == -1 ? EVENT_CHOCH : EVENT_BOS
+    bool hasSellSweep = latestSwingSellSweepActive and not na(latestSwingSellSweepTime) and latestSwingSellSweepTime <= swingBreakTimeSource
+    if latestSwingBuySweepActive
+        f_archiveSweep(latestSwingBuySweepId, "HTF", SWEEP_BUY, "INVALIDATED: BODY BROKE SWEPT LEVEL", latestSwingBuySweepLevel, latestSwingBuySweepWick, latestSwingBuySweepTime, latestSwingBuySweepKnownTime, time)
+        latestSwingBuySweepActive := false
+        latestSwingBuySweepState := "INVALID: BODY BROKE HIGH"
+        swingBuySweepInvalidated := true
+    if hasSellSweep
+        f_archiveSweep(latestSwingSellSweepId, "HTF", SWEEP_SELL, "CONFIRMED MANIPULATION BY " + swingBullEventType, latestSwingSellSweepLevel, latestSwingSellSweepWick, latestSwingSellSweepTime, latestSwingSellSweepKnownTime, time)
+        latestSwingSellSweepActive := false
+        latestSwingSellSweepState := "CONSUMED BY BULL " + swingBullEventType
+        swingSellSweepConsumed := true
+    swingHighConsumed := true
+    swingBias := 1
+    swingLastBullType := swingBullEventType
+    swingLastBullPrice := swingLastHighPrice
+    swingLastBullTime := swingBreakTimeSource
+    swingLastEventType := swingBullEventType
+    swingLastEventDirection := "Bullish"
+    swingLastEventPrice := swingLastHighPrice
+    swingLastEventTime := swingBreakTimeSource
+    swingLastEventKnownTime := time
+    swingLastEventClose := swingBreakCloseSource
+    swingLastEventPriorBias := priorBias
+    swingLastEventReason := f_classReason("Bullish", swingBullEventType, priorBias)
+    swingLastEventSweepStatus := f_sweepConfluenceText("Bullish", hasSellSweep, SWEEP_SELL, latestSwingSellSweepTime)
+    swingLastEventHasSweep := hasSellSweep
+    swingLastEventSweepId := hasSellSweep ? latestSwingSellSweepId : na
+    swingLastEventSweepSourceTime := hasSellSweep ? latestSwingSellSweepTime : na
+    swingLastEventSweepKnownTime := hasSellSweep ? latestSwingSellSweepKnownTime : na
+    swingLastEventSweepConfirmationTime := hasSellSweep ? time : na
+    swingLinkedFvgId := na
+    swingLinkedFvgTime := na
+    swingRangeDir := 1
+    swingRangeLocked := false
+    swingRangeEventType := swingBullEventType
+    swingRangeEventDirection := "Bullish"
+    swingRangeEventTime := swingBreakTimeSource
+    swingRangeBrokenLevel := swingLastHighPrice
+    swingRangeBrokenLevelTime := swingLastHighTime
+    swingRangeLow := swingLastLowPrice
+    swingRangeLowTime := swingLastLowTime
+    swingRangeLowBar := swingLastLowBar
+    swingRangeHigh := swingBreakHighSource
+    swingRangeHighTime := swingBreakTimeSource
+    swingRangeHighBar := useHtfSwingStructure ? na : bar_index
+    if swingBullEventType == EVENT_CHOCH
+        swingBullChochCount += 1
+    else
+        swingBullBosCount += 1
+
+if swingBearBreak
+    int priorBias = swingBias
+    string swingBearEventType = priorBias == 1 ? EVENT_CHOCH : EVENT_BOS
+    bool hasBuySweep = latestSwingBuySweepActive and not na(latestSwingBuySweepTime) and latestSwingBuySweepTime <= swingBreakTimeSource
+    if latestSwingSellSweepActive
+        f_archiveSweep(latestSwingSellSweepId, "HTF", SWEEP_SELL, "INVALIDATED: BODY BROKE SWEPT LEVEL", latestSwingSellSweepLevel, latestSwingSellSweepWick, latestSwingSellSweepTime, latestSwingSellSweepKnownTime, time)
+        latestSwingSellSweepActive := false
+        latestSwingSellSweepState := "INVALID: BODY BROKE LOW"
+        swingSellSweepInvalidated := true
+    if hasBuySweep
+        f_archiveSweep(latestSwingBuySweepId, "HTF", SWEEP_BUY, "CONFIRMED MANIPULATION BY " + swingBearEventType, latestSwingBuySweepLevel, latestSwingBuySweepWick, latestSwingBuySweepTime, latestSwingBuySweepKnownTime, time)
+        latestSwingBuySweepActive := false
+        latestSwingBuySweepState := "CONSUMED BY BEAR " + swingBearEventType
+        swingBuySweepConsumed := true
+    swingLowConsumed := true
+    swingBias := -1
+    swingLastBearType := swingBearEventType
+    swingLastBearPrice := swingLastLowPrice
+    swingLastBearTime := swingBreakTimeSource
+    swingLastEventType := swingBearEventType
+    swingLastEventDirection := "Bearish"
+    swingLastEventPrice := swingLastLowPrice
+    swingLastEventTime := swingBreakTimeSource
+    swingLastEventKnownTime := time
+    swingLastEventClose := swingBreakCloseSource
+    swingLastEventPriorBias := priorBias
+    swingLastEventReason := f_classReason("Bearish", swingBearEventType, priorBias)
+    swingLastEventSweepStatus := f_sweepConfluenceText("Bearish", hasBuySweep, SWEEP_BUY, latestSwingBuySweepTime)
+    swingLastEventHasSweep := hasBuySweep
+    swingLastEventSweepId := hasBuySweep ? latestSwingBuySweepId : na
+    swingLastEventSweepSourceTime := hasBuySweep ? latestSwingBuySweepTime : na
+    swingLastEventSweepKnownTime := hasBuySweep ? latestSwingBuySweepKnownTime : na
+    swingLastEventSweepConfirmationTime := hasBuySweep ? time : na
+    swingLinkedFvgId := na
+    swingLinkedFvgTime := na
+    swingRangeDir := -1
+    swingRangeLocked := false
+    swingRangeEventType := swingBearEventType
+    swingRangeEventDirection := "Bearish"
+    swingRangeEventTime := swingBreakTimeSource
+    swingRangeBrokenLevel := swingLastLowPrice
+    swingRangeBrokenLevelTime := swingLastLowTime
+    swingRangeHigh := swingLastHighPrice
+    swingRangeHighTime := swingLastHighTime
+    swingRangeHighBar := swingLastHighBar
+    swingRangeLow := swingBreakLowSource
+    swingRangeLowTime := swingBreakTimeSource
+    swingRangeLowBar := useHtfSwingStructure ? na : bar_index
+    if swingBearEventType == EVENT_CHOCH
+        swingBearChochCount += 1
+    else
+        swingBearBosCount += 1
+
+if swingSourceCommitAllowed and enableSwingStructure and swingRangeDir == 1 and not swingRangeLocked and not na(swingRangeEventTime)
+    if not na(swingBreakHighSource) and (na(swingRangeHigh) or swingBreakHighSource > swingRangeHigh)
+        swingRangeHigh := swingBreakHighSource
+        swingRangeHighTime := swingBreakTimeSource
+        swingRangeHighBar := useHtfSwingStructure ? na : bar_index
+    if newSwingPivotHigh and swingPivotHighSourceTime >= swingRangeEventTime
+        swingRangeHigh := swingPivotHighSource
+        swingRangeHighTime := swingPivotHighSourceTime
+        swingRangeHighBar := useHtfSwingStructure ? na : bar_index - swingLen
+        swingRangeLocked := true
+
+if swingSourceCommitAllowed and enableSwingStructure and swingRangeDir == -1 and not swingRangeLocked and not na(swingRangeEventTime)
+    if not na(swingBreakLowSource) and (na(swingRangeLow) or swingBreakLowSource < swingRangeLow)
+        swingRangeLow := swingBreakLowSource
+        swingRangeLowTime := swingBreakTimeSource
+        swingRangeLowBar := useHtfSwingStructure ? na : bar_index
+    if newSwingPivotLow and swingPivotLowSourceTime >= swingRangeEventTime
+        swingRangeLow := swingPivotLowSource
+        swingRangeLowTime := swingPivotLowSourceTime
+        swingRangeLowBar := useHtfSwingStructure ? na : bar_index - swingLen
+        swingRangeLocked := true
+
+//──────────────────────────────────────────────────────────────────────────────
+// Fair Value Gaps — chart timeframe
+//──────────────────────────────────────────────────────────────────────────────
+
+var float[] bullFvgTops = array.new_float()
+var float[] bullFvgBottoms = array.new_float()
+var int[] bullFvgTimes = array.new_int()
+var int[] bullFvgIds = array.new_int()
+
+var float[] bearFvgTops = array.new_float()
+var float[] bearFvgBottoms = array.new_float()
+var int[] bearFvgTimes = array.new_int()
+var int[] bearFvgIds = array.new_int()
+
+var int nextFvgId = 0
+
+var float latestBullFvgTop = na
+var float latestBullFvgBottom = na
+var int latestBullFvgTime = na
+var int latestBullFvgId = na
+var string latestBullFvgStatus = STATUS_NA
+
+var float latestBearFvgTop = na
+var float latestBearFvgBottom = na
+var int latestBearFvgTime = na
+var int latestBearFvgId = na
+var string latestBearFvgStatus = STATUS_NA
+
+var int liquidatedBullFvgCount = 0
+var int liquidatedBearFvgCount = 0
+
+var string latestRawFvgDirection = STATUS_NA
+var float latestRawFvgTop = na
+var float latestRawFvgBottom = na
+var int latestRawFvgTime = na
+var string latestFvgValidityResult = STATUS_NA
+var string latestFvgValidityReason = STATUS_NA
+var float latestFvgLiquidationLevel = na
+
+var int[] liquidatedBullIdsThisBar = array.new_int()
+var int[] liquidatedBearIdsThisBar = array.new_int()
+array.clear(liquidatedBullIdsThisBar)
+array.clear(liquidatedBearIdsThisBar)
+
+bool newBullFvgAccepted = false
+bool newBearFvgAccepted = false
+
+float newBullFvgTop = na
+float newBullFvgBottom = na
+float newBullFvgMid = na
+int newBullFvgLeftTime = na
+int newBullFvgRightTime = na
+int newBullFvgId = na
+
+float newBearFvgTop = na
+float newBearFvgBottom = na
+float newBearFvgMid = na
+int newBearFvgLeftTime = na
+int newBearFvgRightTime = na
+int newBearFvgId = na
+
+if confirmedEventBar and enableFvgLogic
+    int bullIndex = array.size(bullFvgBottoms) - 1
+    while bullIndex >= 0
+        float gapTop = array.get(bullFvgTops, bullIndex)
+        float gapBottom = array.get(bullFvgBottoms, bullIndex)
+        float bullLiquidationLevel = fvgLiquidationDepthInput == FVG_LIQ_MID ? (gapTop + gapBottom) / 2.0 : gapBottom
+        bool isLiquidated = mitigationMethod == MIT_WICK ? low <= bullLiquidationLevel : close <= bullLiquidationLevel
+        if isLiquidated
+            int gapId = array.get(bullFvgIds, bullIndex)
+            array.push(liquidatedBullIdsThisBar, gapId)
+            array.remove(bullFvgTops, bullIndex)
+            array.remove(bullFvgBottoms, bullIndex)
+            array.remove(bullFvgTimes, bullIndex)
+            array.remove(bullFvgIds, bullIndex)
+            liquidatedBullFvgCount += 1
+            latestFvgLiquidationLevel := bullLiquidationLevel
+            if gapId == latestBullFvgId
+                latestBullFvgStatus := "Liquidated"
+        bullIndex -= 1
+
+    int bearIndex = array.size(bearFvgTops) - 1
+    while bearIndex >= 0
+        float gapTop = array.get(bearFvgTops, bearIndex)
+        float gapBottom = array.get(bearFvgBottoms, bearIndex)
+        float bearLiquidationLevel = fvgLiquidationDepthInput == FVG_LIQ_MID ? (gapTop + gapBottom) / 2.0 : gapTop
+        bool isLiquidated = mitigationMethod == MIT_WICK ? high >= bearLiquidationLevel : close >= bearLiquidationLevel
+        if isLiquidated
+            int gapId = array.get(bearFvgIds, bearIndex)
+            array.push(liquidatedBearIdsThisBar, gapId)
+            array.remove(bearFvgTops, bearIndex)
+            array.remove(bearFvgBottoms, bearIndex)
+            array.remove(bearFvgTimes, bearIndex)
+            array.remove(bearFvgIds, bearIndex)
+            liquidatedBearFvgCount += 1
+            latestFvgLiquidationLevel := bearLiquidationLevel
+            if gapId == latestBearFvgId
+                latestBearFvgStatus := "Liquidated"
+        bearIndex -= 1
+
+float fvgImpulseBody = math.abs(close[1] - open[1])
+float fvgAtrBaseline = ta.atr(14)[1]
+float fvgThreshold = fvgAtrBaseline * fvgValiditySensitivity
+bool fvgValidityDataReady = not na(fvgImpulseBody) and not na(fvgAtrBaseline)
+bool fvgPassesValidity = not useFvgValidity or fvgValidityDataReady and fvgImpulseBody >= fvgThreshold
+
+bool bullRawFvg = confirmedEventBar and enableFvgLogic and not na(high[2]) and low > high[2]
+bool bearRawFvg = confirmedEventBar and enableFvgLogic and not na(low[2]) and high < low[2]
+
+if enableFvgLogic and (bullRawFvg or bearRawFvg)
+    checklistRawFvgCount += 1
+    latestRawFvgDirection := bullRawFvg ? "Bullish" : "Bearish"
+    latestRawFvgTop := bullRawFvg ? low : low[2]
+    latestRawFvgBottom := bullRawFvg ? high[2] : high
+    latestRawFvgTime := time
+    latestFvgLiquidationLevel := fvgLiquidationDepthInput == FVG_LIQ_MID ? (latestRawFvgTop + latestRawFvgBottom) / 2.0 : bullRawFvg ? latestRawFvgBottom : latestRawFvgTop
+
+    if not useFvgValidity
+        latestFvgValidityResult := "PASS"
+        latestFvgValidityReason := "Validity filter disabled; raw imbalance accepted."
+    else if not fvgValidityDataReady
+        latestFvgValidityResult := "FAIL"
+        latestFvgValidityReason := "ATR14[1] baseline unavailable."
+    else if fvgPassesValidity
+        latestFvgValidityResult := "PASS"
+        latestFvgValidityReason := "body[1] " + f_price(fvgImpulseBody) + " >= ATR14[1] x " + str.tostring(fvgValiditySensitivity) + " = " + f_price(fvgThreshold)
+    else
+        latestFvgValidityResult := "FAIL"
+        latestFvgValidityReason := "body[1] " + f_price(fvgImpulseBody) + " < ATR14[1] x " + str.tostring(fvgValiditySensitivity) + " = " + f_price(fvgThreshold)
+
+    if fvgPassesValidity
+        checklistAcceptedFvgCount += 1
+        nextFvgId += 1
+
+        if bullRawFvg
+            latestBullFvgTop := low
+            latestBullFvgBottom := high[2]
+            latestBullFvgTime := time
+            latestBullFvgId := nextFvgId
+            latestBullFvgStatus := "Active"
+            newBullFvgAccepted := true
+            newBullFvgTop := latestBullFvgTop
+            newBullFvgBottom := latestBullFvgBottom
+            newBullFvgMid := (latestBullFvgTop + latestBullFvgBottom) / 2.0
+            newBullFvgLeftTime := time[2]
+            newBullFvgRightTime := time
+            newBullFvgId := latestBullFvgId
+            array.push(bullFvgTops, latestBullFvgTop)
+            array.push(bullFvgBottoms, latestBullFvgBottom)
+            array.push(bullFvgTimes, latestBullFvgTime)
+            array.push(bullFvgIds, latestBullFvgId)
+
+        if bearRawFvg
+            latestBearFvgTop := low[2]
+            latestBearFvgBottom := high
+            latestBearFvgTime := time
+            latestBearFvgId := nextFvgId
+            latestBearFvgStatus := "Active"
+            newBearFvgAccepted := true
+            newBearFvgTop := latestBearFvgTop
+            newBearFvgBottom := latestBearFvgBottom
+            newBearFvgMid := (latestBearFvgTop + latestBearFvgBottom) / 2.0
+            newBearFvgLeftTime := time[2]
+            newBearFvgRightTime := time
+            newBearFvgId := latestBearFvgId
+            array.push(bearFvgTops, latestBearFvgTop)
+            array.push(bearFvgBottoms, latestBearFvgBottom)
+            array.push(bearFvgTimes, latestBearFvgTime)
+            array.push(bearFvgIds, latestBearFvgId)
+    else
+        checklistAtrRejectedFvgCount += 1
+
+// A strategy-quality LTF FVG belongs to the causal displacement leg: from the
+// event's opposite structural origin through the confirmed post-break extreme.
+// This replaces the earlier arbitrary +/- two-bar link. Once linked, its
+// provenance survives mitigation. HTF audit behavior remains unchanged.
+int fvgLinkWindowMs = int(timeframe.in_seconds() * 1000.0 * 2.0)
+int internalImpulseOriginTime = internalRangeDir == 1 ? internalRangeLowTime : internalRangeDir == -1 ? internalRangeHighTime : na
+int internalImpulseExtremeTime = internalRangeDir == 1 ? internalRangeHighTime : internalRangeDir == -1 ? internalRangeLowTime : na
+bool latestBullFvgInImpulse = internalRangeDir == 1 and not na(latestBullFvgTime) and not na(internalImpulseOriginTime) and latestBullFvgTime >= internalImpulseOriginTime and (not internalRangeLocked or not na(internalImpulseExtremeTime) and latestBullFvgTime <= internalImpulseExtremeTime)
+bool latestBearFvgInImpulse = internalRangeDir == -1 and not na(latestBearFvgTime) and not na(internalImpulseOriginTime) and latestBearFvgTime >= internalImpulseOriginTime and (not internalRangeLocked or not na(internalImpulseExtremeTime) and latestBearFvgTime <= internalImpulseExtremeTime)
+
+if na(internalLinkedFvgId) and latestBullFvgInImpulse
+    internalLinkedFvgId := latestBullFvgId
+    internalLinkedFvgTime := latestBullFvgTime
+    internalLinkedFvgTop := latestBullFvgTop
+    internalLinkedFvgBottom := latestBullFvgBottom
+if na(internalLinkedFvgId) and latestBearFvgInImpulse
+    internalLinkedFvgId := latestBearFvgId
+    internalLinkedFvgTime := latestBearFvgTime
+    internalLinkedFvgTop := latestBearFvgTop
+    internalLinkedFvgBottom := latestBearFvgBottom
+
+if internalRangeLocked and not na(internalLinkedFvgTime) and (na(internalImpulseExtremeTime) or internalLinkedFvgTime > internalImpulseExtremeTime)
+    internalLinkedFvgId := na
+    internalLinkedFvgTime := na
+    internalLinkedFvgTop := na
+    internalLinkedFvgBottom := na
+
+if not checklistCurrentFvgCounted and not na(internalLinkedFvgId)
+    checklistLinkedFvgCount += 1
+    checklistCurrentFvgCounted := true
+
+if isHtfChart and swingLastEventDirection == "Bullish" and not na(latestBullFvgTime) and not na(swingLastEventTime) and math.abs(latestBullFvgTime - swingLastEventTime) <= fvgLinkWindowMs
+    swingLinkedFvgId := latestBullFvgId
+    swingLinkedFvgTime := latestBullFvgTime
+if isHtfChart and swingLastEventDirection == "Bearish" and not na(latestBearFvgTime) and not na(swingLastEventTime) and math.abs(latestBearFvgTime - swingLastEventTime) <= fvgLinkWindowMs
+    swingLinkedFvgId := latestBearFvgId
+    swingLinkedFvgTime := latestBearFvgTime
+
+//──────────────────────────────────────────────────────────────────────────────
+// Validation State + Fib Calculations
+//──────────────────────────────────────────────────────────────────────────────
+
+int baseHighCount = array.size(baseSwingHighPrices)
+int baseLowCount = array.size(baseSwingLowPrices)
+
+int activeBullFvgCount = array.size(bullFvgTops)
+int activeBearFvgCount = array.size(bearFvgTops)
+
+int internalTotalEvents = internalBullBosCount + internalBullChochCount + internalBearBosCount + internalBearChochCount
+int swingTotalEvents = swingBullBosCount + swingBullChochCount + swingBearBosCount + swingBearChochCount
+
+bool internalHasBothLevels = not na(internalLastHighPrice) and not na(internalLastLowPrice)
+bool swingHasBothLevels = not na(swingLastHighPrice) and not na(swingLastLowPrice)
+bool internalHasRange = not na(internalRangeHigh) and not na(internalRangeLow)
+bool swingHasRange = not na(swingRangeHigh) and not na(swingRangeLow)
+bool sensitivityRelationshipOk = internalLen < swingLen or useHtfSwingStructure
+
+bool htfFibRangeReady = swingHasRange and (not fibDrawOnlyLockedInput or swingRangeLocked)
+bool ltfFibRangeReady = internalHasRange and (not fibDrawOnlyLockedInput or internalRangeLocked)
+
+// The transcript owns direction through premium/discount, not through the last
+// structural break. A confirmed, locked 4H range is required. Realtime charts
+// use the previous chart close until the current chart bar is confirmed.
+float confirmedChartClose = barstate.isconfirmed ? close : close[1]
+float htfRangeMidpoint = swingRangeLocked and swingHasRange ? (swingRangeHigh + swingRangeLow) / 2.0 : na
+int htfDirectionGate = na(htfRangeMidpoint) or na(confirmedChartClose) ? 0 : confirmedChartClose < htfRangeMidpoint ? 1 : confirmedChartClose > htfRangeMidpoint ? -1 : 0
+
+float htfFibEntry = f_fibEntry(swingRangeDir, swingRangeHigh, swingRangeLow, swingFibEntryPctInput)
+float htfFibSl = f_fibSl(swingRangeDir, swingRangeHigh, swingRangeLow)
+float htfFibTp = f_fibTp(swingRangeDir, swingRangeHigh, swingRangeLow)
+float htfFibRr = f_fibRr(swingRangeDir, htfFibEntry, htfFibSl, htfFibTp)
+
+float ltfFibEntry = f_fibEntry(internalRangeDir, internalRangeHigh, internalRangeLow, dayFibEntryPctInput)
+float ltfFibSl = f_fibSl(internalRangeDir, internalRangeHigh, internalRangeLow)
+float ltfFibTp = f_fibTp(internalRangeDir, internalRangeHigh, internalRangeLow)
+float ltfFibRr = f_fibRr(internalRangeDir, ltfFibEntry, ltfFibSl, ltfFibTp)
+
+bool allowHtfFibVisual = showFibAuditInput and enableSwingStructure and htfFibRangeReady and isHtfChart
+bool allowLtfFibVisual = showFibAuditInput and enableInternalStructure and ltfFibRangeReady and isEntryTf
+
+string internalSourceText = "Chart TF " + chartTfLabel
+string swingSourceText = useHtfSwingStructure ? "HTF " + swingTfLabel : "Chart timeframe"
+string internalStructureStatus = not enableInternalStructure ? "DISABLED" : internalHasBothLevels ? "READY: LTF levels exist" : "COLLECTING: waiting for LTF high and low"
+string swingStructureStatus = not enableSwingStructure ? "DISABLED" : swingHasBothLevels ? "READY: HTF swing levels exist" : "COLLECTING: waiting for HTF high and low"
+string internalRangeStatus = internalHasRange ? f_rangeStateText(internalRangeDir, internalRangeLocked, internalRangeEventType) : "COLLECTING: no LTF range yet"
+string swingRangeStatus = swingHasRange ? f_rangeStateText(swingRangeDir, swingRangeLocked, swingRangeEventType) : "COLLECTING: no HTF range yet"
+string htfFibStatus = not swingHasRange ? "WAITING: no HTF range" : swingRangeLocked ? "READY: locked 71% swing Fib audit" : "DRAFT: 71% swing Fib audit visible"
+string ltfFibStatus = not internalHasRange ? "WAITING: no LTF range" : internalRangeLocked ? "READY: locked 67% day Fib audit" : "DRAFT: 67% day Fib audit visible"
+string fvgStatus = not enableFvgLogic ? "DISABLED" : activeBullFvgCount + activeBearFvgCount + liquidatedBullFvgCount + liquidatedBearFvgCount > 0 ? "TRACKING: accepted FVG sample exists" : "COLLECTING: no accepted FVG yet"
+string sweepStatus = not enableSweepLogicInput ? "DISABLED" : "CONFLUENCE ONLY: sweep is not an entry signal"
+string overallModelStatus = not isSupportedReviewTf and reviewMode ? "WARNING: USE 4H OR 15M FOR REVIEW" : (not enableSwingStructure or swingHasBothLevels) and sensitivityRelationshipOk ? "READY: PRODUCTION DASHBOARD ACTIVE" : "PARTIAL / COLLECTING"
+string latestHtfSweepLifecycle = latestSwingSweepSide == SWEEP_BUY ? f_sweepStateText(SWEEP_BUY, latestSwingBuySweepLevel, latestSwingBuySweepTime, latestSwingBuySweepActive, latestSwingBuySweepState) : latestSwingSweepSide == SWEEP_SELL ? f_sweepStateText(SWEEP_SELL, latestSwingSellSweepLevel, latestSwingSellSweepTime, latestSwingSellSweepActive, latestSwingSellSweepState) : STATUS_NA
+string latestLtfSweepLifecycle = latestInternalSweepSide == SWEEP_BUY ? f_sweepStateText(SWEEP_BUY, latestInternalBuySweepLevel, latestInternalBuySweepTime, latestInternalBuySweepActive, latestInternalBuySweepState) : latestInternalSweepSide == SWEEP_SELL ? f_sweepStateText(SWEEP_SELL, latestInternalSellSweepLevel, latestInternalSellSweepTime, latestInternalSellSweepActive, latestInternalSellSweepState) : STATUS_NA
+
+bool htfBreakOk = swingLastEventType != STATUS_NA and not na(swingLastEventPrice)
+bool ltfBreakOk = internalLastEventType != STATUS_NA and not na(internalLastEventPrice)
+bool ltfIsReversalEvent = internalLastEventType == EVENT_CHOCH
+bool ltfSweepRequirementOk = ltfBreakOk and (not ltfIsReversalEvent or internalLastEventHasSweep)
+bool htfDirectionAligned = htfDirectionGate == 1 ? swingLastEventDirection == "Bullish" : htfDirectionGate == -1 ? swingLastEventDirection == "Bearish" : false
+bool ltfDirectionAligned = htfDirectionGate == 1 ? internalLastEventDirection == "Bullish" : htfDirectionGate == -1 ? internalLastEventDirection == "Bearish" : false
+bool htfDirectionFvgOk = swingLastEventDirection == "Bullish" ? not na(swingLinkedFvgId) and array.includes(bullFvgIds, swingLinkedFvgId) : swingLastEventDirection == "Bearish" ? not na(swingLinkedFvgId) and array.includes(bearFvgIds, swingLinkedFvgId) : false
+bool ltfDirectionFvgOk = internalLastEventDirection == "Bullish" ? not na(internalLinkedFvgId) and array.includes(bullFvgIds, internalLinkedFvgId) : internalLastEventDirection == "Bearish" ? not na(internalLinkedFvgId) and array.includes(bearFvgIds, internalLinkedFvgId) : false
+bool ltfDirectionFvgWasLinked = not na(internalLinkedFvgId)
+bool ltfFibFvgOverlap = ltfDirectionFvgWasLinked and not na(ltfFibEntry) and not na(internalLinkedFvgTop) and not na(internalLinkedFvgBottom) and ltfFibEntry <= internalLinkedFvgTop and ltfFibEntry >= internalLinkedFvgBottom
+bool ltfAnyDirectionalFvg = internalLastEventDirection == "Bullish" ? activeBullFvgCount > 0 : internalLastEventDirection == "Bearish" ? activeBearFvgCount > 0 : false
+bool newDirectionalFvgForLatestBreak = internalLastEventDirection == "Bullish" ? newBullFvgAccepted : internalLastEventDirection == "Bearish" ? newBearFvgAccepted : false
+bool unrelatedFvgForLatestBreak = (internalBullBreak or internalBearBreak or newDirectionalFvgForLatestBreak) and ltfAnyDirectionalFvg and not ltfDirectionFvgWasLinked
+
+bool htfFibOk = htfFibRangeReady and not na(htfFibEntry) and not na(htfFibSl) and not na(htfFibTp) and not na(htfFibRr) and htfFibRr > 0
+bool ltfFibOk = ltfFibRangeReady and not na(ltfFibEntry) and not na(ltfFibSl) and not na(ltfFibTp) and not na(ltfFibRr) and ltfFibRr > 0
+
+string htfManualStatus = f_manualStatus(swingRangeLocked, htfDirectionAligned, htfBreakOk, swingLastEventHasSweep, htfDirectionFvgOk, htfFibOk)
+string ltfManualStatus = f_manualStatus(swingRangeLocked and internalRangeLocked, ltfDirectionAligned, ltfBreakOk, ltfSweepRequirementOk, ltfDirectionFvgOk, ltfFibOk)
+
+// Setup ledger. A setup is created only once all strict transcript conditions
+// are knowable at a confirmed 15M close. Its levels are frozen immediately,
+// but price interaction begins on the following bar. Historical drawings are
+// never moved back to the sweep, break, FVG, or pivot source candle.
+var int trackedLockedRangeEventTime = na
+var bool trackedEntryTouchedBeforeReady = false
+// Rolling functions must execute on every bar. Calling ta.lowest/ta.highest only
+// on the range-lock bar gives them an incomplete history buffer in Pine and can
+// miss a 67% touch that occurred on either of the two preceding source bars.
+float trackedRecentLtfLow = ta.lowest(low, internalLen + 1)
+float trackedRecentLtfHigh = ta.highest(high, internalLen + 1)
+
+if confirmedEventBar and internalRangeEventTime != nz(internalRangeEventTime[1], internalRangeEventTime)
+    trackedLockedRangeEventTime := na
+    trackedEntryTouchedBeforeReady := false
+
+if confirmedEventBar and internalRangeLocked and ltfFibOk
+    if na(trackedLockedRangeEventTime) or trackedLockedRangeEventTime != internalRangeEventTime
+        trackedLockedRangeEventTime := internalRangeEventTime
+        trackedEntryTouchedBeforeReady := internalRangeDir == 1 ? trackedRecentLtfLow <= ltfFibEntry : trackedRecentLtfHigh >= ltfFibEntry
+    else
+        trackedEntryTouchedBeforeReady := trackedEntryTouchedBeforeReady or (internalRangeDir == 1 ? low <= ltfFibEntry : high >= ltfFibEntry)
+
+var int nextSetupId = 0
+var string lastEvaluatedSetupKey = ""
+var int liveSetupId = na
+var int liveSetupDirection = 0
+var int liveSetupClassCode = 0
+var bool liveSetupFvgOverlap = false
+var string liveSetupState = STATUS_NA
+var int liveSetupReadyTime = na
+var int liveSetupReadyBar = na
+var int liveSetupSweepId = na
+var int liveSetupSweepSourceTime = na
+var int liveSetupSweepConfirmationTime = na
+var int liveSetupBreakTime = na
+var int liveSetupFvgId = na
+var int liveSetupRangeHighTime = na
+var int liveSetupRangeLowTime = na
+var float liveSetupEntry = na
+var float liveSetupStop = na
+var float liveSetupTarget = na
+
+var int latestSetupId = na
+var int latestSetupDirection = 0
+var string latestSetupContext = STATUS_NA
+var string latestSetupState = STATUS_NA
+var int latestSetupReadyTime = na
+var int latestSetupOutcomeTime = na
+var string latestSetupRejection = STATUS_NA
+var int setupReadyCount = 0
+var int setupRejectedLateCount = 0
+var int setupFilledCount = 0
+var int setupTargetCount = 0
+var int setupStopCount = 0
+var int setupMissedCount = 0
+var int setupInvalidCount = 0
+var int setupAmbiguousCount = 0
+
+// Active setups are stored independently. The liveSetup* scalars above expose
+// the newest setup to the proof stream and dashboard, but they never block a
+// later transcript-valid setup from being recorded.
+var int[] activeSetupIds = array.new_int()
+var int[] activeSetupDirections = array.new_int()
+var int[] activeSetupClassCodes = array.new_int()
+var bool[] activeSetupFvgOverlaps = array.new_bool()
+var string[] activeSetupStates = array.new_string()
+var int[] activeSetupReadyTimes = array.new_int()
+var int[] activeSetupReadyBars = array.new_int()
+var int[] activeSetupSweepIds = array.new_int()
+var int[] activeSetupBreakTimes = array.new_int()
+var int[] activeSetupFvgIds = array.new_int()
+var float[] activeSetupEntries = array.new_float()
+var float[] activeSetupStops = array.new_float()
+var float[] activeSetupTargets = array.new_float()
+var string[] activeSetupContexts = array.new_string()
+var box[] activeSetupTargetBoxes = array.new_box()
+var box[] activeSetupRiskBoxes = array.new_box()
+var line[] activeSetupEntryLines = array.new_line()
+var label[] activeSetupLabels = array.new_label()
+// Retained only for the inert scalar-ledger block below while the independent
+// ledger is reviewed as one isolated semantic child.
+var box liveSetupTargetBox = na
+var box liveSetupRiskBox = na
+var line liveSetupEntryLine = na
+var label liveSetupLabel = na
+var box[] finalizedSetupTargetBoxes = array.new_box()
+var box[] finalizedSetupRiskBoxes = array.new_box()
+var line[] finalizedSetupEntryLines = array.new_line()
+var label[] finalizedSetupLabels = array.new_label()
+var label[] rejectedSetupLabels = array.new_label()
+
+// Transcript-faithful 15M contract: a reversal/CHoCH requires a confirmed
+// manipulation, while a continuation/BOS may proceed without a fresh sweep.
+// Both still require confirmed 4H context, a locked 15M range, a causal
+// break-created imbalance, and valid 67%/100%/0% levels.
+bool canonicalSetupContractReady = confirmedEventBar and isEntryTf and swingRangeLocked and htfDirectionGate != 0 and internalRangeLocked and ltfBreakOk and ltfSweepRequirementOk and ltfDirectionFvgWasLinked and ltfFibOk
+string currentSetupKey = canonicalSetupContractReady ? str.tostring(internalLastEventTime) + ":" + str.tostring(nz(internalLastEventSweepId, 0)) + ":" + str.tostring(internalLinkedFvgId) + ":" + str.tostring(internalRangeHighTime) + ":" + str.tostring(internalRangeLowTime) : ""
+bool setupCandidateNew = canonicalSetupContractReady and currentSetupKey != lastEvaluatedSetupKey
+bool setupReadySignal = false
+bool setupRejectedLateSignal = false
+bool setupFilledSignal = false
+bool setupTargetSignal = false
+bool setupStopSignal = false
+bool setupMissedSignal = false
+bool setupInvalidSignal = false
+bool setupAmbiguousSignal = false
+
+if setupCandidateNew
+    lastEvaluatedSetupKey := currentSetupKey
+    bool entryAlreadyTouched = trackedEntryTouchedBeforeReady or (internalRangeDir == 1 ? low <= ltfFibEntry : high >= ltfFibEntry)
+    if entryAlreadyTouched
+        setupRejectedLateSignal := true
+        setupRejectedLateCount += 1
+        latestSetupRejection := "REJECTED: 67% ENTRY TOUCHED BEFORE READY"
+        latestSetupOutcomeTime := time
+        if showSetupLedgerInput and sweepHistoryModeInput == SWEEP_VIEW_AUDIT
+            label rejectedLabel = label.new(time, ltfFibEntry, (internalRangeDir == 1 ? "LONG" : "SHORT") + " SETUP REJECTED\n67% touched before readiness\nsweep #" + str.tostring(internalLastEventSweepId) + " | " + f_time(time), xloc=xloc.bar_time, yloc=yloc.price, style=internalRangeDir == 1 ? label.style_label_up : label.style_label_down, color=color.new(color.gray, 35), textcolor=color.white, size=size.tiny)
+            array.push(rejectedSetupLabels, rejectedLabel)
+    else
+        nextSetupId += 1
+        liveSetupId := nextSetupId
+        liveSetupDirection := internalRangeDir
+        liveSetupClassCode := internalRangeEventType == EVENT_CHOCH ? 2 : 1
+        liveSetupFvgOverlap := ltfFibFvgOverlap
+        liveSetupState := SETUP_PENDING
+        liveSetupReadyTime := time
+        liveSetupReadyBar := bar_index
+        liveSetupSweepId := internalLastEventSweepId
+        liveSetupSweepSourceTime := internalLastEventSweepSourceTime
+        liveSetupSweepConfirmationTime := internalLastEventSweepConfirmationTime
+        liveSetupBreakTime := internalLastEventTime
+        liveSetupFvgId := internalLinkedFvgId
+        liveSetupRangeHighTime := internalRangeHighTime
+        liveSetupRangeLowTime := internalRangeLowTime
+        liveSetupEntry := ltfFibEntry
+        liveSetupStop := ltfFibSl
+        liveSetupTarget := ltfFibTp
+        latestSetupId := liveSetupId
+        latestSetupDirection := liveSetupDirection
+        latestSetupContext := htfDirectionGate == liveSetupDirection ? "PRO-LOCATION" : "COUNTER-LOCATION"
+        latestSetupState := liveSetupState
+        latestSetupReadyTime := liveSetupReadyTime
+        latestSetupOutcomeTime := na
+        latestSetupRejection := STATUS_NA
+        setupReadyCount += 1
+        setupReadySignal := true
+        box setupTargetBox = na
+        box setupRiskBox = na
+        line setupEntryLine = na
+        label setupLabel = na
+        if showSetupLedgerInput and array.size(activeSetupIds) < MAX_ACTIVE_SETUP_DRAWINGS
+            setupTargetBox := box.new(time, math.max(liveSetupTarget, liveSetupEntry), time_close, math.min(liveSetupTarget, liveSetupEntry), xloc=xloc.bar_time, border_color=color.new(color.lime, 18), bgcolor=color.new(color.lime, 84))
+            setupRiskBox := box.new(time, math.max(liveSetupStop, liveSetupEntry), time_close, math.min(liveSetupStop, liveSetupEntry), xloc=xloc.bar_time, border_color=color.new(color.red, 18), bgcolor=color.new(color.red, 84))
+            setupEntryLine := line.new(time, liveSetupEntry, time_close, liveSetupEntry, xloc=xloc.bar_time, extend=extend.none, color=color.white, style=line.style_solid, width=2)
+            string setupDirectionText = liveSetupDirection == 1 ? "LONG" : "SHORT"
+            string setupClassText = liveSetupClassCode == 2 ? "REVERSAL / CONFIRMED MANIPULATION" : internalLastEventHasSweep ? "CONTINUATION + SWEEP" : "CONTINUATION / SWEEP OPTIONAL"
+            string setupQualityText = liveSetupFvgOverlap ? "A+ 67% / FVG OVERLAP" : "BASE CAUSAL FVG"
+            setupLabel := label.new(time, liveSetupEntry, setupDirectionText + " SETUP #" + str.tostring(liveSetupId) + " PENDING\n" + setupClassText + " | " + setupQualityText + "\n" + latestSetupContext + " | ready at confirmed close " + f_time(liveSetupReadyTime) + "\nactionable next bar | E " + f_price(liveSetupEntry) + " | SL " + f_price(liveSetupStop) + " | TP " + f_price(liveSetupTarget), xloc=xloc.bar_time, yloc=yloc.price, style=liveSetupDirection == 1 ? label.style_label_up : label.style_label_down, color=liveSetupDirection == 1 ? color.new(color.green, 5) : color.new(color.red, 5), textcolor=color.white, size=size.tiny)
+        array.push(activeSetupIds, liveSetupId)
+        array.push(activeSetupDirections, liveSetupDirection)
+        array.push(activeSetupClassCodes, liveSetupClassCode)
+        array.push(activeSetupFvgOverlaps, liveSetupFvgOverlap)
+        array.push(activeSetupStates, liveSetupState)
+        array.push(activeSetupReadyTimes, liveSetupReadyTime)
+        array.push(activeSetupReadyBars, liveSetupReadyBar)
+        array.push(activeSetupSweepIds, liveSetupSweepId)
+        array.push(activeSetupBreakTimes, liveSetupBreakTime)
+        array.push(activeSetupFvgIds, liveSetupFvgId)
+        array.push(activeSetupEntries, liveSetupEntry)
+        array.push(activeSetupStops, liveSetupStop)
+        array.push(activeSetupTargets, liveSetupTarget)
+        array.push(activeSetupContexts, latestSetupContext)
+        array.push(activeSetupTargetBoxes, setupTargetBox)
+        array.push(activeSetupRiskBoxes, setupRiskBox)
+        array.push(activeSetupEntryLines, setupEntryLine)
+        array.push(activeSetupLabels, setupLabel)
+
+int activeSetupIndex = array.size(activeSetupIds) - 1
+while confirmedEventBar and activeSetupIndex >= 0
+    int setupId = array.get(activeSetupIds, activeSetupIndex)
+    int setupDirection = array.get(activeSetupDirections, activeSetupIndex)
+    int setupClassCode = array.get(activeSetupClassCodes, activeSetupIndex)
+    bool setupFvgOverlap = array.get(activeSetupFvgOverlaps, activeSetupIndex)
+    string setupState = array.get(activeSetupStates, activeSetupIndex)
+    int setupReadyTime = array.get(activeSetupReadyTimes, activeSetupIndex)
+    int setupReadyBar = array.get(activeSetupReadyBars, activeSetupIndex)
+    int setupSweepId = array.get(activeSetupSweepIds, activeSetupIndex)
+    int setupBreakTime = array.get(activeSetupBreakTimes, activeSetupIndex)
+    int setupFvgId = array.get(activeSetupFvgIds, activeSetupIndex)
+    float setupEntry = array.get(activeSetupEntries, activeSetupIndex)
+    float setupStop = array.get(activeSetupStops, activeSetupIndex)
+    float setupTarget = array.get(activeSetupTargets, activeSetupIndex)
+    string setupContext = array.get(activeSetupContexts, activeSetupIndex)
+    box setupTargetBox = array.get(activeSetupTargetBoxes, activeSetupIndex)
+    box setupRiskBox = array.get(activeSetupRiskBoxes, activeSetupIndex)
+    line setupEntryLine = array.get(activeSetupEntryLines, activeSetupIndex)
+    label setupLabel = array.get(activeSetupLabels, activeSetupIndex)
+    bool setupTerminal = false
+    if bar_index > setupReadyBar
+        if setupState == SETUP_PENDING
+            setupState := SETUP_ACTIVE
+        bool setupEntryHit = setupDirection == 1 ? low <= setupEntry : high >= setupEntry
+        bool setupTargetHit = setupDirection == 1 ? high >= setupTarget : low <= setupTarget
+        bool setupStopHit = setupDirection == 1 ? low <= setupStop : high >= setupStop
+        bool setupStopGapBeforeFill = setupDirection == 1 ? open <= setupStop : open >= setupStop
+        if setupState == SETUP_ACTIVE
+            if setupStopGapBeforeFill
+                setupState := SETUP_INVALID
+                setupInvalidSignal := true
+                setupInvalidCount += 1
+                setupTerminal := true
+            else if setupEntryHit and (setupTargetHit or setupStopHit)
+                setupState := SETUP_AMBIGUOUS
+                setupAmbiguousSignal := true
+                setupAmbiguousCount += 1
+                setupTerminal := true
+            else if setupTargetHit and not setupEntryHit
+                setupState := SETUP_MISSED
+                setupMissedSignal := true
+                setupMissedCount += 1
+                setupTerminal := true
+            else if setupStopHit and not setupEntryHit
+                setupState := SETUP_INVALID
+                setupInvalidSignal := true
+                setupInvalidCount += 1
+                setupTerminal := true
+            else if setupEntryHit
+                setupState := SETUP_FILLED
+                setupFilledSignal := true
+                setupFilledCount += 1
+        else if setupState == SETUP_FILLED
+            if setupTargetHit and setupStopHit
+                setupState := SETUP_AMBIGUOUS
+                setupAmbiguousSignal := true
+                setupAmbiguousCount += 1
+                setupTerminal := true
+            else if setupTargetHit
+                setupState := SETUP_TARGET
+                setupTargetSignal := true
+                setupTargetCount += 1
+                setupTerminal := true
+            else if setupStopHit
+                setupState := SETUP_STOP
+                setupStopSignal := true
+                setupStopCount += 1
+                setupTerminal := true
+        if not na(setupTargetBox)
+            box.set_right(setupTargetBox, time_close)
+        if not na(setupRiskBox)
+            box.set_right(setupRiskBox, time_close)
+        if not na(setupEntryLine)
+            line.set_x2(setupEntryLine, time_close)
+        if not na(setupLabel)
+            string setupOriginText = setupClassCode == 2 ? "reversal sweep #" + str.tostring(setupSweepId) : na(setupSweepId) ? "continuation / sweep optional" : "continuation sweep #" + str.tostring(setupSweepId)
+            string setupQualityText = setupFvgOverlap ? "A+ 67% / FVG OVERLAP" : "BASE CAUSAL FVG"
+            label.set_text(setupLabel, (setupDirection == 1 ? "LONG" : "SHORT") + " SETUP #" + str.tostring(setupId) + " " + setupState + "\n" + setupQualityText + " | " + setupContext + " | ready " + f_time(setupReadyTime) + "\n" + setupOriginText + " | break " + f_time(setupBreakTime) + " | FVG #" + str.tostring(setupFvgId) + "\nE " + f_price(setupEntry) + " | SL " + f_price(setupStop) + " | TP " + f_price(setupTarget))
+        array.set(activeSetupStates, activeSetupIndex, setupState)
+        if setupId == latestSetupId
+            liveSetupState := setupState
+            latestSetupState := setupState
+        if setupTerminal
+            if setupId == latestSetupId
+                latestSetupOutcomeTime := time
+            if not na(setupTargetBox)
+                box.set_bgcolor(setupTargetBox, color.new(color.lime, 88))
+                box.set_border_color(setupTargetBox, color.new(color.lime, 55))
+                array.push(finalizedSetupTargetBoxes, setupTargetBox)
+            if not na(setupRiskBox)
+                box.set_bgcolor(setupRiskBox, color.new(color.red, 88))
+                box.set_border_color(setupRiskBox, color.new(color.red, 55))
+                array.push(finalizedSetupRiskBoxes, setupRiskBox)
+            if not na(setupEntryLine)
+                line.set_color(setupEntryLine, color.new(color.white, 55))
+                array.push(finalizedSetupEntryLines, setupEntryLine)
+            if not na(setupLabel)
+                label.set_color(setupLabel, color.new(setupState == SETUP_TARGET ? color.green : setupState == SETUP_STOP ? color.red : color.gray, 45))
+                array.push(finalizedSetupLabels, setupLabel)
+            array.remove(activeSetupIds, activeSetupIndex)
+            array.remove(activeSetupDirections, activeSetupIndex)
+            array.remove(activeSetupClassCodes, activeSetupIndex)
+            array.remove(activeSetupFvgOverlaps, activeSetupIndex)
+            array.remove(activeSetupStates, activeSetupIndex)
+            array.remove(activeSetupReadyTimes, activeSetupIndex)
+            array.remove(activeSetupReadyBars, activeSetupIndex)
+            array.remove(activeSetupSweepIds, activeSetupIndex)
+            array.remove(activeSetupBreakTimes, activeSetupIndex)
+            array.remove(activeSetupFvgIds, activeSetupIndex)
+            array.remove(activeSetupEntries, activeSetupIndex)
+            array.remove(activeSetupStops, activeSetupIndex)
+            array.remove(activeSetupTargets, activeSetupIndex)
+            array.remove(activeSetupContexts, activeSetupIndex)
+            array.remove(activeSetupTargetBoxes, activeSetupIndex)
+            array.remove(activeSetupRiskBoxes, activeSetupIndex)
+            array.remove(activeSetupEntryLines, activeSetupIndex)
+            array.remove(activeSetupLabels, activeSetupIndex)
+    activeSetupIndex -= 1
+
+bool anySetupPending = false
+bool anySetupActive = false
+bool anySetupFilled = false
+int activeSetupStateIndex = 0
+while activeSetupStateIndex < array.size(activeSetupStates)
+    string activeState = array.get(activeSetupStates, activeSetupStateIndex)
+    anySetupPending := anySetupPending or activeState == SETUP_PENDING
+    anySetupActive := anySetupActive or activeState == SETUP_ACTIVE
+    anySetupFilled := anySetupFilled or activeState == SETUP_FILLED
+    activeSetupStateIndex += 1
+
+// The replaced scalar lifecycle remains inert in this child so that its
+// deletion can be reviewed separately without mixing another semantic change.
+bool setupTerminalThisBar = false
+if false and confirmedEventBar and not na(liveSetupId) and bar_index > liveSetupReadyBar
+    if liveSetupState == SETUP_PENDING
+        liveSetupState := SETUP_ACTIVE
+    bool setupEntryHit = liveSetupDirection == 1 ? low <= liveSetupEntry : high >= liveSetupEntry
+    bool setupTargetHit = liveSetupDirection == 1 ? high >= liveSetupTarget : low <= liveSetupTarget
+    bool setupStopHit = liveSetupDirection == 1 ? low <= liveSetupStop : high >= liveSetupStop
+    bool setupStopGapBeforeFill = liveSetupDirection == 1 ? open <= liveSetupStop : open >= liveSetupStop
+    if liveSetupState == SETUP_ACTIVE
+        if setupStopGapBeforeFill
+            liveSetupState := SETUP_INVALID
+            setupInvalidSignal := true
+            setupInvalidCount += 1
+            setupTerminalThisBar := true
+        else if setupEntryHit and (setupTargetHit or setupStopHit)
+            liveSetupState := SETUP_AMBIGUOUS
+            setupAmbiguousSignal := true
+            setupAmbiguousCount += 1
+            setupTerminalThisBar := true
+        else if setupTargetHit and not setupEntryHit
+            liveSetupState := SETUP_MISSED
+            setupMissedSignal := true
+            setupMissedCount += 1
+            setupTerminalThisBar := true
+        else if setupStopHit and not setupEntryHit
+            liveSetupState := SETUP_INVALID
+            setupInvalidSignal := true
+            setupInvalidCount += 1
+            setupTerminalThisBar := true
+        else if setupEntryHit
+            liveSetupState := SETUP_FILLED
+            setupFilledSignal := true
+            setupFilledCount += 1
+    else if liveSetupState == SETUP_FILLED
+        if setupTargetHit and setupStopHit
+            liveSetupState := SETUP_AMBIGUOUS
+            setupAmbiguousSignal := true
+            setupAmbiguousCount += 1
+            setupTerminalThisBar := true
+        else if setupTargetHit
+            liveSetupState := SETUP_TARGET
+            setupTargetSignal := true
+            setupTargetCount += 1
+            setupTerminalThisBar := true
+        else if setupStopHit
+            liveSetupState := SETUP_STOP
+            setupStopSignal := true
+            setupStopCount += 1
+            setupTerminalThisBar := true
+    latestSetupState := liveSetupState
+    if not na(liveSetupTargetBox)
+        box.set_right(liveSetupTargetBox, time_close)
+    if not na(liveSetupRiskBox)
+        box.set_right(liveSetupRiskBox, time_close)
+    if not na(liveSetupEntryLine)
+        line.set_x2(liveSetupEntryLine, time_close)
+    if not na(liveSetupLabel)
+        string setupOriginText = liveSetupClassCode == 2 ? "reversal sweep #" + str.tostring(liveSetupSweepId) : na(liveSetupSweepId) ? "continuation / sweep optional" : "continuation sweep #" + str.tostring(liveSetupSweepId)
+        string setupQualityText = liveSetupFvgOverlap ? "A+ 67% / FVG OVERLAP" : "BASE CAUSAL FVG"
+        label.set_text(liveSetupLabel, (liveSetupDirection == 1 ? "LONG" : "SHORT") + " SETUP #" + str.tostring(liveSetupId) + " " + liveSetupState + "\n" + setupQualityText + " | " + latestSetupContext + " | ready " + f_time(liveSetupReadyTime) + "\n" + setupOriginText + " | break " + f_time(liveSetupBreakTime) + " | FVG #" + str.tostring(liveSetupFvgId) + "\nE " + f_price(liveSetupEntry) + " | SL " + f_price(liveSetupStop) + " | TP " + f_price(liveSetupTarget))
+
+if setupTerminalThisBar
+    latestSetupOutcomeTime := time
+    if not na(liveSetupTargetBox)
+        box.set_bgcolor(liveSetupTargetBox, color.new(color.lime, 88))
+        box.set_border_color(liveSetupTargetBox, color.new(color.lime, 55))
+        array.push(finalizedSetupTargetBoxes, liveSetupTargetBox)
+    if not na(liveSetupRiskBox)
+        box.set_bgcolor(liveSetupRiskBox, color.new(color.red, 88))
+        box.set_border_color(liveSetupRiskBox, color.new(color.red, 55))
+        array.push(finalizedSetupRiskBoxes, liveSetupRiskBox)
+    if not na(liveSetupEntryLine)
+        line.set_color(liveSetupEntryLine, color.new(color.white, 55))
+        array.push(finalizedSetupEntryLines, liveSetupEntryLine)
+    if not na(liveSetupLabel)
+        label.set_color(liveSetupLabel, color.new(liveSetupState == SETUP_TARGET ? color.green : liveSetupState == SETUP_STOP ? color.red : color.gray, 45))
+        array.push(finalizedSetupLabels, liveSetupLabel)
+    liveSetupId := na
+    liveSetupDirection := 0
+    liveSetupClassCode := 0
+    liveSetupFvgOverlap := false
+    liveSetupState := STATUS_NA
+    liveSetupReadyTime := na
+    liveSetupReadyBar := na
+    liveSetupTargetBox := na
+    liveSetupRiskBox := na
+    liveSetupEntryLine := na
+    liveSetupLabel := na
+
+while array.size(finalizedSetupTargetBoxes) > maxHistoricalSetupsInput
+    box.delete(array.shift(finalizedSetupTargetBoxes))
+while array.size(finalizedSetupRiskBoxes) > maxHistoricalSetupsInput
+    box.delete(array.shift(finalizedSetupRiskBoxes))
+while array.size(finalizedSetupEntryLines) > maxHistoricalSetupsInput
+    line.delete(array.shift(finalizedSetupEntryLines))
+while array.size(finalizedSetupLabels) > maxHistoricalSetupsInput
+    label.delete(array.shift(finalizedSetupLabels))
+while array.size(rejectedSetupLabels) > maxHistoricalSetupsInput
+    label.delete(array.shift(rejectedSetupLabels))
+
+string ltfSetupLedgerStatus = not swingRangeLocked or htfDirectionGate == 0 ? "WAIT: LOCKED 4H CONTEXT" : not internalRangeLocked ? "WAIT: LOCKED 15M RANGE" : not ltfBreakOk ? "WAIT: BOS/CHoCH" : not ltfSweepRequirementOk ? "WAIT: REVERSAL NEEDS CONFIRMED MANIPULATION" : not ltfDirectionFvgWasLinked ? "WAIT: BREAK-LINKED FVG" : not ltfFibOk ? "WAIT: 67% LEVELS" : trackedEntryTouchedBeforeReady ? "REJECT: ENTRY TOUCHED BEFORE READY" : na(latestSetupId) ? "READY CONDITIONS COLLECTED" : "SETUP #" + str.tostring(latestSetupId) + " " + latestSetupState + " | ACTIVE LEDGER " + str.tostring(array.size(activeSetupIds))
+int checklistImplementationStatusCode = na(checklistCurrentEventId) ? 0 : not swingRangeLocked or htfDirectionGate == 0 ? 1 : not internalRangeLocked ? 2 : not ltfSweepRequirementOk ? 3 : not ltfDirectionFvgWasLinked ? 4 : not ltfFibOk ? 5 : trackedEntryTouchedBeforeReady ? 6 : 8
+string checklistCurrentClass = checklistCurrentClassCode == 2 ? "REVERSAL / CHoCH" : checklistCurrentClassCode == 1 ? "CONTINUATION / BOS" : STATUS_NA
+string activeModeStatus = isHtfChart ? htfManualStatus : isEntryTf ? ltfSetupLedgerStatus : "USE 4H OR 15M"
+
+//──────────────────────────────────────────────────────────────────────────────
+// Visual Layer — Base Fractal Markers
+//──────────────────────────────────────────────────────────────────────────────
+
+plotshape(allowBaseFractals and not na(basePivotHigh), title="Visual Fractal High", style=shape.triangledown, location=location.abovebar, offset=-baseSwingLen, size=size.tiny, color=color.new(bearColor, 0), text="")
+plotshape(allowBaseFractals and not na(basePivotLow), title="Visual Fractal Low", style=shape.triangleup, location=location.belowbar, offset=-baseSwingLen, size=size.tiny, color=color.new(bullColor, 0), text="")
+
+//──────────────────────────────────────────────────────────────────────────────
+// Visual Layer — Sweep Labels
+//──────────────────────────────────────────────────────────────────────────────
+
+var label activeLtfBuySweepLabel = na
+var label activeLtfSellSweepLabel = na
+var label activeHtfBuySweepLabel = na
+var label activeHtfSellSweepLabel = na
+var label[] finalizedSweepLabels = array.new_label()
+var line[] finalizedSweepLines = array.new_line()
+var int renderedFinalizedSweepCount = 0
+
+if allowLtfSweepVisuals and internalBuySideSweep
+    if not na(activeLtfBuySweepLabel)
+        label.delete(activeLtfBuySweepLabel)
+    activeLtfBuySweepLabel := sweepHistoryModeInput == SWEEP_VIEW_AUDIT ? label.new(time, internalLastHighPrice, "LTF BSL POTENTIAL #" + str.tostring(latestInternalBuySweepId) + "\nknown at close", xloc=xloc.bar_time, yloc=yloc.price, style=label.style_label_down, color=color.new(buySweepColor, 55), textcolor=color.white, size=size.tiny) : na
+
+if allowLtfSweepVisuals and internalSellSideSweep
+    if not na(activeLtfSellSweepLabel)
+        label.delete(activeLtfSellSweepLabel)
+    activeLtfSellSweepLabel := sweepHistoryModeInput == SWEEP_VIEW_AUDIT ? label.new(time, internalLastLowPrice, "LTF SSL POTENTIAL #" + str.tostring(latestInternalSellSweepId) + "\nknown at close", xloc=xloc.bar_time, yloc=yloc.price, style=label.style_label_up, color=color.new(sellSweepColor, 55), textcolor=color.black, size=size.tiny) : na
+
+if allowHtfSweepVisuals and swingBuySideSweep
+    if not na(activeHtfBuySweepLabel)
+        label.delete(activeHtfBuySweepLabel)
+    activeHtfBuySweepLabel := sweepHistoryModeInput == SWEEP_VIEW_AUDIT ? label.new(time, swingLastHighPrice, "HTF BSL POTENTIAL #" + str.tostring(latestSwingBuySweepId) + "\nsource " + f_time(swingBreakTimeSource) + "\nknown " + f_time(time), xloc=xloc.bar_time, yloc=yloc.price, style=label.style_label_down, color=color.new(buySweepColor, 55), textcolor=color.white, size=size.tiny) : na
+
+if allowHtfSweepVisuals and swingSellSideSweep
+    if not na(activeHtfSellSweepLabel)
+        label.delete(activeHtfSellSweepLabel)
+    activeHtfSellSweepLabel := sweepHistoryModeInput == SWEEP_VIEW_AUDIT ? label.new(time, swingLastLowPrice, "HTF SSL POTENTIAL #" + str.tostring(latestSwingSellSweepId) + "\nsource " + f_time(swingBreakTimeSource) + "\nknown " + f_time(time), xloc=xloc.bar_time, yloc=yloc.price, style=label.style_label_up, color=color.new(sellSweepColor, 55), textcolor=color.black, size=size.tiny) : na
+
+if array.size(finalizedSweepIds) > renderedFinalizedSweepCount
+    for sweepIndex = renderedFinalizedSweepCount to array.size(finalizedSweepIds) - 1
+        int sweepId = array.get(finalizedSweepIds, sweepIndex)
+        string sweepScope = array.get(finalizedSweepScopes, sweepIndex)
+        string sweepSide = array.get(finalizedSweepSides, sweepIndex)
+        string sweepState = array.get(finalizedSweepStates, sweepIndex)
+        float sweepLevel = array.get(finalizedSweepLevels, sweepIndex)
+        int sweepSourceTime = array.get(finalizedSweepSourceTimes, sweepIndex)
+        int sweepKnownTime = array.get(finalizedSweepKnownTimes, sweepIndex)
+        int sweepConfirmationTime = array.get(finalizedSweepConfirmationTimes, sweepIndex)
+        bool sweepConfirmed = str.contains(sweepState, "CONFIRMED MANIPULATION")
+        bool scopeVisible = sweepScope == "LTF" ? allowLtfSweepVisuals : allowHtfSweepVisuals
+        bool stateVisible = sweepConfirmed or sweepHistoryModeInput == SWEEP_VIEW_AUDIT
+        if scopeVisible and stateVisible
+            color recordColor = sweepConfirmed ? (sweepSide == SWEEP_BUY ? buySweepColor : sellSweepColor) : color.gray
+            string sideCode = sweepSide == SWEEP_BUY ? "BSL" : "SSL"
+            string recordText = sweepScope + " " + sideCode + " #" + str.tostring(sweepId) + "\n" + sweepState + "\nsource " + f_time(sweepSourceTime) + "\nknown " + f_time(sweepKnownTime) + "\nfinal " + f_time(sweepConfirmationTime)
+            label recordLabel = label.new(sweepConfirmationTime, sweepLevel, recordText, xloc=xloc.bar_time, yloc=yloc.price, style=sweepSide == SWEEP_BUY ? label.style_label_down : label.style_label_up, color=color.new(recordColor, sweepConfirmed ? 12 : 70), textcolor=sweepSide == SWEEP_BUY ? color.white : color.black, size=size.tiny)
+            line recordLine = line.new(sweepSourceTime, sweepLevel, sweepConfirmationTime, sweepLevel, xloc=xloc.bar_time, extend=extend.none, color=color.new(recordColor, sweepConfirmed ? 20 : 75), style=sweepConfirmed ? line.style_solid : line.style_dotted, width=1)
+            array.push(finalizedSweepLabels, recordLabel)
+            array.push(finalizedSweepLines, recordLine)
+        if sweepScope == "LTF" and sweepSide == SWEEP_BUY and not na(activeLtfBuySweepLabel)
+            label.delete(activeLtfBuySweepLabel)
+            activeLtfBuySweepLabel := na
+        if sweepScope == "LTF" and sweepSide == SWEEP_SELL and not na(activeLtfSellSweepLabel)
+            label.delete(activeLtfSellSweepLabel)
+            activeLtfSellSweepLabel := na
+        if sweepScope == "HTF" and sweepSide == SWEEP_BUY and not na(activeHtfBuySweepLabel)
+            label.delete(activeHtfBuySweepLabel)
+            activeHtfBuySweepLabel := na
+        if sweepScope == "HTF" and sweepSide == SWEEP_SELL and not na(activeHtfSellSweepLabel)
+            label.delete(activeHtfSellSweepLabel)
+            activeHtfSellSweepLabel := na
+    renderedFinalizedSweepCount := array.size(finalizedSweepIds)
+
+while array.size(finalizedSweepLabels) > maxHistoricalSweepsInput
+    label.delete(array.shift(finalizedSweepLabels))
+while array.size(finalizedSweepLines) > maxHistoricalSweepsInput
+    line.delete(array.shift(finalizedSweepLines))
+
+if barstate.islast and not allowLtfSweepVisuals
+    if not na(activeLtfBuySweepLabel)
+        label.delete(activeLtfBuySweepLabel)
+        activeLtfBuySweepLabel := na
+    if not na(activeLtfSellSweepLabel)
+        label.delete(activeLtfSellSweepLabel)
+        activeLtfSellSweepLabel := na
+
+if barstate.islast and not allowHtfSweepVisuals
+    if not na(activeHtfBuySweepLabel)
+        label.delete(activeHtfBuySweepLabel)
+        activeHtfBuySweepLabel := na
+    if not na(activeHtfSellSweepLabel)
+        label.delete(activeHtfSellSweepLabel)
+        activeHtfSellSweepLabel := na
+
+//──────────────────────────────────────────────────────────────────────────────
+// Visual Layer — HTF Active Structure Guides
+//──────────────────────────────────────────────────────────────────────────────
+
+var line activeSwingHighGuide = na
+var line activeSwingLowGuide = na
+var label activeSwingHighGuideLabel = na
+var label activeSwingLowGuideLabel = na
+
+if barstate.islast
+    bool canShowSwingHighGuide = allowHtfGuides and not na(swingLastHighPrice) and not na(swingLastHighTime)
+    bool canShowSwingLowGuide = allowHtfGuides and not na(swingLastLowPrice) and not na(swingLastLowTime)
+
+    if canShowSwingHighGuide
+        color guideColor = swingHighConsumed ? consumedSwingHighColor : activeSwingHighColor
+        if na(activeSwingHighGuide)
+            activeSwingHighGuide := line.new(swingLastHighTime, swingLastHighPrice, time, swingLastHighPrice, xloc=xloc.bar_time, extend=extend.none, color=guideColor, style=line.style_dashed, width=1)
+        else
+            line.set_xy1(activeSwingHighGuide, swingLastHighTime, swingLastHighPrice)
+            line.set_xy2(activeSwingHighGuide, time, swingLastHighPrice)
+            line.set_color(activeSwingHighGuide, guideColor)
+            line.set_style(activeSwingHighGuide, line.style_dashed)
+            line.set_width(activeSwingHighGuide, 1)
+        if showActiveSwingGuideLabelsInput
+            string guideText = swingTfLabel + " Structure High" + (swingHighConsumed ? " consumed" : "")
+            if na(activeSwingHighGuideLabel)
+                activeSwingHighGuideLabel := label.new(time, swingLastHighPrice, guideText, xloc=xloc.bar_time, yloc=yloc.price, style=label.style_label_left, color=color.new(guideColor, 10), textcolor=neutralText, size=size.tiny)
+            else
+                label.set_x(activeSwingHighGuideLabel, time)
+                label.set_y(activeSwingHighGuideLabel, swingLastHighPrice)
+                label.set_text(activeSwingHighGuideLabel, guideText)
+                label.set_color(activeSwingHighGuideLabel, color.new(guideColor, 10))
+                label.set_textcolor(activeSwingHighGuideLabel, neutralText)
+        else
+            if not na(activeSwingHighGuideLabel)
+                label.delete(activeSwingHighGuideLabel)
+                activeSwingHighGuideLabel := na
+    else
+        if not na(activeSwingHighGuide)
+            line.delete(activeSwingHighGuide)
+            activeSwingHighGuide := na
+        if not na(activeSwingHighGuideLabel)
+            label.delete(activeSwingHighGuideLabel)
+            activeSwingHighGuideLabel := na
+
+    if canShowSwingLowGuide
+        color guideColor = swingLowConsumed ? consumedSwingLowColor : activeSwingLowColor
+        if na(activeSwingLowGuide)
+            activeSwingLowGuide := line.new(swingLastLowTime, swingLastLowPrice, time, swingLastLowPrice, xloc=xloc.bar_time, extend=extend.none, color=guideColor, style=line.style_dashed, width=1)
+        else
+            line.set_xy1(activeSwingLowGuide, swingLastLowTime, swingLastLowPrice)
+            line.set_xy2(activeSwingLowGuide, time, swingLastLowPrice)
+            line.set_color(activeSwingLowGuide, guideColor)
+            line.set_style(activeSwingLowGuide, line.style_dashed)
+            line.set_width(activeSwingLowGuide, 1)
+        if showActiveSwingGuideLabelsInput
+            string guideText = swingTfLabel + " Structure Low" + (swingLowConsumed ? " consumed" : "")
+            if na(activeSwingLowGuideLabel)
+                activeSwingLowGuideLabel := label.new(time, swingLastLowPrice, guideText, xloc=xloc.bar_time, yloc=yloc.price, style=label.style_label_left, color=color.new(guideColor, 10), textcolor=neutralText, size=size.tiny)
+            else
+                label.set_x(activeSwingLowGuideLabel, time)
+                label.set_y(activeSwingLowGuideLabel, swingLastLowPrice)
+                label.set_text(activeSwingLowGuideLabel, guideText)
+                label.set_color(activeSwingLowGuideLabel, color.new(guideColor, 10))
+                label.set_textcolor(activeSwingLowGuideLabel, neutralText)
+        else
+            if not na(activeSwingLowGuideLabel)
+                label.delete(activeSwingLowGuideLabel)
+                activeSwingLowGuideLabel := na
+    else
+        if not na(activeSwingLowGuide)
+            line.delete(activeSwingLowGuide)
+            activeSwingLowGuide := na
+        if not na(activeSwingLowGuideLabel)
+            label.delete(activeSwingLowGuideLabel)
+            activeSwingLowGuideLabel := na
+
+//──────────────────────────────────────────────────────────────────────────────
+// Visual Layer — Current Trading Range Lines
+//──────────────────────────────────────────────────────────────────────────────
+
+var line htfRangeHighLine = na
+var line htfRangeLowLine = na
+var box htfRangeBox = na
+var label htfRangeHighLabel = na
+var label htfRangeLowLabel = na
+
+var line ltfRangeHighLine = na
+var line ltfRangeLowLine = na
+var box ltfRangeBox = na
+var label ltfRangeHighLabel = na
+var label ltfRangeLowLabel = na
+
+if barstate.islast
+    bool canShowHtfRange = allowHtfRangeVisual and swingHasRange
+    if canShowHtfRange
+        int leftTime = f_earlierTime(swingRangeHighTime, swingRangeLowTime)
+        float top = math.max(swingRangeHigh, swingRangeLow)
+        float bottom = math.min(swingRangeHigh, swingRangeLow)
+        htfRangeStyle = swingRangeLocked ? line.style_solid : line.style_dashed
+
+        if showRangeBackgroundInput and debugMode
+            if na(htfRangeBox)
+                htfRangeBox := box.new(leftTime, top, time, bottom, xloc=xloc.bar_time, border_color=color.new(htfRangeColor, 90), bgcolor=color.new(htfRangeColor, 97), extend=extend.none)
+            else
+                box.set_left(htfRangeBox, leftTime)
+                box.set_right(htfRangeBox, time)
+                box.set_top(htfRangeBox, top)
+                box.set_bottom(htfRangeBox, bottom)
+                box.set_border_color(htfRangeBox, color.new(htfRangeColor, 90))
+                box.set_bgcolor(htfRangeBox, color.new(htfRangeColor, 97))
+        else
+            if not na(htfRangeBox)
+                box.delete(htfRangeBox)
+                htfRangeBox := na
+
+        if na(htfRangeHighLine)
+            htfRangeHighLine := line.new(swingRangeHighTime, swingRangeHigh, time, swingRangeHigh, xloc=xloc.bar_time, extend=extend.none, color=htfRangeColor, style=htfRangeStyle, width=1)
+        else
+            line.set_xy1(htfRangeHighLine, swingRangeHighTime, swingRangeHigh)
+            line.set_xy2(htfRangeHighLine, time, swingRangeHigh)
+            line.set_color(htfRangeHighLine, htfRangeColor)
+            line.set_style(htfRangeHighLine, htfRangeStyle)
+            line.set_width(htfRangeHighLine, 1)
+
+        if na(htfRangeLowLine)
+            htfRangeLowLine := line.new(swingRangeLowTime, swingRangeLow, time, swingRangeLow, xloc=xloc.bar_time, extend=extend.none, color=htfRangeColor, style=htfRangeStyle, width=1)
+        else
+            line.set_xy1(htfRangeLowLine, swingRangeLowTime, swingRangeLow)
+            line.set_xy2(htfRangeLowLine, time, swingRangeLow)
+            line.set_color(htfRangeLowLine, htfRangeColor)
+            line.set_style(htfRangeLowLine, htfRangeStyle)
+            line.set_width(htfRangeLowLine, 1)
+
+        if showRangeLabelsInput
+            string hiText = showFibAuditInput and swingRangeDir == 1 ? "HTF TP / Range High" : showFibAuditInput and swingRangeDir == -1 ? "HTF SL / Range High" : "HTF Range High"
+            string loText = showFibAuditInput and swingRangeDir == 1 ? "HTF SL / Range Low" : showFibAuditInput and swingRangeDir == -1 ? "HTF TP / Range Low" : "HTF Range Low"
+            if na(htfRangeHighLabel)
+                htfRangeHighLabel := label.new(time, swingRangeHigh, hiText, xloc=xloc.bar_time, yloc=yloc.price, style=label.style_label_left, color=color.new(htfRangeColor, 5), textcolor=color.black, size=size.tiny)
+            else
+                label.set_x(htfRangeHighLabel, time)
+                label.set_y(htfRangeHighLabel, swingRangeHigh)
+                label.set_text(htfRangeHighLabel, hiText)
+                label.set_color(htfRangeHighLabel, color.new(htfRangeColor, 5))
+                label.set_textcolor(htfRangeHighLabel, color.black)
+            if na(htfRangeLowLabel)
+                htfRangeLowLabel := label.new(time, swingRangeLow, loText, xloc=xloc.bar_time, yloc=yloc.price, style=label.style_label_left, color=color.new(htfRangeColor, 5), textcolor=color.black, size=size.tiny)
+            else
+                label.set_x(htfRangeLowLabel, time)
+                label.set_y(htfRangeLowLabel, swingRangeLow)
+                label.set_text(htfRangeLowLabel, loText)
+                label.set_color(htfRangeLowLabel, color.new(htfRangeColor, 5))
+                label.set_textcolor(htfRangeLowLabel, color.black)
+        else
+            if not na(htfRangeHighLabel)
+                label.delete(htfRangeHighLabel)
+                htfRangeHighLabel := na
+            if not na(htfRangeLowLabel)
+                label.delete(htfRangeLowLabel)
+                htfRangeLowLabel := na
+    else
+        if not na(htfRangeBox)
+            box.delete(htfRangeBox)
+            htfRangeBox := na
+        if not na(htfRangeHighLine)
+            line.delete(htfRangeHighLine)
+            htfRangeHighLine := na
+        if not na(htfRangeLowLine)
+            line.delete(htfRangeLowLine)
+            htfRangeLowLine := na
+        if not na(htfRangeHighLabel)
+            label.delete(htfRangeHighLabel)
+            htfRangeHighLabel := na
+        if not na(htfRangeLowLabel)
+            label.delete(htfRangeLowLabel)
+            htfRangeLowLabel := na
+
+    bool canShowLtfRange = allowLtfRangeVisual and internalHasRange
+    if canShowLtfRange
+        int leftTime = f_earlierTime(internalRangeHighTime, internalRangeLowTime)
+        float top = math.max(internalRangeHigh, internalRangeLow)
+        float bottom = math.min(internalRangeHigh, internalRangeLow)
+        ltfRangeStyle = internalRangeLocked ? line.style_solid : line.style_dashed
+
+        if showRangeBackgroundInput and debugMode
+            if na(ltfRangeBox)
+                ltfRangeBox := box.new(leftTime, top, time, bottom, xloc=xloc.bar_time, border_color=color.new(ltfRangeColor, 90), bgcolor=color.new(ltfRangeColor, 98), extend=extend.none)
+            else
+                box.set_left(ltfRangeBox, leftTime)
+                box.set_right(ltfRangeBox, time)
+                box.set_top(ltfRangeBox, top)
+                box.set_bottom(ltfRangeBox, bottom)
+                box.set_border_color(ltfRangeBox, color.new(ltfRangeColor, 90))
+                box.set_bgcolor(ltfRangeBox, color.new(ltfRangeColor, 98))
+        else
+            if not na(ltfRangeBox)
+                box.delete(ltfRangeBox)
+                ltfRangeBox := na
+
+        if na(ltfRangeHighLine)
+            ltfRangeHighLine := line.new(internalRangeHighTime, internalRangeHigh, time, internalRangeHigh, xloc=xloc.bar_time, extend=extend.none, color=ltfRangeColor, style=ltfRangeStyle, width=2)
+        else
+            line.set_xy1(ltfRangeHighLine, internalRangeHighTime, internalRangeHigh)
+            line.set_xy2(ltfRangeHighLine, time, internalRangeHigh)
+            line.set_color(ltfRangeHighLine, ltfRangeColor)
+            line.set_style(ltfRangeHighLine, ltfRangeStyle)
+            line.set_width(ltfRangeHighLine, 2)
+
+        if na(ltfRangeLowLine)
+            ltfRangeLowLine := line.new(internalRangeLowTime, internalRangeLow, time, internalRangeLow, xloc=xloc.bar_time, extend=extend.none, color=ltfRangeColor, style=ltfRangeStyle, width=2)
+        else
+            line.set_xy1(ltfRangeLowLine, internalRangeLowTime, internalRangeLow)
+            line.set_xy2(ltfRangeLowLine, time, internalRangeLow)
+            line.set_color(ltfRangeLowLine, ltfRangeColor)
+            line.set_style(ltfRangeLowLine, ltfRangeStyle)
+            line.set_width(ltfRangeLowLine, 2)
+
+        if showRangeLabelsInput
+            string hiText = showFibAuditInput and internalRangeDir == 1 ? "LTF TP / Range High" : showFibAuditInput and internalRangeDir == -1 ? "LTF SL / Range High" : "LTF Range High"
+            string loText = showFibAuditInput and internalRangeDir == 1 ? "LTF SL / Range Low" : showFibAuditInput and internalRangeDir == -1 ? "LTF TP / Range Low" : "LTF Range Low"
+            if na(ltfRangeHighLabel)
+                ltfRangeHighLabel := label.new(time, internalRangeHigh, hiText, xloc=xloc.bar_time, yloc=yloc.price, style=label.style_label_left, color=color.new(ltfRangeColor, 5), textcolor=color.black, size=size.tiny)
+            else
+                label.set_x(ltfRangeHighLabel, time)
+                label.set_y(ltfRangeHighLabel, internalRangeHigh)
+                label.set_text(ltfRangeHighLabel, hiText)
+                label.set_color(ltfRangeHighLabel, color.new(ltfRangeColor, 5))
+                label.set_textcolor(ltfRangeHighLabel, color.black)
+            if na(ltfRangeLowLabel)
+                ltfRangeLowLabel := label.new(time, internalRangeLow, loText, xloc=xloc.bar_time, yloc=yloc.price, style=label.style_label_left, color=color.new(ltfRangeColor, 5), textcolor=color.black, size=size.tiny)
+            else
+                label.set_x(ltfRangeLowLabel, time)
+                label.set_y(ltfRangeLowLabel, internalRangeLow)
+                label.set_text(ltfRangeLowLabel, loText)
+                label.set_color(ltfRangeLowLabel, color.new(ltfRangeColor, 5))
+                label.set_textcolor(ltfRangeLowLabel, color.black)
+        else
+            if not na(ltfRangeHighLabel)
+                label.delete(ltfRangeHighLabel)
+                ltfRangeHighLabel := na
+            if not na(ltfRangeLowLabel)
+                label.delete(ltfRangeLowLabel)
+                ltfRangeLowLabel := na
+    else
+        if not na(ltfRangeBox)
+            box.delete(ltfRangeBox)
+            ltfRangeBox := na
+        if not na(ltfRangeHighLine)
+            line.delete(ltfRangeHighLine)
+            ltfRangeHighLine := na
+        if not na(ltfRangeLowLine)
+            line.delete(ltfRangeLowLine)
+            ltfRangeLowLine := na
+        if not na(ltfRangeHighLabel)
+            label.delete(ltfRangeHighLabel)
+            ltfRangeHighLabel := na
+        if not na(ltfRangeLowLabel)
+            label.delete(ltfRangeLowLabel)
+            ltfRangeLowLabel := na
+
+//──────────────────────────────────────────────────────────────────────────────
+// Visual Layer — Fib Audit Entry Lines
+//──────────────────────────────────────────────────────────────────────────────
+
+var line htfFibEntryLine = na
+var label htfFibEntryLabel = na
+var line ltfFibEntryLine = na
+var label ltfFibEntryLabel = na
+
+if barstate.islast
+    if allowHtfFibVisual and not na(htfFibEntry)
+        int leftTime = f_earlierTime(swingRangeHighTime, swingRangeLowTime)
+        string pctText = str.tostring(swingFibEntryPctInput * 100.0, "#") + "%"
+        string labelText = swingRangeLocked ? "HTF " + pctText + " Entry" : "HTF Draft " + pctText + " Entry"
+        htfFibStyle = swingRangeLocked ? line.style_solid : line.style_dashed
+        if na(htfFibEntryLine)
+            htfFibEntryLine := line.new(leftTime, htfFibEntry, time, htfFibEntry, xloc=xloc.bar_time, extend=extend.none, color=htfFibColor, style=htfFibStyle, width=2)
+        else
+            line.set_xy1(htfFibEntryLine, leftTime, htfFibEntry)
+            line.set_xy2(htfFibEntryLine, time, htfFibEntry)
+            line.set_color(htfFibEntryLine, htfFibColor)
+            line.set_style(htfFibEntryLine, htfFibStyle)
+            line.set_width(htfFibEntryLine, 2)
+        if showFibEntryLabelInput
+            if na(htfFibEntryLabel)
+                htfFibEntryLabel := label.new(time, htfFibEntry, labelText, xloc=xloc.bar_time, yloc=yloc.price, style=label.style_label_left, color=color.new(htfFibColor, 0), textcolor=color.black, size=size.tiny)
+            else
+                label.set_x(htfFibEntryLabel, time)
+                label.set_y(htfFibEntryLabel, htfFibEntry)
+                label.set_text(htfFibEntryLabel, labelText)
+                label.set_color(htfFibEntryLabel, color.new(htfFibColor, 0))
+                label.set_textcolor(htfFibEntryLabel, color.black)
+        else
+            if not na(htfFibEntryLabel)
+                label.delete(htfFibEntryLabel)
+                htfFibEntryLabel := na
+    else
+        if not na(htfFibEntryLine)
+            line.delete(htfFibEntryLine)
+            htfFibEntryLine := na
+        if not na(htfFibEntryLabel)
+            label.delete(htfFibEntryLabel)
+            htfFibEntryLabel := na
+
+    if allowLtfFibVisual and not na(ltfFibEntry)
+        int leftTime = f_earlierTime(internalRangeHighTime, internalRangeLowTime)
+        string pctText = str.tostring(dayFibEntryPctInput * 100.0, "#") + "%"
+        string labelText = internalRangeLocked ? "LTF " + pctText + " Entry" : "LTF Draft " + pctText + " Entry"
+        ltfFibStyle = internalRangeLocked ? line.style_solid : line.style_dashed
+        if na(ltfFibEntryLine)
+            ltfFibEntryLine := line.new(leftTime, ltfFibEntry, time, ltfFibEntry, xloc=xloc.bar_time, extend=extend.none, color=ltfFibColor, style=ltfFibStyle, width=2)
+        else
+            line.set_xy1(ltfFibEntryLine, leftTime, ltfFibEntry)
+            line.set_xy2(ltfFibEntryLine, time, ltfFibEntry)
+            line.set_color(ltfFibEntryLine, ltfFibColor)
+            line.set_style(ltfFibEntryLine, ltfFibStyle)
+            line.set_width(ltfFibEntryLine, 2)
+        if showFibEntryLabelInput
+            if na(ltfFibEntryLabel)
+                ltfFibEntryLabel := label.new(time, ltfFibEntry, labelText, xloc=xloc.bar_time, yloc=yloc.price, style=label.style_label_left, color=color.new(ltfFibColor, 0), textcolor=color.white, size=size.tiny)
+            else
+                label.set_x(ltfFibEntryLabel, time)
+                label.set_y(ltfFibEntryLabel, ltfFibEntry)
+                label.set_text(ltfFibEntryLabel, labelText)
+                label.set_color(ltfFibEntryLabel, color.new(ltfFibColor, 0))
+                label.set_textcolor(ltfFibEntryLabel, color.white)
+        else
+            if not na(ltfFibEntryLabel)
+                label.delete(ltfFibEntryLabel)
+                ltfFibEntryLabel := na
+    else
+        if not na(ltfFibEntryLine)
+            line.delete(ltfFibEntryLine)
+            ltfFibEntryLine := na
+        if not na(ltfFibEntryLabel)
+            label.delete(ltfFibEntryLabel)
+            ltfFibEntryLabel := na
+
+//──────────────────────────────────────────────────────────────────────────────
+// Visual Layer — Structure Lines
+//──────────────────────────────────────────────────────────────────────────────
+
+var line[] ltfStructureLines = array.new_line()
+var line[] htfStructureLines = array.new_line()
+var label[] ltfStructureLabels = array.new_label()
+var label[] htfStructureLabels = array.new_label()
+var label latestLtfLabel = na
+var label latestHtfLabel = na
+
+bool showInternalBullEvent = allowLtfStructureVisuals and internalBullBreak and f_filterAllows(internalBullFilter, internalLastBullType)
+bool showInternalBearEvent = allowLtfStructureVisuals and internalBearBreak and f_filterAllows(internalBearFilter, internalLastBearType)
+bool showSwingBullEvent = allowHtfStructureVisuals and swingBullBreak and f_filterAllows(swingBullFilter, swingLastBullType)
+bool showSwingBearEvent = allowHtfStructureVisuals and swingBearBreak and f_filterAllows(swingBearFilter, swingLastBearType)
+
+bool showLtfLatestLabel = ltfLabelModeInput == LABEL_LATEST
+bool showLtfAllLabels = ltfLabelModeInput == LABEL_ALL
+bool showHtfLatestLabel = htfLabelModeInput == LABEL_LATEST
+bool showHtfAllLabels = htfLabelModeInput == LABEL_ALL
+
+if showInternalBullEvent
+    line l = line.new(internalLastHighTime, internalLastHighPrice, time, internalLastHighPrice, xloc=xloc.bar_time, extend=extend.none, color=internalBullColor, style=line.style_solid, width=1)
+    array.push(ltfStructureLines, l)
+    string labelText = "LTF Bull " + internalLastBullType
+    if showLtfLatestLabel
+        if not na(latestLtfLabel)
+            label.delete(latestLtfLabel)
+        latestLtfLabel := label.new(time, internalLastHighPrice, labelText, xloc=xloc.bar_time, yloc=yloc.price, style=label.style_label_left, color=color.new(internalBullColor, 0), textcolor=neutralText, size=size.tiny)
+    if showLtfAllLabels
+        label lb = label.new(time, internalLastHighPrice, labelText, xloc=xloc.bar_time, yloc=yloc.price, style=label.style_label_left, color=color.new(internalBullColor, 0), textcolor=neutralText, size=size.tiny)
+        array.push(ltfStructureLabels, lb)
+
+if showInternalBearEvent
+    line l = line.new(internalLastLowTime, internalLastLowPrice, time, internalLastLowPrice, xloc=xloc.bar_time, extend=extend.none, color=internalBearColor, style=line.style_solid, width=1)
+    array.push(ltfStructureLines, l)
+    string labelText = "LTF Bear " + internalLastBearType
+    if showLtfLatestLabel
+        if not na(latestLtfLabel)
+            label.delete(latestLtfLabel)
+        latestLtfLabel := label.new(time, internalLastLowPrice, labelText, xloc=xloc.bar_time, yloc=yloc.price, style=label.style_label_left, color=color.new(internalBearColor, 0), textcolor=neutralText, size=size.tiny)
+    if showLtfAllLabels
+        label lb = label.new(time, internalLastLowPrice, labelText, xloc=xloc.bar_time, yloc=yloc.price, style=label.style_label_left, color=color.new(internalBearColor, 0), textcolor=neutralText, size=size.tiny)
+        array.push(ltfStructureLabels, lb)
+
+if showSwingBullEvent
+    line l = line.new(swingLastHighTime, swingLastHighPrice, swingLastEventTime, swingLastHighPrice, xloc=xloc.bar_time, extend=extend.none, color=swingBullColor, style=line.style_solid, width=2)
+    array.push(htfStructureLines, l)
+    string labelText = "HTF Bull " + swingLastBullType
+    if showHtfLatestLabel
+        if not na(latestHtfLabel)
+            label.delete(latestHtfLabel)
+        latestHtfLabel := label.new(swingLastEventTime, swingLastHighPrice, labelText, xloc=xloc.bar_time, yloc=yloc.price, style=label.style_label_left, color=color.new(swingBullColor, 0), textcolor=neutralText, size=size.tiny)
+    if showHtfAllLabels
+        label lb = label.new(swingLastEventTime, swingLastHighPrice, labelText, xloc=xloc.bar_time, yloc=yloc.price, style=label.style_label_left, color=color.new(swingBullColor, 0), textcolor=neutralText, size=size.tiny)
+        array.push(htfStructureLabels, lb)
+
+if showSwingBearEvent
+    line l = line.new(swingLastLowTime, swingLastLowPrice, swingLastEventTime, swingLastLowPrice, xloc=xloc.bar_time, extend=extend.none, color=swingBearColor, style=line.style_solid, width=2)
+    array.push(htfStructureLines, l)
+    string labelText = "HTF Bear " + swingLastBearType
+    if showHtfLatestLabel
+        if not na(latestHtfLabel)
+            label.delete(latestHtfLabel)
+        latestHtfLabel := label.new(swingLastEventTime, swingLastLowPrice, labelText, xloc=xloc.bar_time, yloc=yloc.price, style=label.style_label_left, color=color.new(swingBearColor, 0), textcolor=neutralText, size=size.tiny)
+    if showHtfAllLabels
+        label lb = label.new(swingLastEventTime, swingLastLowPrice, labelText, xloc=xloc.bar_time, yloc=yloc.price, style=label.style_label_left, color=color.new(swingBearColor, 0), textcolor=neutralText, size=size.tiny)
+        array.push(htfStructureLabels, lb)
+
+int ltfLineLimit = reviewMode ? maxLtfReviewEventsInput : maxStructureEventsInput
+int htfLineLimit = maxStructureEventsInput
+
+while array.size(ltfStructureLines) > ltfLineLimit
+    line.delete(array.shift(ltfStructureLines))
+
+while array.size(htfStructureLines) > htfLineLimit
+    line.delete(array.shift(htfStructureLines))
+
+while array.size(ltfStructureLabels) > ltfLineLimit
+    label.delete(array.shift(ltfStructureLabels))
+
+while array.size(htfStructureLabels) > htfLineLimit
+    label.delete(array.shift(htfStructureLabels))
+
+if barstate.islast and (not allowLtfStructureVisuals or ltfLabelModeInput == LABEL_NONE)
+    if not na(latestLtfLabel)
+        label.delete(latestLtfLabel)
+        latestLtfLabel := na
+    if ltfLabelModeInput == LABEL_NONE
+        while array.size(ltfStructureLabels) > 0
+            label.delete(array.shift(ltfStructureLabels))
+
+if barstate.islast and (not allowHtfStructureVisuals or htfLabelModeInput == LABEL_NONE)
+    if not na(latestHtfLabel)
+        label.delete(latestHtfLabel)
+        latestHtfLabel := na
+    if htfLabelModeInput == LABEL_NONE
+        while array.size(htfStructureLabels) > 0
+            label.delete(array.shift(htfStructureLabels))
+
+if barstate.islast and not allowLtfStructureVisuals
+    while array.size(ltfStructureLines) > 0
+        line.delete(array.shift(ltfStructureLines))
+
+if barstate.islast and not allowHtfStructureVisuals
+    while array.size(htfStructureLines) > 0
+        line.delete(array.shift(htfStructureLines))
+
+//──────────────────────────────────────────────────────────────────────────────
+// Visual Layer — FVG Boxes + 50% Midlines
+//──────────────────────────────────────────────────────────────────────────────
+
+var box[] activeBullFvgBoxes = array.new_box()
+var int[] activeBullFvgBoxIds = array.new_int()
+var line[] activeBullFvgMidlines = array.new_line()
+
+var box[] activeBearFvgBoxes = array.new_box()
+var int[] activeBearFvgBoxIds = array.new_int()
+var line[] activeBearFvgMidlines = array.new_line()
+
+var box[] liquidatedFvgBoxes = array.new_box()
+var line[] liquidatedFvgMidlines = array.new_line()
+
+if allowFvgVisuals and newBullFvgAccepted
+    box b = box.new(newBullFvgLeftTime, newBullFvgTop, newBullFvgRightTime, newBullFvgBottom, xloc=xloc.bar_time, border_color=color.new(bullColor, 82), bgcolor=bullFvgFill, extend=extend.none)
+    line midLine = showFvgMidlinesInput ? line.new(newBullFvgLeftTime, newBullFvgMid, newBullFvgRightTime, newBullFvgMid, xloc=xloc.bar_time, extend=extend.none, color=color.new(bullColor, 64), style=line.style_dotted, width=1) : na
+    array.push(activeBullFvgBoxes, b)
+    array.push(activeBullFvgBoxIds, newBullFvgId)
+    array.push(activeBullFvgMidlines, midLine)
+
+if allowFvgVisuals and newBearFvgAccepted
+    box b = box.new(newBearFvgLeftTime, newBearFvgTop, newBearFvgRightTime, newBearFvgBottom, xloc=xloc.bar_time, border_color=color.new(bearColor, 82), bgcolor=bearFvgFill, extend=extend.none)
+    line midLine = showFvgMidlinesInput ? line.new(newBearFvgLeftTime, newBearFvgMid, newBearFvgRightTime, newBearFvgMid, xloc=xloc.bar_time, extend=extend.none, color=color.new(bearColor, 64), style=line.style_dotted, width=1) : na
+    array.push(activeBearFvgBoxes, b)
+    array.push(activeBearFvgBoxIds, newBearFvgId)
+    array.push(activeBearFvgMidlines, midLine)
+
+if allowFvgVisuals and array.size(liquidatedBullIdsThisBar) > 0
+    for i = 0 to array.size(liquidatedBullIdsThisBar) - 1
+        int liquidatedId = array.get(liquidatedBullIdsThisBar, i)
+        int j = array.size(activeBullFvgBoxIds) - 1
+        while j >= 0
+            if array.get(activeBullFvgBoxIds, j) == liquidatedId
+                box b = array.get(activeBullFvgBoxes, j)
+                line midLine = array.get(activeBullFvgMidlines, j)
+                box.set_right(b, time)
+                if not na(midLine)
+                    line.set_x2(midLine, time)
+                if visualObjectModeInput == FVG_ACTIVE_ONLY
+                    box.delete(b)
+                    if not na(midLine)
+                        line.delete(midLine)
+                else
+                    box.set_bgcolor(b, bullFvgMitigatedFill)
+                    box.set_border_color(b, color.new(bullColor, 94))
+                    if not na(midLine)
+                        line.set_color(midLine, color.new(bullColor, 90))
+                        array.push(liquidatedFvgMidlines, midLine)
+                    array.push(liquidatedFvgBoxes, b)
+                array.remove(activeBullFvgBoxes, j)
+                array.remove(activeBullFvgBoxIds, j)
+                array.remove(activeBullFvgMidlines, j)
+            j -= 1
+
+if allowFvgVisuals and array.size(liquidatedBearIdsThisBar) > 0
+    for i = 0 to array.size(liquidatedBearIdsThisBar) - 1
+        int liquidatedId = array.get(liquidatedBearIdsThisBar, i)
+        int j = array.size(activeBearFvgBoxIds) - 1
+        while j >= 0
+            if array.get(activeBearFvgBoxIds, j) == liquidatedId
+                box b = array.get(activeBearFvgBoxes, j)
+                line midLine = array.get(activeBearFvgMidlines, j)
+                box.set_right(b, time)
+                if not na(midLine)
+                    line.set_x2(midLine, time)
+                if visualObjectModeInput == FVG_ACTIVE_ONLY
+                    box.delete(b)
+                    if not na(midLine)
+                        line.delete(midLine)
+                else
+                    box.set_bgcolor(b, bearFvgMitigatedFill)
+                    box.set_border_color(b, color.new(bearColor, 94))
+                    if not na(midLine)
+                        line.set_color(midLine, color.new(bearColor, 90))
+                        array.push(liquidatedFvgMidlines, midLine)
+                    array.push(liquidatedFvgBoxes, b)
+                array.remove(activeBearFvgBoxes, j)
+                array.remove(activeBearFvgBoxIds, j)
+                array.remove(activeBearFvgMidlines, j)
+            j -= 1
+
+while array.size(activeBullFvgBoxes) > maxFvgBoxesInput
+    box.delete(array.shift(activeBullFvgBoxes))
+    array.shift(activeBullFvgBoxIds)
+    line oldLine = array.shift(activeBullFvgMidlines)
+    if not na(oldLine)
+        line.delete(oldLine)
+
+while array.size(activeBearFvgBoxes) > maxFvgBoxesInput
+    box.delete(array.shift(activeBearFvgBoxes))
+    array.shift(activeBearFvgBoxIds)
+    line oldLine = array.shift(activeBearFvgMidlines)
+    if not na(oldLine)
+        line.delete(oldLine)
+
+while array.size(liquidatedFvgBoxes) > maxMitigatedFvgBoxesInput
+    box.delete(array.shift(liquidatedFvgBoxes))
+
+while array.size(liquidatedFvgMidlines) > maxMitigatedFvgBoxesInput
+    line oldLine = array.shift(liquidatedFvgMidlines)
+    if not na(oldLine)
+        line.delete(oldLine)
+
+if allowFvgVisuals and barstate.islast
+    if array.size(activeBullFvgBoxes) > 0
+        for i = 0 to array.size(activeBullFvgBoxes) - 1
+            box.set_right(array.get(activeBullFvgBoxes, i), time)
+            line midLine = array.get(activeBullFvgMidlines, i)
+            if not na(midLine)
+                line.set_x2(midLine, time)
+
+    if array.size(activeBearFvgBoxes) > 0
+        for i = 0 to array.size(activeBearFvgBoxes) - 1
+            box.set_right(array.get(activeBearFvgBoxes, i), time)
+            line midLine = array.get(activeBearFvgMidlines, i)
+            if not na(midLine)
+                line.set_x2(midLine, time)
+
+if barstate.islast and not allowFvgVisuals
+    while array.size(activeBullFvgBoxes) > 0
+        box.delete(array.shift(activeBullFvgBoxes))
+    while array.size(activeBullFvgBoxIds) > 0
+        array.shift(activeBullFvgBoxIds)
+    while array.size(activeBullFvgMidlines) > 0
+        line oldLine = array.shift(activeBullFvgMidlines)
+        if not na(oldLine)
+            line.delete(oldLine)
+    while array.size(activeBearFvgBoxes) > 0
+        box.delete(array.shift(activeBearFvgBoxes))
+    while array.size(activeBearFvgBoxIds) > 0
+        array.shift(activeBearFvgBoxIds)
+    while array.size(activeBearFvgMidlines) > 0
+        line oldLine = array.shift(activeBearFvgMidlines)
+        if not na(oldLine)
+            line.delete(oldLine)
+    while array.size(liquidatedFvgBoxes) > 0
+        box.delete(array.shift(liquidatedFvgBoxes))
+    while array.size(liquidatedFvgMidlines) > 0
+        line oldLine = array.shift(liquidatedFvgMidlines)
+        if not na(oldLine)
+            line.delete(oldLine)
+
+//──────────────────────────────────────────────────────────────────────────────
+// Alerts
+//──────────────────────────────────────────────────────────────────────────────
+
+bool alertInternalBullBos = enableAlertsInput and internalBullBreak and internalLastBullType == EVENT_BOS
+bool alertInternalBearBos = enableAlertsInput and internalBearBreak and internalLastBearType == EVENT_BOS
+bool alertInternalBullChoch = enableAlertsInput and internalBullBreak and internalLastBullType == EVENT_CHOCH
+bool alertInternalBearChoch = enableAlertsInput and internalBearBreak and internalLastBearType == EVENT_CHOCH
+
+bool alertSwingBullBos = enableAlertsInput and swingBullBreak and swingLastBullType == EVENT_BOS
+bool alertSwingBearBos = enableAlertsInput and swingBearBreak and swingLastBearType == EVENT_BOS
+bool alertSwingBullChoch = enableAlertsInput and swingBullBreak and swingLastBullType == EVENT_CHOCH
+bool alertSwingBearChoch = enableAlertsInput and swingBearBreak and swingLastBearType == EVENT_CHOCH
+
+bool alertNewBullFvg = enableAlertsInput and newBullFvgAccepted
+bool alertNewBearFvg = enableAlertsInput and newBearFvgAccepted
+bool alertBullFvgLiquidated = enableAlertsInput and array.size(liquidatedBullIdsThisBar) > 0
+bool alertBearFvgLiquidated = enableAlertsInput and array.size(liquidatedBearIdsThisBar) > 0
+
+bool alertLtfBuySweep = enableAlertsInput and internalBuySideSweep
+bool alertLtfSellSweep = enableAlertsInput and internalSellSideSweep
+bool alertHtfBuySweep = enableAlertsInput and swingBuySideSweep
+bool alertHtfSellSweep = enableAlertsInput and swingSellSideSweep
+
+alertcondition(alertInternalBullBos, "LTF Bullish BOS", "LTF bullish BOS detected.")
+alertcondition(alertInternalBearBos, "LTF Bearish BOS", "LTF bearish BOS detected.")
+alertcondition(alertInternalBullChoch, "LTF Bullish CHoCH", "LTF bullish CHoCH detected.")
+alertcondition(alertInternalBearChoch, "LTF Bearish CHoCH", "LTF bearish CHoCH detected.")
+
+alertcondition(alertSwingBullBos, "HTF Bullish BOS", "HTF bullish BOS detected.")
+alertcondition(alertSwingBearBos, "HTF Bearish BOS", "HTF bearish BOS detected.")
+alertcondition(alertSwingBullChoch, "HTF Bullish CHoCH", "HTF bullish CHoCH detected.")
+alertcondition(alertSwingBearChoch, "HTF Bearish CHoCH", "HTF bearish CHoCH detected.")
+
+alertcondition(alertNewBullFvg, "New Bullish FVG Accepted", "New bullish FVG accepted.")
+alertcondition(alertNewBearFvg, "New Bearish FVG Accepted", "New bearish FVG accepted.")
+alertcondition(alertBullFvgLiquidated, "Bullish FVG Liquidated", "Bullish FVG liquidated.")
+alertcondition(alertBearFvgLiquidated, "Bearish FVG Liquidated", "Bearish FVG liquidated.")
+
+alertcondition(alertLtfBuySweep, "LTF Buy-side Sweep", "LTF buy-side liquidity sweep detected.")
+alertcondition(alertLtfSellSweep, "LTF Sell-side Sweep", "LTF sell-side liquidity sweep detected.")
+alertcondition(alertHtfBuySweep, "HTF Buy-side Sweep", "HTF buy-side liquidity sweep detected.")
+alertcondition(alertHtfSellSweep, "HTF Sell-side Sweep", "HTF sell-side liquidity sweep detected.")
+
+//──────────────────────────────────────────────────────────────────────────────
+// Dashboard
+//──────────────────────────────────────────────────────────────────────────────
+
+if barstate.islast
+    if showDashboard
+        int r = 0
+
+        r := f_section(dash, r, "Clean Market Structure Engine - Independent Setup Ledger v3.9", dashboardTextSizeInput)
+
+        if dashboardDetailInput == "Production checklist"
+            r := f_section(dash, r, "Production Checklist", dashboardTextSizeInput)
+            r := f_row(dash, r, "Mode", "Chart mode", reviewModeName, "Use 4H for swing, 15M for day execution.", dashboardTextSizeInput)
+
+            if isHtfChart
+                r := f_row(dash, r, "General", "Symbol / TF", syminfo.tickerid + " / " + timeframe.period, "Swing / HTF context mode.", dashboardTextSizeInput)
+                r := f_row(dash, r, "HTF", "Direction gate", f_directionGate(htfDirectionGate), "Confirmed 4H range midpoint " + f_price(htfRangeMidpoint) + ".", dashboardTextSizeInput)
+                r := f_row(dash, r, "HTF", "Structure bias", f_bias(swingBias), "Context only; cannot override premium/discount.", dashboardTextSizeInput)
+                r := f_row(dash, r, "HTF", "Active H/L", f_levelPair(swingLastHighPrice, swingLastLowPrice), "Levels that can trigger next HTF break.", dashboardTextSizeInput)
+                r := f_row(dash, r, "HTF", "Latest break", f_dirEvent(swingLastEventDirection, swingLastEventType, swingLastEventPrice, swingLastEventTime), "Line-first BOS/CHoCH.", dashboardTextSizeInput)
+                r := f_row(dash, r, "HTF", "Sweep", swingLastEventSweepStatus, "Confluence only; not an entry.", dashboardTextSizeInput)
+                r := f_row(dash, r, "HTF", "Sweep lifecycle", latestHtfSweepLifecycle, "Active once; then consumed or invalidated.", dashboardTextSizeInput)
+                r := f_row(dash, r, "HTF", "Range", f_rangeText(swingRangeHigh, swingRangeHighTime, swingRangeLow, swingRangeLowTime), swingRangeStatus, dashboardTextSizeInput)
+                r := f_row(dash, r, "Fib", "71% audit", f_fibPackText(htfFibEntry, htfFibSl, htfFibTp, htfFibRr), htfFibStatus, dashboardTextSizeInput)
+                r := f_row(dash, r, "FVG", "Active bull / bear", str.tostring(activeBullFvgCount) + " / " + str.tostring(activeBearFvgCount), "Latest: Bull " + latestBullFvgStatus + " / Bear " + latestBearFvgStatus, dashboardTextSizeInput)
+                r := f_row(dash, r, "FVG", "Break-linked FVG", f_pass(htfDirectionFvgOk), "Must belong to the HTF BOS/CHoCH impulse.", dashboardTextSizeInput)
+                r := f_row(dash, r, "Status", "Manual review", htfManualStatus, "No auto-entry. Confirm range + sweep + BOS/FVG + Fib.", dashboardTextSizeInput)
+
+            else if isEntryTf
+                r := f_row(dash, r, "General", "Symbol / TF", syminfo.tickerid + " / " + timeframe.period, "Day / LTF execution mode.", dashboardTextSizeInput)
+                r := f_row(dash, r, "HTF", "Direction gate", f_directionGate(htfDirectionGate), "Confirmed 4H range midpoint " + f_price(htfRangeMidpoint) + ".", dashboardTextSizeInput)
+                r := f_row(dash, r, "HTF", "Structure bias", f_bias(swingBias), "Context only; cannot override premium/discount.", dashboardTextSizeInput)
+                r := f_row(dash, r, "HTF", "Active H/L", f_levelPair(swingLastHighPrice, swingLastLowPrice), "Levels that can trigger next HTF break.", dashboardTextSizeInput)
+                r := f_row(dash, r, "HTF", "Latest break", f_dirEvent(swingLastEventDirection, swingLastEventType, swingLastEventPrice, swingLastEventTime), "Context only.", dashboardTextSizeInput)
+                r := f_row(dash, r, "LTF", "Bias", f_bias(internalBias), "15M execution structure.", dashboardTextSizeInput)
+                r := f_row(dash, r, "LTF", "Active H/L", f_levelPair(internalLastHighPrice, internalLastLowPrice), "Levels that can trigger next LTF break.", dashboardTextSizeInput)
+                r := f_row(dash, r, "LTF", "Latest break", f_dirEvent(internalLastEventDirection, internalLastEventType, internalLastEventPrice, internalLastEventTime), "Line-first BOS/CHoCH.", dashboardTextSizeInput)
+                r := f_row(dash, r, "Sweep", "LTF event sweep", internalLastEventSweepStatus, "Manipulation is confirmed only by the later opposite BOS/CHoCH.", dashboardTextSizeInput)
+                r := f_row(dash, r, "Sweep", "Causal times", internalLastEventHasSweep ? "source " + f_time(internalLastEventSweepSourceTime) + " | known " + f_time(internalLastEventSweepKnownTime) + " | confirmed " + f_time(internalLastEventSweepConfirmationTime) : STATUS_NA, "No confirmed manipulation is backdated.", dashboardTextSizeInput)
+                r := f_row(dash, r, "Sweep", "LTF lifecycle", latestLtfSweepLifecycle, "Active once; then consumed or invalidated.", dashboardTextSizeInput)
+                r := f_row(dash, r, "LTF", "Range", f_rangeText(internalRangeHigh, internalRangeHighTime, internalRangeLow, internalRangeLowTime), internalRangeStatus, dashboardTextSizeInput)
+                r := f_row(dash, r, "Fib", "67% audit", f_fibPackText(ltfFibEntry, ltfFibSl, ltfFibTp, ltfFibRr), ltfFibStatus, dashboardTextSizeInput)
+                r := f_row(dash, r, "FVG", "Active bull / bear", str.tostring(activeBullFvgCount) + " / " + str.tostring(activeBearFvgCount), "Latest: Bull " + latestBullFvgStatus + " / Bear " + latestBearFvgStatus, dashboardTextSizeInput)
+                r := f_row(dash, r, "FVG", "Break-linked FVG", f_pass(ltfDirectionFvgOk), "Must belong to the LTF BOS/CHoCH impulse.", dashboardTextSizeInput)
+                r := f_row(dash, r, "FVG", "67% quality grade", ltfFibFvgOverlap ? "A+ OVERLAP" : ltfDirectionFvgWasLinked ? "BASE CAUSAL FVG" : "WAIT", "Overlap is quality, not base validity.", dashboardTextSizeInput)
+                r := f_row(dash, r, "Audit", "Event funnel", "Events " + str.tostring(checklistEventCount) + " | Cont " + str.tostring(checklistContinuationCount) + " | Rev " + str.tostring(checklistReversalCount), "Fresh sweep " + str.tostring(checklistFreshSweepCount) + " | linked FVG " + str.tostring(checklistLinkedFvgCount) + " | locked range " + str.tostring(checklistRangeLockedCount), dashboardTextSizeInput)
+                r := f_row(dash, r, "Audit", "FVG detector", "Raw " + str.tostring(checklistRawFvgCount) + " | accepted " + str.tostring(checklistAcceptedFvgCount), "ATR rejected " + str.tostring(checklistAtrRejectedFvgCount) + " at sensitivity " + str.tostring(fvgValiditySensitivity), dashboardTextSizeInput)
+                r := f_row(dash, r, "Audit", "Current event", "#" + str.tostring(checklistCurrentEventId) + " " + checklistCurrentClass, "Implementation gate code " + str.tostring(checklistImplementationStatusCode) + ": 1 HTF, 2 range, 3 sweep, 4 FVG, 5 Fib, 6 late, 7 active, 8 pass.", dashboardTextSizeInput)
+                r := f_row(dash, r, "Setup", "Latest ledger", na(latestSetupId) ? latestSetupRejection : "#" + str.tostring(latestSetupId) + " " + latestSetupState + " | " + latestSetupContext, na(latestSetupReadyTime) ? "No frozen setup yet." : "ready " + f_time(latestSetupReadyTime) + " | outcome " + f_time(latestSetupOutcomeTime), dashboardTextSizeInput)
+                r := f_row(dash, r, "Setup", "Counts", "Ready " + str.tostring(setupReadyCount) + " | Filled " + str.tostring(setupFilledCount) + " | TP " + str.tostring(setupTargetCount) + " | SL " + str.tostring(setupStopCount), "Missed " + str.tostring(setupMissedCount) + " | Invalid " + str.tostring(setupInvalidCount) + " | Late " + str.tostring(setupRejectedLateCount) + " | Ambiguous " + str.tostring(setupAmbiguousCount), dashboardTextSizeInput)
+                r := f_row(dash, r, "Status", "Canonical readiness", ltfSetupLedgerStatus, "CHoCH requires manipulation; BOS continuation does not. Actionable next bar.", dashboardTextSizeInput)
+
+            else
+                r := f_row(dash, r, "Mode", "Unsupported TF", timeframe.period, "Review mode is designed for 4H and 15M only.", dashboardTextSizeInput)
+                r := f_row(dash, r, "Status", "Manual review", activeModeStatus, "Switch chart timeframe.", dashboardTextSizeInput)
+
+        else if dashboardDetailInput == "Review audit"
+            r := f_section(dash, r, "Review Focus", dashboardTextSizeInput)
+            r := f_row(dash, r, "General", "Symbol / chart TF", syminfo.tickerid + " / " + timeframe.period, reviewModeName, dashboardTextSizeInput)
+            r := f_row(dash, r, "General", "Visual rule", isHtfChart ? "HTF + 71% Fib + sweep audit" : isEntryTf ? "HTF context + LTF 67% Fib + sweep audit" : "Use 4H or 15M", "Sweep is confluence-only; not a signal.", dashboardTextSizeInput)
+
+            r := f_section(dash, r, "HTF Context", dashboardTextSizeInput)
+            r := f_row(dash, r, "HTF", "Direction gate", f_directionGate(htfDirectionGate), "Confirmed 4H midpoint " + f_price(htfRangeMidpoint) + ".", dashboardTextSizeInput)
+            r := f_row(dash, r, "HTF", "Structure bias", f_bias(swingBias), "Context only; changes after HTF BOS/CHoCH.", dashboardTextSizeInput)
+            r := f_row(dash, r, "HTF", "Active structure H/L", f_levelPair(swingLastHighPrice, swingLastLowPrice), "Levels that can trigger next HTF break.", dashboardTextSizeInput)
+            r := f_row(dash, r, "HTF", "Latest event", f_dirEvent(swingLastEventDirection, swingLastEventType, swingLastEventPrice, swingLastEventTime), "Structure line should match this level.", dashboardTextSizeInput)
+            r := f_row(dash, r, "HTF", "Event sweep", swingLastEventSweepStatus, "Bullish needs prior SSL; bearish needs prior BSL.", dashboardTextSizeInput)
+            r := f_row(dash, r, "HTF", "Trading range", f_rangeText(swingRangeHigh, swingRangeHighTime, swingRangeLow, swingRangeLowTime), swingRangeStatus, dashboardTextSizeInput)
+
+            r := f_section(dash, r, "LTF Execution", dashboardTextSizeInput)
+            r := f_row(dash, r, "LTF", "Display", allowLtfStructureVisuals ? "Visible" : "Hidden", isHtfChart ? "Correct: hidden on HTF chart." : isEntryTf ? "Correct: visible on LTF chart." : "Unsupported review TF.", dashboardTextSizeInput)
+            r := f_row(dash, r, "LTF", "Bias", isEntryTf or debugMode ? f_bias(internalBias) : "Hidden", "LTF is execution structure only.", dashboardTextSizeInput)
+            r := f_row(dash, r, "LTF", "Latest event", isEntryTf or debugMode ? f_dirEvent(internalLastEventDirection, internalLastEventType, internalLastEventPrice, internalLastEventTime) : "Hidden", "Line-first with sparse endpoint label.", dashboardTextSizeInput)
+            r := f_row(dash, r, "LTF", "Event sweep", isEntryTf or debugMode ? internalLastEventSweepStatus : "Hidden", "Bullish needs prior SSL; bearish needs prior BSL.", dashboardTextSizeInput)
+            r := f_row(dash, r, "LTF", "Trading range", isEntryTf or debugMode ? f_rangeText(internalRangeHigh, internalRangeHighTime, internalRangeLow, internalRangeLowTime) : "Hidden", isEntryTf or debugMode ? internalRangeStatus : "Only used on " + entryTfLabel + ".", dashboardTextSizeInput)
+
+            r := f_section(dash, r, "Sweep Review", dashboardTextSizeInput)
+            r := f_row(dash, r, "Sweep", "Latest HTF sweep", latestHtfSweepLifecycle, "HTF source and later known time are distinct.", dashboardTextSizeInput)
+            r := f_row(dash, r, "Sweep", "Latest LTF sweep", isEntryTf or debugMode ? latestLtfSweepLifecycle : "Hidden", "LTF execution confluence.", dashboardTextSizeInput)
+            r := f_row(dash, r, "Sweep", "Rule", sweepStatus, "Sweep without BOS/FVG/Fib is not a trade.", dashboardTextSizeInput)
+
+            r := f_section(dash, r, "Setup Ledger", dashboardTextSizeInput)
+            r := f_row(dash, r, "Setup", "Latest", na(latestSetupId) ? latestSetupRejection : "#" + str.tostring(latestSetupId) + " " + latestSetupState, "Ready " + f_time(latestSetupReadyTime) + " | Outcome " + f_time(latestSetupOutcomeTime), dashboardTextSizeInput)
+            r := f_row(dash, r, "Setup", "Timing rule", "CONFIRMED CLOSE -> NEXT BAR", "Drawings never start at an earlier source candle.", dashboardTextSizeInput)
+
+            r := f_section(dash, r, "Fib Audit", dashboardTextSizeInput)
+            r := f_row(dash, r, "Fib", isHtfChart ? "Swing 71%" : isEntryTf ? "Day 67%" : "Inactive", isHtfChart ? f_fibPackText(htfFibEntry, htfFibSl, htfFibTp, htfFibRr) : isEntryTf ? f_fibPackText(ltfFibEntry, ltfFibSl, ltfFibTp, ltfFibRr) : STATUS_NA, isHtfChart ? htfFibStatus : isEntryTf ? ltfFibStatus : "Use 4H or 15M.", dashboardTextSizeInput)
+            r := f_row(dash, r, "Fib", "Rule", isHtfChart ? "4H uses 71%" : isEntryTf ? "15M uses 67%" : STATUS_NA, "Audit-only. No auto-entry.", dashboardTextSizeInput)
+
+            r := f_section(dash, r, "FVG Review", dashboardTextSizeInput)
+            r := f_row(dash, r, "FVG", "Liquidation rule", fvgLiquidationDepthInput + " / " + mitigationMethod, "Default should remove active boxes at 50%.", dashboardTextSizeInput)
+            r := f_row(dash, r, "FVG", "Active bull / bear", str.tostring(activeBullFvgCount) + " / " + str.tostring(activeBearFvgCount), "Visible count may be capped by visual settings.", dashboardTextSizeInput)
+            r := f_row(dash, r, "FVG", "Latest status", "Bull " + latestBullFvgStatus + " / Bear " + latestBearFvgStatus, "Latest accepted FVG state.", dashboardTextSizeInput)
+
+            r := f_section(dash, r, "Pass / Fail", dashboardTextSizeInput)
+            r := f_row(dash, r, "Summary", "HTF range", swingRangeStatus, "Must support 71% Swing Fib on 4H.", dashboardTextSizeInput)
+            r := f_row(dash, r, "Summary", "LTF range", isEntryTf or debugMode ? internalRangeStatus : "Hidden on HTF", "Must support 67% Day Fib on 15M.", dashboardTextSizeInput)
+            r := f_row(dash, r, "Summary", "Sweep module", sweepStatus, "Production dashboard is now default.", dashboardTextSizeInput)
+            r := f_row(dash, r, "Summary", "Overall status", overallModelStatus, "Temporal Ledger v2.", dashboardTextSizeInput)
+
+        else
+            r := f_section(dash, r, "Full Debug Audit", dashboardTextSizeInput)
+            r := f_row(dash, r, "General", "Symbol / TF", syminfo.tickerid + " / " + timeframe.period, reviewModeName, dashboardTextSizeInput)
+            r := f_row(dash, r, "General", "Current bar time", f_time(time), "Exchange timezone formatting.", dashboardTextSizeInput)
+            r := f_row(dash, r, "General", "Visual mode", visualModeInput, "Debug may show noisy internals.", dashboardTextSizeInput)
+
+            r := f_section(dash, r, "HTF Structure Debug", dashboardTextSizeInput)
+            r := f_row(dash, r, "HTF", "Source", swingSourceText, "External swing structure.", dashboardTextSizeInput)
+            r := f_row(dash, r, "HTF", "Active high", f_priceAt(swingLastHighPrice, swingLastHighTime, swingLastHighBar), "Can trigger bullish break.", dashboardTextSizeInput)
+            r := f_row(dash, r, "HTF", "Active low", f_priceAt(swingLastLowPrice, swingLastLowTime, swingLastLowBar), "Can trigger bearish break.", dashboardTextSizeInput)
+            r := f_row(dash, r, "HTF", "Latest event", f_dirEvent(swingLastEventDirection, swingLastEventType, swingLastEventPrice, swingLastEventTime), swingLastEventReason, dashboardTextSizeInput)
+            r := f_row(dash, r, "HTF", "Event sweep", swingLastEventSweepStatus, "Confluence locked at event time.", dashboardTextSizeInput)
+            r := f_row(dash, r, "HTF", "Latest sweep", latestHtfSweepLifecycle, "Latest HTF sweep lifecycle.", dashboardTextSizeInput)
+
+            r := f_section(dash, r, "LTF Structure Debug", dashboardTextSizeInput)
+            r := f_row(dash, r, "LTF", "Active high", f_priceAt(internalLastHighPrice, internalLastHighTime, internalLastHighBar), internalHighConsumed ? "Consumed" : "Available for bullish break.", dashboardTextSizeInput)
+            r := f_row(dash, r, "LTF", "Active low", f_priceAt(internalLastLowPrice, internalLastLowTime, internalLastLowBar), internalLowConsumed ? "Consumed" : "Available for bearish break.", dashboardTextSizeInput)
+            r := f_row(dash, r, "LTF", "Latest pivot decision", internalLastPivotDecision, f_price(internalLastPivotDecisionPrice) + " | source " + f_time(internalLastPivotSourceTime) + " | confirmed " + f_time(internalLastPivotConfirmTime), dashboardTextSizeInput)
+            r := f_row(dash, r, "LTF", "Pivot counts", "Accepted " + str.tostring(internalAcceptedPivotCount) + " / Replaced " + str.tostring(internalReplacementPivotCount) + " / Rejected " + str.tostring(internalRejectedPivotCount), "Alternation with more-extreme same-side replacement.", dashboardTextSizeInput)
+            r := f_row(dash, r, "LTF", "Latest event", f_dirEvent(internalLastEventDirection, internalLastEventType, internalLastEventPrice, internalLastEventTime), internalLastEventReason, dashboardTextSizeInput)
+            r := f_row(dash, r, "LTF", "Event sweep", internalLastEventSweepStatus, "Confluence locked at event time.", dashboardTextSizeInput)
+            r := f_row(dash, r, "LTF", "Latest sweep", latestLtfSweepLifecycle, "Latest LTF sweep lifecycle.", dashboardTextSizeInput)
+            r := f_row(dash, r, "LTF", "Range", f_rangeText(internalRangeHigh, internalRangeHighTime, internalRangeLow, internalRangeLowTime), internalRangeStatus, dashboardTextSizeInput)
+
+// Debug-only structural source markers. These are plotted at the source pivot
+// while the dashboard exposes the later confirmation time.
+plotshape(debugMode and internalHighPivotAccepted, title="Accepted / replaced LTF high", style=shape.triangledown, location=location.abovebar, offset=-internalLen, size=size.tiny, color=color.new(color.orange, 0), text="")
+plotshape(debugMode and internalLowPivotAccepted, title="Accepted / replaced LTF low", style=shape.triangleup, location=location.belowbar, offset=-internalLen, size=size.tiny, color=color.new(color.aqua, 0), text="")
+
+// Standard Pine2Python indicator trace contract. These plots are hidden and do
+// not alter the production chart surface.
+plot(swingLastHighPrice, "p2p__feature__htf_structure_high", display=display.none)
+plot(swingLastLowPrice, "p2p__feature__htf_structure_low", display=display.none)
+plot(swingBias, "p2p__feature__htf_bias", display=display.none)
+plot(htfRangeMidpoint, "p2p__feature__htf_range_midpoint", display=display.none)
+plot(htfDirectionGate, "p2p__feature__htf_direction_gate", display=display.none)
+plot(swingRangeHigh, "p2p__feature__htf_range_high", display=display.none)
+plot(swingRangeLow, "p2p__feature__htf_range_low", display=display.none)
+plot(htfFibEntry, "p2p__feature__htf_fib_entry", display=display.none)
+plot(internalLastHighPrice, "p2p__feature__ltf_structure_high", display=display.none)
+plot(internalLastLowPrice, "p2p__feature__ltf_structure_low", display=display.none)
+plot(internalBias, "p2p__feature__ltf_bias", display=display.none)
+plot(internalRangeHigh, "p2p__feature__ltf_range_high", display=display.none)
+plot(internalRangeLow, "p2p__feature__ltf_range_low", display=display.none)
+plot(ltfFibEntry, "p2p__feature__ltf_fib_entry", display=display.none)
+plot(internalPivotDecisionCode, "p2p__feature__ltf_pivot_decision", display=display.none)
+plot(internalLinkedFvgId, "p2p__feature__ltf_linked_fvg_id", display=display.none)
+plot(swingLinkedFvgId, "p2p__feature__htf_linked_fvg_id", display=display.none)
+
+plot(internalHighConsumed ? 1 : 0, "p2p__state__ltf_high_consumed", display=display.none)
+plot(internalLowConsumed ? 1 : 0, "p2p__state__ltf_low_consumed", display=display.none)
+plot(internalRangeLocked ? 1 : 0, "p2p__state__ltf_range_locked", display=display.none)
+plot(swingRangeLocked ? 1 : 0, "p2p__state__htf_range_locked", display=display.none)
+plot(latestInternalBuySweepActive ? 1 : 0, "p2p__state__ltf_buy_sweep_active", display=display.none)
+plot(latestInternalSellSweepActive ? 1 : 0, "p2p__state__ltf_sell_sweep_active", display=display.none)
+plot(latestSwingBuySweepActive ? 1 : 0, "p2p__state__htf_buy_sweep_active", display=display.none)
+plot(latestSwingSellSweepActive ? 1 : 0, "p2p__state__htf_sell_sweep_active", display=display.none)
+plot(ltfDirectionFvgOk ? 1 : 0, "p2p__state__ltf_linked_fvg_active", display=display.none)
+plot(htfDirectionFvgOk ? 1 : 0, "p2p__state__htf_linked_fvg_active", display=display.none)
+
+plot(internalBullBreak ? 1 : 0, "p2p__signal__ltf_bull_break", display=display.none)
+plot(internalBearBreak ? 1 : 0, "p2p__signal__ltf_bear_break", display=display.none)
+plot(internalBuySideSweep ? 1 : 0, "p2p__signal__ltf_buy_side_sweep", display=display.none)
+plot(internalSellSideSweep ? 1 : 0, "p2p__signal__ltf_sell_side_sweep", display=display.none)
+plot(internalBuySweepConsumed ? 1 : 0, "p2p__signal__ltf_buy_sweep_consumed", display=display.none)
+plot(internalSellSweepConsumed ? 1 : 0, "p2p__signal__ltf_sell_sweep_consumed", display=display.none)
+plot(internalBuySweepInvalidated ? 1 : 0, "p2p__rejection__ltf_buy_sweep_invalidated", display=display.none)
+plot(internalSellSweepInvalidated ? 1 : 0, "p2p__rejection__ltf_sell_sweep_invalidated", display=display.none)
+plot(swingBullBreak ? 1 : 0, "p2p__signal__htf_bull_break", display=display.none)
+plot(swingBearBreak ? 1 : 0, "p2p__signal__htf_bear_break", display=display.none)
+plot(swingBuySweepConsumed ? 1 : 0, "p2p__signal__htf_buy_sweep_consumed", display=display.none)
+plot(swingSellSweepConsumed ? 1 : 0, "p2p__signal__htf_sell_sweep_consumed", display=display.none)
+plot(swingBuySweepInvalidated ? 1 : 0, "p2p__rejection__htf_buy_sweep_invalidated", display=display.none)
+plot(swingSellSweepInvalidated ? 1 : 0, "p2p__rejection__htf_sell_sweep_invalidated", display=display.none)
+plot(unrelatedFvgForLatestBreak ? 1 : 0, "p2p__rejection__unrelated_fvg_for_latest_break", display=display.none)

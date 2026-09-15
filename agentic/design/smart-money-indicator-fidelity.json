@@ -1,0 +1,222 @@
+{
+  "schema_version": "2.0",
+  "authoritative_source": {
+    "document": "pre-strategies/smart-money-3.txt",
+    "pine_start_line": 7,
+    "pine_end_line": 1747,
+    "baseline_source": "pre-strategies/smart-money-indicator-baseline.pine",
+    "baseline_source_sha256": "6994ce1e623d9715cfd9a4b42fd9a5575113409dfc4fad55514abd7f2e990828"
+  },
+  "repair_parent": {
+    "source": "pre-strategies/smart-money-indicator-first.pine",
+    "revision_id": "pvr_e191fd164eac85786003",
+    "source_sha256": "4547b865fa2e89f24a4fca8e320f107cbbc2a21263881444180bfd9a27ca1dd7"
+  },
+  "current_candidate": {
+    "source": "pre-strategies/smart-money-indicator-first.pine",
+    "revision_id": "pvr_28090860d3444b575353",
+    "source_sha256": "449f4c298751e4cb5e4edff8d85de8bd2a20fb208c6ae92e5d36ba82e580cecf",
+    "review_evidence_id": "pev_1f40c4d1e536ea682f4b",
+    "proof_evidence_id": "pev_148804e9528ff1f46091",
+    "tradingview_observation_evidence_id": "pev_e834561bd129554ad866",
+    "proof_instrumentation": "tv_table_v2_6",
+    "proof_instrumented_source_sha256": "70061ec29526fdcd850d3d453f54535dcf4841a1d200bbfbc106514e2cb60fb8",
+    "tradingview_proof_screenshot_sha256": "02f6354c74cbda5b1010f9fd8f1ae3039b75e69a60373792027d6b1eccca118f",
+    "tradingview_readable_screenshot_sha256": "496dd986c9879ebcd26c3410737d2b205ba420a847f9425ee4e6a002be160263",
+    "status": "TRADINGVIEW_SIGNATURE_MATCH_USER_VERDICT_PENDING",
+    "matching_streams": ["features", "states", "signals", "rejections"],
+    "mismatching_streams": []
+  },
+  "strict_parity_exclusions": {
+    "policy": "Exclude only history-origin display pointers whose behavioral timing is already encoded by strict event signals and lifecycle states.",
+    "fields": [
+      "features.checklist_event_id",
+      "features.checklist_class_code",
+      "features.checklist_status_code",
+      "features.checklist_event_count",
+      "features.checklist_continuation_count",
+      "features.checklist_reversal_count",
+      "features.checklist_fresh_sweep_count",
+      "features.checklist_linked_fvg_count",
+      "features.checklist_range_locked_count",
+      "features.checklist_raw_fvg_count",
+      "features.checklist_accepted_fvg_count",
+      "features.checklist_atr_rejected_fvg_count",
+      "features.setup_ready_time",
+      "features.setup_outcome_time"
+    ],
+    "strict_replacements": [
+      "signals.long_setup_ready",
+      "signals.short_setup_ready",
+      "signals.setup_filled",
+      "signals.setup_target",
+      "signals.setup_stop",
+      "signals.setup_missed",
+      "states.setup_pending",
+      "states.setup_active",
+      "states.setup_terminal"
+    ]
+  },
+  "repair_targets": [
+    "confirmed-only imported 4h ownership",
+    "4h premium-discount direction ownership",
+    "single-use structural sweep lifecycle",
+    "BOS-linked FVG provenance that survives later mitigation",
+    "causal displacement-leg FVG provenance instead of fixed bar distance",
+    "A-plus quality grade for exact 67% and causal-FVG overlap",
+    "sweep source-versus-known-time provenance",
+    "persistent confirmed and rejected manipulation history",
+    "confirmed-close canonical setup ledger with next-bar activation",
+    "event-level checklist funnel and exclusive failure attribution",
+    "fresh manipulation required for CHoCH reversals and optional for BOS continuations",
+    "independent concurrent setup records with no detector suppression",
+    "TradingView position-style pending setup drawings"
+  ],
+  "prohibited_changes": [
+    "Do not replace the user-supplied indicator with a reconstruction.",
+    "Do not change the accepted 15m alternating-pivot contract.",
+    "Do not change the 4h 71% or 15m 67% canonical Fib defaults.",
+    "Do not add strategy orders or claim that a pending setup is an executed trade.",
+    "Do not enable the separate 15m 71% aligned variant.",
+    "Do not allow a CHoCH reversal setup without a confirmed manipulation.",
+    "Do not treat PineTS agreement or static analysis as TradingView acceptance."
+  ],
+  "protected_regions": [
+    {
+      "name": "base_visual_fractal_engine",
+      "start_marker": "// Base Visual Fractal Engine",
+      "end_marker": "// LTF / Internal Structure",
+      "baseline_sha256": "cd0ad6170c93b66032eab8df3e9466ad1514b94ec9fd4f9a6a4b2db3bc631406"
+    },
+    {
+      "name": "structure_range_fib_fvg_visuals",
+      "start_marker": "// Visual Layer — HTF Active Structure Guides",
+      "end_marker": "// Alerts",
+      "baseline_sha256": "44dbc19494c0384a01fd9e51a8fd539d7dbb6e525d3a9dd4296f2788fa8eddf4"
+    },
+    {
+      "name": "alerts",
+      "start_marker": "// Alerts",
+      "end_marker": "// Dashboard",
+      "baseline_sha256": "5218d97c43721d6480f393fcaf2a4881ed640ce6dfae4ce9bf6481781eb4450d"
+    }
+  ],
+  "object_budget": {
+    "tradingview_limit_per_type": 500,
+    "default_finalized_setups": 25,
+    "default_finalized_sweeps": 25,
+    "default_setup_objects": {"boxes": 50, "lines": 25, "labels": 50},
+    "default_sweep_objects": {"boxes": 0, "lines": 25, "labels": 25},
+    "maximum_setup_objects": {"boxes": 320, "lines": 160, "labels": 220},
+    "maximum_sweep_objects": {"boxes": 0, "lines": 60, "labels": 60},
+    "policy": "FIFO-delete finalized drawings beyond the configured bounded history; draw at most 100 concurrent active setups while continuing to track every active record; never add plot-count calls for setup or sweep evidence"
+  },
+  "visual_requirements": [
+    "Show premium-discount direction separately from structural bias.",
+    "Keep HTF structure visually stronger than LTF execution structure.",
+    "Anchor sweep labels to the swept level and expose active, consumed, or invalid state.",
+    "Show bounded historical confirmed manipulations and setups in production mode.",
+    "Expose noisy pivot and lifecycle internals only in debug mode.",
+    "Show frozen long or short pending-setup position drawings only from their confirmed readiness bar.",
+    "Expose candidate and invalidated sweeps only in audit mode.",
+    "Show HTF source time separately from the later chart bar where it became known.",
+    "Keep the dense checklist dashboard available for corroboration but disabled by default so production price action and position drawings remain readable."
+  ],
+  "review_timeframes": [
+    {
+      "timeframe": "240",
+      "purpose": "Confirmed 4h ownership, range, premium-discount, 71% audit, sweep lifecycle and visual preservation"
+    },
+    {
+      "timeframe": "15",
+      "purpose": "4h context plus repaired 15m execution structure, 67% audit, sweep lifecycle and break-linked FVG"
+    }
+  ],
+  "entry_criteria": {
+    "hard_rules": [
+      {
+        "id": "SM-H01",
+        "rule": "A confirmed body-close BOS or CHoCH must be produced by an impulsive move containing accepted directional imbalance.",
+        "source_lines": [2034, 2039],
+        "failure_code": "NO_CAUSAL_IMPULSE_FVG"
+      },
+      {
+        "id": "SM-H02",
+        "rule": "The post-break trading-range endpoint must be confirmed before the Fibonacci and setup parameters are frozen.",
+        "source_lines": [2079, 2084],
+        "failure_code": "NO_LOCKED_15M_RANGE"
+      },
+      {
+        "id": "SM-H03",
+        "rule": "The canonical intraday model uses 67% entry, 100% stop, and 0% target on the locked 15-minute range.",
+        "source_lines": [2270, 2273, 2382, 2384],
+        "failure_code": "INVALID_67_100_0_LEVELS"
+      },
+      {
+        "id": "SM-H04",
+        "rule": "Only completed 4-hour context and confirmed 15-minute events may own a setup; readiness is timestamped at the first close where all hard and conditional gates coincide.",
+        "source_lines": [2226, 2235],
+        "failure_code": "NO_LOCKED_HTF_CONTEXT"
+      }
+    ],
+    "conditional_rules": [
+      {
+        "id": "SM-C01",
+        "rule": "A reversal/CHoCH requires a previously purged liquidity level confirmed after the opposite structural break.",
+        "source_lines": [2040, 2046, 2117, 2120],
+        "failure_code": "REVERSAL_WITHOUT_CONFIRMED_SWEEP"
+      },
+      {
+        "id": "SM-C02",
+        "rule": "A BOS continuation may remain valid without a fresh liquidity purge.",
+        "source_lines": [2115, 2122, 2369, 2374],
+        "failure_code": null
+      }
+    ],
+    "quality_grades": [
+      {
+        "id": "SM-Q01",
+        "rule": "Exact or close 67%/FVG alignment is A-plus confluence, not base validity.",
+        "source_lines": [2288, 2289, 2297, 2300],
+        "grade": "A_PLUS_FVG_67_OVERLAP"
+      },
+      {
+        "id": "SM-Q02",
+        "rule": "Pro-trend versus counter-trend 4-hour context is disclosed as risk context and does not veto an otherwise valid 15-minute entry.",
+        "source_lines": [2275, 2283, 2385, 2391],
+        "grade": "PRO_OR_COUNTER_LOCATION"
+      }
+    ],
+    "isolated_alternative": {
+      "id": "SM-A01",
+      "rule": "The later 71% sweep-required swing model is measured separately and cannot silently replace the canonical 67% intraday model.",
+      "source_lines": [2052, 2054],
+      "enabled": false
+    }
+  },
+  "fixture_criteria": [
+    {"name": "confirmed_4h_update", "field": "signals.htf_confirmed_source_update"},
+    {"name": "discount_long_only", "field": "signals.htf_discount_gate"},
+    {"name": "premium_short_only", "field": "signals.htf_premium_gate"},
+    {"name": "accepted_15m_high", "field": "signals.ltf_high_pivot_accepted"},
+    {"name": "accepted_15m_low", "field": "signals.ltf_low_pivot_accepted"},
+    {"name": "replaced_15m_pivot", "field": "signals.ltf_pivot_replaced"},
+    {"name": "rejected_weaker_same_side_pivot", "field": "rejections.ltf_weaker_same_side_pivot"},
+    {"name": "15m_bull_break", "field": "signals.ltf_bull_break"},
+    {"name": "15m_bear_break", "field": "signals.ltf_bear_break"},
+    {"name": "15m_buy_side_sweep", "field": "signals.ltf_buy_side_sweep"},
+    {"name": "15m_sell_side_sweep", "field": "signals.ltf_sell_side_sweep"},
+    {"name": "15m_sweep_consumed", "field": "signals.ltf_sweep_consumed"},
+    {"name": "15m_sweep_invalidated", "field": "rejections.ltf_sweep_invalidated"},
+    {"name": "15m_linked_fvg_active", "field": "states.ltf_linked_fvg_active"},
+    {"name": "unrelated_fvg_rejected", "field": "rejections.unrelated_fvg_for_latest_break"},
+    {"name": "4h_bull_break", "field": "signals.htf_bull_break"},
+    {"name": "4h_bear_break", "field": "signals.htf_bear_break"},
+    {"name": "confirmed_manipulation", "field": "signals.ltf_manipulation_confirmed"},
+    {"name": "late_setup_rejected", "field": "rejections.setup_entry_touched_before_ready"},
+    {"name": "long_setup_ready", "field": "signals.long_setup_ready"},
+    {"name": "short_setup_ready", "field": "signals.short_setup_ready"},
+    {"name": "setup_filled", "field": "signals.setup_filled"},
+    {"name": "setup_terminal", "field": "states.setup_terminal"}
+  ]
+}

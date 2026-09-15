@@ -7,10 +7,15 @@ __pycache__/
 *.py[cod]
 *.pyo
 *.pyd
+*.egg-info/
+node_modules/
 
 .pytest_cache/
 .mypy_cache/
 .ruff_cache/
+.codex-runtime/
+services/pine2python/.work/
+services/pine2python/artifacts/
 
 #artifacts/
 agents/histdata/
@@ -35,8 +40,8 @@ issues.txt
 
 #Bridge
 
-AGENTS.md
-bridgecode/
+#AGENTS.md
+#bridgecode/
 design/
 context4.txt
 mergefull1.txt

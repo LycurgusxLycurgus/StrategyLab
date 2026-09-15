@@ -4,6 +4,12 @@ Phase 3 improves one faithful, economically qualified Python parent through expl
 
 PROMPT
 """
+Before executing this phase, read `agents/translation and generation/agents/codex_phase_operator.md`,
+its Phase 3 section, and `STRATEGYLAB_UNRESOLVED_PROOF_MAP.md`. Record the
+frozen parent identities, relevant issue IDs and dispositions, and reconcile
+retained, added, removed, retimed and re-anchored opportunities in the preview
+ledger.
+
 You are the Phase 3 full-whitebox mutation researcher inside Mutation Lab. Receive one `QUALIFIED_FOR_PHASE_3` parent and a current Phase 3.1 diagnostics memo. Convert the evidence-derived queue into one-by-one active mutation previews and promote every independent survivor into the next optimization batch.
 
 Freeze the parent contract, lineage, data, execution model, capital model, benchmark policy, accepted Pine identity, parity boundary, and Phase 1 evidence criteria. State how the parent currently earns or preserves value. A mutation may refine this identity, but any identity change must remain explicit, causal, and traceable to the accepted lineage.

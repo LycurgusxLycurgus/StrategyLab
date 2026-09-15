@@ -1,0 +1,14 @@
+.git
+.venv
+artifacts
+agentic
+bridgecode
+design
+services/pine2python/node_modules
+services/pine2python/.work
+services/pine2python/artifacts
+__pycache__
+*.pyc
+*.sqlite3
+prev-convo.txt
+context4.txt

@@ -1,9 +1,9 @@
 from __future__ import annotations
 
 import csv
+import hashlib
 import io
 import json
-import socket
 import time
 import uuid
 from dataclasses import dataclass
@@ -98,6 +98,72 @@ class DataService:
                 )
         return bars
 
+    def dataset_content_hash(self, dataset_id: str) -> dict[str, Any]:
+        dataset = self.repo.get_dataset(dataset_id)
+        if not dataset:
+            raise HTTPException(status_code=404, detail="Dataset not found.")
+        path = self._resolve_dataset_path(dataset)
+        if not path.exists():
+            raise HTTPException(status_code=404, detail="Dataset file is missing.")
+        payload = path.read_bytes()
+        digest = hashlib.sha256(payload).hexdigest()
+        existing = self.repo.get_dataset_hash(dataset_id)
+        if (
+            existing
+            and existing["sha256"] == digest
+            and int(existing["bytes_count"]) == len(payload)
+        ):
+            return existing
+        record = {
+            "dataset_id": dataset_id,
+            "sha256": digest,
+            "bytes_count": len(payload),
+            "computed_at": datetime.now(UTC).isoformat(),
+        }
+        self.repo.put_dataset_hash(record)
+        return record
+
+    def pine_proof_window(
+        self, dataset_id: str, max_bars: int = 5_000
+    ) -> dict[str, Any]:
+        if not 1 <= max_bars <= 5_000:
+            raise HTTPException(
+                status_code=400,
+                detail="Pine Basic proof windows must contain 1..5000 bars.",
+            )
+        dataset = self.repo.get_dataset(dataset_id)
+        if not dataset:
+            raise HTTPException(status_code=404, detail="Dataset not found.")
+        bars = self.load_bars(dataset_id)
+        if not bars:
+            raise HTTPException(status_code=400, detail="Dataset has no bars.")
+        window = bars[-max_bars:]
+        interval_ms = INTERVAL_MS.get(dataset["timeframe"])
+        if interval_ms is None and len(window) > 1:
+            interval_ms = max(
+                1,
+                int((window[-1].ts - window[-2].ts).total_seconds() * 1_000),
+            )
+        interval_ms = interval_ms or 1
+        start_ms = int(window[0].ts.timestamp() * 1_000)
+        end_ms = int(window[-1].ts.timestamp() * 1_000) + interval_ms
+        content_hash = self.dataset_content_hash(dataset_id)
+        return {
+            "profile": "basic_v1",
+            "dataset_id": dataset_id,
+            "dataset_sha256": content_hash["sha256"],
+            "symbol": dataset["symbol"],
+            "timeframe": dataset["timeframe"],
+            "rows": len(window),
+            "start_ms": start_ms,
+            "end_ms": end_ms,
+            "start_iso": window[0].ts.isoformat(),
+            "end_exclusive_iso": datetime.fromtimestamp(
+                end_ms / 1_000, tz=UTC
+            ).isoformat(),
+            "selection": "latest_bars",
+        }
+
     def download_binance_dataset(
         self,
         symbol: str,
@@ -113,8 +179,9 @@ class DataService:
                 status_code=400,
                 detail="Mutation Lab requires at least 40000 bars unless full history is selected.",
             )
-        target_bars = bars if not full_history else bars
-        collected, download_meta = self._download_klines(symbol, timeframe, target_bars, full_history)
+        collected, download_meta = self._download_klines(
+            symbol, timeframe, bars, full_history
+        )
         if len(collected) < min(500, bars):
             raise HTTPException(status_code=502, detail="Downloaded dataset is too small for research use.")
         dataset_id = f"ds_{uuid.uuid4().hex[:12]}"
@@ -307,11 +374,22 @@ class DataService:
     def _download_klines(self, symbol: str, timeframe: str, bars: int, full_history: bool) -> tuple[list[Bar], dict[str, Any]]:
         limit = 1000
         interval_ms = INTERVAL_MS[timeframe]
+        now_ms = int(datetime.now(UTC).timestamp() * 1000)
+        closed_end_ms = (now_ms // interval_ms) * interval_ms
         collected: list[list[Any]] = []
-        start_time = 0 if full_history else max(0, int(datetime.now(UTC).timestamp() * 1000) - (bars * interval_ms))
+        start_time = (
+            0
+            if full_history
+            else max(0, closed_end_ms - (bars * interval_ms))
+        )
         history_truncated = False
         while True:
-            query = {"symbol": symbol.upper(), "interval": timeframe, "limit": limit}
+            query = {
+                "symbol": symbol.upper(),
+                "interval": timeframe,
+                "limit": limit,
+                "endTime": closed_end_ms - 1,
+            }
             query["startTime"] = start_time
             url = f"https://api.binance.com/api/v3/klines?{urlencode(query)}"
             payload = self._fetch_klines_page(url, full_history=full_history)
@@ -333,6 +411,8 @@ class DataService:
                 break
         bars_out: list[Bar] = []
         for row in collected:
+            if int(row[0]) + interval_ms > closed_end_ms:
+                continue
             bars_out.append(
                 Bar(
                     ts=datetime.fromtimestamp(int(row[0]) / 1000, UTC),
@@ -369,7 +449,7 @@ class DataService:
                     status_code=502,
                     detail=f"Binance download failed with HTTP {exc.code}. Retry, or reduce the request scope.",
                 ) from exc
-            except (URLError, TimeoutError, socket.timeout) as exc:
+            except (URLError, TimeoutError) as exc:
                 if attempt < len(backoffs):
                     time.sleep(backoffs[attempt])
                     continue

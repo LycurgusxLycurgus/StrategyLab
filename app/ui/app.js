@@ -8,6 +8,13 @@ const state = {
   previewRequestToken: 0,
   optimizationProgressJobId: null,
   optimizationProgressHighWater: 0,
+  pineStatus: null,
+  pineRevisions: [],
+  currentPineRevision: null,
+  currentPineProof: null,
+  currentPythonTrace: null,
+  currentPineParity: null,
+  versionPineEvidence: [],
 };
 
 const outputBox = document.getElementById("outputBox");
@@ -29,6 +36,12 @@ const proposalsTable = document.getElementById("proposalsTable");
 const runsTable = document.getElementById("runsTable");
 const versionsTable = document.getElementById("versionsTable");
 const promptsList = document.getElementById("promptsList");
+const pineRevisionSelect = document.getElementById("pineRevisionSelect");
+const pineEvidenceGrid = document.getElementById("pineEvidenceGrid");
+const pineSourceCode = document.getElementById("pineSourceCode");
+const pineCopyProofButton = document.getElementById("pineCopyProofButton");
+const pineCompareButton = document.getElementById("pineCompareButton");
+const pineOpenEvidenceButton = document.getElementById("pineOpenEvidenceButton");
 let previewTimer = null;
 let optimizationProgressTimer = null;
 const MIN_DATASET_BARS = 40000;
@@ -915,6 +928,136 @@ function renderPrompts() {
   promptsList._visiblePrompts = prompts;
 }
 
+function latestPineEvidence(revision, kind) {
+  return [...(revision?.evidence || [])]
+    .filter((item) => item.kind === kind)
+    .sort((left, right) => right.created_at.localeCompare(left.created_at))[0] || null;
+}
+
+function pineEvidenceCard(label, value, tone = "") {
+  return `
+    <div class="pine-evidence-card">
+      <span>${escapeHtml(label)}</span>
+      <strong class="${tone}">${escapeHtml(value ?? "Not available")}</strong>
+    </div>
+  `;
+}
+
+function renderPineRevisionSelect(preferredRevisionId = "") {
+  const revisions = [...state.pineRevisions].sort((left, right) =>
+    right.created_at.localeCompare(left.created_at),
+  );
+  pineRevisionSelect.innerHTML = revisions.length
+    ? revisions
+        .map(
+          (revision) =>
+            `<option value="${escapeAttribute(revision.revision_id)}">${escapeHtml(revision.revision_id)} | ${escapeHtml(revision.mode)}</option>`,
+        )
+        .join("")
+    : '<option value="">No frozen Pine revisions</option>';
+  const target = revisions.some((revision) => revision.revision_id === preferredRevisionId)
+    ? preferredRevisionId
+    : revisions[0]?.revision_id || "";
+  pineRevisionSelect.value = target;
+}
+
+function renderPineEvidence() {
+  const service = state.pineStatus || { status: "unavailable" };
+  const ready = service.status === "ready";
+  const serviceBadge = document.getElementById("pineServiceBadge");
+  serviceBadge.textContent = ready ? "Ready" : service.status || "Unavailable";
+  serviceBadge.className = `badge ${ready ? "" : "bad"}`.trim();
+  document.getElementById("pineServiceDetail").textContent = ready
+    ? `${service.transport || "service"} · v${service.version?.service_version || "unknown"}`
+    : service.error?.message || "Pine workbench operations are unavailable";
+
+  const revision = state.currentPineRevision;
+  const proof = state.currentPineProof || latestPineEvidence(revision, "tradingview_proof");
+  const pineTrace = latestPineEvidence(revision, "pine_trace");
+  const observation = latestPineEvidence(revision, "tradingview_observation");
+  const parser = revision?.analysis?.parser || {};
+  const capabilities = revision?.analysis?.capabilities || {};
+  const temporalFindings = revision?.analysis?.temporal_findings || [];
+  const runtimeBlockers = capabilities.runtime_blockers || [];
+  const blockingCount = temporalFindings.filter((item) => item.severity === "high").length + runtimeBlockers.length;
+  const observationStatuses = observation?.status || [];
+  const tradingViewStatus = observationStatuses.includes("TRADINGVIEW_ACCEPTED")
+    ? "TRADINGVIEW_ACCEPTED"
+    : observationStatuses.includes("TRADINGVIEW_SIGNATURE_MATCH")
+      ? "TRADINGVIEW_SIGNATURE_MATCH"
+      : proof
+        ? "TRADINGVIEW_REVIEW_REQUIRED"
+        : "NOT_PREPARED";
+  const localRuntimeStatus = proof?.payload?.local_runtime?.status || proof?.local_runtime?.status || capabilities.local_runtime || "NOT_RUN";
+  const proofWindow = proof?.payload?.window || proof?.window;
+  const proofDataset = proof?.dataset_id || "Not prepared";
+  const referenceLabel = proofWindow
+    ? `${pineTrace?.status?.[0] || "PROOF_READY"} · ${proofDataset} · ${new Date(proofWindow.start_ms).toISOString().slice(0, 10)} → ${new Date(proofWindow.end_ms).toISOString().slice(0, 10)}`
+    : proofDataset;
+  const persistedPythonTrace = [...state.versionPineEvidence]
+    .filter((item) => item.kind === "python_trace" && item.dataset_id === selectedDatasetId())
+    .sort((left, right) => right.created_at.localeCompare(left.created_at))[0] || null;
+  const pythonTrace = state.currentPythonTrace || persistedPythonTrace;
+  const pythonTraceLabel = pythonTrace
+    ? `${pythonTrace.status?.[0] || "complete"} · ${pythonTrace.dataset_id}`
+    : "NOT_RUN";
+  const parityStatus = state.currentPineParity?.payload?.status || state.currentPineParity?.status?.[0] || "NOT_READY";
+  const firstDivergence = state.currentPineParity?.payload?.first_divergence;
+  const generated = revision?.provenance?.origin === "pine2python_registered_adapter";
+
+  pineEvidenceGrid.innerHTML = [
+    pineEvidenceCard("Accepted Revision", revision?.revision_id || "None"),
+    pineEvidenceCard("Pine Source SHA-256", revision?.source_sha256 || "None"),
+    pineEvidenceCard("Analysis", revision?.status?.includes("STATIC_REVIEW_COMPLETE") ? "STATIC_REVIEW_COMPLETE" : "NOT_RUN"),
+    pineEvidenceCard("Parser", parser.status || "NOT_RUN", parser.status === "PARSE_COMPLETE" ? "good" : "warn"),
+    pineEvidenceCard("Local Runtime", localRuntimeStatus, String(localRuntimeStatus).includes("PASS") || localRuntimeStatus === "supported" ? "good" : "warn"),
+    pineEvidenceCard("Blocking Findings", String(blockingCount), blockingCount ? "bad" : "good"),
+    pineEvidenceCard("TradingView Review", tradingViewStatus, tradingViewStatus === "TRADINGVIEW_ACCEPTED" ? "good" : "warn"),
+    pineEvidenceCard("Reference Window", referenceLabel),
+    pineEvidenceCard("Python Trace", pythonTraceLabel, pythonTrace ? "good" : "warn"),
+    pineEvidenceCard("Parity", parityStatus, String(parityStatus).includes("PASS") ? "good" : "warn"),
+    pineEvidenceCard("First Divergence", firstDivergence ? `${firstDivergence.key} · ${firstDivergence.field}` : "None recorded"),
+    pineEvidenceCard("Generated Pine", generated ? "REGISTERED ADAPTER" : revision ? "MANUAL / ADAPTED" : "NOT_CREATED"),
+  ].join("");
+
+  document.getElementById("pineAnalyzeButton").disabled = !ready;
+  document.getElementById("pineGenerateButton").disabled = !ready || !selectedDatasetId();
+  document.getElementById("pinePrepareProofButton").disabled = !ready || !revision || !selectedDatasetId();
+  document.getElementById("pinePythonTraceButton").disabled = !ready || !currentVersion() || !selectedDatasetId();
+  pineCopyProofButton.disabled = !state.currentPineProof?.instrumented_source;
+  pineCompareButton.disabled = true;
+  pineCompareButton.title = "Enabled only after both standard Pine and Python traces plus a parity contract exist.";
+  pineOpenEvidenceButton.disabled = !revision;
+}
+
+async function refreshPineWorkbench(preferredRevisionId = "") {
+  const [status, revisions] = await Promise.all([
+    fetchJson("/api/pine2python/status").catch((error) => ({
+      status: "unavailable",
+      error: { message: error.message },
+    })),
+    fetchJson("/api/pine-workbench/revisions").catch(() => []),
+  ]);
+  state.pineStatus = status;
+  state.pineRevisions = revisions;
+  state.versionPineEvidence = currentVersion()
+    ? await fetchJson(
+        `/api/versions/${encodeURIComponent(currentVersion().version_id)}/pine-evidence`,
+      ).catch(() => [])
+    : [];
+  renderPineRevisionSelect(preferredRevisionId);
+  if (pineRevisionSelect.value) {
+    state.currentPineRevision = await fetchJson(
+      `/api/pine-workbench/revisions/${encodeURIComponent(pineRevisionSelect.value)}`,
+    );
+    pineSourceCode.value = state.currentPineRevision.source_code || "";
+  } else {
+    state.currentPineRevision = null;
+  }
+  state.currentPineProof = null;
+  renderPineEvidence();
+}
+
 function promptSortKey(name) {
   const match = String(name).match(/^(\d+)(?:-(\d+))?[_-]/);
   if (!match) {
@@ -982,6 +1125,7 @@ function collectOverrides() {
 async function refreshAll() {
   const familyId = selectedFamilyId();
   const preferredVersionId = versionSelect.value;
+  const preferredPineRevisionId = pineRevisionSelect.value;
   const [families, datasets, prompts] = await Promise.all([
     fetchJson("/api/families"),
     fetchJson("/api/datasets"),
@@ -1004,6 +1148,9 @@ async function refreshAll() {
   renderVersionSelect(preferredVersionId);
   if (versionSelect.value) {
     state.familyDetail.tuning_edges = await fetchJson(`/api/versions/${versionSelect.value}/tuning`);
+    state.versionPineEvidence = await fetchJson(
+      `/api/versions/${encodeURIComponent(versionSelect.value)}/pine-evidence`,
+    ).catch(() => []);
   }
   state.previewResult = null;
   state.workingParameters = {};
@@ -1014,6 +1161,7 @@ async function refreshAll() {
   renderRuns();
   renderVersions();
   renderPrompts();
+  await refreshPineWorkbench(preferredPineRevisionId);
 }
 
 async function refreshFamilyDetail() {
@@ -1026,6 +1174,9 @@ async function refreshFamilyDetail() {
   renderVersionSelect(preferredVersionId);
   if (versionSelect.value) {
     state.familyDetail.tuning_edges = await fetchJson(`/api/versions/${versionSelect.value}/tuning`);
+    state.versionPineEvidence = await fetchJson(
+      `/api/versions/${encodeURIComponent(versionSelect.value)}/pine-evidence`,
+    ).catch(() => []);
   }
   state.previewResult = null;
   state.workingParameters = {};
@@ -1036,6 +1187,7 @@ async function refreshFamilyDetail() {
   renderRuns();
   renderVersions();
   renderPrompts();
+  renderPineEvidence();
 }
 
 async function refreshSelectedVersion() {
@@ -1043,6 +1195,9 @@ async function refreshSelectedVersion() {
     return;
   }
   state.familyDetail.tuning_edges = await fetchJson(`/api/versions/${versionSelect.value}/tuning`);
+  state.versionPineEvidence = await fetchJson(
+    `/api/versions/${encodeURIComponent(versionSelect.value)}/pine-evidence`,
+  ).catch(() => []);
   state.previewResult = null;
   state.workingParameters = {};
   syncWorkingParameters();
@@ -1051,6 +1206,7 @@ async function refreshSelectedVersion() {
   renderTuningEdges();
   renderRuns();
   renderVersions();
+  renderPineEvidence();
 }
 
 async function downloadDataset() {
@@ -1553,6 +1709,215 @@ async function registerBaseline() {
   }
 }
 
+async function selectedPineProofWindow() {
+  const datasetId = selectedDatasetId();
+  if (!datasetId) {
+    throw new Error("Select a dataset before preparing Pine evidence.");
+  }
+  return fetchJson(
+    `/api/datasets/${encodeURIComponent(datasetId)}/pine-proof-window?max_bars=5000`,
+  );
+}
+
+async function selectPineRevision() {
+  if (!pineRevisionSelect.value) {
+    state.currentPineRevision = null;
+    state.currentPineProof = null;
+    renderPineEvidence();
+    return;
+  }
+  try {
+    state.currentPineRevision = await fetchJson(
+      `/api/pine-workbench/revisions/${encodeURIComponent(pineRevisionSelect.value)}`,
+    );
+    state.currentPineProof = null;
+    pineSourceCode.value = state.currentPineRevision.source_code || "";
+    setStatus("pineStatus", `Loaded immutable revision ${pineRevisionSelect.value}.`, "success");
+    renderPineEvidence();
+  } catch (error) {
+    setStatus("pineStatus", error.message, "error");
+    showOutput({ error: error.message });
+  }
+}
+
+async function createPineRevision() {
+  const mode = document.getElementById("pineModeSelect").value;
+  const sourceUrl = document.getElementById("pineSourceUrl").value.trim();
+  const license = document.getElementById("pineSourceLicense").value.trim();
+  const payload = {
+    source_code: pineSourceCode.value,
+    source_name: document.getElementById("pineSourceName").value.trim() || "strategy.pine",
+    mode,
+    settings: {},
+    provenance: {
+      origin: mode === "source_adaptation" ? "open_source_adaptation" : "operator_authored",
+      ...(sourceUrl ? { source_url: sourceUrl } : {}),
+      ...(license ? { license } : {}),
+    },
+    parent_revision_id: state.currentPineRevision?.revision_id || null,
+    workbench_id: state.currentPineRevision?.workbench_id || null,
+  };
+  setStatus("pineStatus", "Parsing, reviewing, and freezing the Pine revision...", "");
+  try {
+    const result = await fetchJson("/api/pine-workbench/revisions", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+    showOutput(result);
+    await refreshPineWorkbench(result.revision_id);
+    setStatus("pineStatus", `Revision ${result.revision_id} frozen with structured analysis.`, "success");
+  } catch (error) {
+    setStatus("pineStatus", error.message, "error");
+    showOutput({ error: error.message });
+  }
+}
+
+async function generatePineCandidate() {
+  setStatus("pineStatus", "Generating and analyzing the registered MA / ATR strategy adapter...", "");
+  try {
+    const window = await selectedPineProofWindow();
+    const mintick = Number(document.getElementById("pineMintickInput").value);
+    if (!Number.isFinite(mintick) || mintick <= 0) {
+      throw new Error("Trading tick size must be a positive number.");
+    }
+    const result = await fetchJson("/api/pine-workbench/generate/ma_cross_atr_stop_v1", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        parameters: {
+          ma_kind: "sma",
+          fast_len: 10,
+          slow_len: 30,
+          atr_len: 14,
+          noise_lookback: 25,
+          max_no_cross: 5,
+          stop_mult: 3,
+          quantity: 1,
+          allow_long: true,
+          allow_short: true,
+          initial_capital: 100000,
+          commission_pct: 0,
+          slippage_ticks: 0,
+          execution_model: "next_bar_open",
+        },
+        title: "StrategyLab MA / ATR parity candidate",
+        symbol: window.symbol,
+        timeframe: window.timeframe,
+        mintick,
+        start_ms: window.start_ms,
+        end_ms: window.end_ms,
+        profile: "basic_v1",
+        workbench_id: state.currentPineRevision?.workbench_id || null,
+        parent_revision_id: state.currentPineRevision?.revision_id || null,
+      }),
+    });
+    showOutput(result);
+    await refreshPineWorkbench(result.revision_id);
+    setStatus("pineStatus", `Generated revision ${result.revision_id}; manual review is still required.`, "success");
+  } catch (error) {
+    setStatus("pineStatus", error.message, "error");
+    showOutput({ error: error.message });
+  }
+}
+
+async function preparePineProof() {
+  if (!state.currentPineRevision) {
+    setStatus("pineStatus", "Freeze or select a Pine revision first.", "error");
+    return;
+  }
+  setStatus("pineStatus", "Building the Basic-plan parity dashboard and running the local proof...", "");
+  try {
+    const window = await selectedPineProofWindow();
+    const mintick = Number(document.getElementById("pineMintickInput").value);
+    if (!Number.isFinite(mintick) || mintick <= 0) {
+      throw new Error("Trading tick size must be a positive number.");
+    }
+    const result = await fetchJson(
+      `/api/pine-workbench/revisions/${encodeURIComponent(state.currentPineRevision.revision_id)}/proofs`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          dataset_id: window.dataset_id,
+          start_ms: window.start_ms,
+          end_ms: window.end_ms,
+          mintick,
+          profile: "basic_v1",
+        }),
+      },
+    );
+    state.currentPineProof = result;
+    state.currentPineRevision = await fetchJson(
+      `/api/pine-workbench/revisions/${encodeURIComponent(state.currentPineRevision.revision_id)}`,
+    );
+    showOutput({ ...result, instrumented_source: "[available through Copy TradingView Source]" });
+    renderPineEvidence();
+    setStatus(
+      "pineStatus",
+      "Local proof complete. Copy the source to TradingView and capture the one-screen dashboard; TradingView review remains required.",
+      "success",
+    );
+  } catch (error) {
+    setStatus("pineStatus", error.message, "error");
+    showOutput({ error: error.message });
+  }
+}
+
+async function copyPineProofSource() {
+  const source = state.currentPineProof?.instrumented_source;
+  if (!source) {
+    return;
+  }
+  try {
+    await copyTextToClipboard(source);
+    setStatus("pineStatus", "Instrumented Pine copied. Paste it into TradingView on the exact symbol and timeframe.", "success");
+  } catch (error) {
+    setStatus("pineStatus", `Clipboard copy failed: ${error.message}`, "error");
+  }
+}
+
+async function runPinePythonTrace() {
+  const version = currentVersion();
+  const datasetId = selectedDatasetId();
+  if (!version || !datasetId) {
+    setStatus("pineStatus", "Select a StrategyLab version and dataset first.", "error");
+    return;
+  }
+  setStatus("pineStatus", "Running the opt-in Python trace on the frozen dataset...", "");
+  try {
+    state.currentPythonTrace = await fetchJson(
+      `/api/versions/${encodeURIComponent(version.version_id)}/python-trace`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ dataset_id: datasetId }),
+      },
+    );
+    state.versionPineEvidence = [
+      ...state.versionPineEvidence.filter(
+        (item) => item.evidence_id !== state.currentPythonTrace.evidence_id,
+      ),
+      state.currentPythonTrace,
+    ];
+    showOutput(state.currentPythonTrace);
+    renderPineEvidence();
+    setStatus("pineStatus", "Python trace recorded. Compare remains locked until a standard Pine reference trace and contract exist.", "success");
+  } catch (error) {
+    setStatus("pineStatus", error.message, "error");
+    showOutput({ error: error.message });
+  }
+}
+
+function openPineEvidence() {
+  if (!state.currentPineRevision) {
+    return;
+  }
+  showOutput(state.currentPineRevision);
+  document.getElementById("output").open = true;
+  window.location.hash = "output";
+}
+
 async function handleTableClick(event) {
   const button = event.target.closest("[data-action]");
   if (!button) {
@@ -1705,13 +2070,23 @@ bindClick("productionDefaultsButton", applyProductionDefaults);
 bindClick("robustnessButton", runRobustnessGate);
 bindClick("resetTuneButton", resetTune);
 bindClick("saveTuneButton", saveTune);
+bindClick("pineAnalyzeButton", createPineRevision);
+bindClick("pineGenerateButton", generatePineCandidate);
+bindClick("pinePrepareProofButton", preparePineProof);
+bindClick("pineCopyProofButton", copyPineProofSource);
+bindClick("pinePythonTraceButton", runPinePythonTrace);
+bindClick("pineOpenEvidenceButton", openPineEvidence);
 optimizeResearchButton.addEventListener("click", () => optimizeAll("research"));
 optimizeAllButton.addEventListener("click", () => optimizeAll("production"));
 optimizeRobustnessButton.addEventListener("click", () => optimizeAll("robustness_repair"));
 bindClick("registerButton", registerBaseline);
 familySelect.addEventListener("change", refreshFamilyDetail);
 versionSelect.addEventListener("change", refreshSelectedVersion);
-datasetSelect.addEventListener("change", () => schedulePreview(true));
+datasetSelect.addEventListener("change", () => {
+  schedulePreview(true);
+  renderPineEvidence();
+});
+pineRevisionSelect.addEventListener("change", selectPineRevision);
 fullHistoryInput.addEventListener("change", syncFullHistoryBars);
 datasetsTable.addEventListener("click", handleTableClick);
 proposalsTable.addEventListener("click", handleTableClick);

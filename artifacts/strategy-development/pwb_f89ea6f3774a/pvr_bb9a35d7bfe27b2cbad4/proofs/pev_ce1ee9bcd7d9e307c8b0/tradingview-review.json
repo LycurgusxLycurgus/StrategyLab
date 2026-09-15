@@ -1,0 +1,28 @@
+{
+  "schema_version": "1.0",
+  "status": "CORROBORATED_AWAITING_USER_VERDICT",
+  "symbol": "BINANCE:BTCUSDT",
+  "timeframe": "15",
+  "source_sha256": "730abeb781090ed4503e46ce65fcad15cac746b3e8821086dfb7167fbde9ac8b",
+  "instrumented_source_sha256": "e570f8817b553838de0fde4de393d7933d5c9abb20bf4b4d6da90a2c4d8cc3d7",
+  "proof_dashboard_match": true,
+  "compile": "PASS",
+  "full_history_rendering": "PASS",
+  "sweep_positive_case": "PASS",
+  "no_sweep_case": "PASS",
+  "reload_stability": "PASS",
+  "sweep_positive_screenshot": {
+    "path": "artifacts/strategy-development/smart-money-4/smart-money-4-v4-sweep-positive.png",
+    "sha256": "1a80093f2109feb3f33340586db6c664e53a4ecaaea36d33a0b17771003b0e77"
+  },
+  "no_sweep_screenshot": {
+    "path": "artifacts/strategy-development/smart-money-4/smart-money-4-v4-no-sweep.png",
+    "sha256": "6aa500683805fc2661c3756f7fd08930eef199806bf150c8b4bc1bb8088570f8"
+  },
+  "proof_screenshot": {
+    "path": "tradingview-dashboard.png",
+    "sha256": "c936101e63c07ffb1df5c4c97369399829c0a08b71bc1d16079cb4a5d77a4bd1"
+  },
+  "verdict": null,
+  "note": "Exact user/expert accept or reject is still required; corroboration is not acceptance."
+}

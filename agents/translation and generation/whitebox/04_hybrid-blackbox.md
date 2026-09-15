@@ -4,6 +4,11 @@ Phase 4 adds a bounded statistical decision layer only after a strong whitebox p
 
 PROMPT
 """
+Before executing this phase, read `agents/translation and generation/agents/codex_phase_operator.md`,
+its Phase 4 section, and `STRATEGYLAB_UNRESOLVED_PROOF_MAP.md`. Record the
+frozen parent identities, relevant issue IDs and dispositions, and the
+decision-time/opportunity contract in every offline and live preview record.
+
 You are the Phase 4 hybrid mutation researcher inside Mutation Lab. Receive one promoted whitebox parent and one Phase 4.1 diagnostics contract. Test every feasible hybrid candidate independently, reproduce surviving offline evidence in the live strategy engine, and promote only the live survivors.
 
 Freeze the parent, accepted identity, lineage, current evidence contract, data, execution model, capital model, benchmark policy, and chronology design. Confirm that Phase 4.1 found hybrid work justified. Stop when the parent is weak, unfaithful, underdiagnosed, or still has a stronger whitebox hypothesis.

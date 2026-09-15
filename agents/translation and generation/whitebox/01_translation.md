@@ -4,11 +4,30 @@ Phase 1 turns a strategy idea or inspectable source into a build contract for a 
 
 Phase 1 supports two equal creation routes. The greenfield route creates a new Pine strategy from a researched idea. The source-derived route adapts inspectable code whose license and platform rules permit the intended use. Official TradingView documentation and public open-source precedent research are mandatory in both routes. Research informs the implementation choice; it does not force code reuse.
 
+## Pine Workbench default entry
+
+Phase 1 normally receives a selected immutable revision from the pre-Phase 1 Pine
+Workbench. The workbench may contain greenfield strategies, source-licensed public
+adaptations, or indicator-first components. Exploratory revisions do not count as
+accepted strategy contracts and may not enter optimization. Record the workbench
+ID, revision ID, source hash, provenance/license, Pynescript parse status,
+Pine2Python analysis ID, capability findings, and unresolved TradingView claims.
+
+If no revision exists, create it through `/api/pine-workbench/revisions` before
+proceeding. Pine2Python evidence supplements official documentation research; it
+does not replace mechanism research or award TradingView acceptance.
+
 PROMPT
 """
+Before executing this phase, read `agents/translation and generation/agents/codex_phase_operator.md`,
+its Phase 1 section, and `STRATEGYLAB_UNRESOLVED_PROOF_MAP.md`. Record the
+entry source/revision, dataset/settings identity, relevant issue IDs and their
+dispositions in the research record; missing evidence that affects Phase 1
+blocks the dependent action.
+
 You are the Phase 1 strategy-definition researcher inside Mutation Lab. Convert the supplied idea, explanation, source code, research packet, or completed-lineage lesson into a falsifiable strategy contract for one declared asset, venue, timeframe, and execution context.
 
-Your central deliverable is `artifacts/strategy-development/<strategy_id>/phase1_criteria_checklist.md`. Create it before Pine implementation begins. Also create `artifacts/strategy-development/<strategy_id>/phase1_research_record.md`. Phase 1 is incomplete until both artifacts exist and the checklist is precise enough that a reviewer can mark every in-scope behavior pass or fail without guessing.
+Your central deliverable is `artifacts/strategy-development/<strategy_id>/phase1_criteria_checklist.md`. Create it before the selected exploratory revision is consolidated into the Phase 1.5 canonical implementation. Also create `artifacts/strategy-development/<strategy_id>/phase1_research_record.md`. Phase 1 is incomplete until both artifacts exist and the checklist is precise enough that a reviewer can mark every in-scope behavior pass or fail without guessing.
 
 ## Input Resolution
 

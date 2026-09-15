@@ -8,6 +8,7 @@ Phase prompts live in `agents/translation and generation/whitebox/`.
 
 | Phase | Prompt | Owned outcome |
 |---:|---|---|
+| 0 | Pine Workbench API and `services/pine2python/` | Immutable greenfield, source-adapted, or indicator-first revisions with automated analysis and local proof evidence. |
 | 1 | `01_translation.md` | Strategy-specific research record and criteria/checklist. |
 | 1.5 | `01-5_baseline_transformation.md` | Complete Pine strategy, screenshot-heavy manual TradingView acceptance, and frozen portability package. |
 | 2 | `02_baseline.md` | Faithful Mutation Lab Python port with criterion-level parity evidence. |
@@ -21,16 +22,19 @@ Phase prompts live in `agents/translation and generation/whitebox/`.
 
 Phases 3 through 4.3 also require `agents/docs/universal_mutation_constitution.md`.
 
-Strategy-development artifacts belong under `artifacts/strategy-development/<strategy_id>/`. Run evidence remains under `artifacts/runs/`, `artifacts/reports/`, and `artifacts/diagnostics/`. Original inspectable source and accepted canonical Pine versions belong under `pre-strategies/` with distinct filenames.
+Strategy-development artifacts belong under `artifacts/strategy-development/<strategy_id>/`. Run evidence remains under `artifacts/runs/`, `artifacts/reports/`, and `artifacts/diagnostics/`. Original inspectable source and accepted canonical Pine versions belong under `pre-strategies/` with distinct filenames. Pine2Python is built in this repository at `services/pine2python/`; do not create a temporary external repository or vendor it later.
 
 ## Operating Constitution
 
 - The Phase 1 criteria/checklist defines correctness before code exists.
 - TradingView is the canonical proving ground for chart-based strategies.
+- TradingView Basic corroboration uses one on-chart parity-proof dashboard by default; paid CSV export is never required.
+- Dataset fingerprints must match before execution or performance parity can pass.
+- Pine2Python provides analysis, local supported-subset execution, proof generation, and first-divergence comparison; it never optimizes or promotes.
 - Greenfield Pine and source-derived Pine are equal routes selected by evidence.
 - Official TradingView documentation and open-source precedent research are mandatory for both routes.
 - The user alone approves the manual TradingView gate.
-- Screenshots are required evidence and must map to stable checklist IDs.
+- One parity-dashboard screenshot is the default required evidence and must map to stable checklist IDs; focused extra screenshots are claim-driven.
 - Mutation Lab receives only a frozen, manually accepted Pine strategy.
 - Phase 2 proves parity before economics or optimization are interpreted.
 - Phase 2.5 reviews successful parity quickly and never repeats the port without a discrepancy.
@@ -39,6 +43,101 @@ Strategy-development artifacts belong under `artifacts/strategy-development/<str
 - Offline evidence cannot promote live behavior.
 - Production claims require robustness, execution feasibility, forward reconciliation, and operational controls beyond the mutation phases.
 - Strategy families remain in the repo until the user explicitly requests removal.
+
+## Shared Project Evidence Contract
+
+This guide is the shared owner of the evidence rules used by every phase. Each
+standalone phase prompt must read this guide, the applicable phase section, and
+the current `STRATEGYLAB_UNRESOLVED_PROOF_MAP.md` before acting. The register is
+the detailed project memory for open questions, proof obligations, owners,
+non-proof, and reopening triggers; it is not a substitute for the
+strategy-specific criteria or a phase verdict.
+
+Every phase carries forward these identities when applicable: authoritative
+source and immutable parent/child hashes; criteria and research revision;
+dataset file/hash, symbol, venue, session, timezone and timeframe; complete
+settings and execution model; Pine2Python analysis, instrumentation, runtime
+and proof IDs; Python parent/trace IDs; and the exact evidence window and
+warmup/reset boundary. Hash the exact UTF-8 bytes written to disk and verify
+them by binary readback before treating a Pine or proof artifact as immutable.
+
+Keep these evidence classes separate:
+
+- `LOCAL_PROOF_CAPTURE_COMPLETE` means supported PineTS streams were captured;
+  `LOCAL_PROOF_PARITY_PASS` requires caller-owned reference streams. Both are
+  local evidence and retain `TRADINGVIEW_REVIEW_REQUIRED`.
+- A TradingView signature is meaningful only after dataset fingerprints match.
+  `TRADINGVIEW_ACCEPTED` additionally requires exact source/settings/window
+  identity, displayed dashboard values, screenshot SHA-256, and an explicit
+  user verdict. A local result, compile, screenshot filename, or API status
+  cannot supply that verdict.
+- Python parity is a separate gate from indicator acceptance and economics.
+  Headline totals never replace feature, signal, state, rejection, order,
+  position, trade and lifecycle evidence.
+
+For detector-based work, account for every candidate with one terminal result
+and a first-failure funnel, then assess independent chart opportunity recall.
+Separate detector events, checklist/quality gates, lifecycle/order policy, and
+rendering capacity. Record source/known/confirmation/ready/action timestamps;
+pending or open outcomes remain explicitly unresolved at the observation
+cutoff. Use the first causal divergence order for proof mismatches: contiguous
+field groups, time partitions, then exact-bar primitive probes. Count all
+TradingView plot calls, including `alertcondition`, and preflight compiled-token
+pressure on the exact generated bytes. Stateful proofs separate supplied
+history warmup from the hashed window. Persistent historical drawings own
+frozen timestamps and use `xloc.bar_time`; an object-budget failure must not
+erase a detection event. Remaining OHLC ambiguity requires a reason code and
+the evidence/review timestamp that leaves it unresolved.
+
+An issue may block only a phase whose accepted scope it affects or whose input
+identity it invalidates. A later phase may not silently close an earlier issue;
+it records the issue ID, evidence locator, disposition, and return route. A
+mechanism is called reusable only after its same failure mechanism passes on a
+materially different non-SMC consumer; additional SMC assets demonstrate
+context coverage, not cross-strategy transfer. The detailed root-resolution and
+cross-strategy proof gates live in the register.
+
+### Phase application map
+
+| Phase | Required application of the shared contract |
+|---:|---|
+| 0 / 1 | Freeze source authority and lineage; create a source-cited criteria manifest with hard, conditional, quality, context and isolated alternatives; choose positive, negative and boundary fixtures; define trace fields, timestamps, data identity and unresolved IDs before semantic work. |
+| 1.5 | Prove protected source regions, exact bytes, static/runtime budgets, causal state and visuals; run the bounded dashboard and focused TradingView review; record the user verdict for the exact candidate before strategy/port progression. |
+| 2 | Port only accepted Pine; map every criterion to Pine/Python code and trace fields; compare aligned datasets and localize the first divergence; document approved exclusions/tolerances without turning feed mismatch into parity. |
+| 2.5 | Verify prerequisite freshness and hashes without repeating sufficient parity; run the unoptimized baseline and economic qualification separately; do not use PF/WR to hide source-valid events or repair semantics. |
+| 3.1 / 3 | Derive hypotheses from current evidence; preserve retained, added, removed, retimed and re-anchored opportunities and first-failure classes; test one conceptual dependency while keeping the accepted semantic boundary explicit. |
+| 4.1 / 4 | Freeze decision-time information, target, ambiguity, chronology, opportunity preservation and complexity before outcome inspection; require offline-to-live reproduction before promotion. |
+| 4.2 | Use a bounded untouched evaluation boundary; record failed relationships; discovery never promotes an opaque branch. |
+| 4.3 | Carry evidence-backed constraints and unresolved issue IDs only; a successor re-earns applicable Phase 1 through 2.5 and later gates under its own identity. |
+| Production | Require robustness, adverse execution, venue legality, forward reconciliation and operational controls; prior local, browser or mutation evidence is not deployment readiness. |
+
+## Phase 0: Indicator-First Pine Workbench
+
+Use this route when the strategy depends on a novel or materially modified
+indicator whose behavior must be established before order rules can be defined.
+Freeze one indicator contract covering its equations, input ownership, output
+series, persistent state, state transitions, timeframe and session ownership,
+completed-bar semantics, warmup, missing-data behavior, invalidation and reset
+rules, object lifecycle, and repaint/future-leakage policy.
+
+Create an immutable Pine revision with mode `indicator_first`; it must declare
+`indicator()`. Instrument every feature and state later consumed by the strategy.
+Run Pynescript analysis and supported PineTS evidence, and preserve each semantic
+change as a child revision. When a mechanism is outside the local runtime subset,
+keep the limitation explicit and define the focused TradingView evidence that
+will decide it.
+
+Corroborate the exact indicator revision in TradingView on the declared symbol,
+timeframe, inputs, and proof window. The user accepts the matching proof dashboard
+and any claim-driven visual or state evidence. Freeze the accepted indicator hash
+before strategy code is added.
+
+Create the strategy as a child revision. Preserve the accepted indicator
+calculations unchanged in the first strategy candidate; add explicit signal,
+rejection, order-intent, sizing, fill, stop, target, and position-state contracts
+around them. Route that strategy through Phases 1 and 1.5 independently. Only the
+accepted strategy hash enters Phase 2, where its declared feature, signal, state,
+order, and trade traces must match Python before any Phase 3–4 adaptation.
 
 ## Phase 1: Strategy Definition and Research
 

@@ -14,6 +14,8 @@ from pydantic import BaseModel, Field
 from app.config import settings
 from app.data import DataService
 from app.lab import MutationLabService
+from app.pine2python_client import Pine2PythonClient
+from app.pine_workbench import PineWorkbenchService
 from app.storage import Repository
 
 
@@ -97,11 +99,71 @@ class HybridTimeDecayTriageRequest(BaseModel):
     exit_fraction: float = Field(default=0.15, ge=0.01, le=0.5)
 
 
+class PineRevisionRequest(BaseModel):
+    source_code: str = Field(min_length=1, max_length=1_000_000)
+    source_name: str = "strategy.pine"
+    mode: str = "greenfield_strategy"
+    settings: dict = Field(default_factory=dict)
+    provenance: dict = Field(default_factory=dict)
+    workbench_id: str | None = None
+    parent_revision_id: str | None = None
+
+
+class PineGenerateRevisionRequest(BaseModel):
+    parameters: dict = Field(default_factory=dict)
+    title: str = "Pine2Python generated strategy"
+    symbol: str = "BTCUSDT"
+    timeframe: str = "15"
+    mintick: float = Field(default=0.01, gt=0)
+    start_ms: int
+    end_ms: int
+    profile: str = "basic_v1"
+    workbench_id: str | None = None
+    parent_revision_id: str | None = None
+
+
+class PineProofRequest(BaseModel):
+    dataset_id: str
+    start_ms: int
+    end_ms: int
+    mintick: float = Field(gt=0)
+    trace_rows: list[dict] = Field(default_factory=list, max_length=200_000)
+    stream_expressions: dict[str, list[dict]] = Field(default_factory=dict)
+    profile: str = "basic_v1"
+
+
+class PineReviewPackageRequest(BaseModel):
+    baseline_revision_id: str
+    fidelity_contract: dict = Field(default_factory=dict)
+    trace_evidence_id: str | None = None
+    trace_rows: list[dict] | None = Field(default=None, max_length=200_000)
+    max_fixtures: int = Field(default=18, ge=1, le=100)
+
+
+class TradingViewObservationRequest(BaseModel):
+    proof_evidence_id: str
+    observed: dict
+    screenshot_sha256: str | None = None
+    user_verdict: str = "pending"
+
+
+class PythonTraceRequest(BaseModel):
+    dataset_id: str
+
+
+class PineParityRequest(BaseModel):
+    reference_rows: list[dict] = Field(max_length=200_000)
+    candidate_rows: list[dict] = Field(max_length=200_000)
+    contract: dict
+
+
 settings.ensure_dirs()
 repo = Repository()
 data_service = DataService(repo)
 lab = MutationLabService(repo, data_service)
 lab.ensure_seeded()
+pine2python_client = Pine2PythonClient()
+pine_workbench = PineWorkbenchService(repo, data_service, pine2python_client)
 optimization_executor = ThreadPoolExecutor(max_workers=1)
 optimization_jobs: dict[str, dict] = {}
 optimization_jobs_lock = Lock()
@@ -116,8 +178,139 @@ def root() -> FileResponse:
 
 
 @app.get("/health")
-def health() -> dict[str, str]:
-    return {"status": "ok", "app": "mutation-lab"}
+def health() -> dict:
+    pine_status = pine_workbench.status()
+    return {
+        "status": (
+            "degraded"
+            if pine_status["status"] == "unavailable"
+            else "ok"
+        ),
+        "app": "mutation-lab",
+        "pine2python": {
+            "status": pine_status["status"],
+            "required": pine_status["required"],
+            "transport": pine_status.get("transport"),
+        },
+    }
+
+
+@app.get("/health/ready")
+def health_ready() -> dict:
+    payload = health()
+    if (
+        payload["pine2python"]["required"]
+        and payload["pine2python"]["status"] != "ready"
+    ):
+        raise HTTPException(
+            status_code=503,
+            detail={
+                "code": "PINE2PYTHON_REQUIRED_UNAVAILABLE",
+                "health": payload,
+            },
+        )
+    return payload
+
+
+@app.get("/api/pine2python/status")
+def pine2python_status() -> dict:
+    return pine_workbench.status()
+
+
+@app.get("/api/pine-workbench/revisions")
+def list_pine_revisions(workbench_id: str | None = None) -> list[dict]:
+    return pine_workbench.list_revisions(workbench_id)
+
+
+@app.get("/api/pine-workbench/revisions/{revision_id}")
+def pine_revision_detail(revision_id: str) -> dict:
+    return pine_workbench.revision_detail(revision_id)
+
+
+@app.post("/api/pine-workbench/revisions")
+def create_pine_revision(request: PineRevisionRequest) -> dict:
+    return pine_workbench.create_revision(
+        source_code=request.source_code,
+        source_name=request.source_name,
+        mode=request.mode,
+        settings_payload=request.settings,
+        provenance=request.provenance,
+        workbench_id=request.workbench_id,
+        parent_revision_id=request.parent_revision_id,
+    )
+
+
+@app.post("/api/pine-workbench/generate/{adapter_id}")
+def generate_pine_revision(
+    adapter_id: str, request: PineGenerateRevisionRequest
+) -> dict:
+    generator_payload = request.model_dump(
+        exclude={"workbench_id", "parent_revision_id"}
+    )
+    return pine_workbench.generate_revision(
+        adapter_id,
+        generator_payload=generator_payload,
+        workbench_id=request.workbench_id,
+        parent_revision_id=request.parent_revision_id,
+    )
+
+
+@app.post("/api/pine-workbench/revisions/{revision_id}/proofs")
+def create_pine_proof(revision_id: str, request: PineProofRequest) -> dict:
+    return pine_workbench.create_proof(
+        revision_id,
+        dataset_id=request.dataset_id,
+        start_ms=request.start_ms,
+        end_ms=request.end_ms,
+        mintick=request.mintick,
+        trace_rows=request.trace_rows,
+        stream_expressions=request.stream_expressions,
+        profile=request.profile,
+    )
+
+
+@app.post("/api/pine-workbench/revisions/{revision_id}/review-package")
+def prepare_pine_review_package(
+    revision_id: str, request: PineReviewPackageRequest
+) -> dict:
+    return pine_workbench.prepare_review_package(
+        revision_id,
+        baseline_revision_id=request.baseline_revision_id,
+        fidelity_contract=request.fidelity_contract,
+        trace_evidence_id=request.trace_evidence_id,
+        trace_rows=request.trace_rows,
+        max_fixtures=request.max_fixtures,
+    )
+
+
+@app.post(
+    "/api/pine-workbench/revisions/{revision_id}/tradingview-observations"
+)
+def observe_tradingview(
+    revision_id: str, request: TradingViewObservationRequest
+) -> dict:
+    return pine_workbench.observe_tradingview(
+        revision_id,
+        proof_evidence_id=request.proof_evidence_id,
+        observed=request.observed,
+        screenshot_sha256=request.screenshot_sha256,
+        user_verdict=request.user_verdict,
+    )
+
+
+@app.post("/api/versions/{version_id}/python-trace")
+def create_python_trace(version_id: str, request: PythonTraceRequest) -> dict:
+    return pine_workbench.python_trace(version_id, request.dataset_id)
+
+
+@app.get("/api/versions/{version_id}/pine-evidence")
+def list_version_pine_evidence(version_id: str) -> list[dict]:
+    return pine_workbench.list_version_evidence(version_id)
+
+
+@app.post("/api/pine2python/parity-comparisons")
+def create_pine_parity(request: PineParityRequest) -> dict:
+    return pine_workbench.compare_parity(request.model_dump())
 
 
 @app.get("/api/prompts")
@@ -174,6 +367,11 @@ def promote_version(family_id: str, version_id: str) -> dict:
 @app.get("/api/datasets")
 def list_datasets() -> list[dict]:
     return data_service.list_datasets()
+
+
+@app.get("/api/datasets/{dataset_id}/pine-proof-window")
+def pine_proof_window(dataset_id: str, max_bars: int = 5_000) -> dict:
+    return data_service.pine_proof_window(dataset_id, max_bars=max_bars)
 
 
 @app.post("/api/datasets/download")

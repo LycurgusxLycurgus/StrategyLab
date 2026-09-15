@@ -1,0 +1,149 @@
+[00:00:00.000 --> 00:00:04.380] I'm going to show you the only 15-minute trading strategy that you need to become profitable.
+[00:00:04.580 --> 00:00:07.960] You'll finally be able to grow your personal account, pass your prop firm challenge,
+[00:00:08.000 --> 00:00:12.300] or finally start receiving payouts from your funded account. Just like one of our community
+[00:00:12.300 --> 00:00:17.440] members, Dave, who just received a $20,000 payout from using this exact strategy. Make
+[00:00:17.440 --> 00:00:22.060] sure to watch until the end because I'm not holding anything back. So this is a very simplistic
+[00:00:22.060 --> 00:00:27.040] and mechanical strategy. It consists of four pieces of entry criteria, two timeframes,
+[00:00:27.040 --> 00:00:32.060] and it is applicable to any asset. The best part about this strategy, in my personal opinion,
+[00:00:32.340 --> 00:00:37.920] is that sessions and timing do not matter. We're taking a look at AUD Swiss franc on the 15-minute
+[00:00:37.920 --> 00:00:42.140] timeframe. If you look to the top right of my screen, you'll see my automated checklist that
+[00:00:42.140 --> 00:00:46.720] is built into my charts at all times. Right here, you'll see the four pieces of entry criteria that
+[00:00:46.720 --> 00:00:51.360] I was referring to. We have higher timeframe alignment, a break of structure, a liquidity
+[00:00:51.360 --> 00:00:56.400] sweep, and an imbalance. All four of these line items are calculated together to come up with an
+[00:00:56.400 --> 00:01:00.640] overall trade score. The trade score, of course, represents the validity of the current trading
+[00:01:00.640 --> 00:01:03.940] opportunity that we're seeing in front of us. And with this example that I'm going to go over
+[00:01:03.940 --> 00:01:08.580] with you, we can see that three out of four line items are present. My indicator has automatically
+[00:01:08.580 --> 00:01:14.260] printed a break of structure, a liquidity sweep prior to the bearish range, as well as significant
+[00:01:14.260 --> 00:01:19.920] imbalance that lands on the Fibonacci retracement number of your choosing. For me, I like to go with 75%
+[00:01:19.920 --> 00:01:24.340] because that gives me a consistent 1 to 3 risk-to-reward ratio for every single trade.
+[00:01:24.340 --> 00:01:29.020] Now, the only confluence that we're missing here is higher timeframe alignment. A lot of people get
+[00:01:29.020 --> 00:01:33.420] confused about what this actually means. So when you're trading on a lower timeframe, such as the
+[00:01:33.420 --> 00:01:38.440] 15-minute, it's really important to have a higher timeframe objective in mind. The reason for this is
+[00:01:38.440 --> 00:01:42.800] that there's so much data available in front of you on the lower timeframes that it's really easy to get
+[00:01:42.800 --> 00:01:47.720] lost in the price action and sometimes take trades that you shouldn't have taken. So whatever bias you
+[00:01:47.720 --> 00:01:52.980] have formed on your entry timeframe, it's good to anchor that bias to a higher timeframe perspective.
+[00:01:52.980 --> 00:01:58.240] To do this, you really only need two timeframes. Your execution timeframe, which in this case is the
+[00:01:58.240 --> 00:02:02.940] 15-minute, and then your high timeframe anchor, which is going to be the 4-hour timeframe. So
+[00:02:02.940 --> 00:02:07.560] basically, if you're looking at a higher timeframe, such as the 4-hour, you're going to identify your
+[00:02:07.560 --> 00:02:12.480] current trading range. Let's just say it's a bearish range. If price is currently trading beneath the
+[00:02:12.480 --> 00:02:18.560] 50% mark of that range, which is of course right here, then that means you are in discount price.
+[00:02:18.560 --> 00:02:25.780] If, however, prices began trading above that 50% mark, you are now in premium levels. We only want
+[00:02:25.780 --> 00:02:31.100] to be selling at a premium and buying at a discount. Thankfully, the CurrencyPros trading view indicator
+[00:02:31.100 --> 00:02:36.200] identifies premium and discount for us, so it's already telling me that the 4-hour timeframe is at
+[00:02:36.200 --> 00:02:40.980] a discount. That is our negative confluence here. We do not have higher timeframe alignment on this
+[00:02:40.980 --> 00:02:46.560] trade. So because the 4-hour is at a discount, and I'm looking at a sell position here, that's not good.
+[00:02:46.560 --> 00:02:52.480] However, we still have a 75% trade score because all of the other confuences are aligned. So in my
+[00:02:52.480 --> 00:02:56.880] opinion, I think this trade is worth taking. And that leads me to a good point. Even when you have
+[00:02:56.880 --> 00:03:00.980] a mechanical trading strategy, there is always going to be a little bit of discretion involved
+[00:03:00.980 --> 00:03:05.060] in your trading decisions. There is one other thing that I don't really like about this trade.
+[00:03:05.240 --> 00:03:10.000] It's not necessarily a deal breaker, but the volume profile is not great. So as you can see,
+[00:03:10.200 --> 00:03:14.660] these volume nodes right here represent the highest concentration of volume within the current range,
+[00:03:14.660 --> 00:03:19.660] as well as previous history. And ideally, we want to see the highest concentration of volume or the
+[00:03:19.660 --> 00:03:25.660] point of control, POC for short, at or generally around the Fibonacci retracement level. In this
+[00:03:25.660 --> 00:03:30.860] scenario, however, the POC is a little bit higher in the range. We still do have significant volume
+[00:03:30.860 --> 00:03:35.680] around here, especially if you compare that to the low volume nodes beneath it. And that does coincide
+[00:03:35.680 --> 00:03:39.520] with all of the other confuences that I've mentioned, such as the imbalance and the Fibonacci
+[00:03:39.520 --> 00:03:44.000] retracement level itself. So overall, I think this is a very healthy trade. Now let's play price
+[00:03:44.000 --> 00:03:50.980] forward and see what happened. And there you have it, a pretty textbook trading opportunity with a
+[00:03:50.980 --> 00:03:55.060] very minimal drawdown. Many of our community members caught this trade, and that is why I am
+[00:03:55.060 --> 00:03:58.960] showcasing it today. The best part is they did it pretty much hands-free because the indicator
+[00:03:58.960 --> 00:04:03.180] identified everything for them. All they had to do was make the choice. I'd like to give you all a
+[00:04:03.180 --> 00:04:07.320] couple more examples to really nail this point down and showcase the strategy in different scenarios.
+[00:04:07.320 --> 00:04:12.860] We're now taking a look at GBPCAD, which is also on the 15 minute timeframe. Again, funny enough,
+[00:04:13.040 --> 00:04:17.440] we're missing higher timeframe alignment in this example as well. But as you saw in the previous
+[00:04:17.440 --> 00:04:21.700] one, that is not always a deal breaker, and it doesn't mean that the trade won't work out. In fact,
+[00:04:21.860 --> 00:04:25.600] aside from the higher timeframe alignment, there are some things about this that look a lot cleaner.
+[00:04:25.840 --> 00:04:30.400] Let's break it down. So we of course have a very clear break of structure here. This was the
+[00:04:30.400 --> 00:04:35.620] previous extreme low, price consolidated, and then aggressively broke to the downside through that past
+[00:04:35.620 --> 00:04:41.380] structure. So my indicator has labeled BOS for break of structure, and also simultaneously checked it off
+[00:04:41.380 --> 00:04:46.180] my checklist. Next up, we have a liquidity sweep. Well, we actually have two, but this top one is more
+[00:04:46.180 --> 00:04:50.840] significant. And all that means is that this was the previous structure, price pierced through it,
+[00:04:51.000 --> 00:04:56.000] but failed to continue, and then immediately afterwards broke to the downside very aggressively,
+[00:04:56.240 --> 00:05:00.660] creating the actual break of structure. That makes this just a simple liquidity sweep.
+[00:05:00.660 --> 00:05:05.920] The reason that's so important is because it tells us price failed to trade higher. And by looking for
+[00:05:05.920 --> 00:05:10.300] a selling opportunity, we are most likely on the right side of the market. Next up, we have a very
+[00:05:10.300 --> 00:05:15.040] large imbalance right here. For those of you who don't know, an imbalance is simply a gap between
+[00:05:15.040 --> 00:05:20.620] candlesticks. And when that gap prints on the chart, price is very drawn back toward it to fill the
+[00:05:20.620 --> 00:05:26.680] gap. I look at imbalance zones as a magnet to pull price in. So if that lines up with my retracement
+[00:05:26.680 --> 00:05:31.720] level, that's a very good confluence for me. That tells me my entry point is highly likely to be
+[00:05:31.720 --> 00:05:36.960] activated. So again, we have a 75% trade score here. Three out of four confluences are present.
+[00:05:37.320 --> 00:05:42.880] And our bonus confluence of volume profile, point of control, lands very nicely within the general
+[00:05:42.880 --> 00:05:47.240] region of the Fibonacci retracement level. This is a really big confluence because it shows that the
+[00:05:47.240 --> 00:05:51.960] highest concentration of volume is where I'm going to be entering. So theoretically, there should be a
+[00:05:51.960 --> 00:05:56.580] reaction from price when we get there. So all you have to do in this scenario is click the short
+[00:05:56.580 --> 00:06:02.680] position tool, place it directly on the 75% line, drag the stop loss to the high of the range,
+[00:06:02.840 --> 00:06:07.580] and drag the take profit to the low of the range. Once you've done this, you can double click on the
+[00:06:07.580 --> 00:06:12.960] parameter tool and copy the exact entry price, stop loss, and take profit into the trading platform
+[00:06:12.960 --> 00:06:17.500] of your choice, whether it be MetaTrader or some other platform. Or if your broker is connected to
+[00:06:17.500 --> 00:06:21.320] TradingView, you could execute the trade right here. Now let's go ahead and play this one forward as
+[00:06:21.320 --> 00:06:29.340] well and see how it panned out. And there you have it, another full take profit hit. This was another
+[00:06:29.340 --> 00:06:33.180] successful trade that many of our community members took. And as you can see, the indicator is doing
+[00:06:33.180 --> 00:06:38.080] its job and printing the next available annotations on the chart for you. Now let's go over one more
+[00:06:38.080 --> 00:06:42.820] chart example to really drive this home. Now we're taking a look at gold on the 15 minute time frame.
+[00:06:42.920 --> 00:06:47.060] And for this example, I'm going to open up my indicator settings and I'm going to enable my second
+[00:06:47.060 --> 00:06:51.420] Fibonacci level, the 71%. The reason I'm doing this is because one of our community members who
+[00:06:51.420 --> 00:06:55.780] took this trade used the 71%. I'll put that picture up on the screen so you can see what I'm talking
+[00:06:55.780 --> 00:07:01.500] about. I, however, targeting the 75%, missed this trade entirely. But regardless, the analysis and
+[00:07:01.500 --> 00:07:05.980] the entry criteria is still the same. And in fact, if you look to the top right of my screen, you'll see
+[00:07:05.980 --> 00:07:11.540] that all four confluences are present, making this a 100 trade score with the added bonus of the point
+[00:07:11.540 --> 00:07:16.580] of control being right within that golden zone of both Fibonacci levels. We have a very clear
+[00:07:16.580 --> 00:07:20.940] liquidity sweep and break of structure right before this massive bullish move to the upside.
+[00:07:21.320 --> 00:07:25.760] So at this point, this trade is a no brainer. You would take out your long position tool, set it at
+[00:07:25.760 --> 00:07:31.080] your chosen Fibonacci level. Let's place it directly on the 71%. Drag the stop loss to the low of the
+[00:07:31.080 --> 00:07:36.100] Fibonacci range and drag the take profit to the high of the Fibonacci range. This gives you basically
+[00:07:36.100 --> 00:07:42.180] a two and a half risk reward ratio at the 71% compared to a one to three risk reward ratio at the 75%.
+[00:07:42.180 --> 00:07:46.080] Not too much of a difference, but the 71 definitely helps you get involved in more trading
+[00:07:46.080 --> 00:07:51.480] opportunities. The 75% is better risk reward ratio, but you often miss trades. Now again, the point
+[00:07:51.480 --> 00:07:55.960] of control line here shows that the highest concentration of volume is right where the entry
+[00:07:55.960 --> 00:08:01.000] is. This is a great confluence to add on to all the other checklist items that are present. Now let's
+[00:08:01.000 --> 00:08:08.560] play this forward and see how it went. You really can't ask for a better outcome than that. Virtually
+[00:08:08.560 --> 00:08:13.600] no drawdown in this opportunity. It just tapped the entry and then went straight up to take profit.
+[00:08:13.600 --> 00:08:20.540] It did so in a very short duration. From entry to exit is eight and a half hours. Again, like I said
+[00:08:20.540 --> 00:08:25.440] at the beginning of this video, sessions and timing do not matter. When you see the opportunity, you
+[00:08:25.440 --> 00:08:29.680] place a limit order and then you back off and let it do its thing. Now at the beginning of the video,
+[00:08:29.840 --> 00:08:35.080] I mentioned how one of our members just received a $20,000 payout. Dave reached that huge accomplishment
+[00:08:35.080 --> 00:08:40.780] by using this exact strategy on gold and NASDAQ specifically. And he is just one of many community
+[00:08:40.780 --> 00:08:45.340] members seeing great success with this strategy. Now, in my opinion, a strategy is just a strategy.
+[00:08:45.500 --> 00:08:50.280] There's nothing proprietary to it, which is why I teach it completely free on the internet. Our value
+[00:08:50.280 --> 00:08:55.200] is in the proprietary tools that we have created to make the trading journey much easier and more
+[00:08:55.200 --> 00:08:59.820] streamlined for the trader. I've showcased a lot of that in this video here today in regard to the
+[00:08:59.820 --> 00:09:04.180] checklist in the top right of my screen. We also have a risk calculator built into your chart at all
+[00:09:04.180 --> 00:09:09.500] times, fully customizable. And additionally, we have a scanner that scans your entire watch list
+[00:09:09.500 --> 00:09:14.060] and shows you all the valid trade setups in that watch list based on the strategy we have discussed
+[00:09:14.060 --> 00:09:18.660] today. It literally takes all the guesswork out of trading. And to go a step further beyond trading
+[00:09:18.660 --> 00:09:24.060] view, we have fully automated this strategy into an automated trading bot for MetaTrader 5.
+[00:09:24.280 --> 00:09:28.500] It's something that I have personally applied to my account at all times running in the background
+[00:09:28.500 --> 00:09:33.060] so that whenever I want to travel or if I have plans or if I just simply don't feel like trading,
+[00:09:33.260 --> 00:09:38.360] I know that that's always running for me. It's a really cool feeling because it's basically a clone of me.
+[00:09:38.360 --> 00:09:43.300] So I know that if I need to take time off, I can do so and nothing will change. Now that we've gone
+[00:09:43.300 --> 00:09:47.400] over the strategy in great detail on the charts, I would like to take you over to our discord community
+[00:09:47.400 --> 00:09:52.020] and show you what our other members are up to. So our day trading channel in our discord community
+[00:09:52.020 --> 00:09:57.040] has been quite active lately. With recent updates to the currency pros indicator, our members are
+[00:09:57.040 --> 00:10:01.460] absolutely loving it. And the vast majority of traders in this channel are utilizing that exact
+[00:10:01.460 --> 00:10:05.820] strategy with the indicators that I've shown today. And as you can see, some of our members even utilize
+[00:10:05.820 --> 00:10:10.580] our strategy on lower timeframes such as the five minute. Now I just want to scroll up here,
+[00:10:10.600 --> 00:10:16.800] you'll see Dave talking about some of his statistics of that $20,000 payout. He actually uses AI to
+[00:10:16.800 --> 00:10:20.780] analyze his trading performance, which is really cool. He journals everything and then runs it
+[00:10:20.780 --> 00:10:25.200] through AI to see where he can make improvements. Dave has been with us for over a year now and he's
+[00:10:25.200 --> 00:10:29.840] a very valued member of our community. And I am beyond happy for him that he received this
+[00:10:29.840 --> 00:10:34.280] monumentous payout. I think the whole community was really pumped for him too. I'm just going to keep
+[00:10:34.280 --> 00:10:38.080] scrolling up a little bit. We've got members entering trades left and right here. Every day,
+[00:10:38.160 --> 00:10:42.020] people are sharing trade ideas here, following up with each other's trade ideas and providing
+[00:10:42.020 --> 00:10:46.860] insight and guidance to those who have questions. Our swing trading channel is of course less active
+[00:10:46.860 --> 00:10:51.360] because that's the nature of swing trading, but it is also a very healthy place to share ideas and get
+[00:10:51.360 --> 00:10:57.540] feedback. As you can see, one of our members, Sajib, just closed this trade on AUD USD on the four hour
+[00:10:57.540 --> 00:11:02.460] timeframe using the exact same strategy that I just showed you. So this style is definitely for the more
+[00:11:02.460 --> 00:11:06.780] patient trader or a trader who has a nine to five job and can't be on the charts too much.
+[00:11:06.980 --> 00:11:11.940] Really proud of Sajib as well. Now we also have a section for our EAs where we discuss the settings
+[00:11:11.940 --> 00:11:15.840] of the EAs, how to best utilize them, and of course share trading opportunities as well.
+[00:11:16.160 --> 00:11:20.240] Here's one from Jordan. He says, beautiful trade by the Fibonacci EA, almost at TP,
+[00:11:20.580 --> 00:11:25.760] moved to break even. So that was a trade on EURUSD on the four hour timeframe that was taken fully
+[00:11:25.760 --> 00:11:31.320] hands-free by the automated Fibonacci EA. Well everyone, I really hope you enjoyed this video. I feel like I went
+[00:11:31.320 --> 00:11:35.280] into great detail on our strategy. I didn't hold anything back. Like I said, the strategy,
+[00:11:37.080 --> 00:11:42.400] the strategy. I showed you all step-by-step what we do as a community to catch these trades on a
+[00:11:42.400 --> 00:11:47.400] weekly basis. Having a profitable trading strategy is only one part of a very complex puzzle. The
+[00:11:47.400 --> 00:11:51.520] majority of profitable trading is in your head and the tools that you utilize to make your life
+[00:11:51.520 --> 00:11:55.660] easier. If you enjoyed this video, leave a like and comment down below. I'd love to hear your feedback.
+[00:11:55.860 --> 00:11:59.820] And if you're interested in any of the tools I showed you today, as well as an automated trading journal,
+[00:11:59.820 --> 00:12:03.640] an AI trading assistant, and so much more, click the link in the description of this video.
+[00:12:03.840 --> 00:12:05.220] And until next time, happy trading.

@@ -6,6 +6,12 @@ The fidelity review is intentionally short. Phase 2.5 does not repeat Pine resea
 
 PROMPT
 """
+Before executing this phase, read `agents/translation and generation/agents/codex_phase_operator.md`,
+its Phase 2.5 section, and `STRATEGYLAB_UNRESOLVED_PROOF_MAP.md`. Record the
+freshness of the accepted identities, applicable issue IDs and dispositions, and
+the exact economic context in the qualification report; do not treat a
+documentation status as a technical pass.
+
 You are the Phase 2.5 baseline qualification operator inside Mutation Lab. Confirm that the accepted Phase 2 package is intact, then run the faithful Python parent under the Phase 1 economic, benchmark, execution, and evidence contract.
 
 ## Fast Fidelity Review

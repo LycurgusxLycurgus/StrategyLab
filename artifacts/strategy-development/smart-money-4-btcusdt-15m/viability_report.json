@@ -1,0 +1,6942 @@
+{
+  "btc_older": {
+    "arrays": {
+      "chronological_halves": {
+        "first": {
+          "ambiguous": 1,
+          "expectancy_r": -0.0534,
+          "long": 57,
+          "missed_or_invalid": 71,
+          "pending_or_open": 0,
+          "profit_factor": 0.9264,
+          "resolved": 51,
+          "setups": 123,
+          "short": 66,
+          "sl": 37,
+          "tp": 14,
+          "tp_rate_pct": 27.451,
+          "win_rate_pct": 27.451,
+          "win_rate_wilson95_descriptive_pct": [
+            17.11,
+            40.95
+          ]
+        },
+        "second_diagnostic": {
+          "ambiguous": 1,
+          "expectancy_r": -0.3571,
+          "long": 71,
+          "missed_or_invalid": 89,
+          "pending_or_open": 0,
+          "profit_factor": 0.5611,
+          "resolved": 59,
+          "setups": 149,
+          "short": 78,
+          "sl": 48,
+          "tp": 11,
+          "tp_rate_pct": 18.644,
+          "win_rate_pct": 18.644,
+          "win_rate_wilson95_descriptive_pct": [
+            10.74,
+            30.38
+          ]
+        }
+      },
+      "cohorts": {
+        "direction:long": {
+          "ambiguous": 0,
+          "expectancy_r": -0.4003,
+          "long": 128,
+          "missed_or_invalid": 82,
+          "pending_or_open": 0,
+          "profit_factor": 0.5154,
+          "resolved": 46,
+          "setups": 128,
+          "short": 0,
+          "sl": 38,
+          "tp": 8,
+          "tp_rate_pct": 17.391,
+          "win_rate_pct": 17.391,
+          "win_rate_wilson95_descriptive_pct": [
+            9.09,
+            30.72
+          ]
+        },
+        "direction:short": {
+          "ambiguous": 2,
+          "expectancy_r": -0.0841,
+          "long": 0,
+          "missed_or_invalid": 78,
+          "pending_or_open": 0,
+          "profit_factor": 0.8855,
+          "resolved": 64,
+          "setups": 144,
+          "short": 144,
+          "sl": 47,
+          "tp": 17,
+          "tp_rate_pct": 26.562,
+          "win_rate_pct": 26.562,
+          "win_rate_wilson95_descriptive_pct": [
+            17.3,
+            38.48
+          ]
+        },
+        "htf:False": {
+          "ambiguous": 0,
+          "expectancy_r": -0.3103,
+          "long": 31,
+          "missed_or_invalid": 40,
+          "pending_or_open": 0,
+          "profit_factor": 0.6121,
+          "resolved": 20,
+          "setups": 60,
+          "short": 29,
+          "sl": 16,
+          "tp": 4,
+          "tp_rate_pct": 20.0,
+          "win_rate_pct": 20.0,
+          "win_rate_wilson95_descriptive_pct": [
+            8.07,
+            41.6
+          ]
+        },
+        "htf:True": {
+          "ambiguous": 2,
+          "expectancy_r": -0.1954,
+          "long": 97,
+          "missed_or_invalid": 120,
+          "pending_or_open": 0,
+          "profit_factor": 0.7451,
+          "resolved": 90,
+          "setups": 212,
+          "short": 115,
+          "sl": 69,
+          "tp": 21,
+          "tp_rate_pct": 23.333,
+          "win_rate_pct": 23.333,
+          "win_rate_wilson95_descriptive_pct": [
+            15.8,
+            33.05
+          ]
+        },
+        "imbalance:False": {
+          "ambiguous": 0,
+          "expectancy_r": -0.4828,
+          "long": 44,
+          "missed_or_invalid": 58,
+          "pending_or_open": 0,
+          "profit_factor": 0.432,
+          "resolved": 40,
+          "setups": 98,
+          "short": 54,
+          "sl": 34,
+          "tp": 6,
+          "tp_rate_pct": 15.0,
+          "win_rate_pct": 15.0,
+          "win_rate_wilson95_descriptive_pct": [
+            7.06,
+            29.07
+          ]
+        },
+        "imbalance:True": {
+          "ambiguous": 2,
+          "expectancy_r": -0.064,
+          "long": 84,
+          "missed_or_invalid": 102,
+          "pending_or_open": 0,
+          "profit_factor": 0.9121,
+          "resolved": 70,
+          "setups": 174,
+          "short": 90,
+          "sl": 51,
+          "tp": 19,
+          "tp_rate_pct": 27.143,
+          "win_rate_pct": 27.143,
+          "win_rate_wilson95_descriptive_pct": [
+            18.12,
+            38.54
+          ]
+        },
+        "missing:FVG": {
+          "ambiguous": 0,
+          "expectancy_r": -0.4828,
+          "long": 44,
+          "missed_or_invalid": 58,
+          "pending_or_open": 0,
+          "profit_factor": 0.432,
+          "resolved": 40,
+          "setups": 98,
+          "short": 54,
+          "sl": 34,
+          "tp": 6,
+          "tp_rate_pct": 15.0,
+          "win_rate_pct": 15.0,
+          "win_rate_wilson95_descriptive_pct": [
+            7.06,
+            29.07
+          ]
+        },
+        "missing:HTF": {
+          "ambiguous": 0,
+          "expectancy_r": -0.3103,
+          "long": 31,
+          "missed_or_invalid": 40,
+          "pending_or_open": 0,
+          "profit_factor": 0.6121,
+          "resolved": 20,
+          "setups": 60,
+          "short": 29,
+          "sl": 16,
+          "tp": 4,
+          "tp_rate_pct": 20.0,
+          "win_rate_pct": 20.0,
+          "win_rate_wilson95_descriptive_pct": [
+            8.07,
+            41.6
+          ]
+        },
+        "missing:LQ": {
+          "ambiguous": 2,
+          "expectancy_r": 0.3612,
+          "long": 41,
+          "missed_or_invalid": 46,
+          "pending_or_open": 0,
+          "profit_factor": 1.5967,
+          "resolved": 38,
+          "setups": 86,
+          "short": 45,
+          "sl": 23,
+          "tp": 15,
+          "tp_rate_pct": 39.474,
+          "win_rate_pct": 39.474,
+          "win_rate_wilson95_descriptive_pct": [
+            25.6,
+            55.28
+          ]
+        },
+        "missing:NONE": {
+          "ambiguous": 0,
+          "expectancy_r": -1.0,
+          "long": 12,
+          "missed_or_invalid": 16,
+          "pending_or_open": 0,
+          "profit_factor": 0.0,
+          "resolved": 12,
+          "setups": 28,
+          "short": 16,
+          "sl": 12,
+          "tp": 0,
+          "tp_rate_pct": 0.0,
+          "win_rate_pct": 0.0,
+          "win_rate_wilson95_descriptive_pct": [
+            0.0,
+            24.25
+          ]
+        },
+        "sweep:False": {
+          "ambiguous": 2,
+          "expectancy_r": 0.3612,
+          "long": 41,
+          "missed_or_invalid": 46,
+          "pending_or_open": 0,
+          "profit_factor": 1.5967,
+          "resolved": 38,
+          "setups": 86,
+          "short": 45,
+          "sl": 23,
+          "tp": 15,
+          "tp_rate_pct": 39.474,
+          "win_rate_pct": 39.474,
+          "win_rate_wilson95_descriptive_pct": [
+            25.6,
+            55.28
+          ]
+        },
+        "sweep:True": {
+          "ambiguous": 0,
+          "expectancy_r": -0.5211,
+          "long": 87,
+          "missed_or_invalid": 114,
+          "pending_or_open": 0,
+          "profit_factor": 0.3949,
+          "resolved": 72,
+          "setups": 186,
+          "short": 99,
+          "sl": 62,
+          "tp": 10,
+          "tp_rate_pct": 13.889,
+          "win_rate_pct": 13.889,
+          "win_rate_wilson95_descriptive_pct": [
+            7.72,
+            23.71
+          ]
+        }
+      },
+      "cost_stress_bps_per_side": {
+        "10": {
+          "ambiguous": 2,
+          "expectancy_r": -0.9802,
+          "long": 128,
+          "missed_or_invalid": 160,
+          "pending_or_open": 0,
+          "profit_factor": 0.2828,
+          "resolved": 110,
+          "setups": 272,
+          "short": 144,
+          "sl": 85,
+          "tp": 25,
+          "tp_rate_pct": 22.727,
+          "win_rate_pct": 22.727,
+          "win_rate_wilson95_descriptive_pct": [
+            15.89,
+            31.4
+          ]
+        },
+        "2": {
+          "ambiguous": 2,
+          "expectancy_r": -0.3691,
+          "long": 128,
+          "missed_or_invalid": 160,
+          "pending_or_open": 0,
+          "profit_factor": 0.586,
+          "resolved": 110,
+          "setups": 272,
+          "short": 144,
+          "sl": 85,
+          "tp": 25,
+          "tp_rate_pct": 22.727,
+          "win_rate_pct": 22.727,
+          "win_rate_wilson95_descriptive_pct": [
+            15.89,
+            31.4
+          ]
+        },
+        "5": {
+          "ambiguous": 2,
+          "expectancy_r": -0.5983,
+          "long": 128,
+          "missed_or_invalid": 160,
+          "pending_or_open": 0,
+          "profit_factor": 0.4407,
+          "resolved": 110,
+          "setups": 272,
+          "short": 144,
+          "sl": 85,
+          "tp": 25,
+          "tp_rate_pct": 22.727,
+          "win_rate_pct": 22.727,
+          "win_rate_wilson95_descriptive_pct": [
+            15.89,
+            31.4
+          ]
+        }
+      },
+      "data_quality": {
+        "duplicate_timestamps": 0,
+        "four_hour_bucket_sizes": {
+          "4": 1,
+          "12": 1,
+          "16": 1249
+        },
+        "gap_examples": [],
+        "input_data_gate_pass": true,
+        "legacy_fixed16_discarded_interior_buckets": 0,
+        "malformed_ohlcv": 0,
+        "native_htf_required_for_parity": false,
+        "non_15m_gaps": 0,
+        "note": "UTC labels in an imported CSV do not verify the original MT5 server timezone. Short buckets may be legitimate sessions or missing data; neither is inferred here.",
+        "session_alignment_verified": true,
+        "status": "CONTINUOUS_UTC_INPUT_CHECK_PASS",
+        "timezone_verified": true
+      },
+      "event_accounting": {
+        "accounted_events": 2982,
+        "by_direction": {
+          "-1": {
+            "LATE": 124,
+            "LEG_ALREADY_OWNED": 554,
+            "SCORE": 534,
+            "SETUP_READY": 144,
+            "SUPERSEDED_BEFORE_LOCK": 133,
+            "WINDOW_END_UNRESOLVED": 1
+          },
+          "1": {
+            "LATE": 111,
+            "LEG_ALREADY_OWNED": 582,
+            "SCORE": 542,
+            "SETUP_READY": 128,
+            "SUPERSEDED_BEFORE_LOCK": 129
+          }
+        },
+        "complete": true,
+        "structural_events": 2982,
+        "terminal_counts": {
+          "LATE": 235,
+          "LEG_ALREADY_OWNED": 1136,
+          "SCORE": 1076,
+          "SETUP_READY": 272,
+          "SUPERSEDED_BEFORE_LOCK": 262,
+          "WINDOW_END_UNRESOLVED": 1
+        }
+      },
+      "gross": {
+        "ambiguous": 2,
+        "expectancy_r": -0.2163,
+        "long": 128,
+        "missed_or_invalid": 160,
+        "pending_or_open": 0,
+        "profit_factor": 0.7201,
+        "resolved": 110,
+        "setups": 272,
+        "short": 144,
+        "sl": 85,
+        "tp": 25,
+        "tp_rate_pct": 22.727,
+        "win_rate_pct": 22.727,
+        "win_rate_wilson95_descriptive_pct": [
+          15.89,
+          31.4
+        ]
+      },
+      "identity": {
+        "bars": 20000,
+        "dataset_file_sha256": "59482f242758a746896460e56effb883151aa9ec00f4f429686d79c1e4e49b76",
+        "end": "2026-05-06T18:45:00+00:00",
+        "start": "2025-10-10T11:00:00+00:00",
+        "symbol": "BTCUSDT",
+        "timeframe": "15m"
+      },
+      "limitations": [
+        "OHLC indicator lifecycle, not broker fills",
+        "POC disabled; no 1m profile required for four-check scoring",
+        "Costs are stress assumptions, not venue quotations",
+        "Reused research windows; no untouched holdout"
+      ],
+      "range_diagnostics": {
+        "affected_setups": {
+          "ambiguous": 0,
+          "expectancy_r": -1.0,
+          "long": 1,
+          "missed_or_invalid": 2,
+          "pending_or_open": 0,
+          "profit_factor": 0.0,
+          "resolved": 3,
+          "setups": 5,
+          "short": 4,
+          "sl": 3,
+          "tp": 0,
+          "tp_rate_pct": 0.0,
+          "win_rate_pct": 0.0,
+          "win_rate_wilson95_descriptive_pct": [
+            0.0,
+            56.15
+          ]
+        },
+        "candidates": 1583,
+        "endpoint_not_beyond_broken_level": 31,
+        "examples": [
+          {
+            "bar_open_ms": 1760989500000,
+            "bos_level": 110110.0,
+            "direction": -1,
+            "score": 50,
+            "target": 110542.0
+          },
+          {
+            "bar_open_ms": 1761395400000,
+            "bos_level": 111438.91,
+            "direction": -1,
+            "score": 75,
+            "target": 111530.38
+          },
+          {
+            "bar_open_ms": 1761436800000,
+            "bos_level": 111370.0,
+            "direction": -1,
+            "score": 50,
+            "target": 111535.48
+          }
+        ]
+      },
+      "setups_per_calendar_week": 9.14,
+      "verdict": "DESCRIPTIVE_ONLY_NOT_AN_EDGE_ACCEPTANCE"
+    },
+    "hierarchical": {
+      "chronological_halves": {
+        "first": {
+          "ambiguous": 0,
+          "expectancy_r": 0.2261,
+          "long": 52,
+          "missed_or_invalid": 62,
+          "pending_or_open": 0,
+          "profit_factor": 1.3508,
+          "resolved": 45,
+          "setups": 107,
+          "short": 55,
+          "sl": 29,
+          "tp": 16,
+          "tp_rate_pct": 35.556,
+          "win_rate_pct": 35.556,
+          "win_rate_wilson95_descriptive_pct": [
+            23.22,
+            50.16
+          ]
+        },
+        "second_diagnostic": {
+          "ambiguous": 0,
+          "expectancy_r": -0.4387,
+          "long": 47,
+          "missed_or_invalid": 62,
+          "pending_or_open": 0,
+          "profit_factor": 0.4761,
+          "resolved": 43,
+          "setups": 105,
+          "short": 58,
+          "sl": 36,
+          "tp": 7,
+          "tp_rate_pct": 16.279,
+          "win_rate_pct": 16.279,
+          "win_rate_wilson95_descriptive_pct": [
+            8.12,
+            29.97
+          ]
+        }
+      },
+      "cohorts": {
+        "direction:long": {
+          "ambiguous": 0,
+          "expectancy_r": -0.2118,
+          "long": 99,
+          "missed_or_invalid": 64,
+          "pending_or_open": 0,
+          "profit_factor": 0.7254,
+          "resolved": 35,
+          "setups": 99,
+          "short": 0,
+          "sl": 27,
+          "tp": 8,
+          "tp_rate_pct": 22.857,
+          "win_rate_pct": 22.857,
+          "win_rate_wilson95_descriptive_pct": [
+            12.07,
+            39.02
+          ]
+        },
+        "direction:short": {
+          "ambiguous": 0,
+          "expectancy_r": -0.0241,
+          "long": 0,
+          "missed_or_invalid": 60,
+          "pending_or_open": 0,
+          "profit_factor": 0.9664,
+          "resolved": 53,
+          "setups": 113,
+          "short": 113,
+          "sl": 38,
+          "tp": 15,
+          "tp_rate_pct": 28.302,
+          "win_rate_pct": 28.302,
+          "win_rate_wilson95_descriptive_pct": [
+            17.97,
+            41.57
+          ]
+        },
+        "htf:False": {
+          "ambiguous": 0,
+          "expectancy_r": -0.0805,
+          "long": 18,
+          "missed_or_invalid": 23,
+          "pending_or_open": 0,
+          "profit_factor": 0.8903,
+          "resolved": 15,
+          "setups": 38,
+          "short": 20,
+          "sl": 11,
+          "tp": 4,
+          "tp_rate_pct": 26.667,
+          "win_rate_pct": 26.667,
+          "win_rate_wilson95_descriptive_pct": [
+            10.9,
+            51.95
+          ]
+        },
+        "htf:True": {
+          "ambiguous": 0,
+          "expectancy_r": -0.1025,
+          "long": 81,
+          "missed_or_invalid": 101,
+          "pending_or_open": 0,
+          "profit_factor": 0.8614,
+          "resolved": 73,
+          "setups": 174,
+          "short": 93,
+          "sl": 54,
+          "tp": 19,
+          "tp_rate_pct": 26.027,
+          "win_rate_pct": 26.027,
+          "win_rate_wilson95_descriptive_pct": [
+            17.34,
+            37.11
+          ]
+        },
+        "imbalance:False": {
+          "ambiguous": 0,
+          "expectancy_r": -0.3103,
+          "long": 35,
+          "missed_or_invalid": 46,
+          "pending_or_open": 0,
+          "profit_factor": 0.6121,
+          "resolved": 25,
+          "setups": 71,
+          "short": 36,
+          "sl": 20,
+          "tp": 5,
+          "tp_rate_pct": 20.0,
+          "win_rate_pct": 20.0,
+          "win_rate_wilson95_descriptive_pct": [
+            8.86,
+            39.13
+          ]
+        },
+        "imbalance:True": {
+          "ambiguous": 0,
+          "expectancy_r": -0.0148,
+          "long": 64,
+          "missed_or_invalid": 78,
+          "pending_or_open": 0,
+          "profit_factor": 0.9793,
+          "resolved": 63,
+          "setups": 141,
+          "short": 77,
+          "sl": 45,
+          "tp": 18,
+          "tp_rate_pct": 28.571,
+          "win_rate_pct": 28.571,
+          "win_rate_wilson95_descriptive_pct": [
+            18.9,
+            40.7
+          ]
+        },
+        "missing:FVG": {
+          "ambiguous": 0,
+          "expectancy_r": -0.3103,
+          "long": 35,
+          "missed_or_invalid": 46,
+          "pending_or_open": 0,
+          "profit_factor": 0.6121,
+          "resolved": 25,
+          "setups": 71,
+          "short": 36,
+          "sl": 20,
+          "tp": 5,
+          "tp_rate_pct": 20.0,
+          "win_rate_pct": 20.0,
+          "win_rate_wilson95_descriptive_pct": [
+            8.86,
+            39.13
+          ]
+        },
+        "missing:HTF": {
+          "ambiguous": 0,
+          "expectancy_r": -0.0805,
+          "long": 18,
+          "missed_or_invalid": 23,
+          "pending_or_open": 0,
+          "profit_factor": 0.8903,
+          "resolved": 15,
+          "setups": 38,
+          "short": 20,
+          "sl": 11,
+          "tp": 4,
+          "tp_rate_pct": 26.667,
+          "win_rate_pct": 26.667,
+          "win_rate_wilson95_descriptive_pct": [
+            10.9,
+            51.95
+          ]
+        },
+        "missing:LQ": {
+          "ambiguous": 0,
+          "expectancy_r": 0.0728,
+          "long": 44,
+          "missed_or_invalid": 45,
+          "pending_or_open": 0,
+          "profit_factor": 1.1057,
+          "resolved": 45,
+          "setups": 90,
+          "short": 46,
+          "sl": 31,
+          "tp": 14,
+          "tp_rate_pct": 31.111,
+          "win_rate_pct": 31.111,
+          "win_rate_wilson95_descriptive_pct": [
+            19.53,
+            45.67
+          ]
+        },
+        "missing:NONE": {
+          "ambiguous": 0,
+          "expectancy_r": -1.0,
+          "long": 2,
+          "missed_or_invalid": 10,
+          "pending_or_open": 0,
+          "profit_factor": 0.0,
+          "resolved": 3,
+          "setups": 13,
+          "short": 11,
+          "sl": 3,
+          "tp": 0,
+          "tp_rate_pct": 0.0,
+          "win_rate_pct": 0.0,
+          "win_rate_wilson95_descriptive_pct": [
+            0.0,
+            56.15
+          ]
+        },
+        "sweep:False": {
+          "ambiguous": 0,
+          "expectancy_r": 0.0728,
+          "long": 44,
+          "missed_or_invalid": 45,
+          "pending_or_open": 0,
+          "profit_factor": 1.1057,
+          "resolved": 45,
+          "setups": 90,
+          "short": 46,
+          "sl": 31,
+          "tp": 14,
+          "tp_rate_pct": 31.111,
+          "win_rate_pct": 31.111,
+          "win_rate_wilson95_descriptive_pct": [
+            19.53,
+            45.67
+          ]
+        },
+        "sweep:True": {
+          "ambiguous": 0,
+          "expectancy_r": -0.2783,
+          "long": 55,
+          "missed_or_invalid": 79,
+          "pending_or_open": 0,
+          "profit_factor": 0.6481,
+          "resolved": 43,
+          "setups": 122,
+          "short": 67,
+          "sl": 34,
+          "tp": 9,
+          "tp_rate_pct": 20.93,
+          "win_rate_pct": 20.93,
+          "win_rate_wilson95_descriptive_pct": [
+            11.42,
+            35.21
+          ]
+        }
+      },
+      "cost_stress_bps_per_side": {
+        "10": {
+          "ambiguous": 0,
+          "expectancy_r": -0.7813,
+          "long": 99,
+          "missed_or_invalid": 124,
+          "pending_or_open": 0,
+          "profit_factor": 0.358,
+          "resolved": 88,
+          "setups": 212,
+          "short": 113,
+          "sl": 65,
+          "tp": 23,
+          "tp_rate_pct": 26.136,
+          "win_rate_pct": 25.0,
+          "win_rate_wilson95_descriptive_pct": [
+            17.13,
+            34.96
+          ]
+        },
+        "2": {
+          "ambiguous": 0,
+          "expectancy_r": -0.2353,
+          "long": 99,
+          "missed_or_invalid": 124,
+          "pending_or_open": 0,
+          "profit_factor": 0.7178,
+          "resolved": 88,
+          "setups": 212,
+          "short": 113,
+          "sl": 65,
+          "tp": 23,
+          "tp_rate_pct": 26.136,
+          "win_rate_pct": 26.136,
+          "win_rate_wilson95_descriptive_pct": [
+            18.09,
+            36.18
+          ]
+        },
+        "5": {
+          "ambiguous": 0,
+          "expectancy_r": -0.44,
+          "long": 99,
+          "missed_or_invalid": 124,
+          "pending_or_open": 0,
+          "profit_factor": 0.5491,
+          "resolved": 88,
+          "setups": 212,
+          "short": 113,
+          "sl": 65,
+          "tp": 23,
+          "tp_rate_pct": 26.136,
+          "win_rate_pct": 26.136,
+          "win_rate_wilson95_descriptive_pct": [
+            18.09,
+            36.18
+          ]
+        }
+      },
+      "data_quality": {
+        "duplicate_timestamps": 0,
+        "four_hour_bucket_sizes": {
+          "4": 1,
+          "12": 1,
+          "16": 1249
+        },
+        "gap_examples": [],
+        "input_data_gate_pass": true,
+        "legacy_fixed16_discarded_interior_buckets": 0,
+        "malformed_ohlcv": 0,
+        "native_htf_required_for_parity": false,
+        "non_15m_gaps": 0,
+        "note": "UTC labels in an imported CSV do not verify the original MT5 server timezone. Short buckets may be legitimate sessions or missing data; neither is inferred here.",
+        "session_alignment_verified": true,
+        "status": "CONTINUOUS_UTC_INPUT_CHECK_PASS",
+        "timezone_verified": true
+      },
+      "event_accounting": {
+        "accounted_events": 1817,
+        "by_direction": {
+          "-1": {
+            "LATE": 91,
+            "LEG_ALREADY_OWNED": 291,
+            "SCORE": 365,
+            "SETUP_READY": 113,
+            "SUPERSEDED_BEFORE_LOCK": 41
+          },
+          "1": {
+            "INVALID_RANGE": 2,
+            "LATE": 82,
+            "LEG_ALREADY_OWNED": 319,
+            "SCORE": 371,
+            "SETUP_READY": 99,
+            "SUPERSEDED_BEFORE_LOCK": 43
+          }
+        },
+        "complete": true,
+        "structural_events": 1817,
+        "terminal_counts": {
+          "INVALID_RANGE": 2,
+          "LATE": 173,
+          "LEG_ALREADY_OWNED": 610,
+          "SCORE": 736,
+          "SETUP_READY": 212,
+          "SUPERSEDED_BEFORE_LOCK": 84
+        }
+      },
+      "gross": {
+        "ambiguous": 0,
+        "expectancy_r": -0.0987,
+        "long": 99,
+        "missed_or_invalid": 124,
+        "pending_or_open": 0,
+        "profit_factor": 0.8663,
+        "resolved": 88,
+        "setups": 212,
+        "short": 113,
+        "sl": 65,
+        "tp": 23,
+        "tp_rate_pct": 26.136,
+        "win_rate_pct": 26.136,
+        "win_rate_wilson95_descriptive_pct": [
+          18.09,
+          36.18
+        ]
+      },
+      "identity": {
+        "bars": 20000,
+        "dataset_file_sha256": "59482f242758a746896460e56effb883151aa9ec00f4f429686d79c1e4e49b76",
+        "end": "2026-05-06T18:45:00+00:00",
+        "start": "2025-10-10T11:00:00+00:00",
+        "symbol": "BTCUSDT",
+        "timeframe": "15m"
+      },
+      "limitations": [
+        "OHLC indicator lifecycle, not broker fills",
+        "POC disabled; no 1m profile required for four-check scoring",
+        "Costs are stress assumptions, not venue quotations",
+        "Reused research windows; no untouched holdout"
+      ],
+      "range_diagnostics": {
+        "affected_setups": {
+          "ambiguous": 0,
+          "expectancy_r": -1.0,
+          "long": 2,
+          "missed_or_invalid": 3,
+          "pending_or_open": 0,
+          "profit_factor": 0.0,
+          "resolved": 3,
+          "setups": 6,
+          "short": 4,
+          "sl": 3,
+          "tp": 0,
+          "tp_rate_pct": 0.0,
+          "win_rate_pct": 0.0,
+          "win_rate_wilson95_descriptive_pct": [
+            0.0,
+            56.15
+          ]
+        },
+        "candidates": 1121,
+        "endpoint_not_beyond_broken_level": 43,
+        "examples": [
+          {
+            "bar_open_ms": 1760703300000,
+            "bos_level": 104505.0,
+            "direction": -1,
+            "score": 25,
+            "target": 105458.0
+          },
+          {
+            "bar_open_ms": 1760813100000,
+            "bos_level": 106605.93,
+            "direction": -1,
+            "score": 25,
+            "target": 106722.72
+          },
+          {
+            "bar_open_ms": 1761768000000,
+            "bos_level": 109797.13,
+            "direction": -1,
+            "score": 25,
+            "target": 110157.03
+          }
+        ]
+      },
+      "setups_per_calendar_week": 7.124,
+      "verdict": "DESCRIPTIVE_ONLY_NOT_AN_EDGE_ACCEPTANCE"
+    },
+    "protected_owner": {
+      "chronological_halves": {
+        "first": {
+          "ambiguous": 0,
+          "expectancy_r": -0.4253,
+          "long": 5,
+          "missed_or_invalid": 8,
+          "pending_or_open": 0,
+          "profit_factor": 0.4897,
+          "resolved": 6,
+          "setups": 14,
+          "short": 9,
+          "sl": 5,
+          "tp": 1,
+          "tp_rate_pct": 16.667,
+          "win_rate_pct": 16.667,
+          "win_rate_wilson95_descriptive_pct": [
+            3.01,
+            56.35
+          ]
+        },
+        "second_diagnostic": {
+          "ambiguous": 0,
+          "expectancy_r": -0.1379,
+          "long": 10,
+          "missed_or_invalid": 16,
+          "pending_or_open": 0,
+          "profit_factor": 0.8161,
+          "resolved": 8,
+          "setups": 24,
+          "short": 14,
+          "sl": 6,
+          "tp": 2,
+          "tp_rate_pct": 25.0,
+          "win_rate_pct": 25.0,
+          "win_rate_wilson95_descriptive_pct": [
+            7.15,
+            59.07
+          ]
+        }
+      },
+      "cohorts": {
+        "direction:long": {
+          "ambiguous": 0,
+          "expectancy_r": -0.3103,
+          "long": 15,
+          "missed_or_invalid": 10,
+          "pending_or_open": 0,
+          "profit_factor": 0.6121,
+          "resolved": 5,
+          "setups": 15,
+          "short": 0,
+          "sl": 4,
+          "tp": 1,
+          "tp_rate_pct": 20.0,
+          "win_rate_pct": 20.0,
+          "win_rate_wilson95_descriptive_pct": [
+            3.62,
+            62.45
+          ]
+        },
+        "direction:short": {
+          "ambiguous": 0,
+          "expectancy_r": -0.2337,
+          "long": 0,
+          "missed_or_invalid": 14,
+          "pending_or_open": 0,
+          "profit_factor": 0.6995,
+          "resolved": 9,
+          "setups": 23,
+          "short": 23,
+          "sl": 7,
+          "tp": 2,
+          "tp_rate_pct": 22.222,
+          "win_rate_pct": 22.222,
+          "win_rate_wilson95_descriptive_pct": [
+            6.32,
+            54.74
+          ]
+        },
+        "htf:False": {
+          "ambiguous": 0,
+          "expectancy_r": -1.0,
+          "long": 3,
+          "missed_or_invalid": 7,
+          "pending_or_open": 0,
+          "profit_factor": 0.0,
+          "resolved": 3,
+          "setups": 10,
+          "short": 7,
+          "sl": 3,
+          "tp": 0,
+          "tp_rate_pct": 0.0,
+          "win_rate_pct": 0.0,
+          "win_rate_wilson95_descriptive_pct": [
+            0.0,
+            56.15
+          ]
+        },
+        "htf:True": {
+          "ambiguous": 0,
+          "expectancy_r": -0.0596,
+          "long": 12,
+          "missed_or_invalid": 17,
+          "pending_or_open": 0,
+          "profit_factor": 0.9181,
+          "resolved": 11,
+          "setups": 28,
+          "short": 16,
+          "sl": 8,
+          "tp": 3,
+          "tp_rate_pct": 27.273,
+          "win_rate_pct": 27.273,
+          "win_rate_wilson95_descriptive_pct": [
+            9.75,
+            56.57
+          ]
+        },
+        "imbalance:False": {
+          "ambiguous": 0,
+          "expectancy_r": null,
+          "long": 1,
+          "missed_or_invalid": 3,
+          "pending_or_open": 0,
+          "profit_factor": null,
+          "resolved": 0,
+          "setups": 3,
+          "short": 2,
+          "sl": 0,
+          "tp": 0,
+          "tp_rate_pct": null,
+          "win_rate_pct": null,
+          "win_rate_wilson95_descriptive_pct": null
+        },
+        "imbalance:True": {
+          "ambiguous": 0,
+          "expectancy_r": -0.2611,
+          "long": 14,
+          "missed_or_invalid": 21,
+          "pending_or_open": 0,
+          "profit_factor": 0.6677,
+          "resolved": 14,
+          "setups": 35,
+          "short": 21,
+          "sl": 11,
+          "tp": 3,
+          "tp_rate_pct": 21.429,
+          "win_rate_pct": 21.429,
+          "win_rate_wilson95_descriptive_pct": [
+            7.57,
+            47.59
+          ]
+        },
+        "missing:FVG": {
+          "ambiguous": 0,
+          "expectancy_r": null,
+          "long": 1,
+          "missed_or_invalid": 3,
+          "pending_or_open": 0,
+          "profit_factor": null,
+          "resolved": 0,
+          "setups": 3,
+          "short": 2,
+          "sl": 0,
+          "tp": 0,
+          "tp_rate_pct": null,
+          "win_rate_pct": null,
+          "win_rate_wilson95_descriptive_pct": null
+        },
+        "missing:HTF": {
+          "ambiguous": 0,
+          "expectancy_r": -1.0,
+          "long": 3,
+          "missed_or_invalid": 7,
+          "pending_or_open": 0,
+          "profit_factor": 0.0,
+          "resolved": 3,
+          "setups": 10,
+          "short": 7,
+          "sl": 3,
+          "tp": 0,
+          "tp_rate_pct": 0.0,
+          "win_rate_pct": 0.0,
+          "win_rate_wilson95_descriptive_pct": [
+            0.0,
+            56.15
+          ]
+        },
+        "missing:LQ": {
+          "ambiguous": 0,
+          "expectancy_r": -0.0596,
+          "long": 11,
+          "missed_or_invalid": 12,
+          "pending_or_open": 0,
+          "profit_factor": 0.9181,
+          "resolved": 11,
+          "setups": 23,
+          "short": 12,
+          "sl": 8,
+          "tp": 3,
+          "tp_rate_pct": 27.273,
+          "win_rate_pct": 27.273,
+          "win_rate_wilson95_descriptive_pct": [
+            9.75,
+            56.57
+          ]
+        },
+        "missing:NONE": {
+          "ambiguous": 0,
+          "expectancy_r": null,
+          "long": 0,
+          "missed_or_invalid": 2,
+          "pending_or_open": 0,
+          "profit_factor": null,
+          "resolved": 0,
+          "setups": 2,
+          "short": 2,
+          "sl": 0,
+          "tp": 0,
+          "tp_rate_pct": null,
+          "win_rate_pct": null,
+          "win_rate_wilson95_descriptive_pct": null
+        },
+        "sweep:False": {
+          "ambiguous": 0,
+          "expectancy_r": -0.0596,
+          "long": 11,
+          "missed_or_invalid": 12,
+          "pending_or_open": 0,
+          "profit_factor": 0.9181,
+          "resolved": 11,
+          "setups": 23,
+          "short": 12,
+          "sl": 8,
+          "tp": 3,
+          "tp_rate_pct": 27.273,
+          "win_rate_pct": 27.273,
+          "win_rate_wilson95_descriptive_pct": [
+            9.75,
+            56.57
+          ]
+        },
+        "sweep:True": {
+          "ambiguous": 0,
+          "expectancy_r": -1.0,
+          "long": 4,
+          "missed_or_invalid": 12,
+          "pending_or_open": 0,
+          "profit_factor": 0.0,
+          "resolved": 3,
+          "setups": 15,
+          "short": 11,
+          "sl": 3,
+          "tp": 0,
+          "tp_rate_pct": 0.0,
+          "win_rate_pct": 0.0,
+          "win_rate_wilson95_descriptive_pct": [
+            0.0,
+            56.15
+          ]
+        }
+      },
+      "cost_stress_bps_per_side": {
+        "10": {
+          "ambiguous": 0,
+          "expectancy_r": -0.7456,
+          "long": 15,
+          "missed_or_invalid": 24,
+          "pending_or_open": 0,
+          "profit_factor": 0.3687,
+          "resolved": 14,
+          "setups": 38,
+          "short": 23,
+          "sl": 11,
+          "tp": 3,
+          "tp_rate_pct": 21.429,
+          "win_rate_pct": 21.429,
+          "win_rate_wilson95_descriptive_pct": [
+            7.57,
+            47.59
+          ]
+        },
+        "2": {
+          "ambiguous": 0,
+          "expectancy_r": -0.358,
+          "long": 15,
+          "missed_or_invalid": 24,
+          "pending_or_open": 0,
+          "profit_factor": 0.586,
+          "resolved": 14,
+          "setups": 38,
+          "short": 23,
+          "sl": 11,
+          "tp": 3,
+          "tp_rate_pct": 21.429,
+          "win_rate_pct": 21.429,
+          "win_rate_wilson95_descriptive_pct": [
+            7.57,
+            47.59
+          ]
+        },
+        "5": {
+          "ambiguous": 0,
+          "expectancy_r": -0.5033,
+          "long": 15,
+          "missed_or_invalid": 24,
+          "pending_or_open": 0,
+          "profit_factor": 0.4882,
+          "resolved": 14,
+          "setups": 38,
+          "short": 23,
+          "sl": 11,
+          "tp": 3,
+          "tp_rate_pct": 21.429,
+          "win_rate_pct": 21.429,
+          "win_rate_wilson95_descriptive_pct": [
+            7.57,
+            47.59
+          ]
+        }
+      },
+      "data_quality": {
+        "duplicate_timestamps": 0,
+        "four_hour_bucket_sizes": {
+          "4": 1,
+          "12": 1,
+          "16": 1249
+        },
+        "gap_examples": [],
+        "input_data_gate_pass": true,
+        "legacy_fixed16_discarded_interior_buckets": 0,
+        "malformed_ohlcv": 0,
+        "native_htf_required_for_parity": false,
+        "non_15m_gaps": 0,
+        "note": "UTC labels in an imported CSV do not verify the original MT5 server timezone. Short buckets may be legitimate sessions or missing data; neither is inferred here.",
+        "session_alignment_verified": true,
+        "status": "CONTINUOUS_UTC_INPUT_CHECK_PASS",
+        "timezone_verified": true
+      },
+      "event_accounting": {
+        "accounted_events": 342,
+        "by_direction": {
+          "-1": {
+            "LATE": 20,
+            "SCORE": 128,
+            "SETUP_READY": 23,
+            "SUPERSEDED_BEFORE_LOCK": 8
+          },
+          "1": {
+            "INVALID_RANGE": 1,
+            "LATE": 16,
+            "SCORE": 117,
+            "SETUP_READY": 15,
+            "SUPERSEDED_BEFORE_LOCK": 14
+          }
+        },
+        "complete": true,
+        "structural_events": 342,
+        "terminal_counts": {
+          "INVALID_RANGE": 1,
+          "LATE": 36,
+          "SCORE": 245,
+          "SETUP_READY": 38,
+          "SUPERSEDED_BEFORE_LOCK": 22
+        }
+      },
+      "gross": {
+        "ambiguous": 0,
+        "expectancy_r": -0.2611,
+        "long": 15,
+        "missed_or_invalid": 24,
+        "pending_or_open": 0,
+        "profit_factor": 0.6677,
+        "resolved": 14,
+        "setups": 38,
+        "short": 23,
+        "sl": 11,
+        "tp": 3,
+        "tp_rate_pct": 21.429,
+        "win_rate_pct": 21.429,
+        "win_rate_wilson95_descriptive_pct": [
+          7.57,
+          47.59
+        ]
+      },
+      "identity": {
+        "bars": 20000,
+        "dataset_file_sha256": "59482f242758a746896460e56effb883151aa9ec00f4f429686d79c1e4e49b76",
+        "end": "2026-05-06T18:45:00+00:00",
+        "start": "2025-10-10T11:00:00+00:00",
+        "symbol": "BTCUSDT",
+        "timeframe": "15m"
+      },
+      "limitations": [
+        "OHLC indicator lifecycle, not broker fills",
+        "POC disabled; no 1m profile required for four-check scoring",
+        "Costs are stress assumptions, not venue quotations",
+        "Reused research windows; no untouched holdout"
+      ],
+      "range_diagnostics": {
+        "affected_setups": {
+          "ambiguous": 0,
+          "expectancy_r": -1.0,
+          "long": 0,
+          "missed_or_invalid": 1,
+          "pending_or_open": 0,
+          "profit_factor": 0.0,
+          "resolved": 1,
+          "setups": 2,
+          "short": 2,
+          "sl": 1,
+          "tp": 0,
+          "tp_rate_pct": 0.0,
+          "win_rate_pct": 0.0,
+          "win_rate_wilson95_descriptive_pct": [
+            0.0,
+            79.35
+          ]
+        },
+        "candidates": 319,
+        "endpoint_not_beyond_broken_level": 20,
+        "examples": [
+          {
+            "bar_open_ms": 1763160300000,
+            "bos_level": 94560.48,
+            "direction": -1,
+            "score": 25,
+            "target": 94700.0
+          },
+          {
+            "bar_open_ms": 1763920800000,
+            "bos_level": 87200.0,
+            "direction": 1,
+            "score": 25,
+            "target": 86957.45
+          },
+          {
+            "bar_open_ms": 1767514500000,
+            "bos_level": 91610.17,
+            "direction": 1,
+            "score": 25,
+            "target": 91546.31
+          }
+        ]
+      },
+      "setups_per_calendar_week": 1.277,
+      "verdict": "DESCRIPTIVE_ONLY_NOT_AN_EDGE_ACCEPTANCE"
+    },
+    "v6_endpoint": {
+      "chronological_halves": {
+        "first": {
+          "ambiguous": 2,
+          "expectancy_r": -0.1818,
+          "long": 76,
+          "missed_or_invalid": 91,
+          "pending_or_open": 0,
+          "profit_factor": 0.7617,
+          "resolved": 59,
+          "setups": 152,
+          "short": 76,
+          "sl": 45,
+          "tp": 14,
+          "tp_rate_pct": 23.729,
+          "win_rate_pct": 23.729,
+          "win_rate_wilson95_descriptive_pct": [
+            14.69,
+            35.98
+          ]
+        },
+        "second_diagnostic": {
+          "ambiguous": 1,
+          "expectancy_r": -0.2611,
+          "long": 83,
+          "missed_or_invalid": 103,
+          "pending_or_open": 0,
+          "profit_factor": 0.6677,
+          "resolved": 70,
+          "setups": 174,
+          "short": 91,
+          "sl": 55,
+          "tp": 15,
+          "tp_rate_pct": 21.429,
+          "win_rate_pct": 21.429,
+          "win_rate_wilson95_descriptive_pct": [
+            13.44,
+            32.39
+          ]
+        }
+      },
+      "cohorts": {
+        "direction:long": {
+          "ambiguous": 0,
+          "expectancy_r": -0.3103,
+          "long": 159,
+          "missed_or_invalid": 99,
+          "pending_or_open": 0,
+          "profit_factor": 0.6121,
+          "resolved": 60,
+          "setups": 159,
+          "short": 0,
+          "sl": 48,
+          "tp": 12,
+          "tp_rate_pct": 20.0,
+          "win_rate_pct": 20.0,
+          "win_rate_wilson95_descriptive_pct": [
+            11.83,
+            31.78
+          ]
+        },
+        "direction:short": {
+          "ambiguous": 3,
+          "expectancy_r": -0.1504,
+          "long": 0,
+          "missed_or_invalid": 95,
+          "pending_or_open": 0,
+          "profit_factor": 0.8004,
+          "resolved": 69,
+          "setups": 167,
+          "short": 167,
+          "sl": 52,
+          "tp": 17,
+          "tp_rate_pct": 24.638,
+          "win_rate_pct": 24.638,
+          "win_rate_wilson95_descriptive_pct": [
+            15.99,
+            35.96
+          ]
+        },
+        "htf:False": {
+          "ambiguous": 0,
+          "expectancy_r": -0.3103,
+          "long": 36,
+          "missed_or_invalid": 49,
+          "pending_or_open": 0,
+          "profit_factor": 0.6121,
+          "resolved": 20,
+          "setups": 69,
+          "short": 33,
+          "sl": 16,
+          "tp": 4,
+          "tp_rate_pct": 20.0,
+          "win_rate_pct": 20.0,
+          "win_rate_wilson95_descriptive_pct": [
+            8.07,
+            41.6
+          ]
+        },
+        "htf:True": {
+          "ambiguous": 3,
+          "expectancy_r": -0.2091,
+          "long": 123,
+          "missed_or_invalid": 145,
+          "pending_or_open": 0,
+          "profit_factor": 0.7287,
+          "resolved": 109,
+          "setups": 257,
+          "short": 134,
+          "sl": 84,
+          "tp": 25,
+          "tp_rate_pct": 22.936,
+          "win_rate_pct": 22.936,
+          "win_rate_wilson95_descriptive_pct": [
+            16.05,
+            31.67
+          ]
+        },
+        "imbalance:False": {
+          "ambiguous": 1,
+          "expectancy_r": -0.3239,
+          "long": 61,
+          "missed_or_invalid": 73,
+          "pending_or_open": 0,
+          "profit_factor": 0.5971,
+          "resolved": 51,
+          "setups": 125,
+          "short": 64,
+          "sl": 41,
+          "tp": 10,
+          "tp_rate_pct": 19.608,
+          "win_rate_pct": 19.608,
+          "win_rate_wilson95_descriptive_pct": [
+            11.02,
+            32.46
+          ]
+        },
+        "imbalance:True": {
+          "ambiguous": 2,
+          "expectancy_r": -0.16,
+          "long": 98,
+          "missed_or_invalid": 121,
+          "pending_or_open": 0,
+          "profit_factor": 0.7884,
+          "resolved": 78,
+          "setups": 201,
+          "short": 103,
+          "sl": 59,
+          "tp": 19,
+          "tp_rate_pct": 24.359,
+          "win_rate_pct": 24.359,
+          "win_rate_wilson95_descriptive_pct": [
+            16.19,
+            34.94
+          ]
+        },
+        "missing:FVG": {
+          "ambiguous": 1,
+          "expectancy_r": -0.3239,
+          "long": 61,
+          "missed_or_invalid": 73,
+          "pending_or_open": 0,
+          "profit_factor": 0.5971,
+          "resolved": 51,
+          "setups": 125,
+          "short": 64,
+          "sl": 41,
+          "tp": 10,
+          "tp_rate_pct": 19.608,
+          "win_rate_pct": 19.608,
+          "win_rate_wilson95_descriptive_pct": [
+            11.02,
+            32.46
+          ]
+        },
+        "missing:HTF": {
+          "ambiguous": 0,
+          "expectancy_r": -0.3103,
+          "long": 36,
+          "missed_or_invalid": 49,
+          "pending_or_open": 0,
+          "profit_factor": 0.6121,
+          "resolved": 20,
+          "setups": 69,
+          "short": 33,
+          "sl": 16,
+          "tp": 4,
+          "tp_rate_pct": 20.0,
+          "win_rate_pct": 20.0,
+          "win_rate_wilson95_descriptive_pct": [
+            8.07,
+            41.6
+          ]
+        },
+        "missing:LQ": {
+          "ambiguous": 2,
+          "expectancy_r": 0.2029,
+          "long": 47,
+          "missed_or_invalid": 55,
+          "pending_or_open": 0,
+          "profit_factor": 1.3116,
+          "resolved": 43,
+          "setups": 100,
+          "short": 53,
+          "sl": 28,
+          "tp": 15,
+          "tp_rate_pct": 34.884,
+          "win_rate_pct": 34.884,
+          "win_rate_wilson95_descriptive_pct": [
+            22.42,
+            49.83
+          ]
+        },
+        "missing:NONE": {
+          "ambiguous": 0,
+          "expectancy_r": -1.0,
+          "long": 15,
+          "missed_or_invalid": 17,
+          "pending_or_open": 0,
+          "profit_factor": 0.0,
+          "resolved": 15,
+          "setups": 32,
+          "short": 17,
+          "sl": 15,
+          "tp": 0,
+          "tp_rate_pct": 0.0,
+          "win_rate_pct": 0.0,
+          "win_rate_wilson95_descriptive_pct": [
+            -0.0,
+            20.39
+          ]
+        },
+        "sweep:False": {
+          "ambiguous": 2,
+          "expectancy_r": 0.2029,
+          "long": 47,
+          "missed_or_invalid": 55,
+          "pending_or_open": 0,
+          "profit_factor": 1.3116,
+          "resolved": 43,
+          "setups": 100,
+          "short": 53,
+          "sl": 28,
+          "tp": 15,
+          "tp_rate_pct": 34.884,
+          "win_rate_pct": 34.884,
+          "win_rate_wilson95_descriptive_pct": [
+            22.42,
+            49.83
+          ]
+        },
+        "sweep:True": {
+          "ambiguous": 1,
+          "expectancy_r": -0.4387,
+          "long": 112,
+          "missed_or_invalid": 139,
+          "pending_or_open": 0,
+          "profit_factor": 0.4761,
+          "resolved": 86,
+          "setups": 226,
+          "short": 114,
+          "sl": 72,
+          "tp": 14,
+          "tp_rate_pct": 16.279,
+          "win_rate_pct": 16.279,
+          "win_rate_wilson95_descriptive_pct": [
+            9.95,
+            25.49
+          ]
+        }
+      },
+      "cost_stress_bps_per_side": {
+        "10": {
+          "ambiguous": 3,
+          "expectancy_r": -0.9792,
+          "long": 159,
+          "missed_or_invalid": 194,
+          "pending_or_open": 0,
+          "profit_factor": 0.2905,
+          "resolved": 129,
+          "setups": 326,
+          "short": 167,
+          "sl": 100,
+          "tp": 29,
+          "tp_rate_pct": 22.481,
+          "win_rate_pct": 22.481,
+          "win_rate_wilson95_descriptive_pct": [
+            16.13,
+            30.42
+          ]
+        },
+        "2": {
+          "ambiguous": 3,
+          "expectancy_r": -0.3757,
+          "long": 159,
+          "missed_or_invalid": 194,
+          "pending_or_open": 0,
+          "profit_factor": 0.5808,
+          "resolved": 129,
+          "setups": 326,
+          "short": 167,
+          "sl": 100,
+          "tp": 29,
+          "tp_rate_pct": 22.481,
+          "win_rate_pct": 22.481,
+          "win_rate_wilson95_descriptive_pct": [
+            16.13,
+            30.42
+          ]
+        },
+        "5": {
+          "ambiguous": 3,
+          "expectancy_r": -0.602,
+          "long": 159,
+          "missed_or_invalid": 194,
+          "pending_or_open": 0,
+          "profit_factor": 0.4414,
+          "resolved": 129,
+          "setups": 326,
+          "short": 167,
+          "sl": 100,
+          "tp": 29,
+          "tp_rate_pct": 22.481,
+          "win_rate_pct": 22.481,
+          "win_rate_wilson95_descriptive_pct": [
+            16.13,
+            30.42
+          ]
+        }
+      },
+      "data_quality": {
+        "duplicate_timestamps": 0,
+        "four_hour_bucket_sizes": {
+          "4": 1,
+          "12": 1,
+          "16": 1249
+        },
+        "gap_examples": [],
+        "input_data_gate_pass": true,
+        "legacy_fixed16_discarded_interior_buckets": 0,
+        "malformed_ohlcv": 0,
+        "native_htf_required_for_parity": false,
+        "non_15m_gaps": 0,
+        "note": "UTC labels in an imported CSV do not verify the original MT5 server timezone. Short buckets may be legitimate sessions or missing data; neither is inferred here.",
+        "session_alignment_verified": true,
+        "status": "CONTINUOUS_UTC_INPUT_CHECK_PASS",
+        "timezone_verified": true
+      },
+      "event_accounting": {
+        "accounted_events": 2982,
+        "by_direction": {
+          "-1": {
+            "LATE": 149,
+            "LEG_ALREADY_OWNED": 489,
+            "SCORE": 609,
+            "SETUP_READY": 167,
+            "SUPERSEDED_BEFORE_LOCK": 75,
+            "WINDOW_END_UNRESOLVED": 1
+          },
+          "1": {
+            "LATE": 120,
+            "LEG_ALREADY_OWNED": 498,
+            "SCORE": 648,
+            "SETUP_READY": 159,
+            "SUPERSEDED_BEFORE_LOCK": 67
+          }
+        },
+        "complete": true,
+        "structural_events": 2982,
+        "terminal_counts": {
+          "LATE": 269,
+          "LEG_ALREADY_OWNED": 987,
+          "SCORE": 1257,
+          "SETUP_READY": 326,
+          "SUPERSEDED_BEFORE_LOCK": 142,
+          "WINDOW_END_UNRESOLVED": 1
+        }
+      },
+      "gross": {
+        "ambiguous": 3,
+        "expectancy_r": -0.2248,
+        "long": 159,
+        "missed_or_invalid": 194,
+        "pending_or_open": 0,
+        "profit_factor": 0.71,
+        "resolved": 129,
+        "setups": 326,
+        "short": 167,
+        "sl": 100,
+        "tp": 29,
+        "tp_rate_pct": 22.481,
+        "win_rate_pct": 22.481,
+        "win_rate_wilson95_descriptive_pct": [
+          16.13,
+          30.42
+        ]
+      },
+      "identity": {
+        "bars": 20000,
+        "dataset_file_sha256": "59482f242758a746896460e56effb883151aa9ec00f4f429686d79c1e4e49b76",
+        "end": "2026-05-06T18:45:00+00:00",
+        "start": "2025-10-10T11:00:00+00:00",
+        "symbol": "BTCUSDT",
+        "timeframe": "15m"
+      },
+      "limitations": [
+        "OHLC indicator lifecycle, not broker fills",
+        "POC disabled; no 1m profile required for four-check scoring",
+        "Costs are stress assumptions, not venue quotations",
+        "Reused research windows; no untouched holdout"
+      ],
+      "range_diagnostics": {
+        "affected_setups": {
+          "ambiguous": 0,
+          "expectancy_r": null,
+          "long": 0,
+          "missed_or_invalid": 0,
+          "pending_or_open": 0,
+          "profit_factor": null,
+          "resolved": 0,
+          "setups": 0,
+          "short": 0,
+          "sl": 0,
+          "tp": 0,
+          "tp_rate_pct": null,
+          "win_rate_pct": null,
+          "win_rate_wilson95_descriptive_pct": null
+        },
+        "candidates": 1852,
+        "endpoint_not_beyond_broken_level": 4,
+        "examples": [
+          {
+            "bar_open_ms": 1763920800000,
+            "bos_level": 87200.0,
+            "direction": 1,
+            "score": 25,
+            "target": 86957.45
+          },
+          {
+            "bar_open_ms": 1765653300000,
+            "bos_level": 90031.38,
+            "direction": -1,
+            "score": 25,
+            "target": 90104.49
+          },
+          {
+            "bar_open_ms": 1774855800000,
+            "bos_level": 67650.01,
+            "direction": 1,
+            "score": 25,
+            "target": 67458.38
+          }
+        ]
+      },
+      "setups_per_calendar_week": 10.954,
+      "verdict": "DESCRIPTIVE_ONLY_NOT_AN_EDGE_ACCEPTANCE"
+    },
+    "v6_sweep": {
+      "chronological_halves": {
+        "first": {
+          "ambiguous": 2,
+          "expectancy_r": -0.1242,
+          "long": 85,
+          "missed_or_invalid": 102,
+          "pending_or_open": 0,
+          "profit_factor": 0.8335,
+          "resolved": 63,
+          "setups": 167,
+          "short": 82,
+          "sl": 47,
+          "tp": 16,
+          "tp_rate_pct": 25.397,
+          "win_rate_pct": 25.397,
+          "win_rate_wilson95_descriptive_pct": [
+            16.28,
+            37.34
+          ]
+        },
+        "second_diagnostic": {
+          "ambiguous": 1,
+          "expectancy_r": -0.2544,
+          "long": 90,
+          "missed_or_invalid": 111,
+          "pending_or_open": 0,
+          "profit_factor": 0.6754,
+          "resolved": 74,
+          "setups": 186,
+          "short": 96,
+          "sl": 58,
+          "tp": 16,
+          "tp_rate_pct": 21.622,
+          "win_rate_pct": 21.622,
+          "win_rate_wilson95_descriptive_pct": [
+            13.77,
+            32.27
+          ]
+        }
+      },
+      "cohorts": {
+        "direction:long": {
+          "ambiguous": 0,
+          "expectancy_r": -0.2685,
+          "long": 175,
+          "missed_or_invalid": 109,
+          "pending_or_open": 0,
+          "profit_factor": 0.6592,
+          "resolved": 66,
+          "setups": 175,
+          "short": 0,
+          "sl": 52,
+          "tp": 14,
+          "tp_rate_pct": 21.212,
+          "win_rate_pct": 21.212,
+          "win_rate_wilson95_descriptive_pct": [
+            13.08,
+            32.51
+          ]
+        },
+        "direction:short": {
+          "ambiguous": 3,
+          "expectancy_r": -0.1258,
+          "long": 0,
+          "missed_or_invalid": 104,
+          "pending_or_open": 0,
+          "profit_factor": 0.8315,
+          "resolved": 71,
+          "setups": 178,
+          "short": 178,
+          "sl": 53,
+          "tp": 18,
+          "tp_rate_pct": 25.352,
+          "win_rate_pct": 25.352,
+          "win_rate_wilson95_descriptive_pct": [
+            16.68,
+            36.55
+          ]
+        },
+        "htf:False": {
+          "ambiguous": 0,
+          "expectancy_r": -0.1724,
+          "long": 44,
+          "missed_or_invalid": 61,
+          "pending_or_open": 0,
+          "profit_factor": 0.7731,
+          "resolved": 25,
+          "setups": 86,
+          "short": 42,
+          "sl": 19,
+          "tp": 6,
+          "tp_rate_pct": 24.0,
+          "win_rate_pct": 24.0,
+          "win_rate_wilson95_descriptive_pct": [
+            11.5,
+            43.43
+          ]
+        },
+        "htf:True": {
+          "ambiguous": 3,
+          "expectancy_r": -0.1995,
+          "long": 131,
+          "missed_or_invalid": 152,
+          "pending_or_open": 0,
+          "profit_factor": 0.7402,
+          "resolved": 112,
+          "setups": 267,
+          "short": 136,
+          "sl": 86,
+          "tp": 26,
+          "tp_rate_pct": 23.214,
+          "win_rate_pct": 23.214,
+          "win_rate_wilson95_descriptive_pct": [
+            16.36,
+            31.84
+          ]
+        },
+        "imbalance:False": {
+          "ambiguous": 1,
+          "expectancy_r": -0.2976,
+          "long": 68,
+          "missed_or_invalid": 79,
+          "pending_or_open": 0,
+          "profit_factor": 0.6263,
+          "resolved": 54,
+          "setups": 134,
+          "short": 66,
+          "sl": 43,
+          "tp": 11,
+          "tp_rate_pct": 20.37,
+          "win_rate_pct": 20.37,
+          "win_rate_wilson95_descriptive_pct": [
+            11.77,
+            32.9
+          ]
+        },
+        "imbalance:True": {
+          "ambiguous": 2,
+          "expectancy_r": -0.1275,
+          "long": 107,
+          "missed_or_invalid": 134,
+          "pending_or_open": 0,
+          "profit_factor": 0.8293,
+          "resolved": 83,
+          "setups": 219,
+          "short": 112,
+          "sl": 62,
+          "tp": 21,
+          "tp_rate_pct": 25.301,
+          "win_rate_pct": 25.301,
+          "win_rate_wilson95_descriptive_pct": [
+            17.19,
+            35.6
+          ]
+        },
+        "missing:FVG": {
+          "ambiguous": 1,
+          "expectancy_r": -0.2976,
+          "long": 68,
+          "missed_or_invalid": 79,
+          "pending_or_open": 0,
+          "profit_factor": 0.6263,
+          "resolved": 54,
+          "setups": 134,
+          "short": 66,
+          "sl": 43,
+          "tp": 11,
+          "tp_rate_pct": 20.37,
+          "win_rate_pct": 20.37,
+          "win_rate_wilson95_descriptive_pct": [
+            11.77,
+            32.9
+          ]
+        },
+        "missing:HTF": {
+          "ambiguous": 0,
+          "expectancy_r": -0.1724,
+          "long": 44,
+          "missed_or_invalid": 61,
+          "pending_or_open": 0,
+          "profit_factor": 0.7731,
+          "resolved": 25,
+          "setups": 86,
+          "short": 42,
+          "sl": 19,
+          "tp": 6,
+          "tp_rate_pct": 24.0,
+          "win_rate_pct": 24.0,
+          "win_rate_wilson95_descriptive_pct": [
+            11.5,
+            43.43
+          ]
+        },
+        "missing:LQ": {
+          "ambiguous": 2,
+          "expectancy_r": 0.2616,
+          "long": 46,
+          "missed_or_invalid": 55,
+          "pending_or_open": 0,
+          "profit_factor": 1.4125,
+          "resolved": 41,
+          "setups": 98,
+          "short": 52,
+          "sl": 26,
+          "tp": 15,
+          "tp_rate_pct": 36.585,
+          "win_rate_pct": 36.585,
+          "win_rate_wilson95_descriptive_pct": [
+            23.59,
+            51.88
+          ]
+        },
+        "missing:NONE": {
+          "ambiguous": 0,
+          "expectancy_r": -1.0,
+          "long": 17,
+          "missed_or_invalid": 18,
+          "pending_or_open": 0,
+          "profit_factor": 0.0,
+          "resolved": 17,
+          "setups": 35,
+          "short": 18,
+          "sl": 17,
+          "tp": 0,
+          "tp_rate_pct": 0.0,
+          "win_rate_pct": 0.0,
+          "win_rate_wilson95_descriptive_pct": [
+            0.0,
+            18.43
+          ]
+        },
+        "sweep:False": {
+          "ambiguous": 2,
+          "expectancy_r": 0.2616,
+          "long": 46,
+          "missed_or_invalid": 55,
+          "pending_or_open": 0,
+          "profit_factor": 1.4125,
+          "resolved": 41,
+          "setups": 98,
+          "short": 52,
+          "sl": 26,
+          "tp": 15,
+          "tp_rate_pct": 36.585,
+          "win_rate_pct": 36.585,
+          "win_rate_wilson95_descriptive_pct": [
+            23.59,
+            51.88
+          ]
+        },
+        "sweep:True": {
+          "ambiguous": 1,
+          "expectancy_r": -0.3894,
+          "long": 129,
+          "missed_or_invalid": 158,
+          "pending_or_open": 0,
+          "profit_factor": 0.5268,
+          "resolved": 96,
+          "setups": 255,
+          "short": 126,
+          "sl": 79,
+          "tp": 17,
+          "tp_rate_pct": 17.708,
+          "win_rate_pct": 17.708,
+          "win_rate_wilson95_descriptive_pct": [
+            11.36,
+            26.54
+          ]
+        }
+      },
+      "cost_stress_bps_per_side": {
+        "10": {
+          "ambiguous": 3,
+          "expectancy_r": -0.9425,
+          "long": 175,
+          "missed_or_invalid": 213,
+          "pending_or_open": 0,
+          "profit_factor": 0.3095,
+          "resolved": 137,
+          "setups": 353,
+          "short": 178,
+          "sl": 105,
+          "tp": 32,
+          "tp_rate_pct": 23.358,
+          "win_rate_pct": 23.358,
+          "win_rate_wilson95_descriptive_pct": [
+            17.06,
+            31.11
+          ]
+        },
+        "2": {
+          "ambiguous": 3,
+          "expectancy_r": -0.3441,
+          "long": 175,
+          "missed_or_invalid": 213,
+          "pending_or_open": 0,
+          "profit_factor": 0.6116,
+          "resolved": 137,
+          "setups": 353,
+          "short": 178,
+          "sl": 105,
+          "tp": 32,
+          "tp_rate_pct": 23.358,
+          "win_rate_pct": 23.358,
+          "win_rate_wilson95_descriptive_pct": [
+            17.06,
+            31.11
+          ]
+        },
+        "5": {
+          "ambiguous": 3,
+          "expectancy_r": -0.5685,
+          "long": 175,
+          "missed_or_invalid": 213,
+          "pending_or_open": 0,
+          "profit_factor": 0.4665,
+          "resolved": 137,
+          "setups": 353,
+          "short": 178,
+          "sl": 105,
+          "tp": 32,
+          "tp_rate_pct": 23.358,
+          "win_rate_pct": 23.358,
+          "win_rate_wilson95_descriptive_pct": [
+            17.06,
+            31.11
+          ]
+        }
+      },
+      "data_quality": {
+        "duplicate_timestamps": 0,
+        "four_hour_bucket_sizes": {
+          "4": 1,
+          "12": 1,
+          "16": 1249
+        },
+        "gap_examples": [],
+        "input_data_gate_pass": true,
+        "legacy_fixed16_discarded_interior_buckets": 0,
+        "malformed_ohlcv": 0,
+        "native_htf_required_for_parity": false,
+        "non_15m_gaps": 0,
+        "note": "UTC labels in an imported CSV do not verify the original MT5 server timezone. Short buckets may be legitimate sessions or missing data; neither is inferred here.",
+        "session_alignment_verified": true,
+        "status": "CONTINUOUS_UTC_INPUT_CHECK_PASS",
+        "timezone_verified": true
+      },
+      "event_accounting": {
+        "accounted_events": 2982,
+        "by_direction": {
+          "-1": {
+            "LATE": 142,
+            "LEG_ALREADY_OWNED": 489,
+            "SCORE": 605,
+            "SETUP_READY": 178,
+            "SUPERSEDED_BEFORE_LOCK": 75,
+            "WINDOW_END_UNRESOLVED": 1
+          },
+          "1": {
+            "LATE": 117,
+            "LEG_ALREADY_OWNED": 498,
+            "SCORE": 635,
+            "SETUP_READY": 175,
+            "SUPERSEDED_BEFORE_LOCK": 67
+          }
+        },
+        "complete": true,
+        "structural_events": 2982,
+        "terminal_counts": {
+          "LATE": 259,
+          "LEG_ALREADY_OWNED": 987,
+          "SCORE": 1240,
+          "SETUP_READY": 353,
+          "SUPERSEDED_BEFORE_LOCK": 142,
+          "WINDOW_END_UNRESOLVED": 1
+        }
+      },
+      "gross": {
+        "ambiguous": 3,
+        "expectancy_r": -0.1946,
+        "long": 175,
+        "missed_or_invalid": 213,
+        "pending_or_open": 0,
+        "profit_factor": 0.7461,
+        "resolved": 137,
+        "setups": 353,
+        "short": 178,
+        "sl": 105,
+        "tp": 32,
+        "tp_rate_pct": 23.358,
+        "win_rate_pct": 23.358,
+        "win_rate_wilson95_descriptive_pct": [
+          17.06,
+          31.11
+        ]
+      },
+      "identity": {
+        "bars": 20000,
+        "dataset_file_sha256": "59482f242758a746896460e56effb883151aa9ec00f4f429686d79c1e4e49b76",
+        "end": "2026-05-06T18:45:00+00:00",
+        "start": "2025-10-10T11:00:00+00:00",
+        "symbol": "BTCUSDT",
+        "timeframe": "15m"
+      },
+      "limitations": [
+        "OHLC indicator lifecycle, not broker fills",
+        "POC disabled; no 1m profile required for four-check scoring",
+        "Costs are stress assumptions, not venue quotations",
+        "Reused research windows; no untouched holdout"
+      ],
+      "range_diagnostics": {
+        "affected_setups": {
+          "ambiguous": 0,
+          "expectancy_r": null,
+          "long": 0,
+          "missed_or_invalid": 0,
+          "pending_or_open": 0,
+          "profit_factor": null,
+          "resolved": 0,
+          "setups": 0,
+          "short": 0,
+          "sl": 0,
+          "tp": 0,
+          "tp_rate_pct": null,
+          "win_rate_pct": null,
+          "win_rate_wilson95_descriptive_pct": null
+        },
+        "candidates": 1852,
+        "endpoint_not_beyond_broken_level": 4,
+        "examples": [
+          {
+            "bar_open_ms": 1763920800000,
+            "bos_level": 87200.0,
+            "direction": 1,
+            "score": 25,
+            "target": 86957.45
+          },
+          {
+            "bar_open_ms": 1765653300000,
+            "bos_level": 90031.38,
+            "direction": -1,
+            "score": 25,
+            "target": 90104.49
+          },
+          {
+            "bar_open_ms": 1774855800000,
+            "bos_level": 67650.01,
+            "direction": 1,
+            "score": 25,
+            "target": 67458.38
+          }
+        ]
+      },
+      "setups_per_calendar_week": 11.861,
+      "verdict": "DESCRIPTIVE_ONLY_NOT_AN_EDGE_ACCEPTANCE"
+    }
+  },
+  "btc_reference": {
+    "arrays": {
+      "chronological_halves": {
+        "first": {
+          "ambiguous": 0,
+          "expectancy_r": -0.569,
+          "long": 14,
+          "missed_or_invalid": 17,
+          "pending_or_open": 0,
+          "profit_factor": 0.3498,
+          "resolved": 16,
+          "setups": 33,
+          "short": 19,
+          "sl": 14,
+          "tp": 2,
+          "tp_rate_pct": 12.5,
+          "win_rate_pct": 12.5,
+          "win_rate_wilson95_descriptive_pct": [
+            3.5,
+            36.02
+          ]
+        },
+        "second_diagnostic": {
+          "ambiguous": 1,
+          "expectancy_r": -0.0148,
+          "long": 24,
+          "missed_or_invalid": 25,
+          "pending_or_open": 0,
+          "profit_factor": 0.9793,
+          "resolved": 14,
+          "setups": 40,
+          "short": 16,
+          "sl": 10,
+          "tp": 4,
+          "tp_rate_pct": 28.571,
+          "win_rate_pct": 28.571,
+          "win_rate_wilson95_descriptive_pct": [
+            11.72,
+            54.65
+          ]
+        }
+      },
+      "cohorts": {
+        "direction:long": {
+          "ambiguous": 1,
+          "expectancy_r": 0.0776,
+          "long": 38,
+          "missed_or_invalid": 21,
+          "pending_or_open": 0,
+          "profit_factor": 1.1129,
+          "resolved": 16,
+          "setups": 38,
+          "short": 0,
+          "sl": 11,
+          "tp": 5,
+          "tp_rate_pct": 31.25,
+          "win_rate_pct": 31.25,
+          "win_rate_wilson95_descriptive_pct": [
+            14.16,
+            55.6
+          ]
+        },
+        "direction:short": {
+          "ambiguous": 0,
+          "expectancy_r": -0.7537,
+          "long": 0,
+          "missed_or_invalid": 21,
+          "pending_or_open": 0,
+          "profit_factor": 0.1883,
+          "resolved": 14,
+          "setups": 35,
+          "short": 35,
+          "sl": 13,
+          "tp": 1,
+          "tp_rate_pct": 7.143,
+          "win_rate_pct": 7.143,
+          "win_rate_wilson95_descriptive_pct": [
+            1.27,
+            31.47
+          ]
+        },
+        "htf:False": {
+          "ambiguous": 1,
+          "expectancy_r": 0.3793,
+          "long": 9,
+          "missed_or_invalid": 7,
+          "pending_or_open": 0,
+          "profit_factor": 1.6322,
+          "resolved": 5,
+          "setups": 13,
+          "short": 4,
+          "sl": 3,
+          "tp": 2,
+          "tp_rate_pct": 40.0,
+          "win_rate_pct": 40.0,
+          "win_rate_wilson95_descriptive_pct": [
+            11.76,
+            76.93
+          ]
+        },
+        "htf:True": {
+          "ambiguous": 0,
+          "expectancy_r": -0.4483,
+          "long": 29,
+          "missed_or_invalid": 35,
+          "pending_or_open": 0,
+          "profit_factor": 0.4663,
+          "resolved": 25,
+          "setups": 60,
+          "short": 31,
+          "sl": 21,
+          "tp": 4,
+          "tp_rate_pct": 16.0,
+          "win_rate_pct": 16.0,
+          "win_rate_wilson95_descriptive_pct": [
+            6.4,
+            34.65
+          ]
+        },
+        "imbalance:False": {
+          "ambiguous": 0,
+          "expectancy_r": -0.7537,
+          "long": 15,
+          "missed_or_invalid": 18,
+          "pending_or_open": 0,
+          "profit_factor": 0.1883,
+          "resolved": 14,
+          "setups": 32,
+          "short": 17,
+          "sl": 13,
+          "tp": 1,
+          "tp_rate_pct": 7.143,
+          "win_rate_pct": 7.143,
+          "win_rate_wilson95_descriptive_pct": [
+            1.27,
+            31.47
+          ]
+        },
+        "imbalance:True": {
+          "ambiguous": 1,
+          "expectancy_r": 0.0776,
+          "long": 23,
+          "missed_or_invalid": 24,
+          "pending_or_open": 0,
+          "profit_factor": 1.1129,
+          "resolved": 16,
+          "setups": 41,
+          "short": 18,
+          "sl": 11,
+          "tp": 5,
+          "tp_rate_pct": 31.25,
+          "win_rate_pct": 31.25,
+          "win_rate_wilson95_descriptive_pct": [
+            14.16,
+            55.6
+          ]
+        },
+        "missing:FVG": {
+          "ambiguous": 0,
+          "expectancy_r": -0.7537,
+          "long": 15,
+          "missed_or_invalid": 18,
+          "pending_or_open": 0,
+          "profit_factor": 0.1883,
+          "resolved": 14,
+          "setups": 32,
+          "short": 17,
+          "sl": 13,
+          "tp": 1,
+          "tp_rate_pct": 7.143,
+          "win_rate_pct": 7.143,
+          "win_rate_wilson95_descriptive_pct": [
+            1.27,
+            31.47
+          ]
+        },
+        "missing:HTF": {
+          "ambiguous": 1,
+          "expectancy_r": 0.3793,
+          "long": 9,
+          "missed_or_invalid": 7,
+          "pending_or_open": 0,
+          "profit_factor": 1.6322,
+          "resolved": 5,
+          "setups": 13,
+          "short": 4,
+          "sl": 3,
+          "tp": 2,
+          "tp_rate_pct": 40.0,
+          "win_rate_pct": 40.0,
+          "win_rate_wilson95_descriptive_pct": [
+            11.76,
+            76.93
+          ]
+        },
+        "missing:LQ": {
+          "ambiguous": 0,
+          "expectancy_r": -0.2337,
+          "long": 11,
+          "missed_or_invalid": 10,
+          "pending_or_open": 0,
+          "profit_factor": 0.6995,
+          "resolved": 9,
+          "setups": 19,
+          "short": 8,
+          "sl": 7,
+          "tp": 2,
+          "tp_rate_pct": 22.222,
+          "win_rate_pct": 22.222,
+          "win_rate_wilson95_descriptive_pct": [
+            6.32,
+            54.74
+          ]
+        },
+        "missing:NONE": {
+          "ambiguous": 0,
+          "expectancy_r": 0.7241,
+          "long": 3,
+          "missed_or_invalid": 7,
+          "pending_or_open": 0,
+          "profit_factor": 2.4483,
+          "resolved": 2,
+          "setups": 9,
+          "short": 6,
+          "sl": 1,
+          "tp": 1,
+          "tp_rate_pct": 50.0,
+          "win_rate_pct": 50.0,
+          "win_rate_wilson95_descriptive_pct": [
+            9.45,
+            90.55
+          ]
+        },
+        "sweep:False": {
+          "ambiguous": 0,
+          "expectancy_r": -0.2337,
+          "long": 11,
+          "missed_or_invalid": 10,
+          "pending_or_open": 0,
+          "profit_factor": 0.6995,
+          "resolved": 9,
+          "setups": 19,
+          "short": 8,
+          "sl": 7,
+          "tp": 2,
+          "tp_rate_pct": 22.222,
+          "win_rate_pct": 22.222,
+          "win_rate_wilson95_descriptive_pct": [
+            6.32,
+            54.74
+          ]
+        },
+        "sweep:True": {
+          "ambiguous": 1,
+          "expectancy_r": -0.3432,
+          "long": 27,
+          "missed_or_invalid": 32,
+          "pending_or_open": 0,
+          "profit_factor": 0.5761,
+          "resolved": 21,
+          "setups": 54,
+          "short": 27,
+          "sl": 17,
+          "tp": 4,
+          "tp_rate_pct": 19.048,
+          "win_rate_pct": 19.048,
+          "win_rate_wilson95_descriptive_pct": [
+            7.67,
+            40.0
+          ]
+        }
+      },
+      "cost_stress_bps_per_side": {
+        "10": {
+          "ambiguous": 1,
+          "expectancy_r": -1.2891,
+          "long": 38,
+          "missed_or_invalid": 42,
+          "pending_or_open": 0,
+          "profit_factor": 0.1947,
+          "resolved": 30,
+          "setups": 73,
+          "short": 35,
+          "sl": 24,
+          "tp": 6,
+          "tp_rate_pct": 20.0,
+          "win_rate_pct": 20.0,
+          "win_rate_wilson95_descriptive_pct": [
+            9.5,
+            37.31
+          ]
+        },
+        "2": {
+          "ambiguous": 1,
+          "expectancy_r": -0.5061,
+          "long": 38,
+          "missed_or_invalid": 42,
+          "pending_or_open": 0,
+          "profit_factor": 0.4729,
+          "resolved": 30,
+          "setups": 73,
+          "short": 35,
+          "sl": 24,
+          "tp": 6,
+          "tp_rate_pct": 20.0,
+          "win_rate_pct": 20.0,
+          "win_rate_wilson95_descriptive_pct": [
+            9.5,
+            37.31
+          ]
+        },
+        "5": {
+          "ambiguous": 1,
+          "expectancy_r": -0.7997,
+          "long": 38,
+          "missed_or_invalid": 42,
+          "pending_or_open": 0,
+          "profit_factor": 0.3338,
+          "resolved": 30,
+          "setups": 73,
+          "short": 35,
+          "sl": 24,
+          "tp": 6,
+          "tp_rate_pct": 20.0,
+          "win_rate_pct": 20.0,
+          "win_rate_wilson95_descriptive_pct": [
+            9.5,
+            37.31
+          ]
+        }
+      },
+      "data_quality": {
+        "duplicate_timestamps": 0,
+        "four_hour_bucket_sizes": {
+          "10": 1,
+          "14": 1,
+          "16": 311
+        },
+        "gap_examples": [],
+        "input_data_gate_pass": true,
+        "legacy_fixed16_discarded_interior_buckets": 0,
+        "malformed_ohlcv": 0,
+        "native_htf_required_for_parity": false,
+        "non_15m_gaps": 0,
+        "note": "UTC labels in an imported CSV do not verify the original MT5 server timezone. Short buckets may be legitimate sessions or missing data; neither is inferred here.",
+        "session_alignment_verified": true,
+        "status": "CONTINUOUS_UTC_INPUT_CHECK_PASS",
+        "timezone_verified": true
+      },
+      "event_accounting": {
+        "accounted_events": 760,
+        "by_direction": {
+          "-1": {
+            "INVALID_RANGE": 1,
+            "LATE": 28,
+            "LEG_ALREADY_OWNED": 148,
+            "SCORE": 127,
+            "SETUP_READY": 35,
+            "SUPERSEDED_BEFORE_LOCK": 38
+          },
+          "1": {
+            "LATE": 26,
+            "LEG_ALREADY_OWNED": 123,
+            "SCORE": 155,
+            "SETUP_READY": 38,
+            "SUPERSEDED_BEFORE_LOCK": 41
+          }
+        },
+        "complete": true,
+        "structural_events": 760,
+        "terminal_counts": {
+          "INVALID_RANGE": 1,
+          "LATE": 54,
+          "LEG_ALREADY_OWNED": 271,
+          "SCORE": 282,
+          "SETUP_READY": 73,
+          "SUPERSEDED_BEFORE_LOCK": 79
+        }
+      },
+      "gross": {
+        "ambiguous": 1,
+        "expectancy_r": -0.3103,
+        "long": 38,
+        "missed_or_invalid": 42,
+        "pending_or_open": 0,
+        "profit_factor": 0.6121,
+        "resolved": 30,
+        "setups": 73,
+        "short": 35,
+        "sl": 24,
+        "tp": 6,
+        "tp_rate_pct": 20.0,
+        "win_rate_pct": 20.0,
+        "win_rate_wilson95_descriptive_pct": [
+          9.5,
+          37.31
+        ]
+      },
+      "identity": {
+        "bars": 5000,
+        "dataset_file_sha256": "0829fbc3ca7dd1a22e04f47a184f4b9edb8921fdfc66b9a0df6e696b99bb4a46",
+        "end": "2026-08-18T19:15:00+00:00",
+        "start": "2026-06-27T17:30:00+00:00",
+        "symbol": "BTCUSDT",
+        "timeframe": "15m"
+      },
+      "limitations": [
+        "OHLC indicator lifecycle, not broker fills",
+        "POC disabled; no 1m profile required for four-check scoring",
+        "Costs are stress assumptions, not venue quotations",
+        "Reused research windows; no untouched holdout"
+      ],
+      "range_diagnostics": {
+        "affected_setups": {
+          "ambiguous": 0,
+          "expectancy_r": null,
+          "long": 0,
+          "missed_or_invalid": 1,
+          "pending_or_open": 0,
+          "profit_factor": null,
+          "resolved": 0,
+          "setups": 1,
+          "short": 1,
+          "sl": 0,
+          "tp": 0,
+          "tp_rate_pct": null,
+          "win_rate_pct": null,
+          "win_rate_wilson95_descriptive_pct": null
+        },
+        "candidates": 409,
+        "endpoint_not_beyond_broken_level": 8,
+        "examples": [
+          {
+            "bar_open_ms": 1783251900000,
+            "bos_level": 62542.0,
+            "direction": -1,
+            "score": 50,
+            "target": 62600.03
+          },
+          {
+            "bar_open_ms": 1783863900000,
+            "bos_level": 64100.32,
+            "direction": 1,
+            "score": 50,
+            "target": 64097.99
+          },
+          {
+            "bar_open_ms": 1784113200000,
+            "bos_level": 64602.5,
+            "direction": -1,
+            "score": 75,
+            "target": 64614.0
+          }
+        ]
+      },
+      "setups_per_calendar_week": 9.813,
+      "verdict": "DESCRIPTIVE_ONLY_NOT_AN_EDGE_ACCEPTANCE"
+    },
+    "hierarchical": {
+      "chronological_halves": {
+        "first": {
+          "ambiguous": 0,
+          "expectancy_r": 0.1494,
+          "long": 3,
+          "missed_or_invalid": 9,
+          "pending_or_open": 0,
+          "profit_factor": 1.2241,
+          "resolved": 6,
+          "setups": 15,
+          "short": 12,
+          "sl": 4,
+          "tp": 2,
+          "tp_rate_pct": 33.333,
+          "win_rate_pct": 33.333,
+          "win_rate_wilson95_descriptive_pct": [
+            9.68,
+            70.0
+          ]
+        },
+        "second_diagnostic": {
+          "ambiguous": 0,
+          "expectancy_r": 0.5326,
+          "long": 17,
+          "missed_or_invalid": 17,
+          "pending_or_open": 0,
+          "profit_factor": 1.9586,
+          "resolved": 9,
+          "setups": 26,
+          "short": 9,
+          "sl": 5,
+          "tp": 4,
+          "tp_rate_pct": 44.444,
+          "win_rate_pct": 44.444,
+          "win_rate_wilson95_descriptive_pct": [
+            18.88,
+            73.34
+          ]
+        }
+      },
+      "cohorts": {
+        "direction:long": {
+          "ambiguous": 0,
+          "expectancy_r": 0.7241,
+          "long": 20,
+          "missed_or_invalid": 14,
+          "pending_or_open": 0,
+          "profit_factor": 2.4483,
+          "resolved": 6,
+          "setups": 20,
+          "short": 0,
+          "sl": 3,
+          "tp": 3,
+          "tp_rate_pct": 50.0,
+          "win_rate_pct": 50.0,
+          "win_rate_wilson95_descriptive_pct": [
+            18.76,
+            81.24
+          ]
+        },
+        "direction:short": {
+          "ambiguous": 0,
+          "expectancy_r": 0.1494,
+          "long": 0,
+          "missed_or_invalid": 12,
+          "pending_or_open": 0,
+          "profit_factor": 1.2241,
+          "resolved": 9,
+          "setups": 21,
+          "short": 21,
+          "sl": 6,
+          "tp": 3,
+          "tp_rate_pct": 33.333,
+          "win_rate_pct": 33.333,
+          "win_rate_wilson95_descriptive_pct": [
+            12.06,
+            64.58
+          ]
+        },
+        "htf:False": {
+          "ambiguous": 0,
+          "expectancy_r": 0.1494,
+          "long": 3,
+          "missed_or_invalid": 4,
+          "pending_or_open": 0,
+          "profit_factor": 1.2241,
+          "resolved": 3,
+          "setups": 7,
+          "short": 4,
+          "sl": 2,
+          "tp": 1,
+          "tp_rate_pct": 33.333,
+          "win_rate_pct": 33.333,
+          "win_rate_wilson95_descriptive_pct": [
+            6.15,
+            79.23
+          ]
+        },
+        "htf:True": {
+          "ambiguous": 0,
+          "expectancy_r": 0.4368,
+          "long": 17,
+          "missed_or_invalid": 22,
+          "pending_or_open": 0,
+          "profit_factor": 1.7488,
+          "resolved": 12,
+          "setups": 34,
+          "short": 17,
+          "sl": 7,
+          "tp": 5,
+          "tp_rate_pct": 41.667,
+          "win_rate_pct": 41.667,
+          "win_rate_wilson95_descriptive_pct": [
+            19.33,
+            68.05
+          ]
+        },
+        "imbalance:False": {
+          "ambiguous": 0,
+          "expectancy_r": -1.0,
+          "long": 5,
+          "missed_or_invalid": 9,
+          "pending_or_open": 0,
+          "profit_factor": 0.0,
+          "resolved": 4,
+          "setups": 13,
+          "short": 8,
+          "sl": 4,
+          "tp": 0,
+          "tp_rate_pct": 0.0,
+          "win_rate_pct": 0.0,
+          "win_rate_wilson95_descriptive_pct": [
+            0.0,
+            48.99
+          ]
+        },
+        "imbalance:True": {
+          "ambiguous": 0,
+          "expectancy_r": 0.8809,
+          "long": 15,
+          "missed_or_invalid": 17,
+          "pending_or_open": 0,
+          "profit_factor": 2.9379,
+          "resolved": 11,
+          "setups": 28,
+          "short": 13,
+          "sl": 5,
+          "tp": 6,
+          "tp_rate_pct": 54.545,
+          "win_rate_pct": 54.545,
+          "win_rate_wilson95_descriptive_pct": [
+            28.01,
+            78.73
+          ]
+        },
+        "missing:FVG": {
+          "ambiguous": 0,
+          "expectancy_r": -1.0,
+          "long": 5,
+          "missed_or_invalid": 9,
+          "pending_or_open": 0,
+          "profit_factor": 0.0,
+          "resolved": 4,
+          "setups": 13,
+          "short": 8,
+          "sl": 4,
+          "tp": 0,
+          "tp_rate_pct": 0.0,
+          "win_rate_pct": 0.0,
+          "win_rate_wilson95_descriptive_pct": [
+            0.0,
+            48.99
+          ]
+        },
+        "missing:HTF": {
+          "ambiguous": 0,
+          "expectancy_r": 0.1494,
+          "long": 3,
+          "missed_or_invalid": 4,
+          "pending_or_open": 0,
+          "profit_factor": 1.2241,
+          "resolved": 3,
+          "setups": 7,
+          "short": 4,
+          "sl": 2,
+          "tp": 1,
+          "tp_rate_pct": 33.333,
+          "win_rate_pct": 33.333,
+          "win_rate_wilson95_descriptive_pct": [
+            6.15,
+            79.23
+          ]
+        },
+        "missing:LQ": {
+          "ambiguous": 0,
+          "expectancy_r": 0.7241,
+          "long": 9,
+          "missed_or_invalid": 9,
+          "pending_or_open": 0,
+          "profit_factor": 2.4483,
+          "resolved": 6,
+          "setups": 15,
+          "short": 6,
+          "sl": 3,
+          "tp": 3,
+          "tp_rate_pct": 50.0,
+          "win_rate_pct": 50.0,
+          "win_rate_wilson95_descriptive_pct": [
+            18.76,
+            81.24
+          ]
+        },
+        "missing:NONE": {
+          "ambiguous": 0,
+          "expectancy_r": 2.4483,
+          "long": 3,
+          "missed_or_invalid": 4,
+          "pending_or_open": 0,
+          "profit_factor": null,
+          "resolved": 2,
+          "setups": 6,
+          "short": 3,
+          "sl": 0,
+          "tp": 2,
+          "tp_rate_pct": 100.0,
+          "win_rate_pct": 100.0,
+          "win_rate_wilson95_descriptive_pct": [
+            34.24,
+            100.0
+          ]
+        },
+        "sweep:False": {
+          "ambiguous": 0,
+          "expectancy_r": 0.7241,
+          "long": 9,
+          "missed_or_invalid": 9,
+          "pending_or_open": 0,
+          "profit_factor": 2.4483,
+          "resolved": 6,
+          "setups": 15,
+          "short": 6,
+          "sl": 3,
+          "tp": 3,
+          "tp_rate_pct": 50.0,
+          "win_rate_pct": 50.0,
+          "win_rate_wilson95_descriptive_pct": [
+            18.76,
+            81.24
+          ]
+        },
+        "sweep:True": {
+          "ambiguous": 0,
+          "expectancy_r": 0.1494,
+          "long": 11,
+          "missed_or_invalid": 17,
+          "pending_or_open": 0,
+          "profit_factor": 1.2241,
+          "resolved": 9,
+          "setups": 26,
+          "short": 15,
+          "sl": 6,
+          "tp": 3,
+          "tp_rate_pct": 33.333,
+          "win_rate_pct": 33.333,
+          "win_rate_wilson95_descriptive_pct": [
+            12.06,
+            64.58
+          ]
+        }
+      },
+      "cost_stress_bps_per_side": {
+        "10": {
+          "ambiguous": 0,
+          "expectancy_r": -0.7577,
+          "long": 20,
+          "missed_or_invalid": 26,
+          "pending_or_open": 0,
+          "profit_factor": 0.4484,
+          "resolved": 15,
+          "setups": 41,
+          "short": 21,
+          "sl": 9,
+          "tp": 6,
+          "tp_rate_pct": 40.0,
+          "win_rate_pct": 40.0,
+          "win_rate_wilson95_descriptive_pct": [
+            19.82,
+            64.25
+          ]
+        },
+        "2": {
+          "ambiguous": 0,
+          "expectancy_r": 0.1519,
+          "long": 20,
+          "missed_or_invalid": 26,
+          "pending_or_open": 0,
+          "profit_factor": 1.2013,
+          "resolved": 15,
+          "setups": 41,
+          "short": 21,
+          "sl": 9,
+          "tp": 6,
+          "tp_rate_pct": 40.0,
+          "win_rate_pct": 40.0,
+          "win_rate_wilson95_descriptive_pct": [
+            19.82,
+            64.25
+          ]
+        },
+        "5": {
+          "ambiguous": 0,
+          "expectancy_r": -0.1892,
+          "long": 20,
+          "missed_or_invalid": 26,
+          "pending_or_open": 0,
+          "profit_factor": 0.8083,
+          "resolved": 15,
+          "setups": 41,
+          "short": 21,
+          "sl": 9,
+          "tp": 6,
+          "tp_rate_pct": 40.0,
+          "win_rate_pct": 40.0,
+          "win_rate_wilson95_descriptive_pct": [
+            19.82,
+            64.25
+          ]
+        }
+      },
+      "data_quality": {
+        "duplicate_timestamps": 0,
+        "four_hour_bucket_sizes": {
+          "10": 1,
+          "14": 1,
+          "16": 311
+        },
+        "gap_examples": [],
+        "input_data_gate_pass": true,
+        "legacy_fixed16_discarded_interior_buckets": 0,
+        "malformed_ohlcv": 0,
+        "native_htf_required_for_parity": false,
+        "non_15m_gaps": 0,
+        "note": "UTC labels in an imported CSV do not verify the original MT5 server timezone. Short buckets may be legitimate sessions or missing data; neither is inferred here.",
+        "session_alignment_verified": true,
+        "status": "CONTINUOUS_UTC_INPUT_CHECK_PASS",
+        "timezone_verified": true
+      },
+      "event_accounting": {
+        "accounted_events": 456,
+        "by_direction": {
+          "-1": {
+            "INVALID_RANGE": 3,
+            "LATE": 22,
+            "LEG_ALREADY_OWNED": 76,
+            "SCORE": 95,
+            "SETUP_READY": 21,
+            "SUPERSEDED_BEFORE_LOCK": 12
+          },
+          "1": {
+            "LATE": 25,
+            "LEG_ALREADY_OWNED": 62,
+            "SCORE": 102,
+            "SETUP_READY": 20,
+            "SUPERSEDED_BEFORE_LOCK": 18
+          }
+        },
+        "complete": true,
+        "structural_events": 456,
+        "terminal_counts": {
+          "INVALID_RANGE": 3,
+          "LATE": 47,
+          "LEG_ALREADY_OWNED": 138,
+          "SCORE": 197,
+          "SETUP_READY": 41,
+          "SUPERSEDED_BEFORE_LOCK": 30
+        }
+      },
+      "gross": {
+        "ambiguous": 0,
+        "expectancy_r": 0.3793,
+        "long": 20,
+        "missed_or_invalid": 26,
+        "pending_or_open": 0,
+        "profit_factor": 1.6322,
+        "resolved": 15,
+        "setups": 41,
+        "short": 21,
+        "sl": 9,
+        "tp": 6,
+        "tp_rate_pct": 40.0,
+        "win_rate_pct": 40.0,
+        "win_rate_wilson95_descriptive_pct": [
+          19.82,
+          64.25
+        ]
+      },
+      "identity": {
+        "bars": 5000,
+        "dataset_file_sha256": "0829fbc3ca7dd1a22e04f47a184f4b9edb8921fdfc66b9a0df6e696b99bb4a46",
+        "end": "2026-08-18T19:15:00+00:00",
+        "start": "2026-06-27T17:30:00+00:00",
+        "symbol": "BTCUSDT",
+        "timeframe": "15m"
+      },
+      "limitations": [
+        "OHLC indicator lifecycle, not broker fills",
+        "POC disabled; no 1m profile required for four-check scoring",
+        "Costs are stress assumptions, not venue quotations",
+        "Reused research windows; no untouched holdout"
+      ],
+      "range_diagnostics": {
+        "affected_setups": {
+          "ambiguous": 0,
+          "expectancy_r": null,
+          "long": 0,
+          "missed_or_invalid": 2,
+          "pending_or_open": 0,
+          "profit_factor": null,
+          "resolved": 0,
+          "setups": 2,
+          "short": 2,
+          "sl": 0,
+          "tp": 0,
+          "tp_rate_pct": null,
+          "win_rate_pct": null,
+          "win_rate_wilson95_descriptive_pct": null
+        },
+        "candidates": 285,
+        "endpoint_not_beyond_broken_level": 14,
+        "examples": [
+          {
+            "bar_open_ms": 1783016100000,
+            "bos_level": 61394.49,
+            "direction": -1,
+            "score": 50,
+            "target": 61619.69
+          },
+          {
+            "bar_open_ms": 1783251900000,
+            "bos_level": 62542.0,
+            "direction": -1,
+            "score": 50,
+            "target": 62600.03
+          },
+          {
+            "bar_open_ms": 1783863900000,
+            "bos_level": 64100.32,
+            "direction": 1,
+            "score": 50,
+            "target": 64097.99
+          }
+        ]
+      },
+      "setups_per_calendar_week": 5.512,
+      "verdict": "DESCRIPTIVE_ONLY_NOT_AN_EDGE_ACCEPTANCE"
+    },
+    "protected_owner": {
+      "chronological_halves": {
+        "first": {
+          "ambiguous": 0,
+          "expectancy_r": 1.5862,
+          "long": 1,
+          "missed_or_invalid": 4,
+          "pending_or_open": 0,
+          "profit_factor": 7.3448,
+          "resolved": 4,
+          "setups": 8,
+          "short": 7,
+          "sl": 1,
+          "tp": 3,
+          "tp_rate_pct": 75.0,
+          "win_rate_pct": 75.0,
+          "win_rate_wilson95_descriptive_pct": [
+            30.06,
+            95.44
+          ]
+        },
+        "second_diagnostic": {
+          "ambiguous": 0,
+          "expectancy_r": -1.0,
+          "long": 3,
+          "missed_or_invalid": 4,
+          "pending_or_open": 0,
+          "profit_factor": 0.0,
+          "resolved": 1,
+          "setups": 5,
+          "short": 2,
+          "sl": 1,
+          "tp": 0,
+          "tp_rate_pct": 0.0,
+          "win_rate_pct": 0.0,
+          "win_rate_wilson95_descriptive_pct": [
+            0.0,
+            79.35
+          ]
+        }
+      },
+      "cohorts": {
+        "direction:long": {
+          "ambiguous": 0,
+          "expectancy_r": null,
+          "long": 4,
+          "missed_or_invalid": 4,
+          "pending_or_open": 0,
+          "profit_factor": null,
+          "resolved": 0,
+          "setups": 4,
+          "short": 0,
+          "sl": 0,
+          "tp": 0,
+          "tp_rate_pct": null,
+          "win_rate_pct": null,
+          "win_rate_wilson95_descriptive_pct": null
+        },
+        "direction:short": {
+          "ambiguous": 0,
+          "expectancy_r": 1.069,
+          "long": 0,
+          "missed_or_invalid": 4,
+          "pending_or_open": 0,
+          "profit_factor": 3.6724,
+          "resolved": 5,
+          "setups": 9,
+          "short": 9,
+          "sl": 2,
+          "tp": 3,
+          "tp_rate_pct": 60.0,
+          "win_rate_pct": 60.0,
+          "win_rate_wilson95_descriptive_pct": [
+            23.07,
+            88.24
+          ]
+        },
+        "htf:False": {
+          "ambiguous": 0,
+          "expectancy_r": -1.0,
+          "long": 2,
+          "missed_or_invalid": 2,
+          "pending_or_open": 0,
+          "profit_factor": 0.0,
+          "resolved": 2,
+          "setups": 4,
+          "short": 2,
+          "sl": 2,
+          "tp": 0,
+          "tp_rate_pct": 0.0,
+          "win_rate_pct": 0.0,
+          "win_rate_wilson95_descriptive_pct": [
+            0.0,
+            65.76
+          ]
+        },
+        "htf:True": {
+          "ambiguous": 0,
+          "expectancy_r": 2.4483,
+          "long": 2,
+          "missed_or_invalid": 6,
+          "pending_or_open": 0,
+          "profit_factor": null,
+          "resolved": 3,
+          "setups": 9,
+          "short": 7,
+          "sl": 0,
+          "tp": 3,
+          "tp_rate_pct": 100.0,
+          "win_rate_pct": 100.0,
+          "win_rate_wilson95_descriptive_pct": [
+            43.85,
+            100.0
+          ]
+        },
+        "imbalance:False": {
+          "ambiguous": 0,
+          "expectancy_r": 2.4483,
+          "long": 0,
+          "missed_or_invalid": 0,
+          "pending_or_open": 0,
+          "profit_factor": null,
+          "resolved": 1,
+          "setups": 1,
+          "short": 1,
+          "sl": 0,
+          "tp": 1,
+          "tp_rate_pct": 100.0,
+          "win_rate_pct": 100.0,
+          "win_rate_wilson95_descriptive_pct": [
+            20.65,
+            100.0
+          ]
+        },
+        "imbalance:True": {
+          "ambiguous": 0,
+          "expectancy_r": 0.7241,
+          "long": 4,
+          "missed_or_invalid": 8,
+          "pending_or_open": 0,
+          "profit_factor": 2.4483,
+          "resolved": 4,
+          "setups": 12,
+          "short": 8,
+          "sl": 2,
+          "tp": 2,
+          "tp_rate_pct": 50.0,
+          "win_rate_pct": 50.0,
+          "win_rate_wilson95_descriptive_pct": [
+            15.0,
+            85.0
+          ]
+        },
+        "missing:FVG": {
+          "ambiguous": 0,
+          "expectancy_r": 2.4483,
+          "long": 0,
+          "missed_or_invalid": 0,
+          "pending_or_open": 0,
+          "profit_factor": null,
+          "resolved": 1,
+          "setups": 1,
+          "short": 1,
+          "sl": 0,
+          "tp": 1,
+          "tp_rate_pct": 100.0,
+          "win_rate_pct": 100.0,
+          "win_rate_wilson95_descriptive_pct": [
+            20.65,
+            100.0
+          ]
+        },
+        "missing:HTF": {
+          "ambiguous": 0,
+          "expectancy_r": -1.0,
+          "long": 2,
+          "missed_or_invalid": 2,
+          "pending_or_open": 0,
+          "profit_factor": 0.0,
+          "resolved": 2,
+          "setups": 4,
+          "short": 2,
+          "sl": 2,
+          "tp": 0,
+          "tp_rate_pct": 0.0,
+          "win_rate_pct": 0.0,
+          "win_rate_wilson95_descriptive_pct": [
+            0.0,
+            65.76
+          ]
+        },
+        "missing:LQ": {
+          "ambiguous": 0,
+          "expectancy_r": 2.4483,
+          "long": 2,
+          "missed_or_invalid": 4,
+          "pending_or_open": 0,
+          "profit_factor": null,
+          "resolved": 2,
+          "setups": 6,
+          "short": 4,
+          "sl": 0,
+          "tp": 2,
+          "tp_rate_pct": 100.0,
+          "win_rate_pct": 100.0,
+          "win_rate_wilson95_descriptive_pct": [
+            34.24,
+            100.0
+          ]
+        },
+        "missing:NONE": {
+          "ambiguous": 0,
+          "expectancy_r": null,
+          "long": 0,
+          "missed_or_invalid": 2,
+          "pending_or_open": 0,
+          "profit_factor": null,
+          "resolved": 0,
+          "setups": 2,
+          "short": 2,
+          "sl": 0,
+          "tp": 0,
+          "tp_rate_pct": null,
+          "win_rate_pct": null,
+          "win_rate_wilson95_descriptive_pct": null
+        },
+        "sweep:False": {
+          "ambiguous": 0,
+          "expectancy_r": 2.4483,
+          "long": 2,
+          "missed_or_invalid": 4,
+          "pending_or_open": 0,
+          "profit_factor": null,
+          "resolved": 2,
+          "setups": 6,
+          "short": 4,
+          "sl": 0,
+          "tp": 2,
+          "tp_rate_pct": 100.0,
+          "win_rate_pct": 100.0,
+          "win_rate_wilson95_descriptive_pct": [
+            34.24,
+            100.0
+          ]
+        },
+        "sweep:True": {
+          "ambiguous": 0,
+          "expectancy_r": 0.1494,
+          "long": 2,
+          "missed_or_invalid": 4,
+          "pending_or_open": 0,
+          "profit_factor": 1.2241,
+          "resolved": 3,
+          "setups": 7,
+          "short": 5,
+          "sl": 2,
+          "tp": 1,
+          "tp_rate_pct": 33.333,
+          "win_rate_pct": 33.333,
+          "win_rate_wilson95_descriptive_pct": [
+            6.15,
+            79.23
+          ]
+        }
+      },
+      "cost_stress_bps_per_side": {
+        "10": {
+          "ambiguous": 0,
+          "expectancy_r": 0.2621,
+          "long": 4,
+          "missed_or_invalid": 8,
+          "pending_or_open": 0,
+          "profit_factor": 1.4045,
+          "resolved": 5,
+          "setups": 13,
+          "short": 9,
+          "sl": 2,
+          "tp": 3,
+          "tp_rate_pct": 60.0,
+          "win_rate_pct": 60.0,
+          "win_rate_wilson95_descriptive_pct": [
+            23.07,
+            88.24
+          ]
+        },
+        "2": {
+          "ambiguous": 0,
+          "expectancy_r": 0.9076,
+          "long": 4,
+          "missed_or_invalid": 8,
+          "pending_or_open": 0,
+          "profit_factor": 3.0186,
+          "resolved": 5,
+          "setups": 13,
+          "short": 9,
+          "sl": 2,
+          "tp": 3,
+          "tp_rate_pct": 60.0,
+          "win_rate_pct": 60.0,
+          "win_rate_wilson95_descriptive_pct": [
+            23.07,
+            88.24
+          ]
+        },
+        "5": {
+          "ambiguous": 0,
+          "expectancy_r": 0.6655,
+          "long": 4,
+          "missed_or_invalid": 8,
+          "pending_or_open": 0,
+          "profit_factor": 2.27,
+          "resolved": 5,
+          "setups": 13,
+          "short": 9,
+          "sl": 2,
+          "tp": 3,
+          "tp_rate_pct": 60.0,
+          "win_rate_pct": 60.0,
+          "win_rate_wilson95_descriptive_pct": [
+            23.07,
+            88.24
+          ]
+        }
+      },
+      "data_quality": {
+        "duplicate_timestamps": 0,
+        "four_hour_bucket_sizes": {
+          "10": 1,
+          "14": 1,
+          "16": 311
+        },
+        "gap_examples": [],
+        "input_data_gate_pass": true,
+        "legacy_fixed16_discarded_interior_buckets": 0,
+        "malformed_ohlcv": 0,
+        "native_htf_required_for_parity": false,
+        "non_15m_gaps": 0,
+        "note": "UTC labels in an imported CSV do not verify the original MT5 server timezone. Short buckets may be legitimate sessions or missing data; neither is inferred here.",
+        "session_alignment_verified": true,
+        "status": "CONTINUOUS_UTC_INPUT_CHECK_PASS",
+        "timezone_verified": true
+      },
+      "event_accounting": {
+        "accounted_events": 122,
+        "by_direction": {
+          "-1": {
+            "LATE": 8,
+            "SCORE": 38,
+            "SETUP_READY": 9,
+            "SUPERSEDED_BEFORE_LOCK": 2
+          },
+          "1": {
+            "LATE": 9,
+            "SCORE": 43,
+            "SETUP_READY": 4,
+            "SUPERSEDED_BEFORE_LOCK": 9
+          }
+        },
+        "complete": true,
+        "structural_events": 122,
+        "terminal_counts": {
+          "LATE": 17,
+          "SCORE": 81,
+          "SETUP_READY": 13,
+          "SUPERSEDED_BEFORE_LOCK": 11
+        }
+      },
+      "gross": {
+        "ambiguous": 0,
+        "expectancy_r": 1.069,
+        "long": 4,
+        "missed_or_invalid": 8,
+        "pending_or_open": 0,
+        "profit_factor": 3.6724,
+        "resolved": 5,
+        "setups": 13,
+        "short": 9,
+        "sl": 2,
+        "tp": 3,
+        "tp_rate_pct": 60.0,
+        "win_rate_pct": 60.0,
+        "win_rate_wilson95_descriptive_pct": [
+          23.07,
+          88.24
+        ]
+      },
+      "identity": {
+        "bars": 5000,
+        "dataset_file_sha256": "0829fbc3ca7dd1a22e04f47a184f4b9edb8921fdfc66b9a0df6e696b99bb4a46",
+        "end": "2026-08-18T19:15:00+00:00",
+        "start": "2026-06-27T17:30:00+00:00",
+        "symbol": "BTCUSDT",
+        "timeframe": "15m"
+      },
+      "limitations": [
+        "OHLC indicator lifecycle, not broker fills",
+        "POC disabled; no 1m profile required for four-check scoring",
+        "Costs are stress assumptions, not venue quotations",
+        "Reused research windows; no untouched holdout"
+      ],
+      "range_diagnostics": {
+        "affected_setups": {
+          "ambiguous": 0,
+          "expectancy_r": 2.4483,
+          "long": 0,
+          "missed_or_invalid": 0,
+          "pending_or_open": 0,
+          "profit_factor": null,
+          "resolved": 1,
+          "setups": 1,
+          "short": 1,
+          "sl": 0,
+          "tp": 1,
+          "tp_rate_pct": 100.0,
+          "win_rate_pct": 100.0,
+          "win_rate_wilson95_descriptive_pct": [
+            20.65,
+            100.0
+          ]
+        },
+        "candidates": 111,
+        "endpoint_not_beyond_broken_level": 5,
+        "examples": [
+          {
+            "bar_open_ms": 1783251900000,
+            "bos_level": 62542.0,
+            "direction": -1,
+            "score": 50,
+            "target": 62600.03
+          },
+          {
+            "bar_open_ms": 1783722600000,
+            "bos_level": 63802.02,
+            "direction": -1,
+            "score": 75,
+            "target": 63981.37
+          },
+          {
+            "bar_open_ms": 1784093400000,
+            "bos_level": 64516.0,
+            "direction": -1,
+            "score": 50,
+            "target": 64602.5
+          }
+        ]
+      },
+      "setups_per_calendar_week": 1.748,
+      "verdict": "DESCRIPTIVE_ONLY_NOT_AN_EDGE_ACCEPTANCE"
+    },
+    "v6_endpoint": {
+      "chronological_halves": {
+        "first": {
+          "ambiguous": 0,
+          "expectancy_r": -0.2504,
+          "long": 16,
+          "missed_or_invalid": 18,
+          "pending_or_open": 0,
+          "profit_factor": 0.6801,
+          "resolved": 23,
+          "setups": 41,
+          "short": 25,
+          "sl": 18,
+          "tp": 5,
+          "tp_rate_pct": 21.739,
+          "win_rate_pct": 21.739,
+          "win_rate_wilson95_descriptive_pct": [
+            9.66,
+            41.9
+          ]
+        },
+        "second_diagnostic": {
+          "ambiguous": 1,
+          "expectancy_r": 0.0142,
+          "long": 27,
+          "missed_or_invalid": 29,
+          "pending_or_open": 0,
+          "profit_factor": 1.0201,
+          "resolved": 17,
+          "setups": 47,
+          "short": 20,
+          "sl": 12,
+          "tp": 5,
+          "tp_rate_pct": 29.412,
+          "win_rate_pct": 29.412,
+          "win_rate_wilson95_descriptive_pct": [
+            13.28,
+            53.13
+          ]
+        }
+      },
+      "cohorts": {
+        "direction:long": {
+          "ambiguous": 1,
+          "expectancy_r": 0.2704,
+          "long": 43,
+          "missed_or_invalid": 23,
+          "pending_or_open": 0,
+          "profit_factor": 1.4282,
+          "resolved": 19,
+          "setups": 43,
+          "short": 0,
+          "sl": 12,
+          "tp": 7,
+          "tp_rate_pct": 36.842,
+          "win_rate_pct": 36.842,
+          "win_rate_wilson95_descriptive_pct": [
+            19.15,
+            58.96
+          ]
+        },
+        "direction:short": {
+          "ambiguous": 0,
+          "expectancy_r": -0.5074,
+          "long": 0,
+          "missed_or_invalid": 24,
+          "pending_or_open": 0,
+          "profit_factor": 0.408,
+          "resolved": 21,
+          "setups": 45,
+          "short": 45,
+          "sl": 18,
+          "tp": 3,
+          "tp_rate_pct": 14.286,
+          "win_rate_pct": 14.286,
+          "win_rate_wilson95_descriptive_pct": [
+            4.98,
+            34.64
+          ]
+        },
+        "htf:False": {
+          "ambiguous": 1,
+          "expectancy_r": 0.3793,
+          "long": 9,
+          "missed_or_invalid": 7,
+          "pending_or_open": 0,
+          "profit_factor": 1.6322,
+          "resolved": 5,
+          "setups": 13,
+          "short": 4,
+          "sl": 3,
+          "tp": 2,
+          "tp_rate_pct": 40.0,
+          "win_rate_pct": 40.0,
+          "win_rate_wilson95_descriptive_pct": [
+            11.76,
+            76.93
+          ]
+        },
+        "htf:True": {
+          "ambiguous": 0,
+          "expectancy_r": -0.2118,
+          "long": 34,
+          "missed_or_invalid": 40,
+          "pending_or_open": 0,
+          "profit_factor": 0.7254,
+          "resolved": 35,
+          "setups": 75,
+          "short": 41,
+          "sl": 27,
+          "tp": 8,
+          "tp_rate_pct": 22.857,
+          "win_rate_pct": 22.857,
+          "win_rate_wilson95_descriptive_pct": [
+            12.07,
+            39.02
+          ]
+        },
+        "imbalance:False": {
+          "ambiguous": 0,
+          "expectancy_r": -0.637,
+          "long": 17,
+          "missed_or_invalid": 22,
+          "pending_or_open": 0,
+          "profit_factor": 0.288,
+          "resolved": 19,
+          "setups": 41,
+          "short": 24,
+          "sl": 17,
+          "tp": 2,
+          "tp_rate_pct": 10.526,
+          "win_rate_pct": 10.526,
+          "win_rate_wilson95_descriptive_pct": [
+            2.94,
+            31.39
+          ]
+        },
+        "imbalance:True": {
+          "ambiguous": 1,
+          "expectancy_r": 0.3136,
+          "long": 26,
+          "missed_or_invalid": 25,
+          "pending_or_open": 0,
+          "profit_factor": 1.5066,
+          "resolved": 21,
+          "setups": 47,
+          "short": 21,
+          "sl": 13,
+          "tp": 8,
+          "tp_rate_pct": 38.095,
+          "win_rate_pct": 38.095,
+          "win_rate_wilson95_descriptive_pct": [
+            20.75,
+            59.12
+          ]
+        },
+        "missing:FVG": {
+          "ambiguous": 0,
+          "expectancy_r": -0.637,
+          "long": 17,
+          "missed_or_invalid": 22,
+          "pending_or_open": 0,
+          "profit_factor": 0.288,
+          "resolved": 19,
+          "setups": 41,
+          "short": 24,
+          "sl": 17,
+          "tp": 2,
+          "tp_rate_pct": 10.526,
+          "win_rate_pct": 10.526,
+          "win_rate_wilson95_descriptive_pct": [
+            2.94,
+            31.39
+          ]
+        },
+        "missing:HTF": {
+          "ambiguous": 1,
+          "expectancy_r": 0.3793,
+          "long": 9,
+          "missed_or_invalid": 7,
+          "pending_or_open": 0,
+          "profit_factor": 1.6322,
+          "resolved": 5,
+          "setups": 13,
+          "short": 4,
+          "sl": 3,
+          "tp": 2,
+          "tp_rate_pct": 40.0,
+          "win_rate_pct": 40.0,
+          "win_rate_wilson95_descriptive_pct": [
+            11.76,
+            76.93
+          ]
+        },
+        "missing:LQ": {
+          "ambiguous": 0,
+          "expectancy_r": 0.1494,
+          "long": 13,
+          "missed_or_invalid": 11,
+          "pending_or_open": 0,
+          "profit_factor": 1.2241,
+          "resolved": 12,
+          "setups": 23,
+          "short": 10,
+          "sl": 8,
+          "tp": 4,
+          "tp_rate_pct": 33.333,
+          "win_rate_pct": 33.333,
+          "win_rate_wilson95_descriptive_pct": [
+            13.81,
+            60.94
+          ]
+        },
+        "missing:NONE": {
+          "ambiguous": 0,
+          "expectancy_r": 0.7241,
+          "long": 4,
+          "missed_or_invalid": 7,
+          "pending_or_open": 0,
+          "profit_factor": 2.4483,
+          "resolved": 4,
+          "setups": 11,
+          "short": 7,
+          "sl": 2,
+          "tp": 2,
+          "tp_rate_pct": 50.0,
+          "win_rate_pct": 50.0,
+          "win_rate_wilson95_descriptive_pct": [
+            15.0,
+            85.0
+          ]
+        },
+        "sweep:False": {
+          "ambiguous": 0,
+          "expectancy_r": 0.1494,
+          "long": 13,
+          "missed_or_invalid": 11,
+          "pending_or_open": 0,
+          "profit_factor": 1.2241,
+          "resolved": 12,
+          "setups": 23,
+          "short": 10,
+          "sl": 8,
+          "tp": 4,
+          "tp_rate_pct": 33.333,
+          "win_rate_pct": 33.333,
+          "win_rate_wilson95_descriptive_pct": [
+            13.81,
+            60.94
+          ]
+        },
+        "sweep:True": {
+          "ambiguous": 1,
+          "expectancy_r": -0.2611,
+          "long": 30,
+          "missed_or_invalid": 36,
+          "pending_or_open": 0,
+          "profit_factor": 0.6677,
+          "resolved": 28,
+          "setups": 65,
+          "short": 35,
+          "sl": 22,
+          "tp": 6,
+          "tp_rate_pct": 21.429,
+          "win_rate_pct": 21.429,
+          "win_rate_wilson95_descriptive_pct": [
+            10.21,
+            39.54
+          ]
+        }
+      },
+      "cost_stress_bps_per_side": {
+        "10": {
+          "ambiguous": 1,
+          "expectancy_r": -1.179,
+          "long": 43,
+          "missed_or_invalid": 47,
+          "pending_or_open": 0,
+          "profit_factor": 0.2523,
+          "resolved": 40,
+          "setups": 88,
+          "short": 45,
+          "sl": 30,
+          "tp": 10,
+          "tp_rate_pct": 25.0,
+          "win_rate_pct": 25.0,
+          "win_rate_wilson95_descriptive_pct": [
+            14.19,
+            40.19
+          ]
+        },
+        "2": {
+          "ambiguous": 1,
+          "expectancy_r": -0.3461,
+          "long": 43,
+          "missed_or_invalid": 47,
+          "pending_or_open": 0,
+          "profit_factor": 0.6218,
+          "resolved": 40,
+          "setups": 88,
+          "short": 45,
+          "sl": 30,
+          "tp": 10,
+          "tp_rate_pct": 25.0,
+          "win_rate_pct": 25.0,
+          "win_rate_wilson95_descriptive_pct": [
+            14.19,
+            40.19
+          ]
+        },
+        "5": {
+          "ambiguous": 1,
+          "expectancy_r": -0.6584,
+          "long": 43,
+          "missed_or_invalid": 47,
+          "pending_or_open": 0,
+          "profit_factor": 0.434,
+          "resolved": 40,
+          "setups": 88,
+          "short": 45,
+          "sl": 30,
+          "tp": 10,
+          "tp_rate_pct": 25.0,
+          "win_rate_pct": 25.0,
+          "win_rate_wilson95_descriptive_pct": [
+            14.19,
+            40.19
+          ]
+        }
+      },
+      "data_quality": {
+        "duplicate_timestamps": 0,
+        "four_hour_bucket_sizes": {
+          "10": 1,
+          "14": 1,
+          "16": 311
+        },
+        "gap_examples": [],
+        "input_data_gate_pass": true,
+        "legacy_fixed16_discarded_interior_buckets": 0,
+        "malformed_ohlcv": 0,
+        "native_htf_required_for_parity": false,
+        "non_15m_gaps": 0,
+        "note": "UTC labels in an imported CSV do not verify the original MT5 server timezone. Short buckets may be legitimate sessions or missing data; neither is inferred here.",
+        "session_alignment_verified": true,
+        "status": "CONTINUOUS_UTC_INPUT_CHECK_PASS",
+        "timezone_verified": true
+      },
+      "event_accounting": {
+        "accounted_events": 760,
+        "by_direction": {
+          "-1": {
+            "INVALID_RANGE": 1,
+            "LATE": 36,
+            "LEG_ALREADY_OWNED": 133,
+            "SCORE": 140,
+            "SETUP_READY": 45,
+            "SUPERSEDED_BEFORE_LOCK": 22
+          },
+          "1": {
+            "LATE": 38,
+            "LEG_ALREADY_OWNED": 106,
+            "SCORE": 180,
+            "SETUP_READY": 43,
+            "SUPERSEDED_BEFORE_LOCK": 16
+          }
+        },
+        "complete": true,
+        "structural_events": 760,
+        "terminal_counts": {
+          "INVALID_RANGE": 1,
+          "LATE": 74,
+          "LEG_ALREADY_OWNED": 239,
+          "SCORE": 320,
+          "SETUP_READY": 88,
+          "SUPERSEDED_BEFORE_LOCK": 38
+        }
+      },
+      "gross": {
+        "ambiguous": 1,
+        "expectancy_r": -0.1379,
+        "long": 43,
+        "missed_or_invalid": 47,
+        "pending_or_open": 0,
+        "profit_factor": 0.8161,
+        "resolved": 40,
+        "setups": 88,
+        "short": 45,
+        "sl": 30,
+        "tp": 10,
+        "tp_rate_pct": 25.0,
+        "win_rate_pct": 25.0,
+        "win_rate_wilson95_descriptive_pct": [
+          14.19,
+          40.19
+        ]
+      },
+      "identity": {
+        "bars": 5000,
+        "dataset_file_sha256": "0829fbc3ca7dd1a22e04f47a184f4b9edb8921fdfc66b9a0df6e696b99bb4a46",
+        "end": "2026-08-18T19:15:00+00:00",
+        "start": "2026-06-27T17:30:00+00:00",
+        "symbol": "BTCUSDT",
+        "timeframe": "15m"
+      },
+      "limitations": [
+        "OHLC indicator lifecycle, not broker fills",
+        "POC disabled; no 1m profile required for four-check scoring",
+        "Costs are stress assumptions, not venue quotations",
+        "Reused research windows; no untouched holdout"
+      ],
+      "range_diagnostics": {
+        "affected_setups": {
+          "ambiguous": 0,
+          "expectancy_r": null,
+          "long": 0,
+          "missed_or_invalid": 0,
+          "pending_or_open": 0,
+          "profit_factor": null,
+          "resolved": 0,
+          "setups": 0,
+          "short": 0,
+          "sl": 0,
+          "tp": 0,
+          "tp_rate_pct": null,
+          "win_rate_pct": null,
+          "win_rate_wilson95_descriptive_pct": null
+        },
+        "candidates": 482,
+        "endpoint_not_beyond_broken_level": 0,
+        "examples": []
+      },
+      "setups_per_calendar_week": 11.83,
+      "verdict": "DESCRIPTIVE_ONLY_NOT_AN_EDGE_ACCEPTANCE"
+    },
+    "v6_sweep": {
+      "chronological_halves": {
+        "first": {
+          "ambiguous": 0,
+          "expectancy_r": -0.2504,
+          "long": 17,
+          "missed_or_invalid": 19,
+          "pending_or_open": 0,
+          "profit_factor": 0.6801,
+          "resolved": 23,
+          "setups": 42,
+          "short": 25,
+          "sl": 18,
+          "tp": 5,
+          "tp_rate_pct": 21.739,
+          "win_rate_pct": 21.739,
+          "win_rate_wilson95_descriptive_pct": [
+            9.66,
+            41.9
+          ]
+        },
+        "second_diagnostic": {
+          "ambiguous": 1,
+          "expectancy_r": 0.0142,
+          "long": 28,
+          "missed_or_invalid": 31,
+          "pending_or_open": 0,
+          "profit_factor": 1.0201,
+          "resolved": 17,
+          "setups": 49,
+          "short": 21,
+          "sl": 12,
+          "tp": 5,
+          "tp_rate_pct": 29.412,
+          "win_rate_pct": 29.412,
+          "win_rate_wilson95_descriptive_pct": [
+            13.28,
+            53.13
+          ]
+        }
+      },
+      "cohorts": {
+        "direction:long": {
+          "ambiguous": 1,
+          "expectancy_r": 0.2704,
+          "long": 45,
+          "missed_or_invalid": 25,
+          "pending_or_open": 0,
+          "profit_factor": 1.4282,
+          "resolved": 19,
+          "setups": 45,
+          "short": 0,
+          "sl": 12,
+          "tp": 7,
+          "tp_rate_pct": 36.842,
+          "win_rate_pct": 36.842,
+          "win_rate_wilson95_descriptive_pct": [
+            19.15,
+            58.96
+          ]
+        },
+        "direction:short": {
+          "ambiguous": 0,
+          "expectancy_r": -0.5074,
+          "long": 0,
+          "missed_or_invalid": 25,
+          "pending_or_open": 0,
+          "profit_factor": 0.408,
+          "resolved": 21,
+          "setups": 46,
+          "short": 46,
+          "sl": 18,
+          "tp": 3,
+          "tp_rate_pct": 14.286,
+          "win_rate_pct": 14.286,
+          "win_rate_wilson95_descriptive_pct": [
+            4.98,
+            34.64
+          ]
+        },
+        "htf:False": {
+          "ambiguous": 1,
+          "expectancy_r": 0.3793,
+          "long": 11,
+          "missed_or_invalid": 10,
+          "pending_or_open": 0,
+          "profit_factor": 1.6322,
+          "resolved": 5,
+          "setups": 16,
+          "short": 5,
+          "sl": 3,
+          "tp": 2,
+          "tp_rate_pct": 40.0,
+          "win_rate_pct": 40.0,
+          "win_rate_wilson95_descriptive_pct": [
+            11.76,
+            76.93
+          ]
+        },
+        "htf:True": {
+          "ambiguous": 0,
+          "expectancy_r": -0.2118,
+          "long": 34,
+          "missed_or_invalid": 40,
+          "pending_or_open": 0,
+          "profit_factor": 0.7254,
+          "resolved": 35,
+          "setups": 75,
+          "short": 41,
+          "sl": 27,
+          "tp": 8,
+          "tp_rate_pct": 22.857,
+          "win_rate_pct": 22.857,
+          "win_rate_wilson95_descriptive_pct": [
+            12.07,
+            39.02
+          ]
+        },
+        "imbalance:False": {
+          "ambiguous": 0,
+          "expectancy_r": -0.637,
+          "long": 17,
+          "missed_or_invalid": 22,
+          "pending_or_open": 0,
+          "profit_factor": 0.288,
+          "resolved": 19,
+          "setups": 41,
+          "short": 24,
+          "sl": 17,
+          "tp": 2,
+          "tp_rate_pct": 10.526,
+          "win_rate_pct": 10.526,
+          "win_rate_wilson95_descriptive_pct": [
+            2.94,
+            31.39
+          ]
+        },
+        "imbalance:True": {
+          "ambiguous": 1,
+          "expectancy_r": 0.3136,
+          "long": 28,
+          "missed_or_invalid": 28,
+          "pending_or_open": 0,
+          "profit_factor": 1.5066,
+          "resolved": 21,
+          "setups": 50,
+          "short": 22,
+          "sl": 13,
+          "tp": 8,
+          "tp_rate_pct": 38.095,
+          "win_rate_pct": 38.095,
+          "win_rate_wilson95_descriptive_pct": [
+            20.75,
+            59.12
+          ]
+        },
+        "missing:FVG": {
+          "ambiguous": 0,
+          "expectancy_r": -0.637,
+          "long": 17,
+          "missed_or_invalid": 22,
+          "pending_or_open": 0,
+          "profit_factor": 0.288,
+          "resolved": 19,
+          "setups": 41,
+          "short": 24,
+          "sl": 17,
+          "tp": 2,
+          "tp_rate_pct": 10.526,
+          "win_rate_pct": 10.526,
+          "win_rate_wilson95_descriptive_pct": [
+            2.94,
+            31.39
+          ]
+        },
+        "missing:HTF": {
+          "ambiguous": 1,
+          "expectancy_r": 0.3793,
+          "long": 11,
+          "missed_or_invalid": 10,
+          "pending_or_open": 0,
+          "profit_factor": 1.6322,
+          "resolved": 5,
+          "setups": 16,
+          "short": 5,
+          "sl": 3,
+          "tp": 2,
+          "tp_rate_pct": 40.0,
+          "win_rate_pct": 40.0,
+          "win_rate_wilson95_descriptive_pct": [
+            11.76,
+            76.93
+          ]
+        },
+        "missing:LQ": {
+          "ambiguous": 0,
+          "expectancy_r": 0.1494,
+          "long": 13,
+          "missed_or_invalid": 11,
+          "pending_or_open": 0,
+          "profit_factor": 1.2241,
+          "resolved": 12,
+          "setups": 23,
+          "short": 10,
+          "sl": 8,
+          "tp": 4,
+          "tp_rate_pct": 33.333,
+          "win_rate_pct": 33.333,
+          "win_rate_wilson95_descriptive_pct": [
+            13.81,
+            60.94
+          ]
+        },
+        "missing:NONE": {
+          "ambiguous": 0,
+          "expectancy_r": 0.7241,
+          "long": 4,
+          "missed_or_invalid": 7,
+          "pending_or_open": 0,
+          "profit_factor": 2.4483,
+          "resolved": 4,
+          "setups": 11,
+          "short": 7,
+          "sl": 2,
+          "tp": 2,
+          "tp_rate_pct": 50.0,
+          "win_rate_pct": 50.0,
+          "win_rate_wilson95_descriptive_pct": [
+            15.0,
+            85.0
+          ]
+        },
+        "sweep:False": {
+          "ambiguous": 0,
+          "expectancy_r": 0.1494,
+          "long": 13,
+          "missed_or_invalid": 11,
+          "pending_or_open": 0,
+          "profit_factor": 1.2241,
+          "resolved": 12,
+          "setups": 23,
+          "short": 10,
+          "sl": 8,
+          "tp": 4,
+          "tp_rate_pct": 33.333,
+          "win_rate_pct": 33.333,
+          "win_rate_wilson95_descriptive_pct": [
+            13.81,
+            60.94
+          ]
+        },
+        "sweep:True": {
+          "ambiguous": 1,
+          "expectancy_r": -0.2611,
+          "long": 32,
+          "missed_or_invalid": 39,
+          "pending_or_open": 0,
+          "profit_factor": 0.6677,
+          "resolved": 28,
+          "setups": 68,
+          "short": 36,
+          "sl": 22,
+          "tp": 6,
+          "tp_rate_pct": 21.429,
+          "win_rate_pct": 21.429,
+          "win_rate_wilson95_descriptive_pct": [
+            10.21,
+            39.54
+          ]
+        }
+      },
+      "cost_stress_bps_per_side": {
+        "10": {
+          "ambiguous": 1,
+          "expectancy_r": -1.179,
+          "long": 45,
+          "missed_or_invalid": 50,
+          "pending_or_open": 0,
+          "profit_factor": 0.2523,
+          "resolved": 40,
+          "setups": 91,
+          "short": 46,
+          "sl": 30,
+          "tp": 10,
+          "tp_rate_pct": 25.0,
+          "win_rate_pct": 25.0,
+          "win_rate_wilson95_descriptive_pct": [
+            14.19,
+            40.19
+          ]
+        },
+        "2": {
+          "ambiguous": 1,
+          "expectancy_r": -0.3461,
+          "long": 45,
+          "missed_or_invalid": 50,
+          "pending_or_open": 0,
+          "profit_factor": 0.6218,
+          "resolved": 40,
+          "setups": 91,
+          "short": 46,
+          "sl": 30,
+          "tp": 10,
+          "tp_rate_pct": 25.0,
+          "win_rate_pct": 25.0,
+          "win_rate_wilson95_descriptive_pct": [
+            14.19,
+            40.19
+          ]
+        },
+        "5": {
+          "ambiguous": 1,
+          "expectancy_r": -0.6584,
+          "long": 45,
+          "missed_or_invalid": 50,
+          "pending_or_open": 0,
+          "profit_factor": 0.434,
+          "resolved": 40,
+          "setups": 91,
+          "short": 46,
+          "sl": 30,
+          "tp": 10,
+          "tp_rate_pct": 25.0,
+          "win_rate_pct": 25.0,
+          "win_rate_wilson95_descriptive_pct": [
+            14.19,
+            40.19
+          ]
+        }
+      },
+      "data_quality": {
+        "duplicate_timestamps": 0,
+        "four_hour_bucket_sizes": {
+          "10": 1,
+          "14": 1,
+          "16": 311
+        },
+        "gap_examples": [],
+        "input_data_gate_pass": true,
+        "legacy_fixed16_discarded_interior_buckets": 0,
+        "malformed_ohlcv": 0,
+        "native_htf_required_for_parity": false,
+        "non_15m_gaps": 0,
+        "note": "UTC labels in an imported CSV do not verify the original MT5 server timezone. Short buckets may be legitimate sessions or missing data; neither is inferred here.",
+        "session_alignment_verified": true,
+        "status": "CONTINUOUS_UTC_INPUT_CHECK_PASS",
+        "timezone_verified": true
+      },
+      "event_accounting": {
+        "accounted_events": 760,
+        "by_direction": {
+          "-1": {
+            "INVALID_RANGE": 1,
+            "LATE": 36,
+            "LEG_ALREADY_OWNED": 133,
+            "SCORE": 139,
+            "SETUP_READY": 46,
+            "SUPERSEDED_BEFORE_LOCK": 22
+          },
+          "1": {
+            "LATE": 38,
+            "LEG_ALREADY_OWNED": 106,
+            "SCORE": 178,
+            "SETUP_READY": 45,
+            "SUPERSEDED_BEFORE_LOCK": 16
+          }
+        },
+        "complete": true,
+        "structural_events": 760,
+        "terminal_counts": {
+          "INVALID_RANGE": 1,
+          "LATE": 74,
+          "LEG_ALREADY_OWNED": 239,
+          "SCORE": 317,
+          "SETUP_READY": 91,
+          "SUPERSEDED_BEFORE_LOCK": 38
+        }
+      },
+      "gross": {
+        "ambiguous": 1,
+        "expectancy_r": -0.1379,
+        "long": 45,
+        "missed_or_invalid": 50,
+        "pending_or_open": 0,
+        "profit_factor": 0.8161,
+        "resolved": 40,
+        "setups": 91,
+        "short": 46,
+        "sl": 30,
+        "tp": 10,
+        "tp_rate_pct": 25.0,
+        "win_rate_pct": 25.0,
+        "win_rate_wilson95_descriptive_pct": [
+          14.19,
+          40.19
+        ]
+      },
+      "identity": {
+        "bars": 5000,
+        "dataset_file_sha256": "0829fbc3ca7dd1a22e04f47a184f4b9edb8921fdfc66b9a0df6e696b99bb4a46",
+        "end": "2026-08-18T19:15:00+00:00",
+        "start": "2026-06-27T17:30:00+00:00",
+        "symbol": "BTCUSDT",
+        "timeframe": "15m"
+      },
+      "limitations": [
+        "OHLC indicator lifecycle, not broker fills",
+        "POC disabled; no 1m profile required for four-check scoring",
+        "Costs are stress assumptions, not venue quotations",
+        "Reused research windows; no untouched holdout"
+      ],
+      "range_diagnostics": {
+        "affected_setups": {
+          "ambiguous": 0,
+          "expectancy_r": null,
+          "long": 0,
+          "missed_or_invalid": 0,
+          "pending_or_open": 0,
+          "profit_factor": null,
+          "resolved": 0,
+          "setups": 0,
+          "short": 0,
+          "sl": 0,
+          "tp": 0,
+          "tp_rate_pct": null,
+          "win_rate_pct": null,
+          "win_rate_wilson95_descriptive_pct": null
+        },
+        "candidates": 482,
+        "endpoint_not_beyond_broken_level": 0,
+        "examples": []
+      },
+      "setups_per_calendar_week": 12.233,
+      "verdict": "DESCRIPTIVE_ONLY_NOT_AN_EDGE_ACCEPTANCE"
+    }
+  },
+  "xauusd": {
+    "arrays": {
+      "chronological_halves": {
+        "first": {
+          "ambiguous": 2,
+          "expectancy_r": -0.4984,
+          "long": 51,
+          "missed_or_invalid": 61,
+          "pending_or_open": 0,
+          "profit_factor": 0.4167,
+          "resolved": 55,
+          "setups": 118,
+          "short": 67,
+          "sl": 47,
+          "tp": 8,
+          "tp_rate_pct": 14.545,
+          "win_rate_pct": 14.545,
+          "win_rate_wilson95_descriptive_pct": [
+            7.56,
+            26.16
+          ]
+        },
+        "second_diagnostic": {
+          "ambiguous": 2,
+          "expectancy_r": -0.1379,
+          "long": 64,
+          "missed_or_invalid": 94,
+          "pending_or_open": 0,
+          "profit_factor": 0.8161,
+          "resolved": 56,
+          "setups": 152,
+          "short": 88,
+          "sl": 42,
+          "tp": 14,
+          "tp_rate_pct": 25.0,
+          "win_rate_pct": 25.0,
+          "win_rate_wilson95_descriptive_pct": [
+            15.52,
+            37.69
+          ]
+        }
+      },
+      "cohorts": {
+        "direction:long": {
+          "ambiguous": 0,
+          "expectancy_r": -0.1571,
+          "long": 115,
+          "missed_or_invalid": 70,
+          "pending_or_open": 0,
+          "profit_factor": 0.7921,
+          "resolved": 45,
+          "setups": 115,
+          "short": 0,
+          "sl": 34,
+          "tp": 11,
+          "tp_rate_pct": 24.444,
+          "win_rate_pct": 24.444,
+          "win_rate_wilson95_descriptive_pct": [
+            14.24,
+            38.67
+          ]
+        },
+        "direction:short": {
+          "ambiguous": 4,
+          "expectancy_r": -0.4253,
+          "long": 0,
+          "missed_or_invalid": 85,
+          "pending_or_open": 0,
+          "profit_factor": 0.4897,
+          "resolved": 66,
+          "setups": 155,
+          "short": 155,
+          "sl": 55,
+          "tp": 11,
+          "tp_rate_pct": 16.667,
+          "win_rate_pct": 16.667,
+          "win_rate_wilson95_descriptive_pct": [
+            9.57,
+            27.43
+          ]
+        },
+        "htf:False": {
+          "ambiguous": 1,
+          "expectancy_r": -0.3103,
+          "long": 41,
+          "missed_or_invalid": 45,
+          "pending_or_open": 0,
+          "profit_factor": 0.6121,
+          "resolved": 20,
+          "setups": 66,
+          "short": 25,
+          "sl": 16,
+          "tp": 4,
+          "tp_rate_pct": 20.0,
+          "win_rate_pct": 20.0,
+          "win_rate_wilson95_descriptive_pct": [
+            8.07,
+            41.6
+          ]
+        },
+        "htf:True": {
+          "ambiguous": 3,
+          "expectancy_r": -0.3179,
+          "long": 74,
+          "missed_or_invalid": 110,
+          "pending_or_open": 0,
+          "profit_factor": 0.6037,
+          "resolved": 91,
+          "setups": 204,
+          "short": 130,
+          "sl": 73,
+          "tp": 18,
+          "tp_rate_pct": 19.78,
+          "win_rate_pct": 19.78,
+          "win_rate_wilson95_descriptive_pct": [
+            12.89,
+            29.11
+          ]
+        },
+        "imbalance:False": {
+          "ambiguous": 0,
+          "expectancy_r": -0.179,
+          "long": 46,
+          "missed_or_invalid": 51,
+          "pending_or_open": 0,
+          "profit_factor": 0.7651,
+          "resolved": 42,
+          "setups": 93,
+          "short": 47,
+          "sl": 32,
+          "tp": 10,
+          "tp_rate_pct": 23.81,
+          "win_rate_pct": 23.81,
+          "win_rate_wilson95_descriptive_pct": [
+            13.48,
+            38.53
+          ]
+        },
+        "imbalance:True": {
+          "ambiguous": 4,
+          "expectancy_r": -0.4003,
+          "long": 69,
+          "missed_or_invalid": 104,
+          "pending_or_open": 0,
+          "profit_factor": 0.5154,
+          "resolved": 69,
+          "setups": 177,
+          "short": 108,
+          "sl": 57,
+          "tp": 12,
+          "tp_rate_pct": 17.391,
+          "win_rate_pct": 17.391,
+          "win_rate_wilson95_descriptive_pct": [
+            10.24,
+            27.98
+          ]
+        },
+        "missing:FVG": {
+          "ambiguous": 0,
+          "expectancy_r": -0.179,
+          "long": 46,
+          "missed_or_invalid": 51,
+          "pending_or_open": 0,
+          "profit_factor": 0.7651,
+          "resolved": 42,
+          "setups": 93,
+          "short": 47,
+          "sl": 32,
+          "tp": 10,
+          "tp_rate_pct": 23.81,
+          "win_rate_pct": 23.81,
+          "win_rate_wilson95_descriptive_pct": [
+            13.48,
+            38.53
+          ]
+        },
+        "missing:HTF": {
+          "ambiguous": 1,
+          "expectancy_r": -0.3103,
+          "long": 41,
+          "missed_or_invalid": 45,
+          "pending_or_open": 0,
+          "profit_factor": 0.6121,
+          "resolved": 20,
+          "setups": 66,
+          "short": 25,
+          "sl": 16,
+          "tp": 4,
+          "tp_rate_pct": 20.0,
+          "win_rate_pct": 20.0,
+          "win_rate_wilson95_descriptive_pct": [
+            8.07,
+            41.6
+          ]
+        },
+        "missing:LQ": {
+          "ambiguous": 1,
+          "expectancy_r": -0.4408,
+          "long": 24,
+          "missed_or_invalid": 43,
+          "pending_or_open": 0,
+          "profit_factor": 0.4739,
+          "resolved": 37,
+          "setups": 81,
+          "short": 57,
+          "sl": 31,
+          "tp": 6,
+          "tp_rate_pct": 16.216,
+          "win_rate_pct": 16.216,
+          "win_rate_wilson95_descriptive_pct": [
+            7.65,
+            31.14
+          ]
+        },
+        "missing:NONE": {
+          "ambiguous": 2,
+          "expectancy_r": -0.4253,
+          "long": 4,
+          "missed_or_invalid": 16,
+          "pending_or_open": 0,
+          "profit_factor": 0.4897,
+          "resolved": 12,
+          "setups": 30,
+          "short": 26,
+          "sl": 10,
+          "tp": 2,
+          "tp_rate_pct": 16.667,
+          "win_rate_pct": 16.667,
+          "win_rate_wilson95_descriptive_pct": [
+            4.7,
+            44.8
+          ]
+        },
+        "sweep:False": {
+          "ambiguous": 1,
+          "expectancy_r": -0.4408,
+          "long": 24,
+          "missed_or_invalid": 43,
+          "pending_or_open": 0,
+          "profit_factor": 0.4739,
+          "resolved": 37,
+          "setups": 81,
+          "short": 57,
+          "sl": 31,
+          "tp": 6,
+          "tp_rate_pct": 16.216,
+          "win_rate_pct": 16.216,
+          "win_rate_wilson95_descriptive_pct": [
+            7.65,
+            31.14
+          ]
+        },
+        "sweep:True": {
+          "ambiguous": 3,
+          "expectancy_r": -0.2544,
+          "long": 91,
+          "missed_or_invalid": 112,
+          "pending_or_open": 0,
+          "profit_factor": 0.6754,
+          "resolved": 74,
+          "setups": 189,
+          "short": 98,
+          "sl": 58,
+          "tp": 16,
+          "tp_rate_pct": 21.622,
+          "win_rate_pct": 21.622,
+          "win_rate_wilson95_descriptive_pct": [
+            13.77,
+            32.27
+          ]
+        }
+      },
+      "cost_stress_bps_per_side": {
+        "10": {
+          "ambiguous": 4,
+          "expectancy_r": -1.4028,
+          "long": 115,
+          "missed_or_invalid": 155,
+          "pending_or_open": 0,
+          "profit_factor": 0.193,
+          "resolved": 111,
+          "setups": 270,
+          "short": 155,
+          "sl": 89,
+          "tp": 22,
+          "tp_rate_pct": 19.82,
+          "win_rate_pct": 19.82,
+          "win_rate_wilson95_descriptive_pct": [
+            13.47,
+            28.19
+          ]
+        },
+        "2": {
+          "ambiguous": 4,
+          "expectancy_r": -0.5338,
+          "long": 115,
+          "missed_or_invalid": 155,
+          "pending_or_open": 0,
+          "profit_factor": 0.4603,
+          "resolved": 111,
+          "setups": 270,
+          "short": 155,
+          "sl": 89,
+          "tp": 22,
+          "tp_rate_pct": 19.82,
+          "win_rate_pct": 19.82,
+          "win_rate_wilson95_descriptive_pct": [
+            13.47,
+            28.19
+          ]
+        },
+        "5": {
+          "ambiguous": 4,
+          "expectancy_r": -0.8597,
+          "long": 115,
+          "missed_or_invalid": 155,
+          "pending_or_open": 0,
+          "profit_factor": 0.3231,
+          "resolved": 111,
+          "setups": 270,
+          "short": 155,
+          "sl": 89,
+          "tp": 22,
+          "tp_rate_pct": 19.82,
+          "win_rate_pct": 19.82,
+          "win_rate_wilson95_descriptive_pct": [
+            13.47,
+            28.19
+          ]
+        }
+      },
+      "data_quality": {
+        "duplicate_timestamps": 0,
+        "four_hour_bucket_sizes": {
+          "2": 1,
+          "3": 1,
+          "6": 4,
+          "7": 1,
+          "9": 1,
+          "11": 1,
+          "12": 218,
+          "16": 1083
+        },
+        "gap_examples": [
+          {
+            "after_ms": 1750986000000,
+            "before_ms": 1750981500000,
+            "missing_slots": 4
+          },
+          {
+            "after_ms": 1751245200000,
+            "before_ms": 1751067900000,
+            "missing_slots": 196
+          },
+          {
+            "after_ms": 1751331600000,
+            "before_ms": 1751327100000,
+            "missing_slots": 4
+          },
+          {
+            "after_ms": 1751418000000,
+            "before_ms": 1751413500000,
+            "missing_slots": 4
+          },
+          {
+            "after_ms": 1751504400000,
+            "before_ms": 1751499900000,
+            "missing_slots": 4
+          }
+        ],
+        "input_data_gate_pass": false,
+        "legacy_fixed16_discarded_interior_buckets": 225,
+        "malformed_ohlcv": 0,
+        "native_htf_required_for_parity": true,
+        "non_15m_gaps": 219,
+        "note": "UTC labels in an imported CSV do not verify the original MT5 server timezone. Short buckets may be legitimate sessions or missing data; neither is inferred here.",
+        "session_alignment_verified": false,
+        "status": "PROVISIONAL_SESSION_OR_TIMEZONE_UNVERIFIED",
+        "timezone_verified": false
+      },
+      "event_accounting": {
+        "accounted_events": 2914,
+        "by_direction": {
+          "-1": {
+            "INVALID_RANGE": 1,
+            "LATE": 111,
+            "LEG_ALREADY_OWNED": 522,
+            "SCORE": 445,
+            "SETUP_READY": 155,
+            "SUPERSEDED_BEFORE_LOCK": 126
+          },
+          "1": {
+            "LATE": 112,
+            "LEG_ALREADY_OWNED": 609,
+            "SCORE": 612,
+            "SETUP_READY": 115,
+            "SUPERSEDED_BEFORE_LOCK": 106
+          }
+        },
+        "complete": true,
+        "structural_events": 2914,
+        "terminal_counts": {
+          "INVALID_RANGE": 1,
+          "LATE": 223,
+          "LEG_ALREADY_OWNED": 1131,
+          "SCORE": 1057,
+          "SETUP_READY": 270,
+          "SUPERSEDED_BEFORE_LOCK": 232
+        }
+      },
+      "gross": {
+        "ambiguous": 4,
+        "expectancy_r": -0.3166,
+        "long": 115,
+        "missed_or_invalid": 155,
+        "pending_or_open": 0,
+        "profit_factor": 0.6052,
+        "resolved": 111,
+        "setups": 270,
+        "short": 155,
+        "sl": 89,
+        "tp": 22,
+        "tp_rate_pct": 19.82,
+        "win_rate_pct": 19.82,
+        "win_rate_wilson95_descriptive_pct": [
+          13.47,
+          28.19
+        ]
+      },
+      "identity": {
+        "bars": 20000,
+        "dataset_file_sha256": "7b9ee9a1d1eddb1515fe37f9b395ce9ca6ca0c8db5d4b4050f40b1a26e9ab4f6",
+        "end": "2026-05-01T16:15:00+00:00",
+        "start": "2025-06-26T09:15:00+00:00",
+        "symbol": "XAUUSD",
+        "timeframe": "15m"
+      },
+      "limitations": [
+        "OHLC indicator lifecycle, not broker fills",
+        "POC disabled; no 1m profile required for four-check scoring",
+        "Costs are stress assumptions, not venue quotations",
+        "Reused research windows; no untouched holdout"
+      ],
+      "range_diagnostics": {
+        "affected_setups": {
+          "ambiguous": 0,
+          "expectancy_r": 0.7241,
+          "long": 3,
+          "missed_or_invalid": 4,
+          "pending_or_open": 0,
+          "profit_factor": 2.4483,
+          "resolved": 2,
+          "setups": 6,
+          "short": 3,
+          "sl": 1,
+          "tp": 1,
+          "tp_rate_pct": 50.0,
+          "win_rate_pct": 50.0,
+          "win_rate_wilson95_descriptive_pct": [
+            9.45,
+            90.55
+          ]
+        },
+        "candidates": 1550,
+        "endpoint_not_beyond_broken_level": 40,
+        "examples": [
+          {
+            "bar_open_ms": 1751564700000,
+            "bos_level": 3314.48,
+            "direction": -1,
+            "score": 50,
+            "target": 3323.55
+          },
+          {
+            "bar_open_ms": 1751893200000,
+            "bos_level": 3305.34,
+            "direction": -1,
+            "score": 25,
+            "target": 3306.21
+          },
+          {
+            "bar_open_ms": 1753711200000,
+            "bos_level": 3334.0,
+            "direction": -1,
+            "score": 25,
+            "target": 3334.24
+          }
+        ]
+      },
+      "setups_per_calendar_week": 6.111,
+      "verdict": "PROVISIONAL_UNVERIFIED_GOLD_FEED_AND_SESSION"
+    },
+    "hierarchical": {
+      "chronological_halves": {
+        "first": {
+          "ambiguous": 0,
+          "expectancy_r": -0.4408,
+          "long": 37,
+          "missed_or_invalid": 49,
+          "pending_or_open": 0,
+          "profit_factor": 0.4739,
+          "resolved": 37,
+          "setups": 86,
+          "short": 49,
+          "sl": 31,
+          "tp": 6,
+          "tp_rate_pct": 16.216,
+          "win_rate_pct": 16.216,
+          "win_rate_wilson95_descriptive_pct": [
+            7.65,
+            31.14
+          ]
+        },
+        "second_diagnostic": {
+          "ambiguous": 1,
+          "expectancy_r": -0.0596,
+          "long": 49,
+          "missed_or_invalid": 73,
+          "pending_or_open": 1,
+          "profit_factor": 0.9181,
+          "resolved": 33,
+          "setups": 108,
+          "short": 59,
+          "sl": 24,
+          "tp": 9,
+          "tp_rate_pct": 27.273,
+          "win_rate_pct": 27.273,
+          "win_rate_wilson95_descriptive_pct": [
+            15.07,
+            44.22
+          ]
+        }
+      },
+      "cohorts": {
+        "direction:long": {
+          "ambiguous": 0,
+          "expectancy_r": -0.0596,
+          "long": 86,
+          "missed_or_invalid": 63,
+          "pending_or_open": 1,
+          "profit_factor": 0.9181,
+          "resolved": 22,
+          "setups": 86,
+          "short": 0,
+          "sl": 16,
+          "tp": 6,
+          "tp_rate_pct": 27.273,
+          "win_rate_pct": 27.273,
+          "win_rate_wilson95_descriptive_pct": [
+            13.15,
+            48.15
+          ]
+        },
+        "direction:short": {
+          "ambiguous": 1,
+          "expectancy_r": -0.3534,
+          "long": 0,
+          "missed_or_invalid": 59,
+          "pending_or_open": 0,
+          "profit_factor": 0.565,
+          "resolved": 48,
+          "setups": 108,
+          "short": 108,
+          "sl": 39,
+          "tp": 9,
+          "tp_rate_pct": 18.75,
+          "win_rate_pct": 18.75,
+          "win_rate_wilson95_descriptive_pct": [
+            10.19,
+            31.94
+          ]
+        },
+        "htf:False": {
+          "ambiguous": 1,
+          "expectancy_r": 0.1494,
+          "long": 24,
+          "missed_or_invalid": 22,
+          "pending_or_open": 0,
+          "profit_factor": 1.2241,
+          "resolved": 12,
+          "setups": 35,
+          "short": 11,
+          "sl": 8,
+          "tp": 4,
+          "tp_rate_pct": 33.333,
+          "win_rate_pct": 33.333,
+          "win_rate_wilson95_descriptive_pct": [
+            13.81,
+            60.94
+          ]
+        },
+        "htf:True": {
+          "ambiguous": 0,
+          "expectancy_r": -0.346,
+          "long": 62,
+          "missed_or_invalid": 100,
+          "pending_or_open": 1,
+          "profit_factor": 0.573,
+          "resolved": 58,
+          "setups": 159,
+          "short": 97,
+          "sl": 47,
+          "tp": 11,
+          "tp_rate_pct": 18.966,
+          "win_rate_pct": 18.966,
+          "win_rate_wilson95_descriptive_pct": [
+            10.93,
+            30.85
+          ]
+        },
+        "imbalance:False": {
+          "ambiguous": 0,
+          "expectancy_r": -0.2337,
+          "long": 27,
+          "missed_or_invalid": 35,
+          "pending_or_open": 0,
+          "profit_factor": 0.6995,
+          "resolved": 18,
+          "setups": 53,
+          "short": 26,
+          "sl": 14,
+          "tp": 4,
+          "tp_rate_pct": 22.222,
+          "win_rate_pct": 22.222,
+          "win_rate_wilson95_descriptive_pct": [
+            9.0,
+            45.22
+          ]
+        },
+        "imbalance:True": {
+          "ambiguous": 1,
+          "expectancy_r": -0.2706,
+          "long": 59,
+          "missed_or_invalid": 87,
+          "pending_or_open": 1,
+          "profit_factor": 0.6569,
+          "resolved": 52,
+          "setups": 141,
+          "short": 82,
+          "sl": 41,
+          "tp": 11,
+          "tp_rate_pct": 21.154,
+          "win_rate_pct": 21.154,
+          "win_rate_wilson95_descriptive_pct": [
+            12.24,
+            34.03
+          ]
+        },
+        "missing:FVG": {
+          "ambiguous": 0,
+          "expectancy_r": -0.2337,
+          "long": 27,
+          "missed_or_invalid": 35,
+          "pending_or_open": 0,
+          "profit_factor": 0.6995,
+          "resolved": 18,
+          "setups": 53,
+          "short": 26,
+          "sl": 14,
+          "tp": 4,
+          "tp_rate_pct": 22.222,
+          "win_rate_pct": 22.222,
+          "win_rate_wilson95_descriptive_pct": [
+            9.0,
+            45.22
+          ]
+        },
+        "missing:HTF": {
+          "ambiguous": 1,
+          "expectancy_r": 0.1494,
+          "long": 24,
+          "missed_or_invalid": 22,
+          "pending_or_open": 0,
+          "profit_factor": 1.2241,
+          "resolved": 12,
+          "setups": 35,
+          "short": 11,
+          "sl": 8,
+          "tp": 4,
+          "tp_rate_pct": 33.333,
+          "win_rate_pct": 33.333,
+          "win_rate_wilson95_descriptive_pct": [
+            13.81,
+            60.94
+          ]
+        },
+        "missing:LQ": {
+          "ambiguous": 0,
+          "expectancy_r": -0.3103,
+          "long": 29,
+          "missed_or_invalid": 55,
+          "pending_or_open": 1,
+          "profit_factor": 0.6121,
+          "resolved": 30,
+          "setups": 86,
+          "short": 57,
+          "sl": 24,
+          "tp": 6,
+          "tp_rate_pct": 20.0,
+          "win_rate_pct": 20.0,
+          "win_rate_wilson95_descriptive_pct": [
+            9.5,
+            37.31
+          ]
+        },
+        "missing:NONE": {
+          "ambiguous": 0,
+          "expectancy_r": -0.6552,
+          "long": 6,
+          "missed_or_invalid": 10,
+          "pending_or_open": 0,
+          "profit_factor": 0.272,
+          "resolved": 10,
+          "setups": 20,
+          "short": 14,
+          "sl": 9,
+          "tp": 1,
+          "tp_rate_pct": 10.0,
+          "win_rate_pct": 10.0,
+          "win_rate_wilson95_descriptive_pct": [
+            1.79,
+            40.42
+          ]
+        },
+        "sweep:False": {
+          "ambiguous": 0,
+          "expectancy_r": -0.3103,
+          "long": 29,
+          "missed_or_invalid": 55,
+          "pending_or_open": 1,
+          "profit_factor": 0.6121,
+          "resolved": 30,
+          "setups": 86,
+          "short": 57,
+          "sl": 24,
+          "tp": 6,
+          "tp_rate_pct": 20.0,
+          "win_rate_pct": 20.0,
+          "win_rate_wilson95_descriptive_pct": [
+            9.5,
+            37.31
+          ]
+        },
+        "sweep:True": {
+          "ambiguous": 1,
+          "expectancy_r": -0.2241,
+          "long": 57,
+          "missed_or_invalid": 67,
+          "pending_or_open": 0,
+          "profit_factor": 0.7108,
+          "resolved": 40,
+          "setups": 108,
+          "short": 51,
+          "sl": 31,
+          "tp": 9,
+          "tp_rate_pct": 22.5,
+          "win_rate_pct": 22.5,
+          "win_rate_wilson95_descriptive_pct": [
+            12.32,
+            37.5
+          ]
+        }
+      },
+      "cost_stress_bps_per_side": {
+        "10": {
+          "ambiguous": 1,
+          "expectancy_r": -1.2105,
+          "long": 86,
+          "missed_or_invalid": 122,
+          "pending_or_open": 1,
+          "profit_factor": 0.239,
+          "resolved": 70,
+          "setups": 194,
+          "short": 108,
+          "sl": 55,
+          "tp": 15,
+          "tp_rate_pct": 21.429,
+          "win_rate_pct": 21.429,
+          "win_rate_wilson95_descriptive_pct": [
+            13.44,
+            32.39
+          ]
+        },
+        "2": {
+          "ambiguous": 1,
+          "expectancy_r": -0.451,
+          "long": 86,
+          "missed_or_invalid": 122,
+          "pending_or_open": 1,
+          "profit_factor": 0.5236,
+          "resolved": 70,
+          "setups": 194,
+          "short": 108,
+          "sl": 55,
+          "tp": 15,
+          "tp_rate_pct": 21.429,
+          "win_rate_pct": 21.429,
+          "win_rate_wilson95_descriptive_pct": [
+            13.44,
+            32.39
+          ]
+        },
+        "5": {
+          "ambiguous": 1,
+          "expectancy_r": -0.7358,
+          "long": 86,
+          "missed_or_invalid": 122,
+          "pending_or_open": 1,
+          "profit_factor": 0.3807,
+          "resolved": 70,
+          "setups": 194,
+          "short": 108,
+          "sl": 55,
+          "tp": 15,
+          "tp_rate_pct": 21.429,
+          "win_rate_pct": 21.429,
+          "win_rate_wilson95_descriptive_pct": [
+            13.44,
+            32.39
+          ]
+        }
+      },
+      "data_quality": {
+        "duplicate_timestamps": 0,
+        "four_hour_bucket_sizes": {
+          "2": 1,
+          "3": 1,
+          "6": 4,
+          "7": 1,
+          "9": 1,
+          "11": 1,
+          "12": 218,
+          "16": 1083
+        },
+        "gap_examples": [
+          {
+            "after_ms": 1750986000000,
+            "before_ms": 1750981500000,
+            "missing_slots": 4
+          },
+          {
+            "after_ms": 1751245200000,
+            "before_ms": 1751067900000,
+            "missing_slots": 196
+          },
+          {
+            "after_ms": 1751331600000,
+            "before_ms": 1751327100000,
+            "missing_slots": 4
+          },
+          {
+            "after_ms": 1751418000000,
+            "before_ms": 1751413500000,
+            "missing_slots": 4
+          },
+          {
+            "after_ms": 1751504400000,
+            "before_ms": 1751499900000,
+            "missing_slots": 4
+          }
+        ],
+        "input_data_gate_pass": false,
+        "legacy_fixed16_discarded_interior_buckets": 225,
+        "malformed_ohlcv": 0,
+        "native_htf_required_for_parity": true,
+        "non_15m_gaps": 219,
+        "note": "UTC labels in an imported CSV do not verify the original MT5 server timezone. Short buckets may be legitimate sessions or missing data; neither is inferred here.",
+        "session_alignment_verified": false,
+        "status": "PROVISIONAL_SESSION_OR_TIMEZONE_UNVERIFIED",
+        "timezone_verified": false
+      },
+      "event_accounting": {
+        "accounted_events": 1793,
+        "by_direction": {
+          "-1": {
+            "LATE": 89,
+            "LEG_ALREADY_OWNED": 291,
+            "SCORE": 309,
+            "SETUP_READY": 108,
+            "SUPERSEDED_BEFORE_LOCK": 37
+          },
+          "1": {
+            "LATE": 83,
+            "LEG_ALREADY_OWNED": 323,
+            "SCORE": 425,
+            "SETUP_READY": 86,
+            "SUPERSEDED_BEFORE_LOCK": 42
+          }
+        },
+        "complete": true,
+        "structural_events": 1793,
+        "terminal_counts": {
+          "LATE": 172,
+          "LEG_ALREADY_OWNED": 614,
+          "SCORE": 734,
+          "SETUP_READY": 194,
+          "SUPERSEDED_BEFORE_LOCK": 79
+        }
+      },
+      "gross": {
+        "ambiguous": 1,
+        "expectancy_r": -0.2611,
+        "long": 86,
+        "missed_or_invalid": 122,
+        "pending_or_open": 1,
+        "profit_factor": 0.6677,
+        "resolved": 70,
+        "setups": 194,
+        "short": 108,
+        "sl": 55,
+        "tp": 15,
+        "tp_rate_pct": 21.429,
+        "win_rate_pct": 21.429,
+        "win_rate_wilson95_descriptive_pct": [
+          13.44,
+          32.39
+        ]
+      },
+      "identity": {
+        "bars": 20000,
+        "dataset_file_sha256": "7b9ee9a1d1eddb1515fe37f9b395ce9ca6ca0c8db5d4b4050f40b1a26e9ab4f6",
+        "end": "2026-05-01T16:15:00+00:00",
+        "start": "2025-06-26T09:15:00+00:00",
+        "symbol": "XAUUSD",
+        "timeframe": "15m"
+      },
+      "limitations": [
+        "OHLC indicator lifecycle, not broker fills",
+        "POC disabled; no 1m profile required for four-check scoring",
+        "Costs are stress assumptions, not venue quotations",
+        "Reused research windows; no untouched holdout"
+      ],
+      "range_diagnostics": {
+        "affected_setups": {
+          "ambiguous": 0,
+          "expectancy_r": 2.4483,
+          "long": 2,
+          "missed_or_invalid": 3,
+          "pending_or_open": 0,
+          "profit_factor": null,
+          "resolved": 1,
+          "setups": 4,
+          "short": 2,
+          "sl": 0,
+          "tp": 1,
+          "tp_rate_pct": 100.0,
+          "win_rate_pct": 100.0,
+          "win_rate_wilson95_descriptive_pct": [
+            20.65,
+            100.0
+          ]
+        },
+        "candidates": 1100,
+        "endpoint_not_beyond_broken_level": 41,
+        "examples": [
+          {
+            "bar_open_ms": 1751564700000,
+            "bos_level": 3314.48,
+            "direction": -1,
+            "score": 50,
+            "target": 3323.55
+          },
+          {
+            "bar_open_ms": 1751600700000,
+            "bos_level": 3325.72,
+            "direction": -1,
+            "score": 25,
+            "target": 3325.88
+          },
+          {
+            "bar_open_ms": 1751893200000,
+            "bos_level": 3305.34,
+            "direction": -1,
+            "score": 25,
+            "target": 3306.21
+          }
+        ]
+      },
+      "setups_per_calendar_week": 4.391,
+      "verdict": "PROVISIONAL_UNVERIFIED_GOLD_FEED_AND_SESSION"
+    },
+    "protected_owner": {
+      "chronological_halves": {
+        "first": {
+          "ambiguous": 0,
+          "expectancy_r": -0.4253,
+          "long": 12,
+          "missed_or_invalid": 20,
+          "pending_or_open": 0,
+          "profit_factor": 0.4897,
+          "resolved": 12,
+          "setups": 32,
+          "short": 20,
+          "sl": 10,
+          "tp": 2,
+          "tp_rate_pct": 16.667,
+          "win_rate_pct": 16.667,
+          "win_rate_wilson95_descriptive_pct": [
+            4.7,
+            44.8
+          ]
+        },
+        "second_diagnostic": {
+          "ambiguous": 1,
+          "expectancy_r": -0.0148,
+          "long": 13,
+          "missed_or_invalid": 21,
+          "pending_or_open": 1,
+          "profit_factor": 0.9793,
+          "resolved": 7,
+          "setups": 30,
+          "short": 17,
+          "sl": 5,
+          "tp": 2,
+          "tp_rate_pct": 28.571,
+          "win_rate_pct": 28.571,
+          "win_rate_wilson95_descriptive_pct": [
+            8.22,
+            64.11
+          ]
+        }
+      },
+      "cohorts": {
+        "direction:long": {
+          "ambiguous": 1,
+          "expectancy_r": -1.0,
+          "long": 25,
+          "missed_or_invalid": 20,
+          "pending_or_open": 1,
+          "profit_factor": 0.0,
+          "resolved": 3,
+          "setups": 25,
+          "short": 0,
+          "sl": 3,
+          "tp": 0,
+          "tp_rate_pct": 0.0,
+          "win_rate_pct": 0.0,
+          "win_rate_wilson95_descriptive_pct": [
+            0.0,
+            56.15
+          ]
+        },
+        "direction:short": {
+          "ambiguous": 0,
+          "expectancy_r": -0.1379,
+          "long": 0,
+          "missed_or_invalid": 21,
+          "pending_or_open": 0,
+          "profit_factor": 0.8161,
+          "resolved": 16,
+          "setups": 37,
+          "short": 37,
+          "sl": 12,
+          "tp": 4,
+          "tp_rate_pct": 25.0,
+          "win_rate_pct": 25.0,
+          "win_rate_wilson95_descriptive_pct": [
+            10.18,
+            49.5
+          ]
+        },
+        "htf:False": {
+          "ambiguous": 1,
+          "expectancy_r": 0.1494,
+          "long": 13,
+          "missed_or_invalid": 12,
+          "pending_or_open": 0,
+          "profit_factor": 1.2241,
+          "resolved": 3,
+          "setups": 16,
+          "short": 3,
+          "sl": 2,
+          "tp": 1,
+          "tp_rate_pct": 33.333,
+          "win_rate_pct": 33.333,
+          "win_rate_wilson95_descriptive_pct": [
+            6.15,
+            79.23
+          ]
+        },
+        "htf:True": {
+          "ambiguous": 0,
+          "expectancy_r": -0.3534,
+          "long": 12,
+          "missed_or_invalid": 29,
+          "pending_or_open": 1,
+          "profit_factor": 0.565,
+          "resolved": 16,
+          "setups": 46,
+          "short": 34,
+          "sl": 13,
+          "tp": 3,
+          "tp_rate_pct": 18.75,
+          "win_rate_pct": 18.75,
+          "win_rate_wilson95_descriptive_pct": [
+            6.59,
+            43.01
+          ]
+        },
+        "imbalance:False": {
+          "ambiguous": 0,
+          "expectancy_r": null,
+          "long": 1,
+          "missed_or_invalid": 6,
+          "pending_or_open": 0,
+          "profit_factor": null,
+          "resolved": 0,
+          "setups": 6,
+          "short": 5,
+          "sl": 0,
+          "tp": 0,
+          "tp_rate_pct": null,
+          "win_rate_pct": null,
+          "win_rate_wilson95_descriptive_pct": null
+        },
+        "imbalance:True": {
+          "ambiguous": 1,
+          "expectancy_r": -0.274,
+          "long": 24,
+          "missed_or_invalid": 35,
+          "pending_or_open": 1,
+          "profit_factor": 0.6529,
+          "resolved": 19,
+          "setups": 56,
+          "short": 32,
+          "sl": 15,
+          "tp": 4,
+          "tp_rate_pct": 21.053,
+          "win_rate_pct": 21.053,
+          "win_rate_wilson95_descriptive_pct": [
+            8.51,
+            43.33
+          ]
+        },
+        "missing:FVG": {
+          "ambiguous": 0,
+          "expectancy_r": null,
+          "long": 1,
+          "missed_or_invalid": 6,
+          "pending_or_open": 0,
+          "profit_factor": null,
+          "resolved": 0,
+          "setups": 6,
+          "short": 5,
+          "sl": 0,
+          "tp": 0,
+          "tp_rate_pct": null,
+          "win_rate_pct": null,
+          "win_rate_wilson95_descriptive_pct": null
+        },
+        "missing:HTF": {
+          "ambiguous": 1,
+          "expectancy_r": 0.1494,
+          "long": 13,
+          "missed_or_invalid": 12,
+          "pending_or_open": 0,
+          "profit_factor": 1.2241,
+          "resolved": 3,
+          "setups": 16,
+          "short": 3,
+          "sl": 2,
+          "tp": 1,
+          "tp_rate_pct": 33.333,
+          "win_rate_pct": 33.333,
+          "win_rate_wilson95_descriptive_pct": [
+            6.15,
+            79.23
+          ]
+        },
+        "missing:LQ": {
+          "ambiguous": 0,
+          "expectancy_r": -0.2611,
+          "long": 11,
+          "missed_or_invalid": 22,
+          "pending_or_open": 1,
+          "profit_factor": 0.6677,
+          "resolved": 14,
+          "setups": 37,
+          "short": 26,
+          "sl": 11,
+          "tp": 3,
+          "tp_rate_pct": 21.429,
+          "win_rate_pct": 21.429,
+          "win_rate_wilson95_descriptive_pct": [
+            7.57,
+            47.59
+          ]
+        },
+        "missing:NONE": {
+          "ambiguous": 0,
+          "expectancy_r": -1.0,
+          "long": 0,
+          "missed_or_invalid": 1,
+          "pending_or_open": 0,
+          "profit_factor": 0.0,
+          "resolved": 2,
+          "setups": 3,
+          "short": 3,
+          "sl": 2,
+          "tp": 0,
+          "tp_rate_pct": 0.0,
+          "win_rate_pct": 0.0,
+          "win_rate_wilson95_descriptive_pct": [
+            0.0,
+            65.76
+          ]
+        },
+        "sweep:False": {
+          "ambiguous": 0,
+          "expectancy_r": -0.2611,
+          "long": 11,
+          "missed_or_invalid": 22,
+          "pending_or_open": 1,
+          "profit_factor": 0.6677,
+          "resolved": 14,
+          "setups": 37,
+          "short": 26,
+          "sl": 11,
+          "tp": 3,
+          "tp_rate_pct": 21.429,
+          "win_rate_pct": 21.429,
+          "win_rate_wilson95_descriptive_pct": [
+            7.57,
+            47.59
+          ]
+        },
+        "sweep:True": {
+          "ambiguous": 1,
+          "expectancy_r": -0.3103,
+          "long": 14,
+          "missed_or_invalid": 19,
+          "pending_or_open": 0,
+          "profit_factor": 0.6121,
+          "resolved": 5,
+          "setups": 25,
+          "short": 11,
+          "sl": 4,
+          "tp": 1,
+          "tp_rate_pct": 20.0,
+          "win_rate_pct": 20.0,
+          "win_rate_wilson95_descriptive_pct": [
+            3.62,
+            62.45
+          ]
+        }
+      },
+      "cost_stress_bps_per_side": {
+        "10": {
+          "ambiguous": 1,
+          "expectancy_r": -0.9594,
+          "long": 25,
+          "missed_or_invalid": 41,
+          "pending_or_open": 1,
+          "profit_factor": 0.3138,
+          "resolved": 19,
+          "setups": 62,
+          "short": 37,
+          "sl": 15,
+          "tp": 4,
+          "tp_rate_pct": 21.053,
+          "win_rate_pct": 21.053,
+          "win_rate_wilson95_descriptive_pct": [
+            8.51,
+            43.33
+          ]
+        },
+        "2": {
+          "ambiguous": 1,
+          "expectancy_r": -0.4111,
+          "long": 25,
+          "missed_or_invalid": 41,
+          "pending_or_open": 1,
+          "profit_factor": 0.5488,
+          "resolved": 19,
+          "setups": 62,
+          "short": 37,
+          "sl": 15,
+          "tp": 4,
+          "tp_rate_pct": 21.053,
+          "win_rate_pct": 21.053,
+          "win_rate_wilson95_descriptive_pct": [
+            8.51,
+            43.33
+          ]
+        },
+        "5": {
+          "ambiguous": 1,
+          "expectancy_r": -0.6167,
+          "long": 25,
+          "missed_or_invalid": 41,
+          "pending_or_open": 1,
+          "profit_factor": 0.4362,
+          "resolved": 19,
+          "setups": 62,
+          "short": 37,
+          "sl": 15,
+          "tp": 4,
+          "tp_rate_pct": 21.053,
+          "win_rate_pct": 21.053,
+          "win_rate_wilson95_descriptive_pct": [
+            8.51,
+            43.33
+          ]
+        }
+      },
+      "data_quality": {
+        "duplicate_timestamps": 0,
+        "four_hour_bucket_sizes": {
+          "2": 1,
+          "3": 1,
+          "6": 4,
+          "7": 1,
+          "9": 1,
+          "11": 1,
+          "12": 218,
+          "16": 1083
+        },
+        "gap_examples": [
+          {
+            "after_ms": 1750986000000,
+            "before_ms": 1750981500000,
+            "missing_slots": 4
+          },
+          {
+            "after_ms": 1751245200000,
+            "before_ms": 1751067900000,
+            "missing_slots": 196
+          },
+          {
+            "after_ms": 1751331600000,
+            "before_ms": 1751327100000,
+            "missing_slots": 4
+          },
+          {
+            "after_ms": 1751418000000,
+            "before_ms": 1751413500000,
+            "missing_slots": 4
+          },
+          {
+            "after_ms": 1751504400000,
+            "before_ms": 1751499900000,
+            "missing_slots": 4
+          }
+        ],
+        "input_data_gate_pass": false,
+        "legacy_fixed16_discarded_interior_buckets": 225,
+        "malformed_ohlcv": 0,
+        "native_htf_required_for_parity": true,
+        "non_15m_gaps": 219,
+        "note": "UTC labels in an imported CSV do not verify the original MT5 server timezone. Short buckets may be legitimate sessions or missing data; neither is inferred here.",
+        "session_alignment_verified": false,
+        "status": "PROVISIONAL_SESSION_OR_TIMEZONE_UNVERIFIED",
+        "timezone_verified": false
+      },
+      "event_accounting": {
+        "accounted_events": 502,
+        "by_direction": {
+          "-1": {
+            "LATE": 28,
+            "SCORE": 125,
+            "SETUP_READY": 37,
+            "SUPERSEDED_BEFORE_LOCK": 21
+          },
+          "1": {
+            "LATE": 34,
+            "SCORE": 212,
+            "SETUP_READY": 25,
+            "SUPERSEDED_BEFORE_LOCK": 20
+          }
+        },
+        "complete": true,
+        "structural_events": 502,
+        "terminal_counts": {
+          "LATE": 62,
+          "SCORE": 337,
+          "SETUP_READY": 62,
+          "SUPERSEDED_BEFORE_LOCK": 41
+        }
+      },
+      "gross": {
+        "ambiguous": 1,
+        "expectancy_r": -0.274,
+        "long": 25,
+        "missed_or_invalid": 41,
+        "pending_or_open": 1,
+        "profit_factor": 0.6529,
+        "resolved": 19,
+        "setups": 62,
+        "short": 37,
+        "sl": 15,
+        "tp": 4,
+        "tp_rate_pct": 21.053,
+        "win_rate_pct": 21.053,
+        "win_rate_wilson95_descriptive_pct": [
+          8.51,
+          43.33
+        ]
+      },
+      "identity": {
+        "bars": 20000,
+        "dataset_file_sha256": "7b9ee9a1d1eddb1515fe37f9b395ce9ca6ca0c8db5d4b4050f40b1a26e9ab4f6",
+        "end": "2026-05-01T16:15:00+00:00",
+        "start": "2025-06-26T09:15:00+00:00",
+        "symbol": "XAUUSD",
+        "timeframe": "15m"
+      },
+      "limitations": [
+        "OHLC indicator lifecycle, not broker fills",
+        "POC disabled; no 1m profile required for four-check scoring",
+        "Costs are stress assumptions, not venue quotations",
+        "Reused research windows; no untouched holdout"
+      ],
+      "range_diagnostics": {
+        "affected_setups": {
+          "ambiguous": 0,
+          "expectancy_r": null,
+          "long": 1,
+          "missed_or_invalid": 4,
+          "pending_or_open": 0,
+          "profit_factor": null,
+          "resolved": 0,
+          "setups": 4,
+          "short": 3,
+          "sl": 0,
+          "tp": 0,
+          "tp_rate_pct": null,
+          "win_rate_pct": null,
+          "win_rate_wilson95_descriptive_pct": null
+        },
+        "candidates": 461,
+        "endpoint_not_beyond_broken_level": 22,
+        "examples": [
+          {
+            "bar_open_ms": 1751253300000,
+            "bos_level": 3255.84,
+            "direction": -1,
+            "score": 50,
+            "target": 3262.91
+          },
+          {
+            "bar_open_ms": 1751893200000,
+            "bos_level": 3305.34,
+            "direction": -1,
+            "score": 25,
+            "target": 3306.21
+          },
+          {
+            "bar_open_ms": 1755134100000,
+            "bos_level": 3352.87,
+            "direction": -1,
+            "score": 50,
+            "target": 3355.5
+          }
+        ]
+      },
+      "setups_per_calendar_week": 1.403,
+      "verdict": "PROVISIONAL_UNVERIFIED_GOLD_FEED_AND_SESSION"
+    },
+    "v6_endpoint": {
+      "chronological_halves": {
+        "first": {
+          "ambiguous": 2,
+          "expectancy_r": -0.4612,
+          "long": 54,
+          "missed_or_invalid": 70,
+          "pending_or_open": 0,
+          "profit_factor": 0.4534,
+          "resolved": 64,
+          "setups": 136,
+          "short": 82,
+          "sl": 54,
+          "tp": 10,
+          "tp_rate_pct": 15.625,
+          "win_rate_pct": 15.625,
+          "win_rate_wilson95_descriptive_pct": [
+            8.71,
+            26.43
+          ]
+        },
+        "second_diagnostic": {
+          "ambiguous": 2,
+          "expectancy_r": -0.1379,
+          "long": 74,
+          "missed_or_invalid": 101,
+          "pending_or_open": 0,
+          "profit_factor": 0.8161,
+          "resolved": 68,
+          "setups": 171,
+          "short": 97,
+          "sl": 51,
+          "tp": 17,
+          "tp_rate_pct": 25.0,
+          "win_rate_pct": 25.0,
+          "win_rate_wilson95_descriptive_pct": [
+            16.23,
+            36.44
+          ]
+        }
+      },
+      "cohorts": {
+        "direction:long": {
+          "ambiguous": 0,
+          "expectancy_r": 0.0217,
+          "long": 128,
+          "missed_or_invalid": 74,
+          "pending_or_open": 0,
+          "profit_factor": 1.0309,
+          "resolved": 54,
+          "setups": 128,
+          "short": 0,
+          "sl": 38,
+          "tp": 16,
+          "tp_rate_pct": 29.63,
+          "win_rate_pct": 29.63,
+          "win_rate_wilson95_descriptive_pct": [
+            19.14,
+            42.83
+          ]
+        },
+        "direction:short": {
+          "ambiguous": 4,
+          "expectancy_r": -0.5137,
+          "long": 0,
+          "missed_or_invalid": 97,
+          "pending_or_open": 0,
+          "profit_factor": 0.402,
+          "resolved": 78,
+          "setups": 179,
+          "short": 179,
+          "sl": 67,
+          "tp": 11,
+          "tp_rate_pct": 14.103,
+          "win_rate_pct": 14.103,
+          "win_rate_wilson95_descriptive_pct": [
+            8.06,
+            23.51
+          ]
+        },
+        "htf:False": {
+          "ambiguous": 1,
+          "expectancy_r": 0.0889,
+          "long": 41,
+          "missed_or_invalid": 49,
+          "pending_or_open": 0,
+          "profit_factor": 1.13,
+          "resolved": 19,
+          "setups": 69,
+          "short": 28,
+          "sl": 13,
+          "tp": 6,
+          "tp_rate_pct": 31.579,
+          "win_rate_pct": 31.579,
+          "win_rate_wilson95_descriptive_pct": [
+            15.36,
+            53.99
+          ]
+        },
+        "htf:True": {
+          "ambiguous": 3,
+          "expectancy_r": -0.3592,
+          "long": 87,
+          "missed_or_invalid": 122,
+          "pending_or_open": 0,
+          "profit_factor": 0.5588,
+          "resolved": 113,
+          "setups": 238,
+          "short": 151,
+          "sl": 92,
+          "tp": 21,
+          "tp_rate_pct": 18.584,
+          "win_rate_pct": 18.584,
+          "win_rate_wilson95_descriptive_pct": [
+            12.49,
+            26.75
+          ]
+        },
+        "imbalance:False": {
+          "ambiguous": 1,
+          "expectancy_r": -0.2337,
+          "long": 58,
+          "missed_or_invalid": 58,
+          "pending_or_open": 0,
+          "profit_factor": 0.6995,
+          "resolved": 54,
+          "setups": 113,
+          "short": 55,
+          "sl": 42,
+          "tp": 12,
+          "tp_rate_pct": 22.222,
+          "win_rate_pct": 22.222,
+          "win_rate_wilson95_descriptive_pct": [
+            13.2,
+            34.94
+          ]
+        },
+        "imbalance:True": {
+          "ambiguous": 3,
+          "expectancy_r": -0.3369,
+          "long": 70,
+          "missed_or_invalid": 113,
+          "pending_or_open": 0,
+          "profit_factor": 0.5829,
+          "resolved": 78,
+          "setups": 194,
+          "short": 124,
+          "sl": 63,
+          "tp": 15,
+          "tp_rate_pct": 19.231,
+          "win_rate_pct": 19.231,
+          "win_rate_wilson95_descriptive_pct": [
+            12.02,
+            29.34
+          ]
+        },
+        "missing:FVG": {
+          "ambiguous": 1,
+          "expectancy_r": -0.2337,
+          "long": 58,
+          "missed_or_invalid": 58,
+          "pending_or_open": 0,
+          "profit_factor": 0.6995,
+          "resolved": 54,
+          "setups": 113,
+          "short": 55,
+          "sl": 42,
+          "tp": 12,
+          "tp_rate_pct": 22.222,
+          "win_rate_pct": 22.222,
+          "win_rate_wilson95_descriptive_pct": [
+            13.2,
+            34.94
+          ]
+        },
+        "missing:HTF": {
+          "ambiguous": 1,
+          "expectancy_r": 0.0889,
+          "long": 41,
+          "missed_or_invalid": 49,
+          "pending_or_open": 0,
+          "profit_factor": 1.13,
+          "resolved": 19,
+          "setups": 69,
+          "short": 28,
+          "sl": 13,
+          "tp": 6,
+          "tp_rate_pct": 31.579,
+          "win_rate_pct": 31.579,
+          "win_rate_wilson95_descriptive_pct": [
+            15.36,
+            53.99
+          ]
+        },
+        "missing:LQ": {
+          "ambiguous": 0,
+          "expectancy_r": -0.5074,
+          "long": 26,
+          "missed_or_invalid": 48,
+          "pending_or_open": 0,
+          "profit_factor": 0.408,
+          "resolved": 49,
+          "setups": 97,
+          "short": 71,
+          "sl": 42,
+          "tp": 7,
+          "tp_rate_pct": 14.286,
+          "win_rate_pct": 14.286,
+          "win_rate_wilson95_descriptive_pct": [
+            7.1,
+            26.67
+          ]
+        },
+        "missing:NONE": {
+          "ambiguous": 2,
+          "expectancy_r": -0.3103,
+          "long": 3,
+          "missed_or_invalid": 16,
+          "pending_or_open": 0,
+          "profit_factor": 0.6121,
+          "resolved": 10,
+          "setups": 28,
+          "short": 25,
+          "sl": 8,
+          "tp": 2,
+          "tp_rate_pct": 20.0,
+          "win_rate_pct": 20.0,
+          "win_rate_wilson95_descriptive_pct": [
+            5.67,
+            50.98
+          ]
+        },
+        "sweep:False": {
+          "ambiguous": 0,
+          "expectancy_r": -0.5074,
+          "long": 26,
+          "missed_or_invalid": 48,
+          "pending_or_open": 0,
+          "profit_factor": 0.408,
+          "resolved": 49,
+          "setups": 97,
+          "short": 71,
+          "sl": 42,
+          "tp": 7,
+          "tp_rate_pct": 14.286,
+          "win_rate_pct": 14.286,
+          "win_rate_wilson95_descriptive_pct": [
+            7.1,
+            26.67
+          ]
+        },
+        "sweep:True": {
+          "ambiguous": 4,
+          "expectancy_r": -0.1691,
+          "long": 102,
+          "missed_or_invalid": 123,
+          "pending_or_open": 0,
+          "profit_factor": 0.7772,
+          "resolved": 83,
+          "setups": 210,
+          "short": 108,
+          "sl": 63,
+          "tp": 20,
+          "tp_rate_pct": 24.096,
+          "win_rate_pct": 24.096,
+          "win_rate_wilson95_descriptive_pct": [
+            16.17,
+            34.31
+          ]
+        }
+      },
+      "cost_stress_bps_per_side": {
+        "10": {
+          "ambiguous": 4,
+          "expectancy_r": -1.4419,
+          "long": 128,
+          "missed_or_invalid": 171,
+          "pending_or_open": 0,
+          "profit_factor": 0.175,
+          "resolved": 132,
+          "setups": 307,
+          "short": 179,
+          "sl": 105,
+          "tp": 27,
+          "tp_rate_pct": 20.455,
+          "win_rate_pct": 19.697,
+          "win_rate_wilson95_descriptive_pct": [
+            13.81,
+            27.3
+          ]
+        },
+        "2": {
+          "ambiguous": 4,
+          "expectancy_r": -0.5241,
+          "long": 128,
+          "missed_or_invalid": 171,
+          "pending_or_open": 0,
+          "profit_factor": 0.4678,
+          "resolved": 132,
+          "setups": 307,
+          "short": 179,
+          "sl": 105,
+          "tp": 27,
+          "tp_rate_pct": 20.455,
+          "win_rate_pct": 20.455,
+          "win_rate_wilson95_descriptive_pct": [
+            14.46,
+            28.12
+          ]
+        },
+        "5": {
+          "ambiguous": 4,
+          "expectancy_r": -0.8683,
+          "long": 128,
+          "missed_or_invalid": 171,
+          "pending_or_open": 0,
+          "profit_factor": 0.3157,
+          "resolved": 132,
+          "setups": 307,
+          "short": 179,
+          "sl": 105,
+          "tp": 27,
+          "tp_rate_pct": 20.455,
+          "win_rate_pct": 20.455,
+          "win_rate_wilson95_descriptive_pct": [
+            14.46,
+            28.12
+          ]
+        }
+      },
+      "data_quality": {
+        "duplicate_timestamps": 0,
+        "four_hour_bucket_sizes": {
+          "2": 1,
+          "3": 1,
+          "6": 4,
+          "7": 1,
+          "9": 1,
+          "11": 1,
+          "12": 218,
+          "16": 1083
+        },
+        "gap_examples": [
+          {
+            "after_ms": 1750986000000,
+            "before_ms": 1750981500000,
+            "missing_slots": 4
+          },
+          {
+            "after_ms": 1751245200000,
+            "before_ms": 1751067900000,
+            "missing_slots": 196
+          },
+          {
+            "after_ms": 1751331600000,
+            "before_ms": 1751327100000,
+            "missing_slots": 4
+          },
+          {
+            "after_ms": 1751418000000,
+            "before_ms": 1751413500000,
+            "missing_slots": 4
+          },
+          {
+            "after_ms": 1751504400000,
+            "before_ms": 1751499900000,
+            "missing_slots": 4
+          }
+        ],
+        "input_data_gate_pass": false,
+        "legacy_fixed16_discarded_interior_buckets": 225,
+        "malformed_ohlcv": 0,
+        "native_htf_required_for_parity": true,
+        "non_15m_gaps": 219,
+        "note": "UTC labels in an imported CSV do not verify the original MT5 server timezone. Short buckets may be legitimate sessions or missing data; neither is inferred here.",
+        "session_alignment_verified": false,
+        "status": "PROVISIONAL_SESSION_OR_TIMEZONE_UNVERIFIED",
+        "timezone_verified": false
+      },
+      "event_accounting": {
+        "accounted_events": 2914,
+        "by_direction": {
+          "-1": {
+            "INVALID_RANGE": 1,
+            "LATE": 142,
+            "LEG_ALREADY_OWNED": 441,
+            "SCORE": 523,
+            "SETUP_READY": 179,
+            "SUPERSEDED_BEFORE_LOCK": 74
+          },
+          "1": {
+            "LATE": 150,
+            "LEG_ALREADY_OWNED": 536,
+            "SCORE": 677,
+            "SETUP_READY": 128,
+            "SUPERSEDED_BEFORE_LOCK": 63
+          }
+        },
+        "complete": true,
+        "structural_events": 2914,
+        "terminal_counts": {
+          "INVALID_RANGE": 1,
+          "LATE": 292,
+          "LEG_ALREADY_OWNED": 977,
+          "SCORE": 1200,
+          "SETUP_READY": 307,
+          "SUPERSEDED_BEFORE_LOCK": 137
+        }
+      },
+      "gross": {
+        "ambiguous": 4,
+        "expectancy_r": -0.2947,
+        "long": 128,
+        "missed_or_invalid": 171,
+        "pending_or_open": 0,
+        "profit_factor": 0.6296,
+        "resolved": 132,
+        "setups": 307,
+        "short": 179,
+        "sl": 105,
+        "tp": 27,
+        "tp_rate_pct": 20.455,
+        "win_rate_pct": 20.455,
+        "win_rate_wilson95_descriptive_pct": [
+          14.46,
+          28.12
+        ]
+      },
+      "identity": {
+        "bars": 20000,
+        "dataset_file_sha256": "7b9ee9a1d1eddb1515fe37f9b395ce9ca6ca0c8db5d4b4050f40b1a26e9ab4f6",
+        "end": "2026-05-01T16:15:00+00:00",
+        "start": "2025-06-26T09:15:00+00:00",
+        "symbol": "XAUUSD",
+        "timeframe": "15m"
+      },
+      "limitations": [
+        "OHLC indicator lifecycle, not broker fills",
+        "POC disabled; no 1m profile required for four-check scoring",
+        "Costs are stress assumptions, not venue quotations",
+        "Reused research windows; no untouched holdout"
+      ],
+      "range_diagnostics": {
+        "affected_setups": {
+          "ambiguous": 0,
+          "expectancy_r": null,
+          "long": 0,
+          "missed_or_invalid": 1,
+          "pending_or_open": 0,
+          "profit_factor": null,
+          "resolved": 0,
+          "setups": 1,
+          "short": 1,
+          "sl": 0,
+          "tp": 0,
+          "tp_rate_pct": null,
+          "win_rate_pct": null,
+          "win_rate_wilson95_descriptive_pct": null
+        },
+        "candidates": 1799,
+        "endpoint_not_beyond_broken_level": 2,
+        "examples": [
+          {
+            "bar_open_ms": 1759439700000,
+            "bos_level": 3831.34,
+            "direction": -1,
+            "score": 75,
+            "target": 3840.64
+          },
+          {
+            "bar_open_ms": 1759819500000,
+            "bos_level": 3958.4,
+            "direction": -1,
+            "score": 75,
+            "target": 3960.94
+          }
+        ]
+      },
+      "setups_per_calendar_week": 6.948,
+      "verdict": "PROVISIONAL_UNVERIFIED_GOLD_FEED_AND_SESSION"
+    },
+    "v6_sweep": {
+      "chronological_halves": {
+        "first": {
+          "ambiguous": 2,
+          "expectancy_r": -0.4253,
+          "long": 56,
+          "missed_or_invalid": 72,
+          "pending_or_open": 0,
+          "profit_factor": 0.4897,
+          "resolved": 66,
+          "setups": 140,
+          "short": 84,
+          "sl": 55,
+          "tp": 11,
+          "tp_rate_pct": 16.667,
+          "win_rate_pct": 16.667,
+          "win_rate_wilson95_descriptive_pct": [
+            9.57,
+            27.43
+          ]
+        },
+        "second_diagnostic": {
+          "ambiguous": 2,
+          "expectancy_r": -0.09,
+          "long": 83,
+          "missed_or_invalid": 115,
+          "pending_or_open": 0,
+          "profit_factor": 0.8777,
+          "resolved": 72,
+          "setups": 189,
+          "short": 106,
+          "sl": 53,
+          "tp": 19,
+          "tp_rate_pct": 26.389,
+          "win_rate_pct": 26.389,
+          "win_rate_wilson95_descriptive_pct": [
+            17.59,
+            37.58
+          ]
+        }
+      },
+      "cohorts": {
+        "direction:long": {
+          "ambiguous": 0,
+          "expectancy_r": 0.0284,
+          "long": 139,
+          "missed_or_invalid": 82,
+          "pending_or_open": 0,
+          "profit_factor": 1.0405,
+          "resolved": 57,
+          "setups": 139,
+          "short": 0,
+          "sl": 40,
+          "tp": 17,
+          "tp_rate_pct": 29.825,
+          "win_rate_pct": 29.825,
+          "win_rate_wilson95_descriptive_pct": [
+            19.53,
+            42.66
+          ]
+        },
+        "direction:short": {
+          "ambiguous": 4,
+          "expectancy_r": -0.4466,
+          "long": 0,
+          "missed_or_invalid": 105,
+          "pending_or_open": 0,
+          "profit_factor": 0.4681,
+          "resolved": 81,
+          "setups": 190,
+          "short": 190,
+          "sl": 68,
+          "tp": 13,
+          "tp_rate_pct": 16.049,
+          "win_rate_pct": 16.049,
+          "win_rate_wilson95_descriptive_pct": [
+            9.63,
+            25.55
+          ]
+        },
+        "htf:False": {
+          "ambiguous": 1,
+          "expectancy_r": 0.0972,
+          "long": 50,
+          "missed_or_invalid": 59,
+          "pending_or_open": 0,
+          "profit_factor": 1.1425,
+          "resolved": 22,
+          "setups": 82,
+          "short": 32,
+          "sl": 15,
+          "tp": 7,
+          "tp_rate_pct": 31.818,
+          "win_rate_pct": 31.818,
+          "win_rate_wilson95_descriptive_pct": [
+            16.36,
+            52.68
+          ]
+        },
+        "htf:True": {
+          "ambiguous": 3,
+          "expectancy_r": -0.3163,
+          "long": 89,
+          "missed_or_invalid": 128,
+          "pending_or_open": 0,
+          "profit_factor": 0.6055,
+          "resolved": 116,
+          "setups": 247,
+          "short": 158,
+          "sl": 93,
+          "tp": 23,
+          "tp_rate_pct": 19.828,
+          "win_rate_pct": 19.828,
+          "win_rate_wilson95_descriptive_pct": [
+            13.59,
+            28.0
+          ]
+        },
+        "imbalance:False": {
+          "ambiguous": 1,
+          "expectancy_r": -0.1677,
+          "long": 59,
+          "missed_or_invalid": 63,
+          "pending_or_open": 0,
+          "profit_factor": 0.779,
+          "resolved": 58,
+          "setups": 122,
+          "short": 63,
+          "sl": 44,
+          "tp": 14,
+          "tp_rate_pct": 24.138,
+          "win_rate_pct": 24.138,
+          "win_rate_wilson95_descriptive_pct": [
+            14.96,
+            36.53
+          ]
+        },
+        "imbalance:True": {
+          "ambiguous": 3,
+          "expectancy_r": -0.3103,
+          "long": 80,
+          "missed_or_invalid": 124,
+          "pending_or_open": 0,
+          "profit_factor": 0.6121,
+          "resolved": 80,
+          "setups": 207,
+          "short": 127,
+          "sl": 64,
+          "tp": 16,
+          "tp_rate_pct": 20.0,
+          "win_rate_pct": 20.0,
+          "win_rate_wilson95_descriptive_pct": [
+            12.7,
+            30.05
+          ]
+        },
+        "missing:FVG": {
+          "ambiguous": 1,
+          "expectancy_r": -0.1677,
+          "long": 59,
+          "missed_or_invalid": 63,
+          "pending_or_open": 0,
+          "profit_factor": 0.779,
+          "resolved": 58,
+          "setups": 122,
+          "short": 63,
+          "sl": 44,
+          "tp": 14,
+          "tp_rate_pct": 24.138,
+          "win_rate_pct": 24.138,
+          "win_rate_wilson95_descriptive_pct": [
+            14.96,
+            36.53
+          ]
+        },
+        "missing:HTF": {
+          "ambiguous": 1,
+          "expectancy_r": 0.0972,
+          "long": 50,
+          "missed_or_invalid": 59,
+          "pending_or_open": 0,
+          "profit_factor": 1.1425,
+          "resolved": 22,
+          "setups": 82,
+          "short": 32,
+          "sl": 15,
+          "tp": 7,
+          "tp_rate_pct": 31.818,
+          "win_rate_pct": 31.818,
+          "win_rate_wilson95_descriptive_pct": [
+            16.36,
+            52.68
+          ]
+        },
+        "missing:LQ": {
+          "ambiguous": 0,
+          "expectancy_r": -0.4864,
+          "long": 25,
+          "missed_or_invalid": 46,
+          "pending_or_open": 0,
+          "profit_factor": 0.4284,
+          "resolved": 47,
+          "setups": 93,
+          "short": 68,
+          "sl": 40,
+          "tp": 7,
+          "tp_rate_pct": 14.894,
+          "win_rate_pct": 14.894,
+          "win_rate_wilson95_descriptive_pct": [
+            7.41,
+            27.69
+          ]
+        },
+        "missing:NONE": {
+          "ambiguous": 2,
+          "expectancy_r": -0.373,
+          "long": 5,
+          "missed_or_invalid": 19,
+          "pending_or_open": 0,
+          "profit_factor": 0.5441,
+          "resolved": 11,
+          "setups": 32,
+          "short": 27,
+          "sl": 9,
+          "tp": 2,
+          "tp_rate_pct": 18.182,
+          "win_rate_pct": 18.182,
+          "win_rate_wilson95_descriptive_pct": [
+            5.14,
+            47.7
+          ]
+        },
+        "sweep:False": {
+          "ambiguous": 0,
+          "expectancy_r": -0.4864,
+          "long": 25,
+          "missed_or_invalid": 46,
+          "pending_or_open": 0,
+          "profit_factor": 0.4284,
+          "resolved": 47,
+          "setups": 93,
+          "short": 68,
+          "sl": 40,
+          "tp": 7,
+          "tp_rate_pct": 14.894,
+          "win_rate_pct": 14.894,
+          "win_rate_wilson95_descriptive_pct": [
+            7.41,
+            27.69
+          ]
+        },
+        "sweep:True": {
+          "ambiguous": 4,
+          "expectancy_r": -0.1285,
+          "long": 114,
+          "missed_or_invalid": 141,
+          "pending_or_open": 0,
+          "profit_factor": 0.8281,
+          "resolved": 91,
+          "setups": 236,
+          "short": 122,
+          "sl": 68,
+          "tp": 23,
+          "tp_rate_pct": 25.275,
+          "win_rate_pct": 25.275,
+          "win_rate_wilson95_descriptive_pct": [
+            17.47,
+            35.08
+          ]
+        }
+      },
+      "cost_stress_bps_per_side": {
+        "10": {
+          "ambiguous": 4,
+          "expectancy_r": -1.3629,
+          "long": 139,
+          "missed_or_invalid": 187,
+          "pending_or_open": 0,
+          "profit_factor": 0.2003,
+          "resolved": 138,
+          "setups": 329,
+          "short": 190,
+          "sl": 108,
+          "tp": 30,
+          "tp_rate_pct": 21.739,
+          "win_rate_pct": 21.014,
+          "win_rate_wilson95_descriptive_pct": [
+            15.05,
+            28.55
+          ]
+        },
+        "2": {
+          "ambiguous": 4,
+          "expectancy_r": -0.4729,
+          "long": 139,
+          "missed_or_invalid": 187,
+          "pending_or_open": 0,
+          "profit_factor": 0.5104,
+          "resolved": 138,
+          "setups": 329,
+          "short": 190,
+          "sl": 108,
+          "tp": 30,
+          "tp_rate_pct": 21.739,
+          "win_rate_pct": 21.739,
+          "win_rate_wilson95_descriptive_pct": [
+            15.67,
+            29.34
+          ]
+        },
+        "5": {
+          "ambiguous": 4,
+          "expectancy_r": -0.8066,
+          "long": 139,
+          "missed_or_invalid": 187,
+          "pending_or_open": 0,
+          "profit_factor": 0.3499,
+          "resolved": 138,
+          "setups": 329,
+          "short": 190,
+          "sl": 108,
+          "tp": 30,
+          "tp_rate_pct": 21.739,
+          "win_rate_pct": 21.739,
+          "win_rate_wilson95_descriptive_pct": [
+            15.67,
+            29.34
+          ]
+        }
+      },
+      "data_quality": {
+        "duplicate_timestamps": 0,
+        "four_hour_bucket_sizes": {
+          "2": 1,
+          "3": 1,
+          "6": 4,
+          "7": 1,
+          "9": 1,
+          "11": 1,
+          "12": 218,
+          "16": 1083
+        },
+        "gap_examples": [
+          {
+            "after_ms": 1750986000000,
+            "before_ms": 1750981500000,
+            "missing_slots": 4
+          },
+          {
+            "after_ms": 1751245200000,
+            "before_ms": 1751067900000,
+            "missing_slots": 196
+          },
+          {
+            "after_ms": 1751331600000,
+            "before_ms": 1751327100000,
+            "missing_slots": 4
+          },
+          {
+            "after_ms": 1751418000000,
+            "before_ms": 1751413500000,
+            "missing_slots": 4
+          },
+          {
+            "after_ms": 1751504400000,
+            "before_ms": 1751499900000,
+            "missing_slots": 4
+          }
+        ],
+        "input_data_gate_pass": false,
+        "legacy_fixed16_discarded_interior_buckets": 225,
+        "malformed_ohlcv": 0,
+        "native_htf_required_for_parity": true,
+        "non_15m_gaps": 219,
+        "note": "UTC labels in an imported CSV do not verify the original MT5 server timezone. Short buckets may be legitimate sessions or missing data; neither is inferred here.",
+        "session_alignment_verified": false,
+        "status": "PROVISIONAL_SESSION_OR_TIMEZONE_UNVERIFIED",
+        "timezone_verified": false
+      },
+      "event_accounting": {
+        "accounted_events": 2914,
+        "by_direction": {
+          "-1": {
+            "INVALID_RANGE": 1,
+            "LATE": 141,
+            "LEG_ALREADY_OWNED": 441,
+            "SCORE": 513,
+            "SETUP_READY": 190,
+            "SUPERSEDED_BEFORE_LOCK": 74
+          },
+          "1": {
+            "LATE": 146,
+            "LEG_ALREADY_OWNED": 536,
+            "SCORE": 670,
+            "SETUP_READY": 139,
+            "SUPERSEDED_BEFORE_LOCK": 63
+          }
+        },
+        "complete": true,
+        "structural_events": 2914,
+        "terminal_counts": {
+          "INVALID_RANGE": 1,
+          "LATE": 287,
+          "LEG_ALREADY_OWNED": 977,
+          "SCORE": 1183,
+          "SETUP_READY": 329,
+          "SUPERSEDED_BEFORE_LOCK": 137
+        }
+      },
+      "gross": {
+        "ambiguous": 4,
+        "expectancy_r": -0.2504,
+        "long": 139,
+        "missed_or_invalid": 187,
+        "pending_or_open": 0,
+        "profit_factor": 0.6801,
+        "resolved": 138,
+        "setups": 329,
+        "short": 190,
+        "sl": 108,
+        "tp": 30,
+        "tp_rate_pct": 21.739,
+        "win_rate_pct": 21.739,
+        "win_rate_wilson95_descriptive_pct": [
+          15.67,
+          29.34
+        ]
+      },
+      "identity": {
+        "bars": 20000,
+        "dataset_file_sha256": "7b9ee9a1d1eddb1515fe37f9b395ce9ca6ca0c8db5d4b4050f40b1a26e9ab4f6",
+        "end": "2026-05-01T16:15:00+00:00",
+        "start": "2025-06-26T09:15:00+00:00",
+        "symbol": "XAUUSD",
+        "timeframe": "15m"
+      },
+      "limitations": [
+        "OHLC indicator lifecycle, not broker fills",
+        "POC disabled; no 1m profile required for four-check scoring",
+        "Costs are stress assumptions, not venue quotations",
+        "Reused research windows; no untouched holdout"
+      ],
+      "range_diagnostics": {
+        "affected_setups": {
+          "ambiguous": 0,
+          "expectancy_r": null,
+          "long": 0,
+          "missed_or_invalid": 1,
+          "pending_or_open": 0,
+          "profit_factor": null,
+          "resolved": 0,
+          "setups": 1,
+          "short": 1,
+          "sl": 0,
+          "tp": 0,
+          "tp_rate_pct": null,
+          "win_rate_pct": null,
+          "win_rate_wilson95_descriptive_pct": null
+        },
+        "candidates": 1799,
+        "endpoint_not_beyond_broken_level": 2,
+        "examples": [
+          {
+            "bar_open_ms": 1759439700000,
+            "bos_level": 3831.34,
+            "direction": -1,
+            "score": 75,
+            "target": 3840.64
+          },
+          {
+            "bar_open_ms": 1759819500000,
+            "bos_level": 3958.4,
+            "direction": -1,
+            "score": 75,
+            "target": 3960.94
+          }
+        ]
+      },
+      "setups_per_calendar_week": 7.446,
+      "verdict": "PROVISIONAL_UNVERIFIED_GOLD_FEED_AND_SESSION"
+    }
+  }
+}

@@ -1,0 +1,4 @@
+# Preserve byte-identity artifacts across Git checkouts and platforms.
+*.pine -text
+artifacts/strategy-development/** -text
+services/pine2python/tests/fixtures/** -text

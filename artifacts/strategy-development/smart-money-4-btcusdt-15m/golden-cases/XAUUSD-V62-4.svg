@@ -1,0 +1,57 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1060" height="435" viewBox="0 0 1060 435">
+<rect width="1060" height="435" fill="#151b25"/>
+<text x="20" y="24" fill="#eeeeee" font-family="sans-serif" font-size="15">XAUUSD-V62-4 | V61_POSITIVE_PRESERVED | SHORT</text>
+<line x1="45.00" x2="45.00" y1="184.64" y2="205.45" stroke="#57b99b"/>
+<rect x="43.00" y="199.92" width="4" height="1.46" fill="#57b99b"/>
+<line x1="81.52" x2="81.52" y1="190.49" y2="216.02" stroke="#df7781"/>
+<rect x="79.52" y="199.11" width="4" height="7.64" fill="#df7781"/>
+<line x1="118.04" x2="118.04" y1="188.54" y2="217.16" stroke="#57b99b"/>
+<rect x="116.04" y="199.11" width="4" height="7.64" fill="#57b99b"/>
+<line x1="154.57" x2="154.57" y1="164.97" y2="199.92" stroke="#57b99b"/>
+<rect x="152.57" y="165.95" width="4" height="33.16" fill="#57b99b"/>
+<line x1="191.09" x2="191.09" y1="162.69" y2="188.54" stroke="#df7781"/>
+<rect x="189.09" y="165.95" width="4" height="21.95" fill="#df7781"/>
+<line x1="227.61" x2="227.61" y1="154.08" y2="221.71" stroke="#df7781"/>
+<rect x="225.61" y="178.79" width="4" height="6.02" fill="#df7781"/>
+<line x1="264.13" x2="264.13" y1="114.41" y2="197.48" stroke="#57b99b"/>
+<rect x="262.13" y="130.99" width="4" height="53.81" fill="#57b99b"/>
+<line x1="300.65" x2="300.65" y1="106.44" y2="135.71" stroke="#57b99b"/>
+<rect x="298.65" y="116.69" width="4" height="14.31" fill="#57b99b"/>
+<line x1="337.17" x2="337.17" y1="114.74" y2="153.59" stroke="#df7781"/>
+<rect x="335.17" y="116.69" width="4" height="25.36" fill="#df7781"/>
+<line x1="373.70" x2="373.70" y1="137.17" y2="214.88" stroke="#df7781"/>
+<rect x="371.70" y="142.05" width="4" height="39.18" fill="#df7781"/>
+<line x1="410.22" x2="410.22" y1="163.83" y2="193.42" stroke="#57b99b"/>
+<rect x="408.22" y="163.83" width="4" height="17.40" fill="#57b99b"/>
+<line x1="446.74" x2="446.74" y1="144.00" y2="193.58" stroke="#df7781"/>
+<rect x="444.74" y="163.83" width="4" height="24.71" fill="#df7781"/>
+<line x1="483.26" x2="483.26" y1="180.58" y2="219.59" stroke="#df7781"/>
+<rect x="481.26" y="188.54" width="4" height="10.24" fill="#df7781"/>
+<line x1="519.78" x2="519.78" y1="86.94" y2="252.27" stroke="#57b99b"/>
+<rect x="517.78" y="113.43" width="4" height="85.35" fill="#57b99b"/>
+<line x1="556.30" x2="556.30" y1="99.62" y2="203.99" stroke="#df7781"/>
+<rect x="554.30" y="113.43" width="4" height="68.77" fill="#df7781"/>
+<line x1="592.83" x2="592.83" y1="173.10" y2="234.39" stroke="#df7781"/>
+<rect x="590.83" y="180.58" width="4" height="43.08" fill="#df7781"/>
+<line x1="629.35" x2="629.35" y1="184.80" y2="222.52" stroke="#57b99b"/>
+<rect x="627.35" y="186.10" width="4" height="36.42" fill="#57b99b"/>
+<line x1="665.87" x2="665.87" y1="121.56" y2="246.42" stroke="#df7781"/>
+<rect x="663.87" y="186.10" width="4" height="53.00" fill="#df7781"/>
+<line x1="702.39" x2="702.39" y1="207.40" y2="293.73" stroke="#df7781"/>
+<rect x="700.39" y="239.10" width="4" height="7.64" fill="#df7781"/>
+<line x1="738.91" x2="738.91" y1="236.01" y2="314.37" stroke="#df7781"/>
+<rect x="736.91" y="244.63" width="4" height="33.65" fill="#df7781"/>
+<line x1="775.43" x2="775.43" y1="272.59" y2="314.21" stroke="#df7781"/>
+<rect x="773.43" y="278.28" width="4" height="17.88" fill="#df7781"/>
+<line x1="811.96" x2="811.96" y1="277.31" y2="353.06" stroke="#df7781"/>
+<rect x="809.96" y="294.54" width="4" height="32.19" fill="#df7781"/>
+<line x1="848.48" x2="848.48" y1="302.83" y2="343.15" stroke="#57b99b"/>
+<rect x="846.48" y="316.00" width="4" height="10.73" fill="#57b99b"/>
+<line x1="885.00" x2="885.00" y1="266.25" y2="327.05" stroke="#57b99b"/>
+<rect x="883.00" y="272.75" width="4" height="43.24" fill="#57b99b"/>
+<line x1="45" x2="890" y1="221.71" y2="221.71" stroke="#a4b9e8" stroke-dasharray="4 5" opacity="0.65"/><text x="900" y="70" fill="#a4b9e8" font-family="sans-serif" font-size="11">bos_level 3336.70</text>
+<line x1="45" x2="890" y1="111.48" y2="111.48" stroke="#a4c8bf" stroke-dasharray="4 5" opacity="0.65"/><text x="900" y="93" fill="#a4c8bf" font-family="sans-serif" font-size="11">sweep_level 3343.48</text>
+<line x1="45" x2="890" y1="162.98" y2="162.98" stroke="#d3bd6d" stroke-dasharray="4 5" opacity="0.65"/><text x="900" y="116" fill="#d3bd6d" font-family="sans-serif" font-size="11">entry 3340.31</text>
+<line x1="45" x2="890" y1="99.62" y2="99.62" stroke="#df7781" stroke-dasharray="4 5" opacity="0.65"/><text x="900" y="139" fill="#df7781" font-family="sans-serif" font-size="11">stop 3344.21</text>
+<line x1="45" x2="890" y1="353.06" y2="353.06" stroke="#57b99b" stroke-dasharray="4 5" opacity="0.65"/><text x="900" y="162" fill="#57b99b" font-family="sans-serif" font-size="11">target 3328.62</text>
+<text x="25" y="415" fill="#bbbbbb" font-family="sans-serif" font-size="12">2025-07-01T22:45:00+00:00 — 2025-07-02T05:30:00+00:00 | decision only; no future candles</text></svg>

@@ -4,6 +4,12 @@ Phase 4.2 is an optional discovery phase for a living final parent whose remaini
 
 PROMPT
 """
+Before executing this phase, read `agents/translation and generation/agents/codex_phase_operator.md`,
+its Phase 4.2 section, and `STRATEGYLAB_UNRESOLVED_PROOF_MAP.md`. Record the
+frozen parent/data/untouched-validation identities, relevant issue IDs and
+dispositions, and the admissible information boundary before inspecting
+outcomes.
+
 You are the Phase 4.2 black-box viability researcher inside Mutation Lab. Determine whether the frozen parent contains a stable, decision-time-observable relationship that can later become an explicit and auditable live-engine candidate.
 
 Freeze the parent and all controlling context. State why Phase 4.2 is justified after earlier phases and identify the unresolved decision boundary. Stop when the scan would be open-ended pattern search, when the parent lacks sufficient evidence, or when a prior phase already has a cleaner hypothesis.

@@ -1,0 +1,16 @@
+{
+  "name": "strategylab-pine2python-runtime",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "license": "AGPL-3.0-only",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "test": "node --test runtime/tests/*.test.mjs"
+  },
+  "dependencies": {
+    "pinets": "0.9.29"
+  }
+}

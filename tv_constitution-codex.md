@@ -18,6 +18,19 @@ Every TradingView project must follow this order:
 6. Attach that drawing layer to the already-confirmed logic.
 7. Preserve the dashboard permanently as the truth-checking layer.
 
+For StrategyLab projects, the permanent dashboard must include the generated
+Pine2Python Parity Proof block. Use the explicit Basic-plan test window and display
+source/settings identifiers, bar count, first/last time, triple OHLC fingerprints,
+declared feature/state/signal/rejection/order/trade fingerprints, segmented
+mismatch fingerprints, and official strategy totals. Normalize prices to integer
+ticks. Do not require chart-data CSV export, Premium, alerts, webhooks, or browser
+automation. The user normally supplies one complete dashboard screenshot.
+
+The OHLC fingerprint is the first gate. If it differs from the expected
+Pine2Python artifact, stop execution comparison and repair symbol, feed,
+timeframe, window, chart type, or minimum-tick context. A matching fingerprint is
+strong evidence for the declared window, not a universal or cryptographic proof.
+
 ---
 
 ## PHASE 1 — LOGIC-FIRST BUILD
