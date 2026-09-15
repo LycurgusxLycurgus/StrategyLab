@@ -3208,6 +3208,9 @@ class BacktestEngine:
             "time_risk_filter_blocks": 0,
             "time_risk_filter_long_blocks": 0,
             "time_risk_filter_short_blocks": 0,
+            "entry_blackbox_veto_blocks": 0,
+            "entry_blackbox_veto_long_blocks": 0,
+            "entry_blackbox_veto_short_blocks": 0,
             "mt5_invalid_lot_skips": 0,
             "mt5_stop_modify_rejects": 0,
             "pending_entry_orders": 0,
@@ -3513,6 +3516,21 @@ class BacktestEngine:
                         diagnostics["time_risk_filter_blocks"] += 1
                         diagnostics["time_risk_filter_short_blocks"] += 1
                         short_signal = False
+
+            if long_signal and not self._entry_blackbox_veto_allows_entry(
+                parameters=parameters,
+                direction=1,
+                entry_ts=bar.ts,
+                diagnostics=diagnostics,
+            ):
+                long_signal = False
+            if short_signal and not self._entry_blackbox_veto_allows_entry(
+                parameters=parameters,
+                direction=-1,
+                entry_ts=bar.ts,
+                diagnostics=diagnostics,
+            ):
+                short_signal = False
 
             if position and position.direction == 1 and short_signal:
                 if mt5_bar_proxy:

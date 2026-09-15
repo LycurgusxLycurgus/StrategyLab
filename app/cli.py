@@ -7,6 +7,7 @@ from app.config import settings
 from app.data import DataService
 from app.lab import MutationLabService
 from app.storage import Repository
+from app.tg_lab import TgManagementLabService
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -35,6 +36,25 @@ def build_parser() -> argparse.ArgumentParser:
 
     detail = sub.add_parser("family-detail", help="Print one family bundle")
     detail.add_argument("--family-id", required=True)
+
+    tg_import = sub.add_parser("tg-import-snapshot", help="Import a finalized offline TgSignalSniper package")
+    tg_import.add_argument("--package", required=True)
+
+    tg_coverage = sub.add_parser("tg-coverage", help="Report exact tick coverage by asset")
+    tg_coverage.add_argument("--snapshot-id", required=True)
+
+    tg_baseline = sub.add_parser("tg-run-baseline", help="Replay the frozen management baseline")
+    tg_baseline.add_argument("--snapshot-id", required=True)
+    tg_baseline.add_argument("--asset", required=True)
+
+    tg_optimize = sub.add_parser("tg-optimize", help="Optimize post-fill management for one asset")
+    tg_optimize.add_argument("--snapshot-id", required=True)
+    tg_optimize.add_argument("--asset", required=True)
+    tg_optimize.add_argument("--seed", type=int, default=0)
+    tg_optimize.add_argument("--candidate-family", choices=("all", "management", "targets", "joint"), default="all")
+
+    tg_report = sub.add_parser("tg-report", help="Print the persisted experiment and report path")
+    tg_report.add_argument("--experiment-id", required=True)
     return parser
 
 
@@ -43,6 +63,7 @@ def main() -> None:
     repo = Repository()
     data_service = DataService(repo)
     lab = MutationLabService(repo, data_service)
+    tg_lab = TgManagementLabService(repo)
     lab.ensure_seeded()
     args = build_parser().parse_args()
 
@@ -60,8 +81,18 @@ def main() -> None:
         payload = lab.generate_proposals(args.version_id, include_hybrid=args.include_hybrid)
     elif args.command == "run-pack":
         payload = lab.run_proposal_pack(args.version_id, args.dataset_id, include_hybrid=args.include_hybrid)
-    else:
+    elif args.command == "family-detail":
         payload = lab.family_detail(args.family_id)
+    elif args.command == "tg-import-snapshot":
+        payload = tg_lab.import_snapshot(args.package)
+    elif args.command == "tg-coverage":
+        payload = tg_lab.coverage(args.snapshot_id)
+    elif args.command == "tg-run-baseline":
+        payload = tg_lab.run_baseline(args.snapshot_id, args.asset)
+    elif args.command == "tg-optimize":
+        payload = tg_lab.optimize_asset(args.snapshot_id, args.asset, args.seed, args.candidate_family)
+    else:
+        payload = tg_lab.experiment(args.experiment_id)
 
     print(json.dumps(payload, indent=2))
 

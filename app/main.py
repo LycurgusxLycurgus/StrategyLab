@@ -17,6 +17,7 @@ from app.lab import MutationLabService
 from app.pine2python_client import Pine2PythonClient
 from app.pine_workbench import PineWorkbenchService
 from app.storage import Repository
+from app.tg_lab import TgManagementLabService
 
 
 class DatasetDownloadRequest(BaseModel):
@@ -157,16 +158,29 @@ class PineParityRequest(BaseModel):
     contract: dict
 
 
+class TgSnapshotImportRequest(BaseModel):
+    package_path: str
+
+
+class TgExperimentRequest(BaseModel):
+    snapshot_id: str
+    asset: str
+    seed: int = 0
+    candidate_family: str = "all"
+
+
 settings.ensure_dirs()
 repo = Repository()
 data_service = DataService(repo)
 lab = MutationLabService(repo, data_service)
+tg_lab = TgManagementLabService(repo)
 lab.ensure_seeded()
 pine2python_client = Pine2PythonClient()
 pine_workbench = PineWorkbenchService(repo, data_service, pine2python_client)
 optimization_executor = ThreadPoolExecutor(max_workers=1)
 optimization_jobs: dict[str, dict] = {}
 optimization_jobs_lock = Lock()
+tg_jobs: dict[str, dict] = {}
 
 app = FastAPI(title="Mutation Lab", version="1.0.0")
 app.mount("/ui", StaticFiles(directory=Path(__file__).parent / "ui"), name="ui")
@@ -610,4 +624,95 @@ def get_artifact(kind: str, artifact_name: str) -> FileResponse:
     path = root / artifact_name
     if not path.exists():
         raise HTTPException(status_code=404, detail="Artifact not found.")
+    return FileResponse(path)
+
+
+@app.get("/api/tg-management/snapshots")
+def list_tg_snapshots() -> list[dict]:
+    return tg_lab.list_snapshots()
+
+
+@app.post("/api/tg-management/snapshots/import")
+def import_tg_snapshot(request: TgSnapshotImportRequest) -> dict:
+    return tg_lab.import_snapshot(request.package_path)
+
+
+@app.get("/api/tg-management/snapshots/{snapshot_id}")
+def tg_snapshot_detail(snapshot_id: str) -> dict:
+    return tg_lab.snapshot_detail(snapshot_id)
+
+
+@app.get("/api/tg-management/snapshots/{snapshot_id}/coverage")
+def tg_snapshot_coverage(snapshot_id: str) -> dict:
+    return tg_lab.coverage(snapshot_id)
+
+
+@app.post("/api/tg-management/baseline")
+def run_tg_baseline(request: TgExperimentRequest) -> dict:
+    return tg_lab.run_baseline(request.snapshot_id, request.asset)
+
+
+@app.post("/api/tg-management/optimize")
+def run_tg_optimization(request: TgExperimentRequest) -> dict:
+    return tg_lab.optimize_asset(request.snapshot_id, request.asset, request.seed, request.candidate_family)
+
+
+@app.post("/api/tg-management/optimization-jobs")
+def start_tg_optimization(request: TgExperimentRequest) -> dict:
+    job_id = f"tgopt_{uuid4().hex[:12]}"
+    now = datetime.now(UTC).isoformat()
+    with optimization_jobs_lock:
+        tg_jobs[job_id] = {"job_id": job_id, "status": "queued", "progress": {"percent": 0, "stage": "queued"}, "result": None, "error": None, "created_at": now, "updated_at": now}
+    optimization_executor.submit(_run_tg_job, job_id, request.snapshot_id, request.asset, request.seed, request.candidate_family)
+    return _tg_job(job_id)
+
+
+def _run_tg_job(job_id: str, snapshot_id: str, asset: str, seed: int, candidate_family: str) -> None:
+    with optimization_jobs_lock:
+        tg_jobs[job_id].update(status="running", progress={"percent": 0, "stage": "search"}, updated_at=datetime.now(UTC).isoformat())
+    def update_progress(progress: dict) -> None:
+        with optimization_jobs_lock:
+            tg_jobs[job_id].update(progress=progress, updated_at=datetime.now(UTC).isoformat())
+    try:
+        result = tg_lab.optimize_asset(snapshot_id, asset, seed, candidate_family, update_progress)
+    except Exception as exc:  # pragma: no cover - defensive API job boundary
+        with optimization_jobs_lock:
+            tg_jobs[job_id].update(status="failed", error=f"{type(exc).__name__}: {exc}", updated_at=datetime.now(UTC).isoformat())
+    else:
+        with optimization_jobs_lock:
+            tg_jobs[job_id].update(status="completed", progress={"percent": 100, "stage": "completed"}, result=result, updated_at=datetime.now(UTC).isoformat())
+
+
+def _tg_job(job_id: str) -> dict:
+    with optimization_jobs_lock:
+        if job_id not in tg_jobs:
+            raise HTTPException(404, "TgSignalSniper optimization job not found")
+        return dict(tg_jobs[job_id])
+
+
+@app.get("/api/tg-management/optimization-jobs/{job_id}")
+def tg_optimization_progress(job_id: str) -> dict:
+    return _tg_job(job_id)
+
+
+@app.get("/api/tg-management/experiments")
+def list_tg_experiments(snapshot_id: str | None = None, asset: str | None = None) -> list[dict]:
+    return tg_lab.list_experiments(snapshot_id, asset)
+
+
+@app.get("/api/tg-management/experiments/{experiment_id}")
+def tg_experiment_detail(experiment_id: str) -> dict:
+    return tg_lab.experiment(experiment_id)
+
+
+@app.get("/api/tg-management/experiments/{experiment_id}/download/{format_name}")
+def download_tg_experiment(experiment_id: str, format_name: str) -> FileResponse:
+    experiment = tg_lab.experiment(experiment_id)
+    suffixes = {"json": ".json", "csv": ".csv", "markdown": ".md"}
+    suffix = suffixes.get(format_name)
+    if not suffix:
+        raise HTTPException(404, "Unknown experiment format")
+    path = settings.tg_experiment_dir / f"{experiment_id}{suffix}"
+    if not path.is_file():
+        raise HTTPException(404, "Experiment artifact not found")
     return FileResponse(path)

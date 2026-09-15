@@ -139,6 +139,35 @@ class Repository:
 
                 CREATE INDEX IF NOT EXISTS idx_pine_evidence_version
                     ON pine_evidence (strategy_version_id, created_at);
+
+                CREATE TABLE IF NOT EXISTS tg_snapshots (
+                    snapshot_id TEXT PRIMARY KEY,
+                    checksum TEXT NOT NULL UNIQUE,
+                    broker_profile TEXT NOT NULL,
+                    cohort_id TEXT NOT NULL,
+                    cohort_json TEXT NOT NULL,
+                    versions_json TEXT NOT NULL,
+                    contract_json TEXT NOT NULL,
+                    coverage_json TEXT NOT NULL,
+                    path TEXT NOT NULL,
+                    created_at TEXT NOT NULL
+                );
+
+                CREATE TABLE IF NOT EXISTS tg_experiments (
+                    experiment_id TEXT PRIMARY KEY,
+                    snapshot_id TEXT NOT NULL,
+                    broker_profile TEXT NOT NULL,
+                    cohort_id TEXT NOT NULL,
+                    asset TEXT NOT NULL,
+                    status TEXT NOT NULL,
+                    engine_version TEXT NOT NULL,
+                    code_hash TEXT NOT NULL,
+                    config_json TEXT NOT NULL,
+                    result_json TEXT NOT NULL,
+                    artifact_path TEXT NOT NULL,
+                    report_path TEXT NOT NULL,
+                    created_at TEXT NOT NULL
+                );
                 """
             )
 
@@ -589,3 +618,86 @@ class Repository:
     def delete_run(self, run_id: str) -> None:
         with self._session() as connection:
             connection.execute("DELETE FROM runs WHERE run_id = ?", (run_id,))
+
+    def put_tg_snapshot(self, payload: dict[str, Any]) -> None:
+        with self._session() as connection:
+            connection.execute(
+                """
+                INSERT INTO tg_snapshots (
+                    snapshot_id, checksum, broker_profile, cohort_id, cohort_json,
+                    versions_json, contract_json, coverage_json, path, created_at
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                """,
+                (
+                    payload["snapshot_id"], payload["checksum"], payload["broker_profile"],
+                    payload["cohort_id"], json.dumps(payload["cohort_json"]),
+                    json.dumps(payload["versions_json"]), json.dumps(payload["contract_json"]),
+                    json.dumps(payload["coverage_json"]), payload["path"], payload["created_at"],
+                ),
+            )
+
+    def get_tg_snapshot(self, snapshot_id: str) -> dict[str, Any] | None:
+        with self._session() as connection:
+            row = connection.execute("SELECT * FROM tg_snapshots WHERE snapshot_id = ?", (snapshot_id,)).fetchone()
+        return self._decode_tg_snapshot(row)
+
+    def list_tg_snapshots(self) -> list[dict[str, Any]]:
+        with self._session() as connection:
+            rows = connection.execute("SELECT * FROM tg_snapshots ORDER BY created_at DESC").fetchall()
+        return [self._decode_tg_snapshot(row) for row in rows if row]
+
+    @staticmethod
+    def _decode_tg_snapshot(row: sqlite3.Row | None) -> dict[str, Any] | None:
+        if not row:
+            return None
+        payload = dict(row)
+        for key in ("cohort_json", "versions_json", "contract_json", "coverage_json"):
+            payload[key] = json.loads(payload[key])
+        return payload
+
+    def put_tg_experiment(self, payload: dict[str, Any]) -> None:
+        with self._session() as connection:
+            connection.execute(
+                """
+                INSERT OR REPLACE INTO tg_experiments (
+                    experiment_id, snapshot_id, broker_profile, cohort_id, asset,
+                    status, engine_version, code_hash, config_json, result_json,
+                    artifact_path, report_path, created_at
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                """,
+                (
+                    payload["experiment_id"], payload["snapshot_id"], payload["broker_profile"],
+                    payload["cohort_id"], payload["asset"], payload["status"],
+                    payload["engine_version"], payload["code_hash"],
+                    json.dumps(payload["config_json"]), json.dumps(payload["result_json"]),
+                    payload["artifact_path"], payload["report_path"], payload["created_at"],
+                ),
+            )
+
+    def get_tg_experiment(self, experiment_id: str) -> dict[str, Any] | None:
+        with self._session() as connection:
+            row = connection.execute("SELECT * FROM tg_experiments WHERE experiment_id = ?", (experiment_id,)).fetchone()
+        return self._decode_tg_experiment(row)
+
+    def list_tg_experiments(self, snapshot_id: str | None = None, asset: str | None = None) -> list[dict[str, Any]]:
+        clauses: list[str] = []
+        params: list[Any] = []
+        if snapshot_id:
+            clauses.append("snapshot_id = ?")
+            params.append(snapshot_id)
+        if asset:
+            clauses.append("asset = ?")
+            params.append(asset)
+        where = f"WHERE {' AND '.join(clauses)}" if clauses else ""
+        with self._session() as connection:
+            rows = connection.execute(f"SELECT * FROM tg_experiments {where} ORDER BY created_at DESC", params).fetchall()
+        return [self._decode_tg_experiment(row) for row in rows if row]
+
+    @staticmethod
+    def _decode_tg_experiment(row: sqlite3.Row | None) -> dict[str, Any] | None:
+        if not row:
+            return None
+        payload = dict(row)
+        payload["config_json"] = json.loads(payload["config_json"])
+        payload["result_json"] = json.loads(payload["result_json"])
+        return payload

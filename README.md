@@ -120,6 +120,15 @@ paste/add/wait/capture steps interactively. The generated dashboard remains the
 comparison contract, and the user still owns the final accept/reject verdict.
 See `services/pine2python/docs/tradingview-browser-corroboration.md`.
 
+## Offline Telegram management lab
+
+The UI also includes an offline TgSignalSniper target-geometry and post-fill
+management lab. Its snapshot contract and commands are documented in
+[`docs/tg_signal_management_lab.md`](docs/tg_signal_management_lab.md). It has
+no MT5, Telegram, AutoKraken, demo, or live connector. Finalized AutoKraken
+operational migrations 16–22 are imported through an explicit versioned,
+capability-compatible contract.
+
 ## Test
 
 ```powershell
@@ -135,3 +144,5 @@ See `services/pine2python/docs/tradingview-browser-corroboration.md`.
 - Reports: `artifacts/reports/`
 - Diagnostics and preview ledgers: `artifacts/diagnostics/`
 - Original source and accepted Pine: `pre-strategies/`
+- `artifacts/tg_snapshots/` (immutable imported execution/tick packages)
+- `artifacts/tg_experiments/` (JSON, CSV, and Markdown management evidence)

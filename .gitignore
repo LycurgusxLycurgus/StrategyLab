@@ -24,6 +24,8 @@ agents/histdata/
 agents/mutation-lab-01.txt
 #agents/new-frontend.txt 
 artifacts/diagnostics/
+artifacts/tg_snapshots/
+artifacts/tg_experiments/
 artifacts/runs/run_10a82774ade2.json
 
 
@@ -38,10 +40,9 @@ Thumbs.db
 issues.txt
 
 
-#Bridge
-
-#AGENTS.md
-#bridgecode/
+# Bridgecode and AGENTS.md are repo-local and must travel with the project.
+# AGENTS.md
+# bridgecode/
 design/
 context4.txt
 mergefull1.txt

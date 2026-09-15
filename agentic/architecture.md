@@ -76,6 +76,27 @@ boundary status and proof-to-closure requirements.
 | `pre-strategies/` | Inspectable source and immutable source-derived Pine candidates. |
 | `artifacts/strategy-development/` | Strategy lineage, criteria, proof, review and phase evidence. |
 
+The offline TgSignalSniper management lab is a separate StrategyLab research
+lane owned by `app/tg_import.py`, `app/tg_models.py`, `app/tg_replay.py`,
+`app/tg_validation.py`, and `app/tg_lab.py`, with routes in `app/main.py` and
+the `tg-management` panel in `app/ui/`. It accepts only a finalized,
+content-addressed package, rejects SQLite WAL/SHM sidecars, reads source
+databases in immutable query-only mode, verifies the declared operational
+migration (known 16–22 plus only capability-compatible additive later
+versions), tick archive codec/checksums, broker symbol economics and policy
+identities, and never connects to MT5, Telegram, AutoKraken, or a live account.
+Baseline realized P&L uses the imported broker deal record; exact tick replay is
+for counterfactual management/target policies, with one-second paths remaining
+explicitly approximate. Search uses chronological walk-forward development and
+one untouched holdout evaluation, and statistical promotion advice is not a
+production or trading acceptance.
+
+The GHL/DC strategy line also exposes opt-in Phase 4.2 entry black-box veto
+controls in `app/lab.py` and `app/backtest.py`. They are disabled by default,
+apply before order-concurrency handling, and emit side/hour/month diagnostics;
+they do not alter the shared phase prompts or the Pine2Python/TradingView
+acceptance boundary.
+
 GitHub commit and fork synchronization are repository operations rather than
 proof evidence. The former copy/paste packet for a separate thread was removed
 once that workflow became the authorized current task; this map records no

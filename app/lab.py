@@ -685,7 +685,7 @@ PHASE_4_2_MUTATION_SPACE = [
         "lever": "entry_blackbox_veto_side_months",
         "path": "parameters.entry_blackbox_veto_side_months",
         "priority": 80,
-        "values": [[], ["long:8"], ["short:12"], ["long:8", "short:12"]],
+        "values": [[], ["short:4"], ["long:8"], ["short:12"], ["long:8", "short:12"]],
         "search_mode": "values_only",
         "rationale": "Choose side-month entry veto buckets encoded as side:month, for example long:8 for long entries during August.",
     },
@@ -1235,7 +1235,12 @@ class MutationLabService:
             changed = True
         engine_id = upgraded.get("engine_id")
         if engine_id == "ghl_dc_breakout_v1":
-            for key, value in {**GHL_DC_PHASE_3_PARAMETERS, **PORTFOLIO_PARAMETERS, **EXECUTION_PARAMETERS}.items():
+            for key, value in {
+                **GHL_DC_PHASE_3_PARAMETERS,
+                **PHASE_4_2_PARAMETERS,
+                **PORTFOLIO_PARAMETERS,
+                **EXECUTION_PARAMETERS,
+            }.items():
                 if key not in parameters:
                     parameters[key] = json.loads(json.dumps(value))
                     changed = True
@@ -1260,7 +1265,11 @@ class MutationLabService:
                 mutation_space = next_mutation_space
                 changed = True
             existing_by_lever = {item.get("lever"): item for item in mutation_space}
-            for default_mutation in [*GHL_DC_PHASE_3_MUTATION_SPACE, *PORTFOLIO_MUTATION_SPACE]:
+            for default_mutation in [
+                *GHL_DC_PHASE_3_MUTATION_SPACE,
+                *PHASE_4_2_MUTATION_SPACE,
+                *PORTFOLIO_MUTATION_SPACE,
+            ]:
                 mutation = _mutation_for_spec(default_mutation, parameters)
                 existing = existing_by_lever.get(mutation["lever"])
                 if existing is None:

@@ -178,7 +178,7 @@ label span, .context-field span, .eyebrow {
 .cockpit-grid { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 16px; }
 .left-stack { grid-column: span 8; display: grid; gap: 16px; }
 .gates-panel { grid-column: span 4; }
-.family-panel, .tuning-panel, .coverage-panel, .runs-panel, .versions-panel, .pine-panel, .advanced-grid, .output-panel { grid-column: 1 / -1; }
+.family-panel, .tuning-panel, .coverage-panel, .runs-panel, .versions-panel, .pine-panel, .tg-panel, .advanced-grid, .output-panel { grid-column: 1 / -1; }
 .split-row { display: grid; grid-template-columns: minmax(0, 1fr) minmax(260px, 0.45fr); gap: 16px; }
 
 .panel {
@@ -289,6 +289,9 @@ button.ghost, .table-actions button.ghost { color: var(--cyan); border-color: rg
 .optimization-status.visible { display: grid; grid-template-columns: 14px minmax(0, 1fr); align-items: start; gap: 8px; }
 .optimization-status.success { color: var(--green); border-color: rgba(74, 222, 128, 0.3); background: rgba(74, 222, 128, 0.06); }
 .optimization-status.error { color: var(--error); border-color: rgba(255, 180, 171, 0.3); background: rgba(255, 180, 171, 0.06); }
+.tg-controls { display: grid; grid-template-columns: minmax(260px, 2fr) auto minmax(220px, 1fr) minmax(120px, .5fr) repeat(3, auto); gap: 10px; align-items: end; margin: 14px 0; }
+.tg-package-field { min-width: 0; }
+.tg-table-wrap { margin-top: 8px; }
 .optimization-spinner { width: 14px; height: 14px; border: 2px solid rgba(229, 226, 225, 0.22); border-top-color: var(--cyan); border-radius: 999px; animation: spin 900ms linear infinite; }
 .optimization-status.success .optimization-spinner, .optimization-status.error .optimization-spinner { display: none; }
 .optimization-message { min-width: 0; overflow-wrap: anywhere; line-height: 1.35; }
@@ -334,6 +337,7 @@ meter { width: 48px; height: 6px; }
   .summary-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .split-row, .family-meta, .pine-layout, .advanced-grid { grid-template-columns: 1fr; }
   .pine-evidence-side { padding-left: 0; border-left: 0; border-top: 1px solid var(--outline-variant); padding-top: 16px; }
+  .tg-controls { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .status-bar { display: none; }
 }
 
@@ -347,5 +351,6 @@ meter { width: 48px; height: 6px; }
   .context-field, .context-field.wide { min-width: 100%; max-width: 100%; }
   .panel { padding: 12px; }
   .summary-grid, .data-grid, .pine-controls, .pine-provenance, .pine-evidence-grid { grid-template-columns: 1fr; }
+  .tg-controls { grid-template-columns: 1fr; }
   .table-wrap { margin: 0 -12px -12px; }
 }

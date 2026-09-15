@@ -21,6 +21,7 @@ from app.pine2python_client import Pine2PythonClient, Pine2PythonClientError
 from app.pine_review import compare_protected_regions, select_review_fixtures
 from app.pine_workbench import PineWorkbenchService
 from app.storage import Repository
+from app.tg_management_tests import TgManagementTests  # noqa: F401
 
 
 def build_fixture_bars(count: int = 3200) -> list[Bar]:
@@ -2225,6 +2226,56 @@ class MutationLabTests(unittest.TestCase):
         self.assertEqual(diagnostics["entry_blackbox_veto_blocks"], 2)
         self.assertEqual(diagnostics["entry_blackbox_veto_long_blocks"], 1)
         self.assertEqual(diagnostics["entry_blackbox_veto_short_blocks"], 1)
+
+    def test_ghl_dc_entry_blackbox_veto_is_applied_before_entry(self) -> None:
+        bars = build_fixture_bars(1200)
+        spec = {
+            "engine_id": "ghl_dc_breakout_v1",
+            "parameters": {
+                "gann_high_period": 5,
+                "gann_low_period": 8,
+                "donchian_length": 13,
+                "max_breakout_bars": 10,
+                "allow_long": True,
+                "allow_short": True,
+                "atr_len": 8,
+                "stop_mode": "atr",
+                "stop_mult": 2.0,
+                "initial_capital": 100000.0,
+                "commission_pct": 0.0,
+                "slippage_ticks": 1,
+                "tick_size": 0.01,
+                "sizing_mode": "fixed_risk_pct",
+                "risk_pct": 0.005,
+                "max_leverage": 1.0,
+                "execution_model": "mt5_bar_proxy",
+            },
+            "evaluation": {},
+        }
+        baseline = BacktestEngine().run(spec, bars)
+        entry_hours = sorted({datetime.fromisoformat(trade["entry_ts"]).hour for trade in baseline["trades"]})
+        self.assertTrue(entry_hours)
+        blocked = json.loads(json.dumps(spec))
+        blocked["parameters"]["entry_blackbox_veto_enabled"] = True
+        blocked["parameters"]["entry_blackbox_veto_utc_hours"] = entry_hours
+        blocked["parameters"]["entry_blackbox_veto_side_months"] = []
+        result = BacktestEngine().run(blocked, bars)
+        self.assertLess(result["metrics"]["total_trades"], baseline["metrics"]["total_trades"])
+        self.assertGreater(result["diagnostics"]["entry_blackbox_veto_blocks"], 0)
+
+    def test_ghl_dc_upgrade_exposes_phase_4_2_veto_controls(self) -> None:
+        spec = {
+            "engine_id": "ghl_dc_breakout_v1",
+            "parameters": {},
+            "evaluation": {},
+            "mutation_space": [],
+        }
+        upgraded, changed = MutationLabService._upgrade_spec(spec)
+        self.assertTrue(changed)
+        self.assertFalse(upgraded["parameters"]["entry_blackbox_veto_enabled"])
+        edges = {item["lever"]: item for item in upgraded["mutation_space"]}
+        self.assertIn("entry_blackbox_veto_enabled", edges)
+        self.assertIn(["short:4"], edges["entry_blackbox_veto_side_months"]["values"])
 
     def test_time_decay_exit_is_disabled_by_default_and_opt_in(self) -> None:
         bars = build_fixture_bars()

@@ -15,6 +15,8 @@ const state = {
   currentPythonTrace: null,
   currentPineParity: null,
   versionPineEvidence: [],
+  tgSnapshots: [],
+  tgExperiments: [],
 };
 
 const outputBox = document.getElementById("outputBox");
@@ -42,6 +44,8 @@ const pineSourceCode = document.getElementById("pineSourceCode");
 const pineCopyProofButton = document.getElementById("pineCopyProofButton");
 const pineCompareButton = document.getElementById("pineCompareButton");
 const pineOpenEvidenceButton = document.getElementById("pineOpenEvidenceButton");
+const tgSnapshotSelect = document.getElementById("tgSnapshotSelect");
+const tgExperimentsTable = document.getElementById("tgExperimentsTable");
 let previewTimer = null;
 let optimizationProgressTimer = null;
 const MIN_DATASET_BARS = 40000;
@@ -588,6 +592,11 @@ function syncWorkingParameters() {
   for (const [key, value] of Object.entries(parameters)) {
     next[key] = state.workingParameters[key] ?? value;
   }
+  for (const edge of tuningEdges()) {
+    if (!(edge.lever in next)) {
+      next[edge.lever] = state.workingParameters[edge.lever] ?? edge.current_value;
+    }
+  }
   state.workingParameters = next;
 }
 
@@ -745,7 +754,7 @@ function renderTuningEdges() {
             ${choices
               .map((value) => {
                 const token = valueToken(value);
-                return `<option value="${token}" ${valueToken(working) === token ? "selected" : ""}>${displayValue(value)}</option>`;
+                return `<option value="${escapeAttribute(token)}" ${valueToken(working) === token ? "selected" : ""}>${escapeHtml(displayValue(value))}</option>`;
               })
               .join("")}
           </select>
@@ -773,7 +782,7 @@ function renderTuningEdges() {
           <td>
             <div class="table-actions">
               ${optimizeControl}
-              <button class="ghost" data-action="reset-edge" data-key="${edge.lever}" data-value="${valueToken(current)}">Reset</button>
+              <button class="ghost" data-action="reset-edge" data-key="${edge.lever}" data-value="${escapeAttribute(valueToken(current))}">Reset</button>
             </div>
           </td>
         </tr>
@@ -1126,14 +1135,18 @@ async function refreshAll() {
   const familyId = selectedFamilyId();
   const preferredVersionId = versionSelect.value;
   const preferredPineRevisionId = pineRevisionSelect.value;
-  const [families, datasets, prompts] = await Promise.all([
+  const [families, datasets, prompts, tgSnapshots, tgExperiments] = await Promise.all([
     fetchJson("/api/families"),
     fetchJson("/api/datasets"),
     fetchJson("/api/prompts"),
+    fetchJson("/api/tg-management/snapshots"),
+    fetchJson("/api/tg-management/experiments"),
   ]);
   state.families = families;
   state.datasets = datasets;
   state.prompts = prompts;
+  state.tgSnapshots = tgSnapshots;
+  state.tgExperiments = tgExperiments;
   renderFamilySelect();
   renderDatasets();
   const targetFamilyId = state.families.some((family) => family.family_id === familyId)
@@ -1162,6 +1175,75 @@ async function refreshAll() {
   renderVersions();
   renderPrompts();
   await refreshPineWorkbench(preferredPineRevisionId);
+  renderTgLab();
+}
+
+function renderTgLab() {
+  const previous = tgSnapshotSelect.value;
+  tgSnapshotSelect.innerHTML = state.tgSnapshots.length
+    ? state.tgSnapshots.map((item) => {
+        const snapshotId = String(item.snapshot_id ?? "");
+        return `<option value="${escapeAttribute(snapshotId)}">${escapeHtml(snapshotId)} | ${escapeHtml(item.broker_profile ?? "")} | ${escapeHtml(item.cohort_id ?? "")}</option>`;
+      }).join("")
+    : `<option value="">No offline snapshots imported</option>`;
+  if (state.tgSnapshots.some((item) => item.snapshot_id === previous)) tgSnapshotSelect.value = previous;
+  tgExperimentsTable.innerHTML = state.tgExperiments.length
+    ? state.tgExperiments.map((item) => {
+        const result = item.result_json || {};
+        const experimentId = String(item.experiment_id ?? "");
+        const status = String(item.status ?? "");
+        const evidence = `${Array.isArray(result.included_execution_ids) ? result.included_execution_ids.length : 0} included / ${result.excluded_executions && typeof result.excluded_executions === "object" ? Object.keys(result.excluded_executions).length : 0} excluded`;
+        const downloadBase = `/api/tg-management/experiments/${encodeURIComponent(experimentId)}/download`;
+        return `<tr><td><strong>${escapeHtml(experimentId)}</strong><div>${escapeHtml(item.snapshot_id ?? "")}</div></td><td>${escapeHtml(item.broker_profile ?? "")}<div>${escapeHtml(item.cohort_id ?? "")}</div></td><td>${escapeHtml(item.asset ?? "")}</td><td><span class="badge ${status === "PROMOTION_CANDIDATE" ? "" : "bad"}">${escapeHtml(status)}</span></td><td>${escapeHtml(evidence)}</td><td><div class="artifact-links"><a href="${escapeAttribute(`${downloadBase}/json`)}">JSON</a><a href="${escapeAttribute(`${downloadBase}/csv`)}">CSV</a><a href="${escapeAttribute(`${downloadBase}/markdown`)}">MD</a></div></td></tr>`;
+      }).join("")
+    : `<tr><td colspan="6" class="empty-state">No offline TgSignalSniper experiments yet.</td></tr>`;
+}
+
+async function importTgSnapshot() {
+  const packagePath = document.getElementById("tgPackagePath").value.trim();
+  if (!packagePath) return setStatus("tgStatus", "Enter the path of a finalized offline package.", "error");
+  setStatus("tgStatus", "Verifying source integrity and importing read-only…", "");
+  try {
+    const result = await fetchJson("/api/tg-management/snapshots/import", {method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify({package_path: packagePath})});
+    showOutput(result); await refreshAll(); tgSnapshotSelect.value = result.snapshot_id;
+    setStatus("tgStatus", `Imported immutable snapshot ${result.snapshot_id}.`, "success");
+  } catch (error) { setStatus("tgStatus", error.message, "error"); showOutput({error: error.message}); }
+}
+
+async function tgAction(kind) {
+  const snapshotId = tgSnapshotSelect.value;
+  const asset = document.getElementById("tgAssetSelect").value;
+  if (!snapshotId) return setStatus("tgStatus", "Import and select an offline snapshot first.", "error");
+  try {
+    if (kind === "coverage") {
+      const result = await fetchJson(`/api/tg-management/snapshots/${snapshotId}/coverage`); showOutput(result);
+      return setStatus("tgStatus", `Coverage loaded for ${snapshotId}.`, "success");
+    }
+    setStatus("tgStatus", kind === "baseline" ? `Replaying ${asset} baseline…` : `Optimizing ${asset} offline…`, "");
+    if (kind === "optimize") {
+      const candidateFamily = document.getElementById("tgCandidateFamily").value;
+      const job = await fetchJson("/api/tg-management/optimization-jobs", {method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify({snapshot_id: snapshotId, asset, seed: 0, candidate_family: candidateFamily})});
+      return await pollTgOptimization(job.job_id, asset);
+    }
+    const result = await fetchJson("/api/tg-management/baseline", {method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify({snapshot_id: snapshotId, asset, seed: 0})});
+    showOutput(result); await refreshAll(); setStatus("tgStatus", `${asset}: ${result.status}.`, result.status === "PROMOTION_CANDIDATE" ? "success" : "");
+  } catch (error) { setStatus("tgStatus", error.message, "error"); showOutput({error: error.message}); }
+}
+
+async function pollTgOptimization(jobId, asset) {
+  for (;;) {
+    const job = await fetchJson(`/api/tg-management/optimization-jobs/${jobId}`);
+    const progress = job.progress || {};
+    const eta = progress.eta_seconds == null ? "estimating ETA" : `ETA ${Math.round(progress.eta_seconds)}s`;
+    setStatus("tgProgress", `${progress.stage || job.status}: ${progress.family || "all"} ${progress.completed || 0}/${progress.total || "?"} (${progress.percent || 0}%) · ${eta}`, "");
+    if (job.status === "completed") {
+      showOutput(job.result); await refreshAll();
+      setStatus("tgStatus", `${asset}: ${job.result.status} · ${job.result.result_json?.recommendation || "review report"}.`, job.result.status === "PROMOTION_CANDIDATE" ? "success" : "");
+      return;
+    }
+    if (job.status === "failed") throw new Error(job.error || "Offline optimization failed");
+    await new Promise((resolve) => setTimeout(resolve, 750));
+  }
 }
 
 async function refreshFamilyDetail() {
@@ -2049,11 +2131,12 @@ function handleWorkingInput(event) {
     return;
   }
   const key = control.dataset.workingKey;
-  const current = currentVersion()?.spec_json?.parameters?.[key];
+  const edge = edgeForKey(key);
+  const storedCurrent = currentVersion()?.spec_json?.parameters?.[key];
+  const current = storedCurrent === undefined ? edge?.current_value : storedCurrent;
   if (current === undefined) {
     return;
   }
-  const edge = edgeForKey(key);
   const nextValue = clampToEdge(castValue(control.value, current), edge);
   state.workingParameters[key] = nextValue;
   if (typeof nextValue === "number" && String(nextValue) !== control.value) {
@@ -2080,6 +2163,10 @@ optimizeResearchButton.addEventListener("click", () => optimizeAll("research"));
 optimizeAllButton.addEventListener("click", () => optimizeAll("production"));
 optimizeRobustnessButton.addEventListener("click", () => optimizeAll("robustness_repair"));
 bindClick("registerButton", registerBaseline);
+bindClick("tgImportButton", importTgSnapshot);
+bindClick("tgCoverageButton", () => tgAction("coverage"));
+bindClick("tgBaselineButton", () => tgAction("baseline"));
+bindClick("tgOptimizeButton", () => tgAction("optimize"));
 familySelect.addEventListener("change", refreshFamilyDetail);
 versionSelect.addEventListener("change", refreshSelectedVersion);
 datasetSelect.addEventListener("change", () => {

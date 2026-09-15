@@ -33,6 +33,8 @@ class Settings:
     run_dir: Path = Path(os.getenv("APP_RUN_DIR", str(BASE_DIR / "artifacts" / "runs")))
     report_dir: Path = Path(os.getenv("APP_REPORT_DIR", str(BASE_DIR / "artifacts" / "reports")))
     diagnostic_dir: Path = Path(os.getenv("APP_DIAGNOSTIC_DIR", str(BASE_DIR / "artifacts" / "diagnostics")))
+    tg_snapshot_dir: Path = Path(os.getenv("APP_TG_SNAPSHOT_DIR", str(BASE_DIR / "artifacts" / "tg_snapshots")))
+    tg_experiment_dir: Path = Path(os.getenv("APP_TG_EXPERIMENT_DIR", str(BASE_DIR / "artifacts" / "tg_experiments")))
     prompt_dir: Path = BASE_DIR / "agents" / "translation and generation" / "whitebox"
     strategy_specs_dir: Path = BASE_DIR / "strategies"
     seed_strategy_path: Path = BASE_DIR / "pre-strategies" / "BTC-intraday.txt"
@@ -66,6 +68,8 @@ class Settings:
             self.run_dir,
             self.report_dir,
             self.diagnostic_dir,
+            self.tg_snapshot_dir,
+            self.tg_experiment_dir,
             self.strategy_specs_dir,
             self.pine_development_dir,
         ):
