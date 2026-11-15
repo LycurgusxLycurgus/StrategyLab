@@ -1,42 +1,29 @@
-# Mutation Lab
+# StrategyLab — Python2Pine
 
-Mutation Lab is a whitebox-first strategy creation, porting, qualification, and mutation workbench. TradingView is the canonical proving ground for chart-based strategies. Its embedded Pine2Python service automates Pine analysis, supported local execution, proof generation, and Pine/Python trace comparison without pretending to be TradingView.
+StrategyLab's new default is Python2Pine: create or translate an executable Python reference first, check its meaning and data, freeze a baseline, and research changes under explicit authorization. Pine and TradingView are a late selected-target corroboration step, not a prerequisite for creating a strategy. Existing Pine-first lineages remain available as `legacy_pine_v1`; they are not silently migrated. The migration rationale is in [`agentic/reference-first-migration-plan.md`](agentic/reference-first-migration-plan.md), and the phase contract is [`agents/translation and generation/agents/codex_phase_operator.md`](agents/translation%20and%20generation/agents/codex_phase_operator.md).
 
-## Lifecycle
+## Strategy Research Lifecycle
 
-1. Create an immutable greenfield, licensed source-adapted, or indicator-first revision in the pre-Phase 1 Pine Workbench.
-2. Define the strategy, research Pine mechanisms and public precedents, and create the Phase 1 criteria/checklist.
-3. Consolidate the Pine strategy and pass the one-screen TradingView Parity Proof Dashboard plus any claim-driven focused review.
-4. Port the accepted Pine strategy to Mutation Lab Python and prove criterion-level trace parity.
-5. Review fidelity quickly, run the faithful baseline, and perform authorized baseline optimization.
-6. Diagnose and test evidence-derived whitebox mutations.
-7. Add a bounded hybrid layer only when whitebox work is exhausted and live-engine reproduction succeeds.
-8. Use constrained viability discovery or successor reseeding only when the completed lineage justifies it.
-9. Complete robustness, execution-feasibility, forward-paper, and operational gates before production claims.
+The active research sequence is systematic and Python-reference-first. Define
+one research envelope—asset or asset universe, venue/data source, timeframe and
+direction choices, hypothesis, and risk constraints—then move through these six phases:
 
-Greenfield Pine and licensed source adaptation are equal creation routes. The route is selected by evidence. Existing strategy families remain available until the user explicitly requests removal.
+1. **Research and candidate selection:** [01_research.md](agents/translation%20and%20generation/whitebox/01_research.md) first classifies the requested approach as systematic or discretionary. It researches original sources and complete mechanical formulations, including a two-step formalization/formulation investigation for discretionary requests, then prepares at least three fresh, complete evidence-supported hypotheses (target 3–4). Meaningful revisions require a new causal test; minor variants and controls do not pad the count. Fewer than three means incomplete research, not a ready batch.
+2. **Controlled comparison:** [02_approach_trials.md](agents/translation%20and%20generation/whitebox/02_approach_trials.md) requires approval of the new batch/protocol, validates measurement meaning and predictive increment separately from full-strategy economics, then compares a preregistered bounded asset/timeframe/direction matrix under common costs, risk and chronology. Unspecified settings receive justified choices before testing. Advance only a candidate meeting every predeclared requirement; if none qualifies, return failure evidence and retained components to Phase 1, propose at least three fresh candidates with a justified new/meaningful-revision/mixed direction, and state that their testing needs new-batch approval. Relative rank alone never establishes qualification. “Ensemble” means candidate comparison, not variations of a preselected winner or automatic signal combination.
+3. **Base strategy:** [03_base_strategy.md](agents/translation%20and%20generation/whitebox/03_base_strategy.md) consolidates the qualifying candidate's tested rules and contexts as a causal, independently testable Python reference and freezes its unoptimized baseline. A mechanical source analogue is not proof of faithful replication of discretionary reasoning.
+4. **Optimization:** [04_optimization.md](agents/translation%20and%20generation/whitebox/04_optimization.md) searches all legitimate, explicitly declared tunable parameters within a bounded budget and chronological development/holdout controls.
+5. **Unified mutation and optimization:** [05_mutation_optimization.md](agents/translation%20and%20generation/whitebox/05_mutation_optimization.md) tests admissible, evidence-derived structural changes and re-optimizes their legitimate parameters in one controlled loop. Preserve parent versions, account for all trials, and do not tune on a consumed final holdout.
+6. **Paper trading:** [06_paper_trading.md](agents/translation%20and%20generation/whitebox/06_paper_trading.md) evaluates a frozen finalist against explicit paper-adapter, coverage, reconciliation, risk, and operational gates; the result is graduate or do not graduate, with reasons.
 
-## Phase Prompts
+Phase 1 is research-only by default: a ready specification has no new tested trades, validated signal or economic acceptance. Phase 2 performs the actual initial testing/stress comparison that decides Phase 3 or another research return. Explicit approval of a bounded research-and-test batch permits both stages together with a visible transition; readiness or approval of an older failed batch does not.
 
-- `agents/translation and generation/whitebox/01_translation.md`
-- `agents/translation and generation/whitebox/01-5_baseline_transformation.md`
-- `agents/translation and generation/whitebox/02_baseline.md`
-- `agents/translation and generation/whitebox/02-5_baseline_qualification.md`
-- `agents/translation and generation/whitebox/03-1_whitebox_diagnostics.md`
-- `agents/translation and generation/whitebox/03_full-whitebox.md`
-- `agents/translation and generation/whitebox/04-1_hybrid_diagnostics.md`
-- `agents/translation and generation/whitebox/04_hybrid-blackbox.md`
-- `agents/translation and generation/whitebox/04-2_blackbox_viability.md`
-- `agents/translation and generation/whitebox/04-3_successor_baseline.md`
-- `agents/docs/universal_mutation_constitution.md`
+The [phase operator](agents/translation%20and%20generation/agents/codex_phase_operator.md) defines the shared handoffs and evidence boundaries. Python is the canonical research reference. Pine is an optional selected target; when used, check target behavior and corroborate in TradingView before paper evaluation, without treating a chart comparison as data or execution parity unless the inputs and semantics support that claim. Documentation and phase completion do not themselves provide a paper-trading connector. Graduation is eligibility for a separate live-readiness review, never permission to place live orders.
 
-The operator contract is `agents/translation and generation/agents/codex_phase_operator.md`.
+This sequence is the documentation-level `systematic_v2` schedule only; it does not add or rename a runtime workflow enum. Discretionary-origin indicator-to-decision-model work and the ML/social/CLEF/white-box/black-box assessment remain [PLAN ONLY](agents/plans/discretionary_and_blackbox_roadmap.md); this roadmap does not enable a model, connector, or integration.
 
-The recoverable project context and current unresolved proof obligations are
-maintained in `STRATEGYLAB_UNRESOLVED_PROOF_MAP.md`. Read it with the operator
-guide when resuming work after a lost conversation; it distinguishes local
-evidence, TradingView/user acceptance, cross-strategy transfer, and economic
-qualification.
+The former phase schedule and prompts are preserved for historical recovery in [`agents/archive/2026-10-23-pre-systematic-v2/`](agents/archive/2026-10-23-pre-systematic-v2/). This documentation change does not rename existing runtime APIs, persisted workflow IDs, or strategy lineages; existing `reference_v1` and `legacy_pine_v1` behavior remains governed by its implemented contracts.
+
+The [research-quality audit](agentic/research/phase1-phase2-quality-audit-2026-10-29.md) explains the Bitcoin campaign failures and the distinction between unsupported proxies, scoped noise/no useful effect, inconclusive evidence, promising components and supported signals. A retained good component never promotes a failed full strategy.
 
 ## Run
 
@@ -47,7 +34,28 @@ npm ci --prefix services\pine2python
 .venv\Scripts\python -m uvicorn app.main:app --reload
 ```
 
-## Pine Workbench API
+## Python2Pine API and workflow status
+
+New reference work uses these additive API boundaries. The registry is bounded
+to the supported MA crossover/ATR and confirmed-pivot/BOS references; unsupported
+decision or broker semantics must remain blocked rather than being approximated
+silently.
+
+| Endpoint | Purpose |
+|---|---|
+| `GET /api/python2pine/status` | Public-name alias for workflow/runtime readiness; old Pine2Python route remains valid |
+| `GET /api/versions/{id}/workflow?dataset_id=...` | Independent current semantic, data, execution, economics, target, platform, and operational states |
+| `POST /api/versions/{id}/reference-validation` | Validate independently authored serialized cases and save ledger/casebook evidence |
+| `GET /api/versions/{id}/reference-casebook?dataset_id=...` | Read current hash-verified HTML generated only from the saved ledger |
+| `POST /api/versions/{id}/search-authorization` | Freeze objective, allowed parameter values, metric, and chronological training/holdout boundaries after baseline |
+| `POST /api/versions/{id}/reference-children` | Create an explicit provenance-preserving reference child that must earn its own evidence |
+| `POST /api/versions/{id}/pine-target` | Late Pine target generation and feature/signal comparison; never a fabricated TradingView or broker verdict |
+
+Each new version selects `reference_v1` by default. Select `legacy_pine_v1`
+explicitly to continue the older Pine-first contract. Existing stored lineages
+without the field keep their existing route.
+
+## Legacy and selected-target Pine APIs
 
 | Endpoint | Purpose |
 |---|---|
@@ -62,9 +70,12 @@ npm ci --prefix services\pine2python
 | `POST /api/pine2python/parity-comparisons` | Compare traces and report the first divergence |
 
 TradingView chart-data export, Premium, alerts, webhooks, and automated account
-access are not required. The normal external action is one screenshot of the
-on-chart proof table. Dataset fingerprints must match before execution or
-performance parity can pass.
+access are not required. For a selected Pine target, the normal human check is a
+focused chart/replay review against predeclared ledger events, with a screenshot
+of the observed behavior and Strategy Tester only for the separately declared
+execution claim. Dataset fingerprints must match before full execution or
+performance parity can be claimed. A screenshot or similar summary totals on a
+different/unverified feed support only the narrower visual behavior observed.
 
 The two-container topology is:
 
@@ -84,36 +95,28 @@ stack without deleting its evidence volumes with:
 docker compose down
 ```
 
-## Indicator-first strategy creation
+## Indicator-first reference creation
 
-For a strategy whose central indicator does not exist as reusable source, create
-and validate it before adding any order logic:
+When a required indicator is novel, establish the component before adding order
+logic:
 
-1. When source already exists, register it unchanged as the fidelity baseline
-   and declare protected regions, repair targets, prohibited changes, visual
-   requirements, and review timeframes. Otherwise freeze the indicator's
-   mathematical, state, timeframe, confirmation, warmup, missing-data, reset,
-   and no-repaint contracts.
-2. Create an immutable `indicator_first` Pine revision that declares
-   `indicator()`. Instrument every output and state transition needed later by
-   the strategy.
-3. Run analysis and supported PineTS evidence. Resolve blockers one semantic
-   change per child revision. Unsupported MTF or drawing behavior is preserved
-   and routed to focused TradingView review.
-4. Prepare a review package that proves protected-source fidelity and selects
-   representative event fixtures before spending time on a full proof.
-5. Corroborate the exact indicator revision in TradingView on every declared
-   review timeframe, then run the final proof dashboard. Freeze its hash only
-   after the user accepts the source, visual/state, fixture, and dashboard
-   evidence.
-6. Create a child strategy revision that initially copies the accepted indicator
-   calculations unchanged, then adds explicit entries, exits, sizing, and
-   execution semantics. Prove this Pine strategy separately in TradingView.
-7. Port only the accepted strategy to Python, compare declared feature, signal,
-   state, order, and trade traces, and fix the first divergence until parity
-   passes.
-8. Freeze the unoptimized Python parent. Asset-specific diagnostics,
-   optimization, and mutation begin only in Phases 3–4.
+1. Freeze its equations, inputs, outputs, state, timing/confirmation, warmup,
+   missing-data behavior, invalidation/reset, and no-future-information rules.
+   Preserve an open-source source and provenance unchanged where one exists.
+2. Implement it as a Python `reference_v1` indicator component with independently
+   authored accepted/rejected/boundary cases. An accepted indicator has decisions
+   and features but zero order intents/trades.
+3. Validate the exact decision stream, ledger causality, prefix behavior, and
+   data/execution scope; save its evidence and casebook.
+4. Create a child strategy that preserves the accepted indicator parameters and
+   records the new order-rule transformation. Validate the child independently;
+   no semantic or economic evidence transfers automatically.
+5. Freeze the fixed baseline before authorized asset-specific search. Pine and
+   TradingView remain optional until selected as the late target.
+
+If a user selects Pine, use the Pine Workbench APIs below and keep that evidence
+separate from the accepted reference. A Pine indicator or strategy screenshot
+does not replace reference expectations or raw-data identity.
 
 When a user-authenticated TradingView tab is available, Codex can perform the
 paste/add/wait/capture steps interactively. The generated dashboard remains the
@@ -133,8 +136,17 @@ capability-compatible contract.
 
 ```powershell
 .venv\Scripts\python -m unittest discover -s app -p tests.py
+.venv\Scripts\python -m unittest app.reference_tests
+.venv\Scripts\python -m unittest app.workflow_tests
 .venv\Scripts\python agentic\testscripts\pine2python_vertical.py
+.venv\Scripts\python agentic\testscripts\reference_vertical.py --pine-target
 ```
+
+The reference vertical writes an isolated, ignored run under
+`artifacts/strategy-development/reference-demo/`. Its Pine target check reports
+local feature/signal comparison separately from broker semantics and the
+still-required TradingView review; it cannot mark the target or production
+accepted.
 
 ## Artifacts
 

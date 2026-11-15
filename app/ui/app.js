@@ -2,6 +2,7 @@ const state = {
   families: [],
   datasets: [],
   familyDetail: null,
+  selectionRequestToken: 0,
   prompts: [],
   workingParameters: {},
   previewResult: null,
@@ -15,6 +16,7 @@ const state = {
   currentPythonTrace: null,
   currentPineParity: null,
   versionPineEvidence: [],
+  workflowStatus: null,
   tgSnapshots: [],
   tgExperiments: [],
 };
@@ -376,6 +378,14 @@ function currentVersion() {
     state.familyDetail?.versions?.find((version) => version.version_id === selected) ||
     state.familyDetail?.current_version ||
     null
+  );
+}
+
+function isCurrentSelectionRequest(requestToken, familyId, versionId = null) {
+  return (
+    requestToken === state.selectionRequestToken &&
+    selectedFamilyId() === familyId &&
+    (versionId === null || versionSelect.value === versionId)
   );
 }
 
@@ -1039,9 +1049,129 @@ function renderPineEvidence() {
   pineOpenEvidenceButton.disabled = !revision;
 }
 
+const WORKFLOW_STATUS_CARDS = [
+  ["semantic", "Semantic"],
+  ["data", "Data Integrity"],
+  ["execution", "Execution"],
+  ["economics", "Economics"],
+  ["source_fidelity", "Source Fidelity"],
+  ["target", "Target Port"],
+  ["platform", "TradingView / Platform"],
+  ["operational", "Operations"],
+];
+
+function workflowStatusTone(value) {
+  if (["PASSED", "VERIFIED"].includes(value)) return "good";
+  if (["FAILED", "BLOCKED", "STALE", "INVALID", "UNVERIFIED"].includes(value)) return "bad";
+  return "warn";
+}
+
+function renderWorkflowStatus() {
+  const badge = document.getElementById("workflowRouteBadge");
+  const grid = document.getElementById("workflowGateGrid");
+  const message = document.getElementById("workflowStatusMessage");
+  const version = currentVersion();
+  if (!version) {
+    badge.textContent = "Select a version";
+    badge.className = "badge";
+    grid.innerHTML = `<div class="empty-state">Select a strategy version to inspect evidence gates.</div>`;
+    message.textContent = "Choose a family and version. Existing Pine-first lineages remain on the legacy route.";
+    return;
+  }
+
+  const status = state.workflowStatus || {};
+  const route = status.workflow_version || version.spec_json?.workflow_version || "legacy_pine_v1";
+  badge.textContent = route;
+  badge.className = `badge ${route === "legacy_pine_v1" ? "legacy" : ""}`.trim();
+  if (status.loading) {
+    grid.innerHTML = WORKFLOW_STATUS_CARDS.map(([key, label]) => {
+      return `<div class="workflow-gate-card"><span>${escapeHtml(label)}</span><strong class="warn">LOADING</strong></div>`;
+    }).join("");
+    message.textContent = "Loading evidence for the selected version and dataset…";
+    message.className = "status";
+    return;
+  }
+  const gates = status.gates || {};
+  grid.innerHTML = WORKFLOW_STATUS_CARDS.map(([key, label]) => {
+    const value = key === "source_fidelity"
+      ? status.source_fidelity?.status || "NOT_RUN"
+      : gates[key]?.status || "NOT_RUN";
+    return `<div class="workflow-gate-card"><span>${escapeHtml(label)}</span><strong class="${workflowStatusTone(value)}">${escapeHtml(value)}</strong></div>`;
+  }).join("");
+
+  const blockers = Array.isArray(status.blockers) ? status.blockers : [];
+  const limitations = Array.isArray(status.limitations) ? status.limitations : [];
+  if (blockers.length) {
+    message.textContent = `Blocked: ${blockers.map((item) => typeof item === "string" ? item : JSON.stringify(item)).join(" · ")}`;
+    message.className = "status error";
+  } else if (route === "legacy_pine_v1") {
+    message.textContent = limitations[0] || "Legacy Pine-first evidence retains its original meaning; no reference verdict is inferred.";
+    message.className = "status";
+  } else if (!selectedDatasetId()) {
+    message.textContent = "Select a dataset to read current reference evidence for this version.";
+    message.className = "status";
+  } else {
+    const targetStatus = gates.target?.status || "NOT_RUN";
+    const platformStatus = gates.platform?.status || "NOT_RUN";
+    message.textContent = targetStatus !== "NOT_RUN" || platformStatus !== "NOT_RUN"
+      ? `Target boundary: ${targetStatus}; platform review: ${platformStatus}. These do not qualify source fidelity or economics.`
+      : "Semantic, data, execution, economics, target, platform, and operational evidence are reported independently; no missing gate is inferred as passed.";
+    message.className = "status";
+  }
+}
+
+async function refreshWorkflowStatus() {
+  const version = currentVersion();
+  const datasetId = selectedDatasetId();
+  if (!version) {
+    state.workflowStatus = null;
+    renderWorkflowStatus();
+    return;
+  }
+  if (!datasetId) {
+    state.workflowStatus = {
+      workflow_version: version.spec_json?.workflow_version || "legacy_pine_v1",
+      gates: {},
+      blockers: [],
+      limitations: [],
+      source_fidelity: { status: "NOT_RUN" },
+    };
+    renderWorkflowStatus();
+    return;
+  }
+  const versionId = version.version_id;
+  state.workflowStatus = {
+    workflow_version: version.spec_json?.workflow_version || "legacy_pine_v1",
+    loading: true,
+  };
+  renderWorkflowStatus();
+  try {
+    const status = await fetchJson(
+      `/api/versions/${encodeURIComponent(versionId)}/workflow?dataset_id=${encodeURIComponent(datasetId)}`,
+    );
+    if (
+      currentVersion()?.version_id !== versionId ||
+      selectedDatasetId() !== datasetId
+    ) return;
+    state.workflowStatus = status;
+  } catch (error) {
+    if (
+      currentVersion()?.version_id !== versionId ||
+      selectedDatasetId() !== datasetId
+    ) return;
+    state.workflowStatus = {
+      workflow_version: version.spec_json?.workflow_version || "legacy_pine_v1",
+      gates: {},
+      blockers: [error.message],
+      source_fidelity: { status: "NOT_RUN" },
+    };
+  }
+  renderWorkflowStatus();
+}
+
 async function refreshPineWorkbench(preferredRevisionId = "") {
   const [status, revisions] = await Promise.all([
-    fetchJson("/api/pine2python/status").catch((error) => ({
+    fetchJson("/api/python2pine/status").catch((error) => ({
       status: "unavailable",
       error: { message: error.message },
     })),
@@ -1132,6 +1262,7 @@ function collectOverrides() {
 }
 
 async function refreshAll() {
+  const requestToken = ++state.selectionRequestToken;
   const familyId = selectedFamilyId();
   const preferredVersionId = versionSelect.value;
   const preferredPineRevisionId = pineRevisionSelect.value;
@@ -1142,6 +1273,7 @@ async function refreshAll() {
     fetchJson("/api/tg-management/snapshots"),
     fetchJson("/api/tg-management/experiments"),
   ]);
+  if (requestToken !== state.selectionRequestToken) return;
   state.families = families;
   state.datasets = datasets;
   state.prompts = prompts;
@@ -1154,16 +1286,24 @@ async function refreshAll() {
     : state.families[0]?.family_id;
   if (targetFamilyId) {
     familySelect.value = targetFamilyId;
-    state.familyDetail = await fetchJson(`/api/families/${targetFamilyId}`);
+    const familyDetail = await fetchJson(`/api/families/${encodeURIComponent(targetFamilyId)}`);
+    if (!isCurrentSelectionRequest(requestToken, targetFamilyId)) return;
+    state.familyDetail = familyDetail;
   } else {
     state.familyDetail = null;
   }
   renderVersionSelect(preferredVersionId);
-  if (versionSelect.value) {
-    state.familyDetail.tuning_edges = await fetchJson(`/api/versions/${versionSelect.value}/tuning`);
-    state.versionPineEvidence = await fetchJson(
-      `/api/versions/${encodeURIComponent(versionSelect.value)}/pine-evidence`,
-    ).catch(() => []);
+  const versionId = versionSelect.value;
+  if (versionId) {
+    const [tuningEdges, versionPineEvidence] = await Promise.all([
+      fetchJson(`/api/versions/${encodeURIComponent(versionId)}/tuning`),
+      fetchJson(`/api/versions/${encodeURIComponent(versionId)}/pine-evidence`).catch(() => []),
+    ]);
+    if (!isCurrentSelectionRequest(requestToken, targetFamilyId, versionId)) return;
+    state.familyDetail.tuning_edges = tuningEdges;
+    state.versionPineEvidence = versionPineEvidence;
+  } else {
+    state.versionPineEvidence = [];
   }
   state.previewResult = null;
   state.workingParameters = {};
@@ -1174,7 +1314,10 @@ async function refreshAll() {
   renderRuns();
   renderVersions();
   renderPrompts();
+  await refreshWorkflowStatus();
+  if (requestToken !== state.selectionRequestToken) return;
   await refreshPineWorkbench(preferredPineRevisionId);
+  if (requestToken !== state.selectionRequestToken) return;
   renderTgLab();
 }
 
@@ -1247,18 +1390,33 @@ async function pollTgOptimization(jobId, asset) {
 }
 
 async function refreshFamilyDetail() {
+  const requestToken = ++state.selectionRequestToken;
   const familyId = selectedFamilyId();
   const preferredVersionId = versionSelect.value;
+  state.familyDetail = null;
+  state.versionPineEvidence = [];
+  state.workflowStatus = null;
+  renderVersionSelect();
+  renderWorkflowStatus();
+  renderPineEvidence();
   if (!familyId) {
     return;
   }
-  state.familyDetail = await fetchJson(`/api/families/${familyId}`);
+  const familyDetail = await fetchJson(`/api/families/${encodeURIComponent(familyId)}`);
+  if (!isCurrentSelectionRequest(requestToken, familyId)) return;
+  state.familyDetail = familyDetail;
   renderVersionSelect(preferredVersionId);
-  if (versionSelect.value) {
-    state.familyDetail.tuning_edges = await fetchJson(`/api/versions/${versionSelect.value}/tuning`);
-    state.versionPineEvidence = await fetchJson(
-      `/api/versions/${encodeURIComponent(versionSelect.value)}/pine-evidence`,
-    ).catch(() => []);
+  const versionId = versionSelect.value;
+  if (versionId) {
+    const [tuningEdges, versionPineEvidence] = await Promise.all([
+      fetchJson(`/api/versions/${encodeURIComponent(versionId)}/tuning`),
+      fetchJson(`/api/versions/${encodeURIComponent(versionId)}/pine-evidence`).catch(() => []),
+    ]);
+    if (!isCurrentSelectionRequest(requestToken, familyId, versionId)) return;
+    state.familyDetail.tuning_edges = tuningEdges;
+    state.versionPineEvidence = versionPineEvidence;
+  } else {
+    state.versionPineEvidence = [];
   }
   state.previewResult = null;
   state.workingParameters = {};
@@ -1269,17 +1427,35 @@ async function refreshFamilyDetail() {
   renderRuns();
   renderVersions();
   renderPrompts();
+  await refreshWorkflowStatus();
+  if (!isCurrentSelectionRequest(requestToken, familyId, versionId)) return;
   renderPineEvidence();
 }
 
 async function refreshSelectedVersion() {
-  if (!state.familyDetail || !versionSelect.value) {
+  const familyId = selectedFamilyId();
+  const versionId = versionSelect.value;
+  if (
+    !state.familyDetail ||
+    state.familyDetail.family?.family_id !== familyId ||
+    !versionId
+  ) {
     return;
   }
-  state.familyDetail.tuning_edges = await fetchJson(`/api/versions/${versionSelect.value}/tuning`);
-  state.versionPineEvidence = await fetchJson(
-    `/api/versions/${encodeURIComponent(versionSelect.value)}/pine-evidence`,
-  ).catch(() => []);
+  const requestToken = ++state.selectionRequestToken;
+  const version = currentVersion();
+  state.workflowStatus = {
+    workflow_version: version?.spec_json?.workflow_version || "legacy_pine_v1",
+    loading: true,
+  };
+  renderWorkflowStatus();
+  const [tuningEdges, versionPineEvidence] = await Promise.all([
+    fetchJson(`/api/versions/${encodeURIComponent(versionId)}/tuning`),
+    fetchJson(`/api/versions/${encodeURIComponent(versionId)}/pine-evidence`).catch(() => []),
+  ]);
+  if (!isCurrentSelectionRequest(requestToken, familyId, versionId)) return;
+  state.familyDetail.tuning_edges = tuningEdges;
+  state.versionPineEvidence = versionPineEvidence;
   state.previewResult = null;
   state.workingParameters = {};
   syncWorkingParameters();
@@ -1288,6 +1464,8 @@ async function refreshSelectedVersion() {
   renderTuningEdges();
   renderRuns();
   renderVersions();
+  await refreshWorkflowStatus();
+  if (!isCurrentSelectionRequest(requestToken, familyId, versionId)) return;
   renderPineEvidence();
 }
 
@@ -1769,6 +1947,7 @@ async function registerBaseline() {
       asset: document.getElementById("registerAsset").value.trim(),
       venue: document.getElementById("registerVenue").value.trim(),
       timeframe: document.getElementById("registerTimeframe").value.trim(),
+      workflow_version: document.getElementById("registerWorkflowVersion").value,
       version_name: document.getElementById("registerVersionName").value.trim(),
       source_code: document.getElementById("registerSourceCode").value,
       spec_json: JSON.parse(document.getElementById("registerSpecJson").value),
@@ -2171,6 +2350,7 @@ familySelect.addEventListener("change", refreshFamilyDetail);
 versionSelect.addEventListener("change", refreshSelectedVersion);
 datasetSelect.addEventListener("change", () => {
   schedulePreview(true);
+  refreshWorkflowStatus();
   renderPineEvidence();
 });
 pineRevisionSelect.addEventListener("change", selectPineRevision);

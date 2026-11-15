@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import hashlib
 import json
 import math
 import tempfile
@@ -14,13 +15,14 @@ from fastapi import HTTPException
 
 from app.backtest import BacktestEngine, Position
 from app.config import Settings, settings
-from app.data import Bar, DataService
+from app.data import Bar, DataService, audit_bars
 from app.lab import MutationLabService
 from app.main import DatasetDownloadRequest
 from app.pine2python_client import Pine2PythonClient, Pine2PythonClientError
 from app.pine_review import compare_protected_regions, select_review_fixtures
 from app.pine_workbench import PineWorkbenchService
 from app.storage import Repository
+from app.reference_tests import ReferenceExpectedCaseTests  # noqa: F401
 from app.tg_management_tests import TgManagementTests  # noqa: F401
 
 
@@ -508,6 +510,172 @@ class FakePine2PythonClient:
             "artifact": {"artifact_id": "generation_fixture"},
             "status": "TRADINGVIEW_REVIEW_REQUIRED",
         }
+
+
+class DataIntegrityTests(unittest.TestCase):
+    def _bars(self) -> list[Bar]:
+        start = datetime(2024, 1, 1, tzinfo=UTC)
+        return [
+            Bar(start, 100, 102, 99, 101, 10, "TEST", "15m"),
+            Bar(start + timedelta(minutes=15), 101, 103, 100, 102, 11, "TEST", "15m"),
+            Bar(start + timedelta(minutes=60), 102, 104, 101, 103, 12, "TEST", "15m"),
+        ]
+
+    def test_audit_reports_identical_duplicates_and_time_gaps_before_normalizing(self) -> None:
+        bars = self._bars()
+        raw = [
+            bars[0],
+            bars[1],
+            Bar(
+                bars[1].ts,
+                bars[1].open,
+                bars[1].high,
+                bars[1].low,
+                bars[1].close,
+                bars[1].volume,
+                bars[1].symbol,
+                bars[1].timeframe,
+            ),
+            bars[2],
+        ]
+
+        audit = audit_bars(raw)
+
+        self.assertEqual("PASS_WITH_LIMITATIONS", audit["status"])
+        self.assertEqual(4, audit["row_count"])
+        self.assertEqual(1, audit["duplicate_counts"]["identical_rows"])
+        self.assertEqual("report_and_keep_first", audit["identical_duplicate_policy"])
+        self.assertEqual(1, len(audit["gaps"]))
+        self.assertEqual(2, audit["gaps"][0]["missing_intervals_estimate"])
+
+    def test_raw_csv_audit_precedes_deduplication_and_keeps_the_first_duplicate(self) -> None:
+        content = """<DATE>,<TIME>,<OPEN>,<HIGH>,<LOW>,<CLOSE>,<TICKVOL>
+2024.01.01,00:00:00,100,102,99,101,10
+2024.01.01,00:15:00,101,103,100,102,11
+2024.01.01,00:15:00,101,103,100,102,11
+2024.01.01,01:00:00,102,104,101,103,12
+"""
+        service = DataService.__new__(DataService)
+
+        normalized, audit = service._read_mt5_csv_text_with_audit(
+            content, "TEST", "15m"
+        )
+
+        self.assertEqual("PASS_WITH_LIMITATIONS", audit["status"])
+        self.assertEqual(4, audit["row_count"])
+        self.assertEqual(1, audit["duplicate_counts"]["identical_rows"])
+        self.assertEqual(3, len(normalized))
+        self.assertEqual(102, normalized[1].close)
+
+    def test_new_import_persists_raw_and_normalized_quality_identity(self) -> None:
+        temp_dir = tempfile.TemporaryDirectory()
+        root = Path(temp_dir.name)
+        previous_data_dir = settings.data_dir
+        try:
+            settings.data_dir = root / "data"
+            settings.data_dir.mkdir(parents=True)
+            repo = Repository(root / "mutation_lab.sqlite3")
+            service = DataService(repo)
+            start = datetime(2024, 1, 1, tzinfo=UTC)
+            rows = []
+            for index in range(500):
+                timestamp = start + timedelta(minutes=15 * index)
+                close = 100 + index / 10
+                rows.append(
+                    f"{timestamp.strftime('%Y.%m.%d')},{timestamp.strftime('%H:%M:%S')},"
+                    f"{close},{close + 1},{close - 1},{close},100"
+                )
+            rows.insert(3, rows[2])
+            content = "<DATE>,<TIME>,<OPEN>,<HIGH>,<LOW>,<CLOSE>,<TICKVOL>\n" + "\n".join(rows) + "\n"
+            imported = service.import_mt5_csv_content(
+                "fixture.csv", content, "TEST", "15m"
+            )
+
+            raw_bytes = content.encode("utf-8")
+            normalized_bytes = Path(imported["path"]).read_bytes()
+            quality_path = Path(imported["quality_manifest"]["artifact_path"])
+            saved_manifest_bytes = quality_path.read_bytes()
+            saved_manifest = json.loads(saved_manifest_bytes)
+            self.assertEqual(hashlib.sha256(raw_bytes).hexdigest(), saved_manifest["raw_sha256"])
+            self.assertEqual(hashlib.sha256(normalized_bytes).hexdigest(), saved_manifest["normalized_sha256"])
+            self.assertEqual("csv_text_utf8", saved_manifest["raw_kind"])
+            self.assertEqual(501, saved_manifest["data_audit"]["row_count"])
+            self.assertEqual(1, saved_manifest["data_audit"]["duplicate_counts"]["identical_rows"])
+            self.assertEqual("PASS_WITH_LIMITATIONS", saved_manifest["data_audit"]["status"])
+            self.assertEqual(500, saved_manifest["normalized_row_count"])
+
+            verified = service.dataset_quality_manifest(imported["dataset_id"])
+            self.assertEqual("VERIFIED", verified["status"])
+            self.assertEqual(
+                hashlib.sha256(saved_manifest_bytes).hexdigest(),
+                verified["manifest_sha256"],
+            )
+            legacy_path = settings.data_dir / "legacy.csv"
+            service.write_bars(legacy_path, self._bars())
+            repo.put_dataset(
+                {
+                    "dataset_id": "legacy-without-quality",
+                    "name": "legacy",
+                    "symbol": "TEST",
+                    "timeframe": "15m",
+                    "source": "legacy",
+                    "rows_count": 3,
+                    "path": str(legacy_path),
+                    "created_at": datetime.now(UTC).isoformat(),
+                }
+            )
+            self.assertEqual(
+                "Original raw audit unavailable",
+                service.dataset_quality_manifest("legacy-without-quality")["reason"],
+            )
+
+            Path(imported["path"]).write_bytes(normalized_bytes + b"\n")
+            stale = service.dataset_quality_manifest(imported["dataset_id"])
+            self.assertEqual("STALE", stale["status"])
+        finally:
+            settings.data_dir = previous_data_dir
+            temp_dir.cleanup()
+
+    def test_conflicting_duplicates_descending_time_and_invalid_ohlcv_are_blocked(self) -> None:
+        bars = self._bars()
+        conflicting = [
+            bars[0],
+            bars[1],
+            Bar(
+                bars[1].ts,
+                bars[1].open,
+                bars[1].high,
+                bars[1].low,
+                99,
+                bars[1].volume,
+                bars[1].symbol,
+                bars[1].timeframe,
+            ),
+        ]
+        conflict_audit = audit_bars(conflicting)
+        self.assertEqual("BLOCKED", conflict_audit["status"])
+        self.assertEqual(1, conflict_audit["duplicate_counts"]["conflicting_timestamps"])
+        self.assertIn(
+            "DATA_DUPLICATE_CONFLICT",
+            {item["code"] for item in conflict_audit["findings"]},
+        )
+
+        descending = [bars[1], bars[0]]
+        descending_audit = audit_bars(descending)
+        self.assertEqual("BLOCKED", descending_audit["status"])
+        self.assertIn(
+            "DATA_TIME_ORDER_DESCENDING",
+            {item["code"] for item in descending_audit["findings"]},
+        )
+
+        malformed = [Bar(bars[0].ts, 100, 99, 101, 102, -1, "TEST", "15m")]
+        malformed_audit = audit_bars(malformed)
+        self.assertEqual("BLOCKED", malformed_audit["status"])
+        self.assertTrue(
+            {"DATA_OHLC_INVALID", "DATA_VOLUME_NEGATIVE"}.issubset(
+                {item["code"] for item in malformed_audit["findings"]}
+            )
+        )
 
 
 class MutationLabTests(unittest.TestCase):

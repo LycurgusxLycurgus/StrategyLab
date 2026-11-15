@@ -1,0 +1,110 @@
+{
+  "campaign_id": "btc-smc-20261028",
+  "implementation_status": "ACCEPTED_RESEARCH_IMPLEMENTATION",
+  "economic_status": "RETURN_TO_PHASE_1_NOT_QUALIFIED",
+  "selected_strategy": null,
+  "accepted_run": "comparison-v1",
+  "regression_tests_passed": 70,
+  "new_test_methods": 27,
+  "review_mode": "root review per explicit user role override; no independent reviewer",
+  "first_root_review": "PASS",
+  "correction_stages_used": 0,
+  "implementation_reviews_used": 1,
+  "root_verification": "PASS",
+  "completed_economic_evaluations": 210,
+  "cumulative_evaluations": 210,
+  "parameter_searches": 0,
+  "mutations": 0,
+  "reserved_policy": "September 2026 onward not fetched or evaluated by this campaign; no final holdout claim",
+  "code_and_input_identities": {
+    "artifacts\\strategy-development\\btc-smc-20261028\\protocol.json": "f87c9b110db8e7581cc94ebd0c69d55630bc65070f954975e1297a8ff81d0497",
+    "artifacts\\strategy-development\\btc-smc-20261028\\STRATEGY.md": "8015b25c1031814ea8cd4a4ab00e1f6719508381c4e675adaddad5e29395735d",
+    "C:\\Users\\Baham\\Documents\\Nexuz\\dove_red\\StrategyLab\\app\\btc_smc_campaign.py": "2f5d2ec6c703f4b1011429995b292ec77f44daccb7a59303c6b68d4a89562ad2",
+    "app\\btc_smc.py": "844e9d4f054c3651217497105739ee6bd57cdc03c4ecca5663c9c0eb5f673f1c",
+    "app\\btc_smc_tests.py": "b86b5fef228cb93e3a686651ed9085e33b129a6421327c10d2934bd994dc2606",
+    "app\\btc_liquidity.py": "455380609b4fd13566bfd363424386a79262f3dedc33e5e5ce6b5f7468022abf",
+    "app\\btc_liquidity_data.py": "18b3e414c4573d9824cd41514b361c94b65c77332500d5345488a754ff877809",
+    "app\\btc_liquidity_campaign.py": "d8b5250e4024d3d603e88cee2370861b40f2aebbf99bc983c6b2a8bba877ea4d",
+    "app\\btc_liquidity_tests.py": "25fae992911cdb57ec1181f1afd72bf24e5abed13b5b89f4efebc42502d1456f",
+    "artifacts\\strategy-development\\btc-liquidity-20261023\\raw\\audit.json": "b753943b640ac12851cd5e287a8303c7ebbe391e209589abd53435949a3df899",
+    "artifacts\\strategy-development\\btc-liquidity-20261023\\raw\\exchangeInfo.json": "7997df0087febf4a8c510fd488cc297928f5694126e0932a03f1f01f2bd0ad1b",
+    "artifacts\\strategy-development\\btc-liquidity-20261023\\raw\\funding_coverage.json": "4ba33f9a8986b7cd4ee9b4161c3cea77efd0ccd9d4a3c7382bbe96eec27efe68",
+    "artifacts\\strategy-development\\btc-liquidity-20261023\\raw\\funding_mark_provenance.json": "a102add0906710a7cb5d7a0b9c40d8f0808330bc247e888607df8d3d58ac9b4a",
+    "artifacts\\strategy-development\\btc-liquidity-20261023\\raw\\manifest.json": "49ed1b895b054df0447c99ce2b109c58ff8f7f27e5a0c3be1dbb7b54a708cfe8",
+    "artifacts\\strategy-development\\btc-liquidity-20261023\\raw\\mark_price_gap_repairs.json": "4cf5974236a7f94e0181fd7e8ab4d9a208876af11bf5511031343d0268d5b020",
+    "artifacts\\strategy-development\\btc-liquidity-20261023\\raw\\normalized_funding.json": "f6e3ce0614d31147eb71ed7e823b406963b7a203aeda0376c0ee687395559a2f"
+  },
+  "detector_lifecycle_accounting": [
+    {
+      "detector": "15-bos_order_block",
+      "balanced": true,
+      "long_signals": 1236,
+      "short_signals": 1215,
+      "counts": {
+        "pivot": 45076,
+        "bos": 14859,
+        "block": 12067,
+        "signal": 2451,
+        "expired": 6768,
+        "invalidated": 2504,
+        "bos_rejected": 2792,
+        "replaced": 344
+      }
+    },
+    {
+      "detector": "15-turtle_soup_plus1",
+      "balanced": true,
+      "long_signals": 795,
+      "short_signals": 850,
+      "counts": {
+        "breakout": 5133,
+        "reclaim_failed": 3488,
+        "signal": 1645
+      }
+    },
+    {
+      "detector": "5-bos_order_block",
+      "balanced": true,
+      "long_signals": 5030,
+      "short_signals": 5209,
+      "counts": {
+        "pivot": 130263,
+        "bos": 45972,
+        "bos_rejected": 9997,
+        "block": 35975,
+        "invalidated": 10433,
+        "replaced": 7987,
+        "signal": 10239,
+        "expired": 7316
+      }
+    },
+    {
+      "detector": "5-silver_bullet",
+      "balanced": true,
+      "long_signals": 7,
+      "short_signals": 5,
+      "counts": {
+        "sweep": 2428,
+        "invalidated": 989,
+        "expired": 167,
+        "session_ended": 571,
+        "replaced": 689,
+        "gap": 215,
+        "dual_sweep_excluded": 15,
+        "signal": 12
+      }
+    },
+    {
+      "detector": "5-turtle_soup_plus1",
+      "balanced": true,
+      "long_signals": 2632,
+      "short_signals": 2765,
+      "counts": {
+        "breakout": 17059,
+        "reclaim_failed": 11662,
+        "signal": 5397
+      }
+    }
+  ],
+  "scope_limit": "Python research prototypes only; no qualified baseline, statistical edge, source fidelity, Pine target, paper/live adapter or orders."
+}

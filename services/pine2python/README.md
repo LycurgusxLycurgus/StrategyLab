@@ -1,4 +1,9 @@
-# Pine2Python
+# Python2Pine bridge (Pine2Python compatibility service)
+
+The public StrategyLab workflow is reference-first Python2Pine. New registered
+references earn semantic/execution evidence and a fixed baseline before research;
+Pine is a late target. This service retains its `pine2python` package, CLI and
+HTTP contracts for existing callers and legacy Pine-first lineages.
 
 Pine2Python is StrategyLab's local-first Pine analysis, execution, proof, trace,
 parity, and registered-adapter service. It is built inside the monorepo but can run

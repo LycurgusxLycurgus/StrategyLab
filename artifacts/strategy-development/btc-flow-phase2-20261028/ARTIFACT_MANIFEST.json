@@ -1,0 +1,594 @@
+{
+  "AUTHORIZATION.json": {
+    "bytes": 191,
+    "sha256": "885af6a7c4b5583473a8ea52f60aa1edb4dbdca53e594c0cd42e5b7466c69eca"
+  },
+  "cumulative_trials.jsonl": {
+    "bytes": 920148,
+    "sha256": "df732693d75434362c92d5eae1c5feda552c37149ac8d59f62da262905af0456"
+  },
+  "DATA_AUDIT.json": {
+    "bytes": 671,
+    "sha256": "38c598e3ce7788aed98c78cc0023dd4beac75ebd815788b2a9abd3b392847c8d"
+  },
+  "INPUT_IDENTITIES.json": {
+    "bytes": 5213,
+    "sha256": "14f308d4b6a5df4da75e4f3f5fc251a1623e3a4301fe118f0c5e8bc345dd254e"
+  },
+  "PHASE1.md": {
+    "bytes": 5701,
+    "sha256": "f3d12dc8a565c72aad2d633e8556a44e6c06c5751164d60f6a465084a29b4191"
+  },
+  "PHASE2.md": {
+    "bytes": 8348,
+    "sha256": "b247dc3ed7f85ab808bed8349fd4ed2cfd686e13a089752df83aa9352b13f188"
+  },
+  "PRIOR_INTEGRITY.json": {
+    "bytes": 320,
+    "sha256": "fd93042fdcd27ca0fac7639d66651147e94899179506d4545c90959311c7464e"
+  },
+  "protocol.json": {
+    "bytes": 7764,
+    "sha256": "1995f909f8808c53e65d4e32b7d9b2e7667e2e369659769620d0047e1543bb68"
+  },
+  "ROOT_REVIEW.json": {
+    "bytes": 1685,
+    "sha256": "a3ebc7e285de04608802f381033574b4229f77e5cc43216aa4b692fde9fbb030"
+  },
+  "runs/comparison-v1/15m-executed_taker_pressure_reversal_v1-both-2022-base.json.gz": {
+    "bytes": 286866,
+    "sha256": "ed2392b27c96a556df0dc7d7e9c6ac850e21f7a82999e21e6ad8cf01802d32ab"
+  },
+  "runs/comparison-v1/15m-executed_taker_pressure_reversal_v1-both-2022-stress.json.gz": {
+    "bytes": 279512,
+    "sha256": "c5e3d8faf49f230f45a19c03f7fa5118ada15a09ddb234444b16ed0fa0d3af58"
+  },
+  "runs/comparison-v1/15m-executed_taker_pressure_reversal_v1-both-2023-base.json.gz": {
+    "bytes": 272672,
+    "sha256": "b441a444a9693bdd2497535489dacd8eb8d4a24eee1e2dca0047ccaf6658e4ec"
+  },
+  "runs/comparison-v1/15m-executed_taker_pressure_reversal_v1-both-2023-stress.json.gz": {
+    "bytes": 261852,
+    "sha256": "916c1685d42e9fd29cc6ede4f90c14235dba732d37fb9098e380d45c66d173fd"
+  },
+  "runs/comparison-v1/15m-executed_taker_pressure_reversal_v1-both-2024-base.json.gz": {
+    "bytes": 282387,
+    "sha256": "ae25f58a60bb677906d4bb4c9692fd2537b4bc7bf0f1c72c6c458f8ba3447e8f"
+  },
+  "runs/comparison-v1/15m-executed_taker_pressure_reversal_v1-both-2024-stress.json.gz": {
+    "bytes": 271714,
+    "sha256": "f280dd3fa026793cd92d72890fbaef3003eb1bc3d6a19ad52682accb00873477"
+  },
+  "runs/comparison-v1/15m-executed_taker_pressure_reversal_v1-both-2025-base.json.gz": {
+    "bytes": 228373,
+    "sha256": "10dfe2688d438e307fbdfb4a6a2b093b3f8a3b760a623774803491fcd4a1eae2"
+  },
+  "runs/comparison-v1/15m-executed_taker_pressure_reversal_v1-both-2025-stress.json.gz": {
+    "bytes": 221414,
+    "sha256": "4b4a847d915e0ac235254c2ade31259117be0578d9e2a198f659f1259781853c"
+  },
+  "runs/comparison-v1/15m-executed_taker_pressure_reversal_v1-both-2026-base.json.gz": {
+    "bytes": 157186,
+    "sha256": "6dd26ddeeec930b1797369f6bd8a38089d9db982a2f3cb055eb5ade5b1045dbd"
+  },
+  "runs/comparison-v1/15m-executed_taker_pressure_reversal_v1-both-2026-stress.json.gz": {
+    "bytes": 153682,
+    "sha256": "6b927cf218d2f99db328ac15da7a9a6fe35271f06344f4d6a2c43a412bfa9148"
+  },
+  "runs/comparison-v1/15m-executed_taker_pressure_reversal_v1-long-2022-base.json.gz": {
+    "bytes": 230808,
+    "sha256": "2d9b07146fc6195615c5313d0b9e72cfe40c2b14038271fc8ca538ea6fb0d0ce"
+  },
+  "runs/comparison-v1/15m-executed_taker_pressure_reversal_v1-long-2022-stress.json.gz": {
+    "bytes": 225887,
+    "sha256": "9e99aa15cd458b70c168b4ad114b362df4d90987fca149fe2af571c3b7c77de0"
+  },
+  "runs/comparison-v1/15m-executed_taker_pressure_reversal_v1-long-2023-base.json.gz": {
+    "bytes": 224588,
+    "sha256": "5fd98d3228befe06dc3731318f4c837615fdc2fcb3969213d7a3cf2cd4f6aebd"
+  },
+  "runs/comparison-v1/15m-executed_taker_pressure_reversal_v1-long-2023-stress.json.gz": {
+    "bytes": 214766,
+    "sha256": "9de54db810c7b4ee4597280ebc0b6e4239ee2f4860540335414242f9e44b5fb1"
+  },
+  "runs/comparison-v1/15m-executed_taker_pressure_reversal_v1-long-2024-base.json.gz": {
+    "bytes": 229495,
+    "sha256": "5f1d11ae5fcd6dd863aef1a1baf3b691096f5600166a1f0c24764e8959a03522"
+  },
+  "runs/comparison-v1/15m-executed_taker_pressure_reversal_v1-long-2024-stress.json.gz": {
+    "bytes": 224993,
+    "sha256": "f3ae0fce542bf5378c418da4c48c2458c7e5f457ab083c69bcfad48dc036592d"
+  },
+  "runs/comparison-v1/15m-executed_taker_pressure_reversal_v1-long-2025-base.json.gz": {
+    "bytes": 201280,
+    "sha256": "a27f2df983becf9cc0f0b357d51a33989fcde9a6b0c424f7705d944727a329f0"
+  },
+  "runs/comparison-v1/15m-executed_taker_pressure_reversal_v1-long-2025-stress.json.gz": {
+    "bytes": 198083,
+    "sha256": "ddd924a94e0852efac6fb039a775c9323c127483688f783b392657f46992627a"
+  },
+  "runs/comparison-v1/15m-executed_taker_pressure_reversal_v1-long-2026-base.json.gz": {
+    "bytes": 138197,
+    "sha256": "77d89c943a90dbf843325faf690cce470c2a00562fc40a04c541815d9c9cf184"
+  },
+  "runs/comparison-v1/15m-executed_taker_pressure_reversal_v1-long-2026-stress.json.gz": {
+    "bytes": 135748,
+    "sha256": "0d6512be6fac0878ef08d2f676cc657f23bc51296813ac787746f4ca106fab7c"
+  },
+  "runs/comparison-v1/15m-executed_taker_pressure_reversal_v1-short-2022-base.json.gz": {
+    "bytes": 232631,
+    "sha256": "d217ea51c429cd63e42511e6b4bbdbc71cce7b1b4b1c1902d16c05dcfe14f08a"
+  },
+  "runs/comparison-v1/15m-executed_taker_pressure_reversal_v1-short-2022-stress.json.gz": {
+    "bytes": 229940,
+    "sha256": "9c2eaba7a7d65aec42e797bae486b2fb40d4f53c0cfc27ce6d9a8f797e08728b"
+  },
+  "runs/comparison-v1/15m-executed_taker_pressure_reversal_v1-short-2023-base.json.gz": {
+    "bytes": 225796,
+    "sha256": "e4042c0c967a1e148352b2db9bc000ba1933bea11e95e2786da208334e407a36"
+  },
+  "runs/comparison-v1/15m-executed_taker_pressure_reversal_v1-short-2023-stress.json.gz": {
+    "bytes": 224105,
+    "sha256": "0a5f72e9be0a2aabd8d6201380cbed9aacf6a47717d8345748bde48842da901f"
+  },
+  "runs/comparison-v1/15m-executed_taker_pressure_reversal_v1-short-2024-base.json.gz": {
+    "bytes": 233747,
+    "sha256": "46929366e1d7de02a50ff9105bc3ae3857c28fdb18b4ad72bb19e450ebcc828c"
+  },
+  "runs/comparison-v1/15m-executed_taker_pressure_reversal_v1-short-2024-stress.json.gz": {
+    "bytes": 227012,
+    "sha256": "b5e654203926d1478ad64deb06a475d5cb50b9b3886d19abfba0303e0303d12a"
+  },
+  "runs/comparison-v1/15m-executed_taker_pressure_reversal_v1-short-2025-base.json.gz": {
+    "bytes": 193475,
+    "sha256": "4baf482e0550509d00ab3c17984db4e936bb121158ef1f6812695193548111eb"
+  },
+  "runs/comparison-v1/15m-executed_taker_pressure_reversal_v1-short-2025-stress.json.gz": {
+    "bytes": 189815,
+    "sha256": "55be80e8686fc6c0b3bdafe5e922b0fdd1c101fb738a74e1e71338c45386c045"
+  },
+  "runs/comparison-v1/15m-executed_taker_pressure_reversal_v1-short-2026-base.json.gz": {
+    "bytes": 130582,
+    "sha256": "19e9a3e88ebb5e646929563640c0a556b3bbba28755f361bae3e9a4df7342f94"
+  },
+  "runs/comparison-v1/15m-executed_taker_pressure_reversal_v1-short-2026-stress.json.gz": {
+    "bytes": 129440,
+    "sha256": "4f8493be978c26a400a8383d22faa64770a5cf7d6c90bc1183735e3c0d2577d2"
+  },
+  "runs/comparison-v1/15m-price_shock_reversal_control_v1-both-2022-base.json.gz": {
+    "bytes": 658960,
+    "sha256": "0fa8054a3c704e222fbaf30315b743eda9452fd2ca8272560dafa4b222748292"
+  },
+  "runs/comparison-v1/15m-price_shock_reversal_control_v1-both-2022-stress.json.gz": {
+    "bytes": 609115,
+    "sha256": "28f8433d5a07e62b99c6b29c1dbab0cd413ba9ebf8a2baad814a2845b6ba9458"
+  },
+  "runs/comparison-v1/15m-price_shock_reversal_control_v1-both-2023-base.json.gz": {
+    "bytes": 398592,
+    "sha256": "391435bee58d36b544dd37a48a3ee8ed53cc4771ea5b6f2c68ebabd1b27ff8e0"
+  },
+  "runs/comparison-v1/15m-price_shock_reversal_control_v1-both-2023-stress.json.gz": {
+    "bytes": 359249,
+    "sha256": "90937121d7772478b8c30bc98bfd1c93f01139cc6d2599e8fa689a729c87d121"
+  },
+  "runs/comparison-v1/15m-price_shock_reversal_control_v1-both-2024-base.json.gz": {
+    "bytes": 555162,
+    "sha256": "f398241a673935bca3097d1bcbbc3e0e28fe786cf9481b43b0c46d79dc2b40e5"
+  },
+  "runs/comparison-v1/15m-price_shock_reversal_control_v1-both-2024-stress.json.gz": {
+    "bytes": 505656,
+    "sha256": "46230770b19bf19e1ce978070bba5c0cafa5d72a87f1b3c05d23254eb0500657"
+  },
+  "runs/comparison-v1/15m-price_shock_reversal_control_v1-both-2025-base.json.gz": {
+    "bytes": 402065,
+    "sha256": "3634a677af844917d58d4f7ab0736d28504b0c0e6e08d4893914bcc089468564"
+  },
+  "runs/comparison-v1/15m-price_shock_reversal_control_v1-both-2025-stress.json.gz": {
+    "bytes": 374238,
+    "sha256": "06ba8360223b469365db7b31586cb1a65d1f8ca4c82b35efca691c9c7b608749"
+  },
+  "runs/comparison-v1/15m-price_shock_reversal_control_v1-both-2026-base.json.gz": {
+    "bytes": 304819,
+    "sha256": "75d9d01dce12cb093c0acd0c3bf5c56b8e5dbca59d9a6212ae14927953c81429"
+  },
+  "runs/comparison-v1/15m-price_shock_reversal_control_v1-both-2026-stress.json.gz": {
+    "bytes": 276511,
+    "sha256": "22558a918adf309603b0f3f15ad273d4b5977aec38bce9973e4a00603c022de3"
+  },
+  "runs/comparison-v1/15m-price_shock_reversal_control_v1-long-2022-base.json.gz": {
+    "bytes": 532121,
+    "sha256": "47471775fcfc96de108e1d2820703c2758c99476d1b78ce8c0aecb4295040981"
+  },
+  "runs/comparison-v1/15m-price_shock_reversal_control_v1-long-2022-stress.json.gz": {
+    "bytes": 501476,
+    "sha256": "baf4da0ff00547cb6a3c34b32de617007189acf4fa6a8c7c01d92f1be6cfd735"
+  },
+  "runs/comparison-v1/15m-price_shock_reversal_control_v1-long-2023-base.json.gz": {
+    "bytes": 313338,
+    "sha256": "62b250631c2a17db5920ad1c2efc13bc94baa57eff85ba4d5cab1b0eb65cf8c6"
+  },
+  "runs/comparison-v1/15m-price_shock_reversal_control_v1-long-2023-stress.json.gz": {
+    "bytes": 282760,
+    "sha256": "1ed1bae8ae74c27b2d1f1e214a6c2206662a070e611c51fde756d317bea11e6e"
+  },
+  "runs/comparison-v1/15m-price_shock_reversal_control_v1-long-2024-base.json.gz": {
+    "bytes": 433307,
+    "sha256": "f7550c22117ea3358c6e41118901ce370cfff045c27302eb95a7cac1e20c4cf4"
+  },
+  "runs/comparison-v1/15m-price_shock_reversal_control_v1-long-2024-stress.json.gz": {
+    "bytes": 399895,
+    "sha256": "413914ac0cd6479c8ea8845e7aac8cfeebf1cd0b4bb5821451f5ec9be6861d85"
+  },
+  "runs/comparison-v1/15m-price_shock_reversal_control_v1-long-2025-base.json.gz": {
+    "bytes": 331012,
+    "sha256": "37fa319d3cb140a7ecbdc51db4c15e89996cd98d08672a54f00c2fee9c47674a"
+  },
+  "runs/comparison-v1/15m-price_shock_reversal_control_v1-long-2025-stress.json.gz": {
+    "bytes": 315934,
+    "sha256": "8b81c6b82874e0dbd2d908b87a816a0eefd05ee2cdc474f8d8389adb0a9ba55b"
+  },
+  "runs/comparison-v1/15m-price_shock_reversal_control_v1-long-2026-base.json.gz": {
+    "bytes": 244516,
+    "sha256": "72c1adb546d48f98141993d714751e563aa65e43f5b48be1739949d0d8a0ab8d"
+  },
+  "runs/comparison-v1/15m-price_shock_reversal_control_v1-long-2026-stress.json.gz": {
+    "bytes": 224443,
+    "sha256": "8a8b97216588d8948fb0dc87d6916ffc07bb6e0786ddbacb5430dcf97ad72926"
+  },
+  "runs/comparison-v1/15m-price_shock_reversal_control_v1-short-2022-base.json.gz": {
+    "bytes": 513723,
+    "sha256": "59e41f93aeae8ac68123479745aaafe6569d4995e766dc41ce639b02f29df57f"
+  },
+  "runs/comparison-v1/15m-price_shock_reversal_control_v1-short-2022-stress.json.gz": {
+    "bytes": 478450,
+    "sha256": "3f49c6f76e11530e52c93201bd8e7351b8ae9df4277f0704d840a0494570855b"
+  },
+  "runs/comparison-v1/15m-price_shock_reversal_control_v1-short-2023-base.json.gz": {
+    "bytes": 318136,
+    "sha256": "2b7f0449868e9cc1bde96879e48b36696675b8b7160bb92c07188a154c7321c2"
+  },
+  "runs/comparison-v1/15m-price_shock_reversal_control_v1-short-2023-stress.json.gz": {
+    "bytes": 299963,
+    "sha256": "976074fc143468b4417805c61796507fa40d60f7b3fab0768c47aa7efbcb1a00"
+  },
+  "runs/comparison-v1/15m-price_shock_reversal_control_v1-short-2024-base.json.gz": {
+    "bytes": 452386,
+    "sha256": "5fbd82ecf26033c6af9b5332742a3dd561a35a6cffd103d515a5367f4c88cc83"
+  },
+  "runs/comparison-v1/15m-price_shock_reversal_control_v1-short-2024-stress.json.gz": {
+    "bytes": 417352,
+    "sha256": "3718a85636c549e01c80c2152af48712a5303f1e4770cbc463ba22bf36ec70f9"
+  },
+  "runs/comparison-v1/15m-price_shock_reversal_control_v1-short-2025-base.json.gz": {
+    "bytes": 333046,
+    "sha256": "cfc180150ae0144b9cb4ec9842935ffa0fd6c975b32e6ccc4044224dcd0aa4fc"
+  },
+  "runs/comparison-v1/15m-price_shock_reversal_control_v1-short-2025-stress.json.gz": {
+    "bytes": 308424,
+    "sha256": "7238a5d5aa79b8d071465231611d8fd8e59a8324ca0275aa5e847067c6d9331d"
+  },
+  "runs/comparison-v1/15m-price_shock_reversal_control_v1-short-2026-base.json.gz": {
+    "bytes": 244322,
+    "sha256": "eb2e51e0e97a7d80d75b23f2d708b53a654573dcf2221f391e0cd78a64e81581"
+  },
+  "runs/comparison-v1/15m-price_shock_reversal_control_v1-short-2026-stress.json.gz": {
+    "bytes": 225765,
+    "sha256": "f95a15e1146bfbbef06d8d193bf94463aa229bbed80416070333135d96d98709"
+  },
+  "runs/comparison-v1/5m-executed_taker_pressure_reversal_v1-both-2022-base.json.gz": {
+    "bytes": 734968,
+    "sha256": "44a0f1fcacf4f0d6461414b803301b8dfcc9efef5b2f653f9965de36d1cd359c"
+  },
+  "runs/comparison-v1/5m-executed_taker_pressure_reversal_v1-both-2022-stress.json.gz": {
+    "bytes": 678268,
+    "sha256": "692981d899f06af589879649a1266f136e59029dabd2968b2af312368431d59f"
+  },
+  "runs/comparison-v1/5m-executed_taker_pressure_reversal_v1-both-2023-base.json.gz": {
+    "bytes": 608297,
+    "sha256": "e50b413305213d212eedecaa95b8dab0b194d00c8a9f0c9293ec9c176a4e8798"
+  },
+  "runs/comparison-v1/5m-executed_taker_pressure_reversal_v1-both-2023-stress.json.gz": {
+    "bytes": 558425,
+    "sha256": "5d63938ec470f0482f65cf2aaf9ccf8ae441ee562c3ef4f5c11289860cf300ef"
+  },
+  "runs/comparison-v1/5m-executed_taker_pressure_reversal_v1-both-2024-base.json.gz": {
+    "bytes": 629838,
+    "sha256": "18826d8045614c82e86625682f70026e2a93a4c3b4b34c17eb060fd9dfced86b"
+  },
+  "runs/comparison-v1/5m-executed_taker_pressure_reversal_v1-both-2024-stress.json.gz": {
+    "bytes": 570613,
+    "sha256": "c2eee68e72cef066aaf616efa4cc8fedcbc7bd643cb2f6c950401679f6c04726"
+  },
+  "runs/comparison-v1/5m-executed_taker_pressure_reversal_v1-both-2025-base.json.gz": {
+    "bytes": 512326,
+    "sha256": "48dea0332541daefe4da56423921811613dc361754aec558a1cc78d0157478c1"
+  },
+  "runs/comparison-v1/5m-executed_taker_pressure_reversal_v1-both-2025-stress.json.gz": {
+    "bytes": 492180,
+    "sha256": "a08ef4281af903c6f6e742283d2548c9f87e34511966bcfce44519ded5dcb09b"
+  },
+  "runs/comparison-v1/5m-executed_taker_pressure_reversal_v1-both-2026-base.json.gz": {
+    "bytes": 367656,
+    "sha256": "05838bc524d7a67f1f48b5ef7a8397912e664f600bd043025bb9dab4bb1fd58f"
+  },
+  "runs/comparison-v1/5m-executed_taker_pressure_reversal_v1-both-2026-stress.json.gz": {
+    "bytes": 345354,
+    "sha256": "8b86256763ca58f29e9e9f58f1ce3a2dc4c4efb60c8c60f1c91e9f8d2957c027"
+  },
+  "runs/comparison-v1/5m-executed_taker_pressure_reversal_v1-long-2022-base.json.gz": {
+    "bytes": 603867,
+    "sha256": "0eeec368eada9b568db28c0040d6b171aee0e935493c3f537018997ae2863674"
+  },
+  "runs/comparison-v1/5m-executed_taker_pressure_reversal_v1-long-2022-stress.json.gz": {
+    "bytes": 571700,
+    "sha256": "e78ef5ed02397f1835454a8a40437d3673bb6047a29b566643ac85e8a5bcd427"
+  },
+  "runs/comparison-v1/5m-executed_taker_pressure_reversal_v1-long-2023-base.json.gz": {
+    "bytes": 522060,
+    "sha256": "0232a865cced714300d1dd768d1c1400b7f52691c2a8e3c7880d18aa7dabd9ba"
+  },
+  "runs/comparison-v1/5m-executed_taker_pressure_reversal_v1-long-2023-stress.json.gz": {
+    "bytes": 493475,
+    "sha256": "03ac1910d381744a0631bfe6f25e015000faf05126caac74cf6efe42156006ae"
+  },
+  "runs/comparison-v1/5m-executed_taker_pressure_reversal_v1-long-2024-base.json.gz": {
+    "bytes": 528892,
+    "sha256": "2b3e78efc0850292293199113fc2eb7f63573687da7d393c3697c4903259c436"
+  },
+  "runs/comparison-v1/5m-executed_taker_pressure_reversal_v1-long-2024-stress.json.gz": {
+    "bytes": 499673,
+    "sha256": "e75c1cc422d934a5814d7b9d9e07913fe2bdcdf5439488dbf824b3cd1c1dda5f"
+  },
+  "runs/comparison-v1/5m-executed_taker_pressure_reversal_v1-long-2025-base.json.gz": {
+    "bytes": 463886,
+    "sha256": "0acfaa5d84f79166d914736759f118591c4e61dbc4ffe4f27d82840c14046ffb"
+  },
+  "runs/comparison-v1/5m-executed_taker_pressure_reversal_v1-long-2025-stress.json.gz": {
+    "bytes": 452898,
+    "sha256": "2541d085cc0fb3eb9aa97fd366a6266dd876b01b88420606b14822c2d9abbd25"
+  },
+  "runs/comparison-v1/5m-executed_taker_pressure_reversal_v1-long-2026-base.json.gz": {
+    "bytes": 311372,
+    "sha256": "73eebb90269c5658663b08415e36ff26dd8005f9b5c7be57f2cafcaa69da3b76"
+  },
+  "runs/comparison-v1/5m-executed_taker_pressure_reversal_v1-long-2026-stress.json.gz": {
+    "bytes": 304208,
+    "sha256": "30bbc33acd04296de46b2158e98926fa25c051c946b03f930f157555a3931fa1"
+  },
+  "runs/comparison-v1/5m-executed_taker_pressure_reversal_v1-short-2022-base.json.gz": {
+    "bytes": 573121,
+    "sha256": "42609e36243530c0ab86ad2de978961544a783c26c484aa33145c9f68d5dca7f"
+  },
+  "runs/comparison-v1/5m-executed_taker_pressure_reversal_v1-short-2022-stress.json.gz": {
+    "bytes": 544709,
+    "sha256": "2ef825b8d3821bb84905af056433299ecdf930c29c5128db8628631d40bf9dfe"
+  },
+  "runs/comparison-v1/5m-executed_taker_pressure_reversal_v1-short-2023-base.json.gz": {
+    "bytes": 519931,
+    "sha256": "a0e836751fd29e141ab1027a1ee1f7cdc0caa11847a31b7d719b2556bf34e6dc"
+  },
+  "runs/comparison-v1/5m-executed_taker_pressure_reversal_v1-short-2023-stress.json.gz": {
+    "bytes": 496038,
+    "sha256": "8b6ed4c37bc7dbc7ea4d67cd72c89d20d7e95b59fc6542d3543390c6b2e7d3fc"
+  },
+  "runs/comparison-v1/5m-executed_taker_pressure_reversal_v1-short-2024-base.json.gz": {
+    "bytes": 538128,
+    "sha256": "3d3ed19d23ca2487f5da6d325061bc73d36a97b30f2370ba7a59deb89ed50a2b"
+  },
+  "runs/comparison-v1/5m-executed_taker_pressure_reversal_v1-short-2024-stress.json.gz": {
+    "bytes": 502671,
+    "sha256": "221df56851971309e699af809e529fbe817eb5be4ad06360823fb5e2e7974fe6"
+  },
+  "runs/comparison-v1/5m-executed_taker_pressure_reversal_v1-short-2025-base.json.gz": {
+    "bytes": 458660,
+    "sha256": "416b15d8db02fd017830bc7ac4a21ee30d5ae3621c769d5fed6cd196149a7b39"
+  },
+  "runs/comparison-v1/5m-executed_taker_pressure_reversal_v1-short-2025-stress.json.gz": {
+    "bytes": 445317,
+    "sha256": "ebe55f3ac2673f773407d4bb5ccbbf5942f70365f858d88dfdd8d30261310352"
+  },
+  "runs/comparison-v1/5m-executed_taker_pressure_reversal_v1-short-2026-base.json.gz": {
+    "bytes": 329244,
+    "sha256": "3ea8395944677d1f6534f4baeaf1e9d643ffa191ef8084a553a2764148335d7c"
+  },
+  "runs/comparison-v1/5m-executed_taker_pressure_reversal_v1-short-2026-stress.json.gz": {
+    "bytes": 312126,
+    "sha256": "fca768915ecb1afc0afc9f29f953081196d0c3967edfbc2b2057e3f3ac5b17bd"
+  },
+  "runs/comparison-v1/5m-price_shock_reversal_control_v1-both-2022-base.json.gz": {
+    "bytes": 965484,
+    "sha256": "1caafb4f921e25460f86d34170dadde8bcff5ccbd2c499c504da2e01200a6cf9"
+  },
+  "runs/comparison-v1/5m-price_shock_reversal_control_v1-both-2022-stress.json.gz": {
+    "bytes": 870225,
+    "sha256": "ee0b116b364deed4a35ee322e898deb611664be1a035109245484b6d626d29fd"
+  },
+  "runs/comparison-v1/5m-price_shock_reversal_control_v1-both-2023-base.json.gz": {
+    "bytes": 653168,
+    "sha256": "9efbff4a45d2668c64a4234d44ecb3bc381374cdb87475e37f470ef77eeffb4e"
+  },
+  "runs/comparison-v1/5m-price_shock_reversal_control_v1-both-2023-stress.json.gz": {
+    "bytes": 601206,
+    "sha256": "3c02e05d1f7c62daad8bdd345c09ae393723e91a91f2aaf6091869f241bd61b1"
+  },
+  "runs/comparison-v1/5m-price_shock_reversal_control_v1-both-2024-base.json.gz": {
+    "bytes": 752528,
+    "sha256": "45f493df6ec3348ee8ae5721d01a53805907feb46bc54d9fad013681524d6d28"
+  },
+  "runs/comparison-v1/5m-price_shock_reversal_control_v1-both-2024-stress.json.gz": {
+    "bytes": 678657,
+    "sha256": "b729621664f2ee371edc0338f36e13bd9a2cf81d32689dfa83d091dd1df7b1f9"
+  },
+  "runs/comparison-v1/5m-price_shock_reversal_control_v1-both-2025-base.json.gz": {
+    "bytes": 598195,
+    "sha256": "84ad6dd40833141eff5d3081b7428fbdf6abe146a233ffd79ffac25408dbed00"
+  },
+  "runs/comparison-v1/5m-price_shock_reversal_control_v1-both-2025-stress.json.gz": {
+    "bytes": 563961,
+    "sha256": "ad0f65f9b09abb5d15b9365b4579cb9741a753b551cd3c17f80ec8ad3f435b97"
+  },
+  "runs/comparison-v1/5m-price_shock_reversal_control_v1-both-2026-base.json.gz": {
+    "bytes": 445768,
+    "sha256": "ea9e7394777d3caaf23d81ab4e2a034174df3369fe048a756958256bbfc4fad4"
+  },
+  "runs/comparison-v1/5m-price_shock_reversal_control_v1-both-2026-stress.json.gz": {
+    "bytes": 412176,
+    "sha256": "6f6e9a615b465135780d6500f1658e8633789ccc807125f712fc449778b97903"
+  },
+  "runs/comparison-v1/5m-price_shock_reversal_control_v1-long-2022-base.json.gz": {
+    "bytes": 820973,
+    "sha256": "a9ff5aec7a0d1f0448bbe0dd984a2737f77c5b8553137e6de0dc75f9cefab1e9"
+  },
+  "runs/comparison-v1/5m-price_shock_reversal_control_v1-long-2022-stress.json.gz": {
+    "bytes": 755049,
+    "sha256": "2d3a1a0ba8dd3f96c9fc27a1919b66fb981d1e13ab43f364f230f06ba1278691"
+  },
+  "runs/comparison-v1/5m-price_shock_reversal_control_v1-long-2023-base.json.gz": {
+    "bytes": 560992,
+    "sha256": "9c177581b5c9da242751c7f1e27e790d808d101a6ac3b93965a20e23cf90307e"
+  },
+  "runs/comparison-v1/5m-price_shock_reversal_control_v1-long-2023-stress.json.gz": {
+    "bytes": 521013,
+    "sha256": "5ebc99a2af591921fa32efa642265d9cca362f7f70bd1d2f675b27b8ce720256"
+  },
+  "runs/comparison-v1/5m-price_shock_reversal_control_v1-long-2024-base.json.gz": {
+    "bytes": 631059,
+    "sha256": "d48e1200ef6096fe3aa308c67b5a972366261d7da583d71805ac885183e283a2"
+  },
+  "runs/comparison-v1/5m-price_shock_reversal_control_v1-long-2024-stress.json.gz": {
+    "bytes": 584509,
+    "sha256": "22e2b747f2d23376eeec75492fdc1b62ec085e5956f120d752fe3723f4c908ee"
+  },
+  "runs/comparison-v1/5m-price_shock_reversal_control_v1-long-2025-base.json.gz": {
+    "bytes": 521953,
+    "sha256": "ceb550ce8bbf022d2719ef59baa9fd9b251d7d6c051b81a7192d12dc4e2db776"
+  },
+  "runs/comparison-v1/5m-price_shock_reversal_control_v1-long-2025-stress.json.gz": {
+    "bytes": 506348,
+    "sha256": "40b9d8ac8e9d9ffc5588f01b3b15df581d037c40d931bc88c9531bad57181880"
+  },
+  "runs/comparison-v1/5m-price_shock_reversal_control_v1-long-2026-base.json.gz": {
+    "bytes": 363366,
+    "sha256": "a0b5e89983ba7ee9ef5737ce7b12f4d670f49443a000e546a8ba1ea8d6294563"
+  },
+  "runs/comparison-v1/5m-price_shock_reversal_control_v1-long-2026-stress.json.gz": {
+    "bytes": 345537,
+    "sha256": "1b67d712486df9554bcd4a2c28ac60dcfec5f25436d748c127e7533ca50ffdd5"
+  },
+  "runs/comparison-v1/5m-price_shock_reversal_control_v1-short-2022-base.json.gz": {
+    "bytes": 777550,
+    "sha256": "150f2d8d5628bd93845f88c7e9a61d36422320b320ca5daea4c4834e5b6d460b"
+  },
+  "runs/comparison-v1/5m-price_shock_reversal_control_v1-short-2022-stress.json.gz": {
+    "bytes": 710788,
+    "sha256": "e4627151628754615035383cf366162f0beac1cbd7e36d50270b20056a3d5224"
+  },
+  "runs/comparison-v1/5m-price_shock_reversal_control_v1-short-2023-base.json.gz": {
+    "bytes": 561553,
+    "sha256": "73e5728aa2fcacb3518f8d1e21b9909560d151bb366a1377892c3c4965c3c67d"
+  },
+  "runs/comparison-v1/5m-price_shock_reversal_control_v1-short-2023-stress.json.gz": {
+    "bytes": 528059,
+    "sha256": "5bbe17abda9148ec059e55176efeefc275da6d06e5aa45aba9d62db87b386a58"
+  },
+  "runs/comparison-v1/5m-price_shock_reversal_control_v1-short-2024-base.json.gz": {
+    "bytes": 644297,
+    "sha256": "7e3456c6d4658697d0dc2bf630b4fed2dd49a213e2c0e9804ddac9f80d23b8a2"
+  },
+  "runs/comparison-v1/5m-price_shock_reversal_control_v1-short-2024-stress.json.gz": {
+    "bytes": 591535,
+    "sha256": "339e5e6c79d45ee686b7eb8a4736dd87491a8e062bc121f2d6d73be529262236"
+  },
+  "runs/comparison-v1/5m-price_shock_reversal_control_v1-short-2025-base.json.gz": {
+    "bytes": 539674,
+    "sha256": "d9a4e3588de46b31c98b26e2ff5e84201091998d6761e21c57d562da4ae8f0b6"
+  },
+  "runs/comparison-v1/5m-price_shock_reversal_control_v1-short-2025-stress.json.gz": {
+    "bytes": 509761,
+    "sha256": "bfa187b4647daae14b4430c18167e0158c4c3200ef12c21e8d03b53b1775b6fe"
+  },
+  "runs/comparison-v1/5m-price_shock_reversal_control_v1-short-2026-base.json.gz": {
+    "bytes": 395346,
+    "sha256": "5123f1e17d31ee3f13b989408a91bdd8e455ab081e9a369eacc21a4fa255a4fc"
+  },
+  "runs/comparison-v1/5m-price_shock_reversal_control_v1-short-2026-stress.json.gz": {
+    "bytes": 370329,
+    "sha256": "c61c195ad5306dcfba4c5922b78a62e2ba08815cb8e544a8184de90ae9496dd0"
+  },
+  "runs/comparison-v1/comparison.json": {
+    "bytes": 231664,
+    "sha256": "d5436db52fa2ff4ed1126e544cbe6d53a5a2a91483b1077d81c4a9a3a838891c"
+  },
+  "runs/comparison-v1/comparison.partial.json": {
+    "bytes": 201767,
+    "sha256": "0c8a18a81aba2b59d11dcd58c7f1110ec26258495cfc82e07947eed234a418d4"
+  },
+  "runs/comparison-v1/data_audit.json": {
+    "bytes": 250,
+    "sha256": "bf170431f92785437b61ee8603262f27250836bcf3e85cff15b3be0a95dc909f"
+  },
+  "runs/comparison-v1/detector-15-executed_taker_pressure_reversal_v1.json.gz": {
+    "bytes": 101990,
+    "sha256": "21eaa70eee14c4ca5af4342d88e4f964459f97337b0ca436c65d5d450d4caca4"
+  },
+  "runs/comparison-v1/detector-15-price_shock_reversal_control_v1.json.gz": {
+    "bytes": 258299,
+    "sha256": "9e24485a27293ae58496cd1aa38d3b6d0d2d18c2ffab50c1f79a7753faa6b7d4"
+  },
+  "runs/comparison-v1/detector-5-executed_taker_pressure_reversal_v1.json.gz": {
+    "bytes": 113994,
+    "sha256": "8432a4fec26df91d30d220ada722cb74ecb787aa240233dc3bf519b6272bbb3c"
+  },
+  "runs/comparison-v1/detector-5-price_shock_reversal_control_v1.json.gz": {
+    "bytes": 194831,
+    "sha256": "d998dc39d832436ce1f1ac63e844675f4530de6dbe7555e15d2d2f4a391bfc8b"
+  },
+  "runs/comparison-v1/ECONOMIC_SUMMARY.json": {
+    "bytes": 7671,
+    "sha256": "68a2b7fbf823d47fcf290e5b5ad58f1d123e25459480e36fb32a5fd18e52d1a5"
+  },
+  "runs/comparison-v1/features-15.json.gz": {
+    "bytes": 3390895,
+    "sha256": "b1196491688a4975078d4c78733b80353ecaef2159db0052861ea03011d70ec8"
+  },
+  "runs/comparison-v1/features-5.json.gz": {
+    "bytes": 8910413,
+    "sha256": "d3fbb1b69dc7f66a06dadf26bde10aeca7a4bf6c4dc1705832d19702922fa713"
+  },
+  "runs/comparison-v1/identities_after_run.json": {
+    "bytes": 5764,
+    "sha256": "9392c180e6ae8eff50888aab877080eeb8d57b41c60cb76dcb7fbffa5c80fed8"
+  },
+  "runs/comparison-v1/identities_before_run.json": {
+    "bytes": 5764,
+    "sha256": "9392c180e6ae8eff50888aab877080eeb8d57b41c60cb76dcb7fbffa5c80fed8"
+  },
+  "runs/comparison-v1/progress.json": {
+    "bytes": 69,
+    "sha256": "0595b35d7848e3f565ff626404a2ac08fed205dc0b3825a59892a88588ee0b84"
+  },
+  "runs/comparison-v1/RECONCILIATION.json": {
+    "bytes": 6661,
+    "sha256": "6d5eec3b9b64e6f4026d58f1a660df80550a952b8062e74585b20947ff5b995e"
+  },
+  "runs/comparison-v1/REPORT.md": {
+    "bytes": 3028,
+    "sha256": "274390e8456c3b94431e21ef4c7ac6ff5a006c6ebafa63ff5ca18a9d440193cc"
+  },
+  "runs/comparison-v1/trades.csv": {
+    "bytes": 6928870,
+    "sha256": "ffbf23594d3238069a60b39de07b439715c8d1dec8f1bef4ac74e195900774e8"
+  },
+  "runs/comparison-v1/trials.jsonl": {
+    "bytes": 911748,
+    "sha256": "5be1398d8fa488475cc1b22ec047e7f72314387539f8caa0a21c69661e48104a"
+  },
+  "SOURCES.json": {
+    "bytes": 1298,
+    "sha256": "76322223d9d4db9fb4b1c0ff4987631c8d34f345407abc6fae0a2e144999a2fc"
+  },
+  "TEST_RESULTS.json": {
+    "bytes": 2265,
+    "sha256": "c61fb2e04d1d1e963aa08b43327ab00a72da80e6dabab6a4b8a54d47d20f4e33"
+  }
+}

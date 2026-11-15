@@ -1,0 +1,602 @@
+{
+  "AUTHORIZATION.json": {
+    "sha256": "e75a9c2a1c9360d254949b7bdba689a0db848370f6922130a872b9e1bddd47b1",
+    "bytes": 376
+  },
+  "comparison-v1.stderr.log": {
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "bytes": 0
+  },
+  "comparison-v1.stdout.log": {
+    "sha256": "6789aa0a872d45666be81ec5de4a553097b9c3f190decec7a3a5e8d0e888e940",
+    "bytes": 81
+  },
+  "cumulative_trials.jsonl": {
+    "sha256": "23c2b916d214d8a5e6229ded53827ba0c7365de012d93019f4eb833744f2ca6a",
+    "bytes": 757630
+  },
+  "INPUT_IDENTITIES.json": {
+    "sha256": "325d6aafe044f057999d0c6aee1e591b8ec886d5e004381a9d57856a5a001dd6",
+    "bytes": 2586
+  },
+  "PHASE2.md": {
+    "sha256": "41535ce0cda7a32832d43b6c83560b2b1a0e50bb5467b65dcbbc5c91e305a24a",
+    "bytes": 13110
+  },
+  "PRE_ECONOMICS_DATA_FEATURE_AUDIT.json": {
+    "sha256": "3e53814418ff0d824af64ca6626cf89a44c854471555b696f09b50c61b2c3d42",
+    "bytes": 447
+  },
+  "protocol.json": {
+    "sha256": "6027e1be528e882f84fd8c370458d2a3b680b9d33332418860d8816a438136a5",
+    "bytes": 10370
+  },
+  "ROOT_ARTIFACT_RECONCILIATION.json": {
+    "sha256": "c230e2b17ec05f5e74ff92ad6bb27cdbe4e1000f948096f4e2df76f3f0ec3775",
+    "bytes": 720
+  },
+  "ROOT_DATA_AUDIT.json": {
+    "sha256": "3033b506e579b0f60e60c840b0562c6cdb9edcafb35d7cad91a377e02e446a9f",
+    "bytes": 441
+  },
+  "ROOT_REVIEW.json": {
+    "sha256": "c82ad6adbe551cc9183efa4411f7aaf6c3eeaef7e8401eed1f11e3b35d2c4185",
+    "bytes": 2101
+  },
+  "runs/comparison-v1/clock_6h_alternating-both-2022-base.json.gz": {
+    "sha256": "fe10b413dc26099024ec98eb1a4c1a1e9778a546d177719e9e9195f8a76f37da",
+    "bytes": 1015326
+  },
+  "runs/comparison-v1/clock_6h_alternating-both-2022-stress.json.gz": {
+    "sha256": "20bd3aa4dbbf1857d93757dae8f9aeddd871ca4b5ada19ac2997c459b0765748",
+    "bytes": 1015382
+  },
+  "runs/comparison-v1/clock_6h_alternating-both-2023-base.json.gz": {
+    "sha256": "4c3924053c07e53971240823e9c4a587508676950b4679c4e6cc7e981ff1691f",
+    "bytes": 876571
+  },
+  "runs/comparison-v1/clock_6h_alternating-both-2023-stress.json.gz": {
+    "sha256": "757ba08c83f450c6d654f1c66e586cd692d3475560ea9b3125a6e35a9ec20d59",
+    "bytes": 876142
+  },
+  "runs/comparison-v1/clock_6h_alternating-both-2024-base.json.gz": {
+    "sha256": "a5a25627447bb5249675949508693e343d3a10f9d09b2b40d1c4d8b373e2b893",
+    "bytes": 1012108
+  },
+  "runs/comparison-v1/clock_6h_alternating-both-2024-stress.json.gz": {
+    "sha256": "87b2eb560e601c9d10aff08673ff62422baad2da1f8f1ce8b3e46cf8a8346f46",
+    "bytes": 1013791
+  },
+  "runs/comparison-v1/clock_6h_alternating-both-2025-base.json.gz": {
+    "sha256": "4395b422f526e0309b24b5b969e402247bf101bba74c323ccb628bba056a58ed",
+    "bytes": 909728
+  },
+  "runs/comparison-v1/clock_6h_alternating-both-2025-stress.json.gz": {
+    "sha256": "6fe0b25c7b4020ef6e487cd1444a61fe91a79e55eb85f2789cd6d41933590c23",
+    "bytes": 909984
+  },
+  "runs/comparison-v1/clock_6h_alternating-both-2026-base.json.gz": {
+    "sha256": "98a0d736afe215d3edb7bd8bdc7fc2d0f2ffb8f19825885923e211b14e4c78dc",
+    "bytes": 615961
+  },
+  "runs/comparison-v1/clock_6h_alternating-both-2026-stress.json.gz": {
+    "sha256": "2c88145b81d90fe584f64ba07451e3115a9b7114f684d5ed31320d6e04782d4c",
+    "bytes": 615221
+  },
+  "runs/comparison-v1/clock_6h_long-both-2022-base.json.gz": {
+    "sha256": "86c81f7f66002cef460613bb72cf24b95d7bf27a14face59ae38fe31668c1834",
+    "bytes": 1003504
+  },
+  "runs/comparison-v1/clock_6h_long-both-2022-stress.json.gz": {
+    "sha256": "517e24a09ddb131be1bd105c311a6ac7a48971c7a4b9af082d4dfac629bcd6a5",
+    "bytes": 1003665
+  },
+  "runs/comparison-v1/clock_6h_long-both-2023-base.json.gz": {
+    "sha256": "79fd0cd039812efab473cf8ef6af1e80f27964d5f0be72bf7e0c266cabfc354b",
+    "bytes": 870777
+  },
+  "runs/comparison-v1/clock_6h_long-both-2023-stress.json.gz": {
+    "sha256": "3f4a29bcd9019a25807f4e7033c5d283c4e343900ade6821fca0a63a9928cdfb",
+    "bytes": 871641
+  },
+  "runs/comparison-v1/clock_6h_long-both-2024-base.json.gz": {
+    "sha256": "d79f18fe7267dd09ae896863f8391244766c3a729914917518b3eadee45d3e06",
+    "bytes": 1001904
+  },
+  "runs/comparison-v1/clock_6h_long-both-2024-stress.json.gz": {
+    "sha256": "d436f0656b708a2e4f0da8bb7986110865b8f16b3c7fd711b0583cc28d8049b6",
+    "bytes": 1003351
+  },
+  "runs/comparison-v1/clock_6h_long-both-2025-base.json.gz": {
+    "sha256": "2092d1bc21b14476d276df741b4d00ca9d154c10fdda8526548ff4de38b8a20c",
+    "bytes": 900335
+  },
+  "runs/comparison-v1/clock_6h_long-both-2025-stress.json.gz": {
+    "sha256": "d66d09ca50fb36d96631deed7e0707495a7e6b36fd4df342baf6786907ccf3b0",
+    "bytes": 901914
+  },
+  "runs/comparison-v1/clock_6h_long-both-2026-base.json.gz": {
+    "sha256": "dd36d68598c82124e7d5ccdc1769225b8c1f124b04ad5a1ad80cde810779639b",
+    "bytes": 608526
+  },
+  "runs/comparison-v1/clock_6h_long-both-2026-stress.json.gz": {
+    "sha256": "85a87dc0821a2e3d455e72b539f2a43a0d4a4c98f6110c921a22d73f301ff03e",
+    "bytes": 607881
+  },
+  "runs/comparison-v1/clock_6h_short-both-2022-base.json.gz": {
+    "sha256": "6ba120c3db67a7f336fb15182c334a56a995c81c015a2c7b822e1466d95541d2",
+    "bytes": 1010051
+  },
+  "runs/comparison-v1/clock_6h_short-both-2022-stress.json.gz": {
+    "sha256": "77a253b232705ccfee2f31307cc72c30fb49e8feb4f26a49891918ce7e1cfbb2",
+    "bytes": 1009736
+  },
+  "runs/comparison-v1/clock_6h_short-both-2023-base.json.gz": {
+    "sha256": "f4dcaf1e7a8f249486d5ffab575c8612607f060f5af0b1f353c7013ea22979ee",
+    "bytes": 867668
+  },
+  "runs/comparison-v1/clock_6h_short-both-2023-stress.json.gz": {
+    "sha256": "777e0e2c86347a5cab8fe5d7adcfcfd5327a16525ee135f087ec506a92d919a4",
+    "bytes": 866836
+  },
+  "runs/comparison-v1/clock_6h_short-both-2024-base.json.gz": {
+    "sha256": "51f4d6b1ad976a27c1334914547da10e4c3b6fec759bb209e7ba202b77215e2d",
+    "bytes": 1005120
+  },
+  "runs/comparison-v1/clock_6h_short-both-2024-stress.json.gz": {
+    "sha256": "bd47c793371bf745b5c04600da8438258acb005c31945d23cb5c31f0eee10323",
+    "bytes": 1004836
+  },
+  "runs/comparison-v1/clock_6h_short-both-2025-base.json.gz": {
+    "sha256": "00a05024e0b90cec31d22866268f79444a59624d30de715c802bd2fe00c87ade",
+    "bytes": 905394
+  },
+  "runs/comparison-v1/clock_6h_short-both-2025-stress.json.gz": {
+    "sha256": "c087c931650e7d1326db39a32c4e64b57fbe7009fe2f7e2f0a5f3386e9dcb5b9",
+    "bytes": 905676
+  },
+  "runs/comparison-v1/clock_6h_short-both-2026-base.json.gz": {
+    "sha256": "4aeb0957be2de07693b1f1c2099e7078821e618791a97265d79fe691759cefcd",
+    "bytes": 610772
+  },
+  "runs/comparison-v1/clock_6h_short-both-2026-stress.json.gz": {
+    "sha256": "50446fd9d8ce667e4ff9c3045f730568363d91515a396b0e3ac1fba8418450be",
+    "bytes": 610841
+  },
+  "runs/comparison-v1/close_channel_24h-both-2022-base.json.gz": {
+    "sha256": "53126a4767d4747bb077dd3b0a0f4f9237d3cb6438821a3ad6c8653dba837664",
+    "bytes": 866390
+  },
+  "runs/comparison-v1/close_channel_24h-both-2022-stress.json.gz": {
+    "sha256": "6d7e9fe2eed81c048c30f2b0a33b89002b3d2be4c0f0860b79b55d3b81e8915c",
+    "bytes": 867362
+  },
+  "runs/comparison-v1/close_channel_24h-both-2023-base.json.gz": {
+    "sha256": "e3b0974116d99d4a4dfc3c7b773b5df42428be8768393c04774765874eccd042",
+    "bytes": 702805
+  },
+  "runs/comparison-v1/close_channel_24h-both-2023-stress.json.gz": {
+    "sha256": "12f1e63fd7e89323588f97de70bd45f2b802ba2613a1e9b345a5299a1883d3e5",
+    "bytes": 704299
+  },
+  "runs/comparison-v1/close_channel_24h-both-2024-base.json.gz": {
+    "sha256": "599a9ae39743e310edc0282de542f9c51124b023e9aba9cd27eed7ea795f0056",
+    "bytes": 861111
+  },
+  "runs/comparison-v1/close_channel_24h-both-2024-stress.json.gz": {
+    "sha256": "e6754bd175942e153a57c6a9f5672647384d7c312476adefa86fe95446663d7f",
+    "bytes": 860114
+  },
+  "runs/comparison-v1/close_channel_24h-both-2025-base.json.gz": {
+    "sha256": "1ab7528620a582b5e65f95866117059e1006ab1275cba01a20eab0db316e8d29",
+    "bytes": 809123
+  },
+  "runs/comparison-v1/close_channel_24h-both-2025-stress.json.gz": {
+    "sha256": "cd267f71c47fa5fdbbb74da95b4a9181139a712fa74f4c0cea2f0f755cd4ee33",
+    "bytes": 808407
+  },
+  "runs/comparison-v1/close_channel_24h-both-2026-base.json.gz": {
+    "sha256": "1fd334af9fa2177adb529024c7ee0a7d0f33a44216eba1fb8ab403f8cbd30230",
+    "bytes": 556712
+  },
+  "runs/comparison-v1/close_channel_24h-both-2026-stress.json.gz": {
+    "sha256": "cd26128f0f864284db515c92a0a87834c0777a431be1268d842d58bda302531d",
+    "bytes": 555834
+  },
+  "runs/comparison-v1/close_channel_24h-long-2022-base.json.gz": {
+    "sha256": "528a9e800b518c8780016c26dabec7e96a6fb1d8b0fc228b634a494082094317",
+    "bytes": 532571
+  },
+  "runs/comparison-v1/close_channel_24h-long-2022-stress.json.gz": {
+    "sha256": "3a1e5d5e4f6fba3169a4bd66d419fe2100791e9df9ec97899532e7d7c35f114e",
+    "bytes": 533323
+  },
+  "runs/comparison-v1/close_channel_24h-long-2023-base.json.gz": {
+    "sha256": "fade71f3fb320087e2cbcdbed98f9b2651a071dbb612a09c76c81ca928169175",
+    "bytes": 486770
+  },
+  "runs/comparison-v1/close_channel_24h-long-2023-stress.json.gz": {
+    "sha256": "b6b50b6b124f178891180040e662a4fcffe13ce34fbd2906e681bec009a7e203",
+    "bytes": 487887
+  },
+  "runs/comparison-v1/close_channel_24h-long-2024-base.json.gz": {
+    "sha256": "a96682f91e0bc5aada346849972a0ef5a24cf83bf048d7cc1a93b6d823e9113a",
+    "bytes": 584227
+  },
+  "runs/comparison-v1/close_channel_24h-long-2024-stress.json.gz": {
+    "sha256": "732faaa369fd82f0dd8a98337a8cd9c2ac24f5d9fb0fdb59bee150cc665ac10f",
+    "bytes": 583978
+  },
+  "runs/comparison-v1/close_channel_24h-long-2025-base.json.gz": {
+    "sha256": "f09b4a90c5e82847cf1fd67b7e163c587e1cf57bbb0e5966b43dbe359a4e3a92",
+    "bytes": 530720
+  },
+  "runs/comparison-v1/close_channel_24h-long-2025-stress.json.gz": {
+    "sha256": "c0946c3ebd799f0918a965bc35d5aa570fed2fda85e3f4b2f42cf4b966cec6fd",
+    "bytes": 530846
+  },
+  "runs/comparison-v1/close_channel_24h-long-2026-base.json.gz": {
+    "sha256": "7750fb88f15efa3da21ef777922ceb4efddabbed27cc6919c73c647a5f9255e2",
+    "bytes": 357430
+  },
+  "runs/comparison-v1/close_channel_24h-long-2026-stress.json.gz": {
+    "sha256": "75e5f576bf7870977890c1b9c6896ae5558abdf37ebe4cf760dc83448642c1c4",
+    "bytes": 357283
+  },
+  "runs/comparison-v1/close_channel_24h-short-2022-base.json.gz": {
+    "sha256": "23a481529de6eb26d5c2474002824dd09c82bcf7b518d6822212761179c5f339",
+    "bytes": 575055
+  },
+  "runs/comparison-v1/close_channel_24h-short-2022-stress.json.gz": {
+    "sha256": "69b71a0c451b8032701b7d4784649431f0e9559b1f580488361055cb6e540b59",
+    "bytes": 575543
+  },
+  "runs/comparison-v1/close_channel_24h-short-2023-base.json.gz": {
+    "sha256": "1e008ab4ee1a44ca7fdf139d5a3aa0e1f8f06c58f00924965f725cb515671c5c",
+    "bytes": 441603
+  },
+  "runs/comparison-v1/close_channel_24h-short-2023-stress.json.gz": {
+    "sha256": "238cddee3d6eedbfd01d0721280656cb435c682993ec19ecb7716ee01dc00a96",
+    "bytes": 441555
+  },
+  "runs/comparison-v1/close_channel_24h-short-2024-base.json.gz": {
+    "sha256": "74830821eadef3ff51930b12fb19a3ec95997724cf71a22b91d27e6df592dd3c",
+    "bytes": 519284
+  },
+  "runs/comparison-v1/close_channel_24h-short-2024-stress.json.gz": {
+    "sha256": "54313adbae4409629327e2dbe23f0cb50cabd8932a0190b8a700c41d18864bd0",
+    "bytes": 519261
+  },
+  "runs/comparison-v1/close_channel_24h-short-2025-base.json.gz": {
+    "sha256": "1e636a6c406cc62dd5970527a111da7adc2093e2f76809dcd8c238f07ff4ee1b",
+    "bytes": 519160
+  },
+  "runs/comparison-v1/close_channel_24h-short-2025-stress.json.gz": {
+    "sha256": "3bbb6cf6729dc169e93c542aef894a0015542f65724824ea3657863db785a059",
+    "bytes": 519600
+  },
+  "runs/comparison-v1/close_channel_24h-short-2026-base.json.gz": {
+    "sha256": "8bb70ca11bc459dd08b38e90b1aa01082ab73dbcfc0ab65550f5e13321b2ca21",
+    "bytes": 359556
+  },
+  "runs/comparison-v1/close_channel_24h-short-2026-stress.json.gz": {
+    "sha256": "339595be162e0d7d93a314a08efd03a622b01fe8e66519000faaa63add24cc3b",
+    "bytes": 359568
+  },
+  "runs/comparison-v1/comparison.json": {
+    "sha256": "a725563975c5ccc27047599ef8019654d5811b054551836fa9a4163e28c8b98b",
+    "bytes": 221586
+  },
+  "runs/comparison-v1/comparison.partial.json": {
+    "sha256": "009901edda4550480992e2d172047d2257eacec1478490a3d8fe5671e125dcc8",
+    "bytes": 201539
+  },
+  "runs/comparison-v1/data_audit.json": {
+    "sha256": "b3f8ef1f772081cd6db068431daaa3aa1c131bd0d22a7f8f8954e6a6a92a3322",
+    "bytes": 360
+  },
+  "runs/comparison-v1/detector-clock_6h_alternating.json.gz": {
+    "sha256": "125326b7cb2104b86b7bab19002223ec2d4098b0890f01f8b69dfff8f9346839",
+    "bytes": 193861
+  },
+  "runs/comparison-v1/detector-clock_6h_long.json.gz": {
+    "sha256": "674ddfa74ffac7ac9f37fe9220377fa4556d4c718dbc917465c9e6fac8237600",
+    "bytes": 175967
+  },
+  "runs/comparison-v1/detector-clock_6h_short.json.gz": {
+    "sha256": "dfc7979b40b1d6cdd7267ce9a1075b969cd2788cd8549d4033744e5510a76107",
+    "bytes": 176660
+  },
+  "runs/comparison-v1/detector-close_channel_24h.json.gz": {
+    "sha256": "0a022bf35e204ece27e2471a2ef7760cbe923536de715bf7dd33e5f882d2765d",
+    "bytes": 184514
+  },
+  "runs/comparison-v1/detector-shock_reversal_2h.json.gz": {
+    "sha256": "04ede6b1f5ca6a094255b263607765fc29943d39efd7d33fdf6d0e28bcd37593",
+    "bytes": 16191
+  },
+  "runs/comparison-v1/detector-utc_noise_momentum.json.gz": {
+    "sha256": "331cfc7ea49f61e9e56af49bfdd1cdbce828eca2fe9423b8bcb8daaddb7a131d",
+    "bytes": 529135
+  },
+  "runs/comparison-v1/ECONOMIC_DETAILS.json": {
+    "sha256": "e8c7ab5d2b8247a80b73a1b568ce373ef3a7b9fa1d9946da244e99787f88b6bc",
+    "bytes": 281835
+  },
+  "runs/comparison-v1/features.json.gz": {
+    "sha256": "8b98040b0835052376fb55adbf51646dca0b18ca43ac9eea30ee2436d50f9469",
+    "bytes": 8619937
+  },
+  "runs/comparison-v1/identities_after_run.json": {
+    "sha256": "03cb8ac38d377f3d79410daa4a644116d54a5a50d9e0918cfb4ebad5ed911811",
+    "bytes": 4705
+  },
+  "runs/comparison-v1/identities_before_run.json": {
+    "sha256": "03cb8ac38d377f3d79410daa4a644116d54a5a50d9e0918cfb4ebad5ed911811",
+    "bytes": 4705
+  },
+  "runs/comparison-v1/progress.json": {
+    "sha256": "0595b35d7848e3f565ff626404a2ac08fed205dc0b3825a59892a88588ee0b84",
+    "bytes": 69
+  },
+  "runs/comparison-v1/REPORT.md": {
+    "sha256": "96850ce9ff939a816bb690fa8ec5e9503551123ce5c5932aba8d3d281d1ae63c",
+    "bytes": 3242
+  },
+  "runs/comparison-v1/shock_reversal_2h-both-2022-base.json.gz": {
+    "sha256": "164905b36eebaa2efc85e3601419ab3833fe394edfec4c3299af4c7a39306593",
+    "bytes": 211902
+  },
+  "runs/comparison-v1/shock_reversal_2h-both-2022-stress.json.gz": {
+    "sha256": "bf6c73dde50d81ce14e68a5dfa160ffcf0fbfdd86a4a9f5d23edb806195cb922",
+    "bytes": 211955
+  },
+  "runs/comparison-v1/shock_reversal_2h-both-2023-base.json.gz": {
+    "sha256": "05c2a97c969bab16bb1ee28df1213ff59f1b8ab8acefc5766008c13afed264aa",
+    "bytes": 214657
+  },
+  "runs/comparison-v1/shock_reversal_2h-both-2023-stress.json.gz": {
+    "sha256": "fe8d3517485f529cffe5cee110d6c64bdc08a6e682cbe5fc63b86dd4b2fb966e",
+    "bytes": 214749
+  },
+  "runs/comparison-v1/shock_reversal_2h-both-2024-base.json.gz": {
+    "sha256": "e4e255288aa36889140f6bb64106e488f95d1bdda21a7252af12fbc46f6b7490",
+    "bytes": 216587
+  },
+  "runs/comparison-v1/shock_reversal_2h-both-2024-stress.json.gz": {
+    "sha256": "c126289bc0a7a7dd2bc3650e0e039d27084714191968dde8a4c368d588137938",
+    "bytes": 216299
+  },
+  "runs/comparison-v1/shock_reversal_2h-both-2025-base.json.gz": {
+    "sha256": "d23a06addbddb45108147ba4e56005b15f0feb510b055148287e8adf6f6a1b80",
+    "bytes": 219313
+  },
+  "runs/comparison-v1/shock_reversal_2h-both-2025-stress.json.gz": {
+    "sha256": "959c0f1bc1a8da6f4cd68adc4591c4ec26045ba6c330ff85198d3e3e5698e7e3",
+    "bytes": 219461
+  },
+  "runs/comparison-v1/shock_reversal_2h-both-2026-base.json.gz": {
+    "sha256": "47e7689e6789fb9d140e28c227d79f4b27343c74682dfaf174c9646ce78c61ca",
+    "bytes": 138491
+  },
+  "runs/comparison-v1/shock_reversal_2h-both-2026-stress.json.gz": {
+    "sha256": "e0d01635abf92ed381cab8d704230896118f02e5c208f4095ba11a3aba3d297d",
+    "bytes": 138223
+  },
+  "runs/comparison-v1/shock_reversal_2h-long-2022-base.json.gz": {
+    "sha256": "973bc4d15a16990a0f209365ab368317c372ed73bcde2cd1545669bd16cb9d9a",
+    "bytes": 184609
+  },
+  "runs/comparison-v1/shock_reversal_2h-long-2022-stress.json.gz": {
+    "sha256": "957c6e301e7a50bb8fa030a532758bcbfb377fbc3a4e1ce50f0d1d883e83d51f",
+    "bytes": 184481
+  },
+  "runs/comparison-v1/shock_reversal_2h-long-2023-base.json.gz": {
+    "sha256": "4957b4e5bf132d3537ab48819fc8a45013be8a4970a06c5622417945cdae16d3",
+    "bytes": 181058
+  },
+  "runs/comparison-v1/shock_reversal_2h-long-2023-stress.json.gz": {
+    "sha256": "f25e2d4fa56d825d1b4b2f3988e9085cf6355e9ba1e36abff3c0d9e5355562cc",
+    "bytes": 181311
+  },
+  "runs/comparison-v1/shock_reversal_2h-long-2024-base.json.gz": {
+    "sha256": "5c8cf28c750b313c0101cbe4e884980b48b56e31489ce801cc5145747bb398c5",
+    "bytes": 183449
+  },
+  "runs/comparison-v1/shock_reversal_2h-long-2024-stress.json.gz": {
+    "sha256": "369508137f0ff4d90458112f4aabcf3e2c57ec0d856d3e751f93b3a7fad06761",
+    "bytes": 183580
+  },
+  "runs/comparison-v1/shock_reversal_2h-long-2025-base.json.gz": {
+    "sha256": "76ecf02aa4654414fa8f88f8b49e84e8e6bae7bbd7e10a020a09592182ab2d54",
+    "bytes": 191863
+  },
+  "runs/comparison-v1/shock_reversal_2h-long-2025-stress.json.gz": {
+    "sha256": "9088f2a7a9bdb364f3f0dea19d910485ea6667a0e431fa7a6eca3a3b6d665390",
+    "bytes": 192354
+  },
+  "runs/comparison-v1/shock_reversal_2h-long-2026-base.json.gz": {
+    "sha256": "49adb41dec3dadded3de29ad6619c00464c149830b20495222203d4f104da98b",
+    "bytes": 117546
+  },
+  "runs/comparison-v1/shock_reversal_2h-long-2026-stress.json.gz": {
+    "sha256": "0dc874903d4d957bb13b8016bab3c4aa6440222b13426de4f269061b94342f69",
+    "bytes": 117681
+  },
+  "runs/comparison-v1/shock_reversal_2h-short-2022-base.json.gz": {
+    "sha256": "cf36131583d28f8f12ba40c2bdc0a8936646d98271e57d851de90126c850fc3b",
+    "bytes": 184134
+  },
+  "runs/comparison-v1/shock_reversal_2h-short-2022-stress.json.gz": {
+    "sha256": "269729c12d2c046c1cd4564aaf3790b243d741d32fb7210e437bb880e7f2d3ee",
+    "bytes": 183974
+  },
+  "runs/comparison-v1/shock_reversal_2h-short-2023-base.json.gz": {
+    "sha256": "a41f12bb9e33c880fae2d92225117628106f0e10e0ead98a516b9fa3b8ee2f50",
+    "bytes": 188918
+  },
+  "runs/comparison-v1/shock_reversal_2h-short-2023-stress.json.gz": {
+    "sha256": "4483ef23f72bfcf250c5ab8a6e08a6dd4e58ede28e92cdf0f022cdc8f4fd61d6",
+    "bytes": 188917
+  },
+  "runs/comparison-v1/shock_reversal_2h-short-2024-base.json.gz": {
+    "sha256": "ffe64b9b76796260cf69f9cc9910b9af37c9452292cdeddd02bad94a4d979ad8",
+    "bytes": 189192
+  },
+  "runs/comparison-v1/shock_reversal_2h-short-2024-stress.json.gz": {
+    "sha256": "2dea3abb6021816316bedbef864af4290e64e198e7a666a8b8431a9922971297",
+    "bytes": 189664
+  },
+  "runs/comparison-v1/shock_reversal_2h-short-2025-base.json.gz": {
+    "sha256": "0893da2829cfb188adee6b9a11b2b9f07569f273f4067f0b3d6953cad81f3ed0",
+    "bytes": 182533
+  },
+  "runs/comparison-v1/shock_reversal_2h-short-2025-stress.json.gz": {
+    "sha256": "d4c03e35ed8b82d5f01cd23fee5a7ea87af219be4954e9e04aa3a6eb32cd8042",
+    "bytes": 183028
+  },
+  "runs/comparison-v1/shock_reversal_2h-short-2026-base.json.gz": {
+    "sha256": "a61e487b31d270e8b67b99759ae2c3f0a078bd3307083a385e5eb20fe044c2ce",
+    "bytes": 125229
+  },
+  "runs/comparison-v1/shock_reversal_2h-short-2026-stress.json.gz": {
+    "sha256": "13a488a19e22f330dd4f6d934dff23a7bb3447ec3aca294666196b56ca446eb3",
+    "bytes": 125360
+  },
+  "runs/comparison-v1/TRADE_EXAMPLES.json": {
+    "sha256": "933eec64dbbd676c6d5de3c66c6fcca0d6f8fc28356b94accbb43832dc12e947",
+    "bytes": 5404
+  },
+  "runs/comparison-v1/trades.csv": {
+    "sha256": "ca3fcc63ee91a1dc821e48cd9a70ded598d2d7f96c00fad802c8324fabf6c838",
+    "bytes": 15578177
+  },
+  "runs/comparison-v1/trials.jsonl": {
+    "sha256": "6b3d1119eee3365464d89f9727f456b275481ec482dcac826cf6cb7ecd86380b",
+    "bytes": 748630
+  },
+  "runs/comparison-v1/utc_noise_momentum-both-2022-base.json.gz": {
+    "sha256": "c7e3f706234c56c9b2984e1dde840895a684777fcc638cbac0d71f60ef914252",
+    "bytes": 880347
+  },
+  "runs/comparison-v1/utc_noise_momentum-both-2022-stress.json.gz": {
+    "sha256": "2e2165fe66861e0c6e0e8e89a3e62efcd5bb9ce93eec7e1ac5279bc56eaef066",
+    "bytes": 881222
+  },
+  "runs/comparison-v1/utc_noise_momentum-both-2023-base.json.gz": {
+    "sha256": "a95c4db007cd7e7434f70345d95dda8693dacc4b24ffc325c535dee3e0882835",
+    "bytes": 829247
+  },
+  "runs/comparison-v1/utc_noise_momentum-both-2023-stress.json.gz": {
+    "sha256": "6c98d8b84203b6a5c617e80f0d0d499333c0bfaea33986b8307f821280bad539",
+    "bytes": 828572
+  },
+  "runs/comparison-v1/utc_noise_momentum-both-2024-base.json.gz": {
+    "sha256": "4fa9c2036503a1860dfee48a4305644188efe0d8896863af0f32b1250a5c41b9",
+    "bytes": 976142
+  },
+  "runs/comparison-v1/utc_noise_momentum-both-2024-stress.json.gz": {
+    "sha256": "25e21e4c74399d412061435c26e1c6602330dfa06ad77d5c96eeff5c1ebe823f",
+    "bytes": 976008
+  },
+  "runs/comparison-v1/utc_noise_momentum-both-2025-base.json.gz": {
+    "sha256": "fb757a026554585d8c1842bbffa4678a2c805c591bc2d9bf73a69bb2605840d4",
+    "bytes": 940606
+  },
+  "runs/comparison-v1/utc_noise_momentum-both-2025-stress.json.gz": {
+    "sha256": "254695e38683b12cb458a4fc5f5c1768545b8bcd49f86bd695f9887de20b51d9",
+    "bytes": 941224
+  },
+  "runs/comparison-v1/utc_noise_momentum-both-2026-base.json.gz": {
+    "sha256": "2fe3c98ba4c64b2e3d0ccb005dfb4786e16e4d05eeeebd85417ce2fd28fa2361",
+    "bytes": 610320
+  },
+  "runs/comparison-v1/utc_noise_momentum-both-2026-stress.json.gz": {
+    "sha256": "f4098f49c6ccf33edf459f1faf77c581146bee3151d1abae3b6396c91f8df523",
+    "bytes": 609922
+  },
+  "runs/comparison-v1/utc_noise_momentum-long-2022-base.json.gz": {
+    "sha256": "2e681a90ef59fa7942975b3031ecb03d8320f9503e4b88b03fcc0ae90d3d85f0",
+    "bytes": 608394
+  },
+  "runs/comparison-v1/utc_noise_momentum-long-2022-stress.json.gz": {
+    "sha256": "bd3b387ed0d65ef27b190551a7012a09413e4619f4ee57d5cb30a92110327948",
+    "bytes": 608790
+  },
+  "runs/comparison-v1/utc_noise_momentum-long-2023-base.json.gz": {
+    "sha256": "752b4af687c37dd754c95d9b040abb550cd967eb24b113e15df7a735bef1301b",
+    "bytes": 599737
+  },
+  "runs/comparison-v1/utc_noise_momentum-long-2023-stress.json.gz": {
+    "sha256": "851adbe98f250bca2b571946ffdc6d39aef5f0a46e19263b74b13aa7849b681f",
+    "bytes": 598614
+  },
+  "runs/comparison-v1/utc_noise_momentum-long-2024-base.json.gz": {
+    "sha256": "3a910c5a352881fa2d24fc1d34dfdb58c8b6633599cc99fa896b3b77f88d248b",
+    "bytes": 710410
+  },
+  "runs/comparison-v1/utc_noise_momentum-long-2024-stress.json.gz": {
+    "sha256": "b6e38c0bdd4e4a8e21769026c1632c3e7295daba76856f7c49a3386e5a3c97f9",
+    "bytes": 711049
+  },
+  "runs/comparison-v1/utc_noise_momentum-long-2025-base.json.gz": {
+    "sha256": "5a941f6e391d1556c644bb11ec6bd3b8befc36aa9b1df8f38076c049829019e2",
+    "bytes": 676855
+  },
+  "runs/comparison-v1/utc_noise_momentum-long-2025-stress.json.gz": {
+    "sha256": "4b624b3afa2290745ae4f9a61ee4dfcb2de02ca20b3e1bdf9a7d86ff985df7ed",
+    "bytes": 677457
+  },
+  "runs/comparison-v1/utc_noise_momentum-long-2026-base.json.gz": {
+    "sha256": "e6adc1dc82f7d68b73d1d889c61062818c03d747282790b1e6f7807c8222be15",
+    "bytes": 419661
+  },
+  "runs/comparison-v1/utc_noise_momentum-long-2026-stress.json.gz": {
+    "sha256": "6c07ac449470fcae8800dcae65c2601a57f31725b31c2c0a6f2b1321751cf4fb",
+    "bytes": 419343
+  },
+  "runs/comparison-v1/utc_noise_momentum-short-2022-base.json.gz": {
+    "sha256": "44ac7049fc52623920d2b26b1380a37c378799dc8f0b6612baacd21fc0b556e4",
+    "bytes": 630549
+  },
+  "runs/comparison-v1/utc_noise_momentum-short-2022-stress.json.gz": {
+    "sha256": "854b5d37145b64306edf41dca54203cd140b68f38f06331e59587b065957f8ed",
+    "bytes": 629893
+  },
+  "runs/comparison-v1/utc_noise_momentum-short-2023-base.json.gz": {
+    "sha256": "85a577ca9d90abd2641ffa9f014f506115237bb211f17af5e39ab6bd8a86c736",
+    "bytes": 591026
+  },
+  "runs/comparison-v1/utc_noise_momentum-short-2023-stress.json.gz": {
+    "sha256": "a042b81960302a558807de8178357e11904ca17cb058a48711469d8db156a6c9",
+    "bytes": 591225
+  },
+  "runs/comparison-v1/utc_noise_momentum-short-2024-base.json.gz": {
+    "sha256": "5848cc5371c01bdf34f206292384664ad64e99738a758c858720669e3127d72b",
+    "bytes": 657339
+  },
+  "runs/comparison-v1/utc_noise_momentum-short-2024-stress.json.gz": {
+    "sha256": "b9a0a368ebef13c1e4cfea5b8cc0f218b867d7cf3a0a78a29a5b07e9fe1a5b36",
+    "bytes": 657335
+  },
+  "runs/comparison-v1/utc_noise_momentum-short-2025-base.json.gz": {
+    "sha256": "f6a1020ddf3f7d709a89eeeec2c1360c0a007c639b504f244aeba3d2cbc10681",
+    "bytes": 660547
+  },
+  "runs/comparison-v1/utc_noise_momentum-short-2025-stress.json.gz": {
+    "sha256": "3ab85ca9117d06a012250004fcf8c6e19544700bd2711fe999d4acdf75689059",
+    "bytes": 660555
+  },
+  "runs/comparison-v1/utc_noise_momentum-short-2026-base.json.gz": {
+    "sha256": "347e315ba19ea2f845c1f21a44e6ca7fa4c37838e875b30446f2036d4bf0320d",
+    "bytes": 448829
+  },
+  "runs/comparison-v1/utc_noise_momentum-short-2026-stress.json.gz": {
+    "sha256": "2c86d4e5973f7db6ba587ad883ccf0ee3dbdbb98a23b7117e5780850f23fdcf0",
+    "bytes": 449030
+  },
+  "VALIDATION.json": {
+    "sha256": "9968d559df3b8637159bfcec9fb06efc7b03cad5f5e25229d112a83fcb8e20bb",
+    "bytes": 1248
+  }
+}

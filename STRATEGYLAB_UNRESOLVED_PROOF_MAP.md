@@ -1,6 +1,12 @@
 # StrategyLab unresolved work and root-proof map
 
-Status: maintained project recovery record, 2026-09-15. This document is the
+## Current schedule — 2026-10-23
+
+New campaigns use **systematic_v2**: research -> approach trials -> accepted Python base -> parameter optimization -> unified mutation/reoptimization and once-only final holdout/required target acceptance -> paper graduation. The active operator and six prompts own scheduling. Existing runtime selectors and stored evidence are unchanged; no issue below is closed by this documentation change. Indicator/source correctness precedes economic selection; mechanical analogues do not prove discretionary-source fidelity. Paper adapters and novel strategy engines are prerequisites, not capabilities created by prompts. Future decision-model/ML/social work is plan only in `agents/plans/discretionary_and_blackbox_roadmap.md`.
+
+The dated migration snapshots and numbered phases below are **historical context**, not current routing. Preserve their artifact identities and proof obligations; map continued campaigns explicitly. Exact prior documents are recoverable from `agents/archive/2026-10-23-pre-systematic-v2/`.
+
+Status: maintained historical recovery record, updated 2026-10-17. This document is the
 future-model-facing companion to `PINE2PYTHON_INTEGRATION_REPORT.md`. It is the
 detailed register for unresolved boundaries, proof obligations, ownership, and
 reopening conditions. It is not a claim that the SMC indicator is accepted,
@@ -19,7 +25,10 @@ was never persisted.
 
 Use this file when a new model or task resumes StrategyLab:
 
-1. Read `AGENTS.md` completely.
+1. Read `AGENTS.md` completely, then the binding repository constraints in
+   `agentic/architecture.md`. The reference-first migration plan is at
+   `agentic/reference-first-migration-plan.md`; consult the current migration
+   note below for implementation evidence and its still-open acceptance limits.
 2. Read `agents/translation and generation/agents/codex_phase_operator.md` and
    the applicable phase prompt.
 3. Read this register, then the strategy-specific criteria and design contract.
@@ -34,6 +43,40 @@ implementation and regression evidence; then summaries, prior reports and
 model interpretations. When two records disagree, keep both identities,
 identify the conflict, and resolve it at the responsible boundary. Never use a
 new summary to overwrite an older immutable artifact.
+
+## 2026-10-17 Python2Pine migration snapshot
+
+New strategy work now defaults to `reference_v1`, publicly presented as
+Python2Pine. Existing stored lineages retain `legacy_pine_v1`; old evidence and
+Pine2Python APIs are not silently rewritten. The active operator and phase
+prompts define Phase 0/1 specification, independent Phase 1.5 semantics,
+Phase 2 data/execution, Phase 2.5 baseline/search authorization, Phases 3–4
+research, Phase 5 selected-target acceptance, and Phase 6 operations. A novel
+indicator may be accepted before a child adds order rules.
+
+Current implementation evidence is local to this worktree. Terminal independent
+implementation review passed; this is not broad strategy acceptance:
+
+- Final affected checks passed 33/33: 24 reference, 4 data-integrity, and 5
+  parity tests. Combined application/reference regression passed 171 tests
+  before the final reference-only authorization correction. The correction
+  rejects omitted parameters that select unauthorized effective defaults.
+  `node --check app/ui/app.js` passed; browser checks covered accepted/blocked/
+  legacy states, mobile layout, casebook and delayed-response selection safety.
+- The isolated vertical run is
+  `artifacts/strategy-development/reference-demo/run-20261017T142234Z-a299b75e/`.
+  Its MA and bounded pivot/BOS references saved independent cases, ledgers,
+  casebooks, fixed baselines, and authorized training-only children. The late
+  MA Pine target had local feature/signal `PARITY_PASS` on 12/12 aligned rows;
+  target stayed `BLOCKED`, platform stayed `TRADINGVIEW_REVIEW_REQUIRED`,
+  source fidelity was `PASS_WITH_LIMITATIONS` for the chosen discretionary
+  interpretation, economics remained unqualified, and production was not
+  accepted. No TradingView human corroboration was performed.
+- These bounded controls do not establish SMC behavior, source equivalence for
+  other strategies, broker execution parity, profitability, cross-strategy
+  transfer, or strategy-specific production acceptance. Keep the
+  issue records below at their historical verdicts unless fresh evidence
+  addresses their exact identities and criteria.
 
 ## Current project snapshot
 
@@ -845,7 +888,8 @@ issues:
   schemas and role separation; Pine2Python; `LOCAL_FIX_PROVEN` for the current
   implementation, subject to regression freshness.
 - **Observed problem and evidence:** The nested service instruction has been
-  consolidated into root `AGENTS.md`. The implementation uses Pydantic bounds,
+  consolidated into the single repository contract and subsequently relocated
+  to `agentic/architecture.md` on 2026-10-08. The implementation uses Pydantic bounds,
   caller candles, a fixed Node worker, argument-array invocation with
   `shell=False`, timeout/output bounds and per-job directories. Service reports
   explicit unsupported semantics and do not optimize, mutate, promote or create
@@ -853,9 +897,9 @@ issues:
 - **Root-cause hypothesis and boundary:** The original risk was instruction
   fragmentation and the possibility of future callers treating a bounded local
   runtime as arbitrary code execution or TradingView truth. The responsible
-  boundary is the service API/worker adapter and root instruction contract.
+  boundary is the service API/worker adapter and architecture constraint contract.
 - **Required proof bundle:** Keep the nine nested invariants represented in the
-  root rules, run service/schema/worker tests, inspect the worker command and
+  architecture constraints, run service/schema/worker tests, inspect the worker command and
   path/data restrictions, verify bounded failure behavior, and confirm artifact
   status labels. Reopen on worker, dependency, public-schema or container
   changes.

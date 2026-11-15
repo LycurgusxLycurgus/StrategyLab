@@ -1,0 +1,52 @@
+{
+  "schema_version": "btc_successor_phase2_acceptance_v1",
+  "campaign_id": "btc-successor-phase2-20261028",
+  "run_id": "comparison-v1",
+  "accepted_at_utc": "2026-10-28T19:05:36.842190+00:00",
+  "authorized_phase": 2,
+  "implementation_verdict": "PASS",
+  "phase_gate": "RETURN_TO_PHASE_1",
+  "qualified_candidate_contexts": 0,
+  "candidate_contexts": 9,
+  "control_contexts": 3,
+  "economic_evaluations": 120,
+  "parameter_searches": 0,
+  "mutations": 0,
+  "phase3_base_implemented": false,
+  "final_holdout_evaluations": 0,
+  "selected": null,
+  "review": {
+    "owner": "root per explicit user override",
+    "first_verdict": "PASS",
+    "correction_stage_used": false,
+    "terminal_status": "PASS",
+    "extra_reviewer_spawned": false
+  },
+  "validation_tests": 112,
+  "new_successor_tests": 42,
+  "closed_trade_records_all_contexts_costs": 62090,
+  "records_not_independent_samples": true,
+  "source_code_sha256": {
+    "app/btc_successor.py": "99f2b9dd911fb00c25db0be07b3ab5284dd0921810d8afda208b28103a533359",
+    "app/btc_successor_data.py": "fc516c7bd8759ca83b7c58bc3f592b7bb74b74c23da5e12968307798a4f5ea66",
+    "app/btc_successor_broker.py": "e0c3ddf7d3db2b383caf6f3f308b4709b61b86d86908bcdec2103327b7be5085",
+    "app/btc_successor_campaign.py": "1f982c3b6513095df5df640c3c862e099ddb7f4ee1c5d2f86f73118e52726df3",
+    "app/btc_successor_tests.py": "0a90203ebbf218f7f8e33b354912373294eab76304fb7059e758c14eb4f2270d"
+  },
+  "protocol_sha256": "6027e1be528e882f84fd8c370458d2a3b680b9d33332418860d8816a438136a5",
+  "phase1_input_identities_sha256": "325d6aafe044f057999d0c6aee1e591b8ec886d5e004381a9d57856a5a001dd6",
+  "artifact_manifest_sha256": "c687d23e33d499f88afcc46e007b7bcfe9a6e69e2b3f487462d8bb59196709cd",
+  "root_review_sha256": "c82ad6adbe551cc9183efa4411f7aaf6c3eeaef7e8401eed1f11e3b35d2c4185",
+  "artifact_reconciliation_sha256": "c230e2b17ec05f5e74ff92ad6bb27cdbe4e1000f948096f4e2df76f3f0ec3775",
+  "primary_report": "PHASE2.md",
+  "full_trades": "runs/comparison-v1/trades.csv",
+  "protected_windows_status": "UNFETCHED_UNEVALUATED_BY_THIS_TASK",
+  "prior_source_and_artifact_identities_unchanged": true,
+  "next_phase": "Phase1 research; no automatic tuning or new campaign authorized",
+  "limits": [
+    "bounded OHLC research executor",
+    "funding mark proxies and historical venue filters",
+    "reused screening history, not pristine OOS",
+    "no source replication/live execution claims"
+  ]
+}

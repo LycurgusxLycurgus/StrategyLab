@@ -1,11 +1,11 @@
 from __future__ import annotations
 
+import gc
 import json
-import uuid
 import math
 import threading
 import traceback
-import gc
+import uuid
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
@@ -16,6 +16,8 @@ from app.backtest import BacktestEngine, apply_patch_to_spec, buy_hold_drawdown_
 from app.config import settings
 from app.data import DataService
 from app.execution_audit import audit_saved_run_for_okx
+from app.reference import workflow
+from app.reference_evidence import EvidenceService, provenance
 from app.storage import Repository
 
 
@@ -969,6 +971,7 @@ class MutationLabService:
         self.repo = repo or Repository()
         self.data_service = data_service or DataService(self.repo)
         self.engine = engine or BacktestEngine()
+        self.reference_evidence = EvidenceService(self.repo, self.data_service)
         self._optimization_lock = threading.Lock()
         self._optimization_progress: dict[str, Any] = {
             "active": False,
@@ -1191,6 +1194,8 @@ class MutationLabService:
         if not parent:
             return
         parent_spec = parent.get("spec_json", {})
+        if workflow(parent_spec) == "reference_v1":
+            return
         parent_parameters = parent_spec.get("parameters", {})
         parent_edges = parent_spec.get("mutation_space", [])
         parent_evaluation = parent_spec.get("evaluation", {})
@@ -1224,6 +1229,8 @@ class MutationLabService:
 
     @staticmethod
     def _upgrade_spec(spec: dict[str, Any]) -> tuple[dict[str, Any], bool]:
+        if workflow(spec) == "reference_v1":
+            return json.loads(json.dumps(spec)), False
         upgraded = json.loads(json.dumps(spec))
         changed = False
         parameters = upgraded.setdefault("parameters", {})
@@ -1446,6 +1453,12 @@ class MutationLabService:
         causal_story: str,
         notes: str,
     ) -> dict[str, Any]:
+        spec_json = json.loads(json.dumps(spec_json))
+        spec_json.setdefault("workflow_version", "legacy_pine_v1")
+        if workflow(spec_json) == "reference_v1":
+            provenance(spec_json)
+        if self.repo.get_family(family_id):
+            raise HTTPException(status_code=409, detail="Family already exists; create a child version instead.")
         created_at = datetime.now(UTC).isoformat()
         version_id = f"ver_{uuid.uuid4().hex[:12]}"
         self.repo.put_family(
@@ -1515,19 +1528,34 @@ class MutationLabService:
                 proposals.append(proposal)
         return proposals
 
+    def create_reference_child(self, version_id: str, dataset_id: str, spec: dict, name: str, source_code: str | None = None) -> dict:
+        parent = self.repo.get_version(version_id)
+        if not parent or workflow(parent["spec_json"]) != "reference_v1":
+            raise HTTPException(422, "A reference parent is required.")
+        self.reference_evidence.require(parent, dataset_id, "run")
+        provenance(spec, parent)
+        if parent["spec_json"].get("component_kind") == "indicator" and spec.get("parameters") != parent["spec_json"].get("parameters"):
+            raise HTTPException(422, "First strategy child must preserve the accepted indicator parameters.")
+        child = {**parent, "version_id": f"ver_{uuid.uuid4().hex[:12]}", "parent_version_id": version_id, "name": name, "stage": "reference_spec", "spec_json": json.loads(json.dumps(spec)), "source_code": parent["source_code"] if source_code is None else source_code, "mutation_json": {"origin": "reference_child", "operation_transition": spec.get("operation_transition"), "transformations": spec.get("transformations", [])}, "created_at": datetime.now(UTC).isoformat()}
+        self.repo.put_version(child)
+        return child
+
     def run_version(self, version_id: str, dataset_id: str) -> dict[str, Any]:
         version = self._get_upgraded_version(version_id)
         if not version:
             raise HTTPException(status_code=404, detail="Version not found.")
+        self.reference_evidence.require(version, dataset_id, "run")
         bars = self.data_service.load_bars(dataset_id)
+        bars = self._reference_run_bars(version, dataset_id, bars)
         result = self.engine.run(version["spec_json"], bars)
-        return self._store_run(version, dataset_id, result)
+        return self._store_run(version, dataset_id, result, _bars=bars) if workflow(version["spec_json"]) == "reference_v1" else self._store_run(version, dataset_id, result)
 
     def preview_tuned_version(
         self,
         version_id: str,
         dataset_id: str,
         parameter_overrides: dict[str, Any],
+        _bars: list[Any] | None = None,
     ) -> dict[str, Any]:
         version = self._get_upgraded_version(version_id)
         if not version:
@@ -1535,11 +1563,18 @@ class MutationLabService:
         if not isinstance(parameter_overrides, dict):
             raise HTTPException(status_code=400, detail="parameter_overrides must be an object.")
         tuned_spec = self._apply_parameter_overrides(version["spec_json"], parameter_overrides)
-        bars = self.data_service.load_bars(dataset_id)
+        bars = _bars if _bars is not None else self.data_service.load_bars(dataset_id)
+        if workflow(tuned_spec) == "reference_v1":
+            self.reference_evidence.require(version, dataset_id, "search", tuned_spec)
+            bars = self.reference_evidence.training_bars(version, dataset_id, bars)
         result = self.engine.run(tuned_spec, bars)
         comparison = self._comparison(version_id, dataset_id, result["metrics"])
+        if workflow(version["spec_json"]) == "reference_v1":
+            comparison = self._reference_comparison(version, bars, result["metrics"])
         return {
             "mode": "preview",
+            "promotable": False,
+            "data_scope": "training" if _bars is not None or workflow(tuned_spec) == "reference_v1" else "full_dataset_diagnostic",
             "family_id": version["family_id"],
             "base_version_id": version_id,
             "dataset_id": dataset_id,
@@ -1561,14 +1596,17 @@ class MutationLabService:
         version = self._get_upgraded_version(version_id)
         if not version:
             raise HTTPException(status_code=404, detail="Version not found.")
+        self.reference_evidence.require(version, dataset_id, "search")
         tuned_spec = self._apply_parameter_overrides(version["spec_json"], dict(parameter_overrides or {}))
+        self.reference_evidence.require(version, dataset_id, "search", tuned_spec)
         bars = self.data_service.load_bars(dataset_id)
+        bars = self.reference_evidence.training_bars(version, dataset_id, bars)
         if len(bars) < ROBUSTNESS_MIN_BARS:
             raise HTTPException(status_code=400, detail="Robustness checks require at least 40000 bars.")
         base_result = self.engine.run(tuned_spec, bars)
         base_verdict = self._verdict(tuned_spec, base_result["metrics"], None)
         walk_forward = self._walk_forward_checks(tuned_spec, bars)
-        train_test = self._anchored_train_test_checks(version_id, tuned_spec, bars)
+        train_test = self._anchored_train_test_checks(version_id, tuned_spec, bars, dataset_id) if workflow(tuned_spec) == "reference_v1" else self._anchored_train_test_checks(version_id, tuned_spec, bars)
         cost_stress = self._cost_stress_checks(tuned_spec, bars)
         summary = self._robustness_summary(base_verdict, walk_forward, cost_stress, train_test)
         return {
@@ -1615,7 +1653,7 @@ class MutationLabService:
             )
         return folds
 
-    def _anchored_train_test_checks(self, version_id: str, spec: dict[str, Any], bars: list[Any]) -> list[dict[str, Any]]:
+    def _anchored_train_test_checks(self, version_id: str, spec: dict[str, Any], bars: list[Any], dataset_id: str | None = None) -> list[dict[str, Any]]:
         folds: list[dict[str, Any]] = []
         if len(bars) < 40_000:
             return folds
@@ -1627,7 +1665,7 @@ class MutationLabService:
             if len(train_bars) < 10_000 or len(test_bars) < 500:
                 continue
             try:
-                train_spec, train_steps = self._optimize_spec_on_bars(version_id, spec, train_bars)
+                train_spec, train_steps = self._optimize_spec_on_bars(version_id, spec, train_bars, dataset_id) if workflow(spec) == "reference_v1" else self._optimize_spec_on_bars(version_id, spec, train_bars)
                 test_result = self.engine.run(train_spec, test_bars)
             except HTTPException as exc:
                 folds.append(
@@ -1664,7 +1702,7 @@ class MutationLabService:
             )
         return folds
 
-    def _optimize_spec_on_bars(self, version_id: str, spec: dict[str, Any], bars: list[Any]) -> tuple[dict[str, Any], list[dict[str, Any]]]:
+    def _optimize_spec_on_bars(self, version_id: str, spec: dict[str, Any], bars: list[Any], dataset_id: str | None = None) -> tuple[dict[str, Any], list[dict[str, Any]]]:
         overrides: dict[str, Any] = {}
         base_spec = json.loads(json.dumps(spec))
         steps: list[dict[str, Any]] = []
@@ -1679,11 +1717,18 @@ class MutationLabService:
         )[:8]
         for edge in train_edges:
             values = self._train_candidate_values(base_spec, edge)
+            if workflow(spec) == "reference_v1":
+                authorization = self.reference_evidence.require(self._get_upgraded_version(version_id), dataset_id, "search")
+                values = authorization["parameters"].get(edge["lever"], [])
             if not values:
                 continue
             candidates: list[dict[str, Any]] = []
             for value in values:
                 candidate_spec = self._apply_parameter_overrides(base_spec, {**overrides, edge["lever"]: value})
+                if workflow(spec) == "reference_v1":
+                    if not dataset_id:
+                        raise HTTPException(422, "Reference nested search requires its authorized dataset identity.")
+                    self.reference_evidence.require(self._get_upgraded_version(version_id), dataset_id, "search", candidate_spec)
                 try:
                     result = self.engine.run(candidate_spec, bars)
                 except HTTPException as exc:
@@ -1694,7 +1739,7 @@ class MutationLabService:
                     {
                         "value": value,
                         "eligible": self._optimization_eligible(candidate_spec, result["metrics"]),
-                        "score": self._optimization_score(candidate_spec, result["metrics"]),
+                        "score": self._search_score_components(version_id, dataset_id, candidate_spec, result["metrics"])["score"],
                         "metrics": result["metrics"],
                     }
                 )
@@ -1823,11 +1868,12 @@ class MutationLabService:
         version_id: str,
         spec: dict[str, Any],
         bars: list[Any],
+        dataset_id: str | None = None,
     ) -> dict[str, Any]:
         base_result = self.engine.run(spec, bars)
         base_verdict = self._verdict(spec, base_result["metrics"], None)
         walk_forward = self._walk_forward_checks(spec, bars)
-        anchored = self._anchored_train_test_checks(version_id, spec, bars)
+        anchored = self._anchored_train_test_checks(version_id, spec, bars, dataset_id) if workflow(spec) == "reference_v1" else self._anchored_train_test_checks(version_id, spec, bars)
         cost_stress = self._cost_stress_checks(spec, bars)
         summary = self._robustness_summary(base_verdict, walk_forward, cost_stress, anchored)
         return {
@@ -1954,6 +2000,8 @@ class MutationLabService:
         if not artifact_path.exists():
             raise HTTPException(status_code=404, detail="Run artifact not found.")
         payload = json.loads(artifact_path.read_text(encoding="utf-8"))
+        if workflow(payload.get("spec", {})) == "reference_v1":
+            raise HTTPException(422, detail={"code": "REFERENCE_VENUE_ADAPTER_UNIMPLEMENTED", "message": "The registered reference contract has no verified OKX venue adapter; its execution gate is not venue feasibility."})
         return audit_saved_run_for_okx(payload)
 
     def optimize_lever(
@@ -1972,6 +2020,7 @@ class MutationLabService:
         if not version:
             raise HTTPException(status_code=404, detail="Version not found.")
         base_overrides = dict(parameter_overrides or {})
+        authorization = self.reference_evidence.require(version, dataset_id, "search", self._apply_parameter_overrides(version["spec_json"], base_overrides))
         edges = self.list_tuning_edges(version_id)
         edge = next((item for item in edges if item["lever"] == lever), None)
         if not edge:
@@ -1979,9 +2028,14 @@ class MutationLabService:
         if not edge.get("optimizable", True):
             raise HTTPException(status_code=400, detail=f"{lever} is manually editable but not optimizable.")
         bars = _bars if _bars is not None else self.data_service.load_bars(dataset_id)
+        bars = self.reference_evidence.training_bars(version, dataset_id, bars)
         candidates: list[dict[str, Any]] = []
         skipped_candidates: list[dict[str, Any]] = []
         values = self._candidate_values(edge)
+        if authorization is not None:
+            values = authorization["parameters"].get(lever, [])
+            if not values:
+                raise HTTPException(422, detail={"code": "SEARCH_DOMAIN_UNAUTHORIZED", "message": "Authorize a finite domain for this lever before search."})
         for candidate_index, value in enumerate(values, start=1):
             if _progress_context is not None:
                 progress = {
@@ -2007,6 +2061,7 @@ class MutationLabService:
                     _progress_callback(progress)
             overrides = {**base_overrides, lever: value}
             tuned_spec = self._apply_parameter_overrides(version["spec_json"], overrides)
+            self.reference_evidence.require(version, dataset_id, "search", tuned_spec)
             try:
                 result = self.engine.run(tuned_spec, bars)
             except HTTPException as exc:
@@ -2022,6 +2077,8 @@ class MutationLabService:
                     continue
                 raise
             comparison = self._comparison(version_id, dataset_id, result["metrics"])
+            if workflow(version["spec_json"]) == "reference_v1":
+                comparison = self._reference_comparison(version, bars, result["metrics"])
             verdict = self._verdict(tuned_spec, result["metrics"], comparison)
             robustness_evidence = None
             if optimization_mode == "robustness_repair":
@@ -2030,8 +2087,8 @@ class MutationLabService:
                 {
                     "lever": lever,
                     "value": value,
-                    "score": self._optimization_score(tuned_spec, result["metrics"]),
-                    "score_components": self._optimization_score_components(tuned_spec, result["metrics"]),
+                    "score": self._search_score_components(version_id, dataset_id, tuned_spec, result["metrics"])["score"],
+                    "score_components": self._search_score_components(version_id, dataset_id, tuned_spec, result["metrics"]),
                     "eligible": self._optimization_eligible(tuned_spec, result["metrics"]),
                     "verdict": verdict,
                     "metrics": result["metrics"],
@@ -2106,11 +2163,17 @@ class MutationLabService:
         if not version:
             raise HTTPException(status_code=404, detail="Version not found.")
         self._ensure_no_active_optimization()
+        authorization = self.reference_evidence.require(version, dataset_id, "search")
         passes = max(1, min(int(passes), 5))
         starting_overrides = dict(parameter_overrides or {})
         overrides = self._production_baseline_overrides(version["spec_json"], starting_overrides)
         edges = [edge for edge in self.list_tuning_edges(version_id) if edge.get("optimizable", True)]
         candidate_counts = {edge["lever"]: len(self._candidate_values(edge)) for edge in edges}
+        if authorization is not None:
+            edges = [edge for edge in edges if edge["lever"] in authorization["parameters"]]
+            candidate_counts = {edge["lever"]: len(authorization["parameters"][edge["lever"]]) for edge in edges}
+            if not edges:
+                raise HTTPException(422, detail={"code": "SEARCH_DOMAIN_UNAUTHORIZED", "message": "No tuning levers have authorized domains."})
         total_overall = max(1, sum(candidate_counts.values()) * passes)
         progress_mode = "optimize_robustness_repair" if optimization_mode == "robustness_repair" else "optimize_all"
         self._start_optimization_progress(
@@ -2135,6 +2198,7 @@ class MutationLabService:
             self._set_optimization_progress(message="Loading dataset once for memory-stable optimization...")
             try:
                 bars = self.data_service.load_bars(dataset_id)
+                bars = self.reference_evidence.training_bars(version, dataset_id, bars)
             except HTTPException:
                 bars = None
             for pass_index in range(1, passes + 1):
@@ -2216,7 +2280,7 @@ class MutationLabService:
                     evaluated_finalists.append(
                         {
                             **finalist,
-                            "full_robustness": self._full_robustness_evidence(version_id, finalist_spec, bars),
+                            "full_robustness": self._full_robustness_evidence(version_id, finalist_spec, bars, dataset_id) if workflow(finalist_spec) == "reference_v1" else self._full_robustness_evidence(version_id, finalist_spec, bars),
                         }
                     )
                 if evaluated_finalists:
@@ -2239,14 +2303,14 @@ class MutationLabService:
                     }
             self._set_optimization_progress(message="Building optimized preview...")
             candidate_overrides = dict(overrides)
-            preview = self.preview_tuned_version(version_id, dataset_id, candidate_overrides)
+            preview = self.preview_tuned_version(version_id, dataset_id, candidate_overrides, _bars=bars)
             final_candidate_rejected = False
             rejection_reason = None
             if not self._optimization_eligible(preview["spec"], preview["metrics"]):
                 final_candidate_rejected = True
                 rejection_reason = "optimized_candidate_failed_production_gates"
                 overrides = starting_overrides
-                preview = self.preview_tuned_version(version_id, dataset_id, overrides)
+                preview = self.preview_tuned_version(version_id, dataset_id, overrides, _bars=bars)
             if optimization_mode == "robustness_repair" and robustness_evidence is None:
                 final_spec = self._apply_parameter_overrides(version["spec_json"], overrides)
                 cost_stress = self._cost_stress_checks(final_spec, bars)
@@ -2312,6 +2376,8 @@ class MutationLabService:
 
     @staticmethod
     def _production_baseline_overrides(spec: dict[str, Any], overrides: dict[str, Any]) -> dict[str, Any]:
+        if workflow(spec) == "reference_v1":
+            return dict(overrides)
         parameters = spec.get("parameters", {})
         rules = spec.get("evaluation", {})
         output = dict(overrides)
@@ -2347,6 +2413,9 @@ class MutationLabService:
         if not parent:
             raise HTTPException(status_code=404, detail="Version not found.")
         tuned_spec = self._apply_parameter_overrides(parent["spec_json"], parameter_overrides)
+        self.reference_evidence.require(parent, dataset_id, "save", tuned_spec)
+        if workflow(tuned_spec) == "reference_v1":
+            tuned_spec = self._reference_child_spec(parent, tuned_spec, parameter_overrides)
         child_version_id = f"ver_{uuid.uuid4().hex[:12]}"
         summary = self._summarize_overrides(parameter_overrides)
         child_version = {
@@ -2367,8 +2436,10 @@ class MutationLabService:
             "created_at": datetime.now(UTC).isoformat(),
         }
         self.repo.put_version(child_version)
-        result = self.engine.run(tuned_spec, self.data_service.load_bars(dataset_id))
-        return self._store_run(child_version, dataset_id, result)
+        self.reference_evidence.child(parent, child_version, dataset_id)
+        bars = self._reference_run_bars(child_version, dataset_id, self.data_service.load_bars(dataset_id))
+        result = self.engine.run(tuned_spec, bars)
+        return self._store_run(child_version, dataset_id, result, _bars=bars) if workflow(tuned_spec) == "reference_v1" else self._store_run(child_version, dataset_id, result)
 
     def run_proposal(self, proposal_id: str, dataset_id: str) -> dict[str, Any]:
         proposal = self.repo.get_proposal(proposal_id)
@@ -2379,6 +2450,10 @@ class MutationLabService:
             raise HTTPException(status_code=404, detail="Parent version not found.")
         child_version_id = proposal.get("child_version_id") or f"ver_{uuid.uuid4().hex[:12]}"
         child_spec = apply_patch_to_spec(parent["spec_json"], proposal["patch_json"])
+        self.reference_evidence.require(parent, dataset_id, "save", child_spec)
+        if workflow(child_spec) == "reference_v1":
+            key = proposal["patch_json"]["path"].removeprefix("parameters.")
+            child_spec = self._reference_child_spec(parent, child_spec, {key: proposal["patch_json"]["value"]})
         child_version = {
             "version_id": child_version_id,
             "family_id": parent["family_id"],
@@ -2398,8 +2473,10 @@ class MutationLabService:
             "created_at": datetime.now(UTC).isoformat(),
         }
         self.repo.put_version(child_version)
-        result = self.engine.run(child_spec, self.data_service.load_bars(dataset_id))
-        run_payload = self._store_run(child_version, dataset_id, result)
+        self.reference_evidence.child(parent, child_version, dataset_id)
+        bars = self._reference_run_bars(child_version, dataset_id, self.data_service.load_bars(dataset_id))
+        result = self.engine.run(child_spec, bars)
+        run_payload = self._store_run(child_version, dataset_id, result, _bars=bars) if workflow(child_spec) == "reference_v1" else self._store_run(child_version, dataset_id, result)
         proposal["status"] = "tested"
         proposal["child_version_id"] = child_version_id
         proposal["run_id"] = run_payload["run_id"]
@@ -2407,6 +2484,10 @@ class MutationLabService:
         return run_payload
 
     def run_proposal_pack(self, version_id: str, dataset_id: str, include_hybrid: bool = False) -> dict[str, Any]:
+        version = self._get_upgraded_version(version_id)
+        if not version:
+            raise HTTPException(404, "Version not found.")
+        self.reference_evidence.require(version, dataset_id, "search")
         proposals = self.generate_proposals(version_id, include_hybrid=include_hybrid)
         tested: list[dict[str, Any]] = []
         for proposal in proposals:
@@ -2428,6 +2509,25 @@ class MutationLabService:
         family = self.repo.get_family(family_id)
         if not family:
             raise HTTPException(status_code=404, detail="Family not found.")
+        version = self.repo.get_version(version_id)
+        if not version or version["family_id"] != family_id:
+            raise HTTPException(status_code=409, detail="Candidate must belong to this family.")
+        if workflow(version["spec_json"]) == "reference_v1":
+            runs = [r for r in self.repo.list_runs(family_id) if r["version_id"] == version_id]
+            if not runs:
+                raise HTTPException(status_code=409, detail="Validated comparable baseline required before promotion.")
+            self.reference_evidence.require(version, runs[0]["dataset_id"], "promote")
+            baseline = self.reference_evidence._read(version, runs[0]["dataset_id"], "baseline")
+            if not version["spec_json"].get("evaluation") or self._core_gate_failures(version["spec_json"], baseline["metrics"]) or self._portfolio_gate_failures(version["spec_json"], baseline["metrics"]):
+                raise HTTPException(409, "Reference economics must satisfy its explicitly declared evaluation contract before promotion.")
+            if version.get("parent_version_id"):
+                parent = self.repo.get_version(version["parent_version_id"])
+                if not parent:
+                    raise HTTPException(409, "Parent comparison identity is missing.")
+                self.reference_evidence.require(parent, runs[0]["dataset_id"], "promote")
+                comparison = baseline.get("comparison") or {}
+                if comparison.get("parent_version_id") != parent["version_id"] or comparison.get("comparison_scope") != "same_observations":
+                    raise HTTPException(409, "A current same-observation parent comparison is required for reference promotion.")
         family["current_version_id"] = version_id
         self.repo.put_family(family)
         return self.family_detail(family_id)
@@ -2447,6 +2547,8 @@ class MutationLabService:
         if not artifact_path.exists():
             raise HTTPException(status_code=404, detail="Run artifact not found.")
         parent_payload = json.loads(artifact_path.read_text(encoding="utf-8"))
+        if workflow(parent_payload["spec"]) == "reference_v1":
+            raise HTTPException(422, detail={"code": "REFERENCE_HYBRID_ADAPTER_UNSUPPORTED", "message": "Offline legacy trade filters do not implement the reference causal execution contract. Use authorized reference parameter research."})
         bars = self.data_service.load_bars(parent_payload["dataset_id"])
         result = self.engine.run(parent_payload["spec"], bars)
         rows = self._hybrid_trade_rows(
@@ -2522,6 +2624,8 @@ class MutationLabService:
         if not artifact_path.exists():
             raise HTTPException(status_code=404, detail="Run artifact not found.")
         parent_payload = json.loads(artifact_path.read_text(encoding="utf-8"))
+        if workflow(parent_payload["spec"]) == "reference_v1":
+            raise HTTPException(422, detail={"code": "REFERENCE_HYBRID_ADAPTER_UNSUPPORTED", "message": "Offline legacy trade filters do not implement the reference causal execution contract. Use authorized reference parameter research."})
         bars = self.data_service.load_bars(parent_payload["dataset_id"])
         result = self.engine.run(parent_payload["spec"], bars)
         rows = self._hybrid_trade_rows(
@@ -2644,6 +2748,8 @@ class MutationLabService:
         if not artifact_path.exists():
             raise HTTPException(status_code=404, detail="Run artifact not found.")
         parent_payload = json.loads(artifact_path.read_text(encoding="utf-8"))
+        if workflow(parent_payload["spec"]) == "reference_v1":
+            raise HTTPException(422, detail={"code": "REFERENCE_HYBRID_ADAPTER_UNSUPPORTED", "message": "Offline legacy trade filters do not implement the reference causal execution contract. Use authorized reference parameter research."})
         bars = self.data_service.load_bars(parent_payload["dataset_id"])
         result = self.engine.run(parent_payload["spec"], bars)
         snapshots = self._hybrid_time_decay_snapshot_rows(
@@ -2733,11 +2839,23 @@ class MutationLabService:
         self.repo.delete_version(version_id)
         return self.family_detail(version["family_id"])
 
-    def _store_run(self, version: dict[str, Any], dataset_id: str, result: dict[str, Any]) -> dict[str, Any]:
+    def _reference_run_bars(self, version: dict, dataset_id: str, bars: list[Any]) -> list[Any]:
+        if workflow(version["spec_json"]) == "reference_v1" and version.get("parent_version_id") and version["spec_json"].get("development_operation") == "improve":
+            parent = self.repo.get_version(version["parent_version_id"])
+            if not parent:
+                raise HTTPException(409, "Reference research parent is missing.")
+            return self.reference_evidence.training_bars(parent, dataset_id, bars)
+        return bars
+
+    def _store_run(self, version: dict[str, Any], dataset_id: str, result: dict[str, Any], _bars: list[Any] | None = None) -> dict[str, Any]:
+        self.reference_evidence.require(version, dataset_id, "run")
         run_id = f"run_{uuid.uuid4().hex[:12]}"
         artifact_path = settings.run_dir / f"{run_id}.json"
         report_path = settings.report_dir / f"{run_id}.md"
         comparison = self._comparison(version["parent_version_id"], dataset_id, result["metrics"])
+        if workflow(version["spec_json"]) == "reference_v1" and version.get("parent_version_id") and _bars is not None:
+            parent = self.repo.get_version(version["parent_version_id"])
+            comparison = self._reference_comparison(parent, _bars, result["metrics"])
         verdict = self._verdict(version["spec_json"], result["metrics"], comparison)
         payload = {
             "run_id": run_id,
@@ -2752,6 +2870,9 @@ class MutationLabService:
             "comparison": comparison,
             "spec": version["spec_json"],
             "mutation": version.get("mutation_json", {}),
+            "workflow_version": workflow(version["spec_json"]),
+            "data_scope": "training" if workflow(version["spec_json"]) == "reference_v1" and version.get("parent_version_id") and version["spec_json"].get("development_operation") == "improve" else "fixed_baseline",
+            "reference": {k: result[k] for k in ("ledger", "decisions", "order_intents", "limitations", "trace") if k in result},
         }
         artifact_path.write_text(json.dumps(payload, indent=2), encoding="utf-8")
         report_path.write_text(self._run_report(version, payload), encoding="utf-8")
@@ -2771,7 +2892,18 @@ class MutationLabService:
         )
         payload["artifact_path"] = str(artifact_path)
         payload["report_path"] = str(report_path)
+        self.reference_evidence.baseline(version, dataset_id, payload)
         return payload
+
+    @staticmethod
+    def _reference_child_spec(parent: dict, spec: dict, changes: dict) -> dict:
+        child = json.loads(json.dumps(spec))
+        child["development_operation"] = "improve"
+        child["development_authorization"] = "Explicit recorded search authorization for parameter domain"
+        child["operation_transition"] = {"from": parent["spec_json"].get("development_operation"), "to": "improve", "parent_version_id": parent["version_id"]}
+        child["claim_exact_source"] = False
+        child["transformations"] = [*child.get("transformations", []), *[{"parent_rule_id": key, "child_rule_id": key, "operation": "substitute", "rationale": "Authorized parameter-domain child", "source_evidence": parent["version_id"], "ambiguity_or_problem": "Declared research objective", "executable_choice": value, "meaning_change": True, "expected_effect": "Measure against frozen parent", "validation_evidence": "Independent parent cases rerun for exact child"} for key, value in changes.items()]]
+        return child
 
     def _hybrid_trade_rows(
         self,
@@ -3461,6 +3593,10 @@ class MutationLabService:
             "trade_count_delta": child_metrics["total_trades"] - parent_metrics["total_trades"],
         }
 
+    def _reference_comparison(self, version: dict, bars: list[Any], candidate: dict) -> dict:
+        parent_metrics = self.engine.run(version["spec_json"], bars)["metrics"]
+        return {"parent_version_id": version["version_id"], "profit_factor_delta": round(candidate["profit_factor"] - parent_metrics["profit_factor"], 4), "net_pnl_delta": round(candidate["net_pnl"] - parent_metrics["net_pnl"], 2), "drawdown_pct_delta": round(candidate["max_equity_drawdown_pct"] - parent_metrics["max_equity_drawdown_pct"], 2), "trade_count_delta": candidate["total_trades"] - parent_metrics["total_trades"], "comparison_scope": "same_observations", "bars": len(bars)}
+
     @staticmethod
     def _trade_stats(trades: list[dict[str, Any]]) -> dict[str, Any]:
         if not trades:
@@ -3642,6 +3778,17 @@ class MutationLabService:
             and not MutationLabService._live_execution_gate_failures(spec, metrics)
         )
 
+    def _search_score_components(self, version_id: str, dataset_id: str | None, spec: dict[str, Any], metrics: dict[str, Any]) -> dict[str, Any]:
+        if workflow(spec) == "reference_v1":
+            if not dataset_id:
+                raise HTTPException(422, "Reference search requires its authorized dataset identity.")
+            authorization = self.reference_evidence.require(self._get_upgraded_version(version_id), dataset_id, "search", spec)
+            metric = authorization.get("objective_metric", "existing_score_v1")
+            if metric != "existing_score_v1":
+                value = float(metrics[metric])
+                return {"score": -value if metric == "max_equity_drawdown_pct" else value, "objective_metric": metric, "metric_value": value}
+        return self._optimization_score_components(spec, metrics)
+
     @staticmethod
     def _optimization_score(spec: dict[str, Any], metrics: dict[str, Any]) -> float:
         return MutationLabService._optimization_score_components(spec, metrics)["score"]
@@ -3787,10 +3934,12 @@ class MutationLabService:
         rules = spec.get("evaluation", {})
         parameters = spec.get("parameters", {})
         failures: list[str] = []
-        allowed_modes = set(rules.get("production_sizing_modes", ["mt5_fixed_risk_lot"]))
-        if parameters.get("sizing_mode", "mt5_fixed_risk_lot") not in allowed_modes:
+        default_modes = ["fixed_quantity"] if workflow(spec) == "reference_v1" else ["mt5_fixed_risk_lot"]
+        allowed_modes = set(rules.get("production_sizing_modes", default_modes))
+        default_mode = "fixed_quantity" if workflow(spec) == "reference_v1" else "mt5_fixed_risk_lot"
+        if parameters.get("sizing_mode", default_mode) not in allowed_modes:
             failures.append("diagnostic_capital_model")
-        policy = rules.get("benchmark_policy", "outperform_return_or_calmar")
+        policy = rules.get("benchmark_policy", "declared_only" if workflow(spec) == "reference_v1" else "outperform_return_or_calmar")
         if policy == "outperform_return_or_calmar":
             beats_return = metrics.get("outperformance_pct", 0.0) > 0
             beats_efficiency = metrics.get("calmar_delta", 0.0) > 0
@@ -3833,6 +3982,12 @@ class MutationLabService:
         return failures
 
     def _verdict(self, spec: dict[str, Any], metrics: dict[str, Any], comparison: dict[str, Any] | None) -> str:
+        if workflow(spec) == "reference_v1":
+            if not spec.get("evaluation"):
+                return "unqualified_reference"
+            if self._core_gate_failures(spec, metrics) or self._portfolio_gate_failures(spec, metrics):
+                return "research_rejected"
+            return "qualified_reference"
         if self._core_gate_failures(spec, metrics):
             return "graveyard"
         if self._portfolio_gate_failures(spec, metrics) or self._live_execution_gate_failures(spec, metrics):
@@ -3863,6 +4018,21 @@ class MutationLabService:
         return warnings
 
     def _run_report(self, version: dict[str, Any], payload: dict[str, Any]) -> str:
+        if workflow(version["spec_json"]) == "reference_v1":
+            reference = payload.get("reference", {})
+            return "\n".join([
+                f"# {version['name']} — reference baseline",
+                "", f"Version: `{version['version_id']}`; dataset: `{payload['dataset_id']}`.",
+                "", "This fixed run measures economics under the selected reference execution contract. Semantic/data/execution evidence, source fidelity, target acceptance and operational readiness remain separate verdicts.",
+                "", f"Economic disposition: `{payload['verdict']}`.",
+                "", "## Metrics", "", *[f"- {key}: `{value}`" for key, value in payload["metrics"].items()],
+                "", "## Decision and lifecycle evidence", "",
+                f"- Decision candidates: `{len(reference.get('decisions', []))}`",
+                f"- Order intents: `{len(reference.get('order_intents', []))}`",
+                f"- Ledger events: `{len(reference.get('ledger', []))}`",
+                "", *[f"- {item}" for item in reference.get("limitations", [])],
+                "", "Full ledger and trace are saved in the run JSON; the independent reference casebook is served by the version's reference-casebook endpoint.",
+            ])
         metrics = payload["metrics"]
         comparison = payload["comparison"]
         capital_warnings = self._capital_model_warnings(payload["spec"], metrics)

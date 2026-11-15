@@ -298,6 +298,53 @@ class ParityTests(unittest.TestCase):
         self.assertFalse(result["passed"])
         self.assertEqual("signal", result["summary"]["first_divergence"]["field"])
 
+    def test_duplicate_keys_are_rejected_before_trace_indexing(self) -> None:
+        for rows, side in (
+            ([{"time": 1}, {"time": 1}], "reference"),
+            ([{"time": 1}, {"time": 1}], "candidate"),
+        ):
+            reference = rows if side == "reference" else [{"time": 1}]
+            candidate = rows if side == "candidate" else [{"time": 1}]
+            with self.subTest(side=side), self.assertRaises(Pine2PythonError) as context:
+                compare_traces(reference, candidate, ParityContract())
+            self.assertEqual("TRACE_DUPLICATE_KEY", context.exception.code)
+            self.assertEqual(side, context.exception.details["side"])
+
+    def test_malformed_keys_and_missing_required_fields_are_distinct(self) -> None:
+        with self.assertRaises(Pine2PythonError) as malformed:
+            compare_traces(
+                [{"time": [1]}], [{"time": [1]}], ParityContract()
+            )
+        self.assertEqual("TRACE_KEY_INVALID", malformed.exception.code)
+
+        with self.assertRaises(Pine2PythonError) as missing:
+            compare_traces(
+                [{"time": 1, "features": {}}],
+                [{"time": 1, "features": {"x": None}}],
+                ParityContract(exact_fields=["features.x"]),
+            )
+        self.assertEqual("TRACE_FIELD_MISSING", missing.exception.code)
+        self.assertEqual("reference", missing.exception.details["side"])
+
+    def test_explicit_null_is_a_value_not_a_missing_field(self) -> None:
+        result = compare_traces(
+            [{"time": 1, "features": {"x": None}}],
+            [{"time": 1, "features": {"x": None}}],
+            ParityContract(exact_fields=["features.x"]),
+        )
+        self.assertTrue(result["passed"])
+
+    def test_key_alignment_failure_is_reported_as_first_divergence(self) -> None:
+        result = compare_traces(
+            [{"time": 1}, {"time": 2}],
+            [{"time": 1}, {"time": 3}],
+            ParityContract(),
+        )
+        self.assertFalse(result["passed"])
+        self.assertEqual(2, result["alignment"]["missing_candidate_keys"][0])
+        self.assertEqual(3, result["alignment"]["extra_candidate_keys"][0])
+        self.assertEqual("$alignment", result["summary"]["first_divergence"]["field"])
+
 
 class ArtifactAndGenerationTests(unittest.TestCase):
     def test_content_addressed_bundle_is_idempotent(self) -> None:

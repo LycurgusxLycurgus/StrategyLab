@@ -1,0 +1,94 @@
+{
+  "campaign_id": "btc-liquidity-20261023",
+  "schedule": "systematic_v2",
+  "origin": "systematic_native",
+  "operation": "create",
+  "instrument": "Binance USD-M BTCUSDT perpetual",
+  "timezone": "UTC",
+  "development_start": "2022-01-01",
+  "development_end_exclusive": "2026-09-01",
+  "reserved_start": "2026-09-01",
+  "reserved_end_exclusive": "2026-10-23",
+  "reserved_policy": "Do not fetch or inspect before one qualified finalist freezes. Previously inspected BTC spot windows are development exposure, not final evidence.",
+  "annual_folds": [
+    2022,
+    2023,
+    2024,
+    2025,
+    2026
+  ],
+  "timeframes_minutes": [
+    5,
+    15
+  ],
+  "directions": [
+    "long",
+    "short",
+    "both"
+  ],
+  "approaches": [
+    "reclaim",
+    "confirm",
+    "confirm_fvg"
+  ],
+  "control": "breakout_control",
+  "budget": {
+    "fixed_candidates": 18,
+    "fixed_controls": 6,
+    "cost_conditions": 2,
+    "annual_runs": 240,
+    "parameter_searches": 0,
+    "mutations": 0
+  },
+  "parameters": {
+    "lookback_minutes": 360,
+    "atr_minutes": 120,
+    "confirm_minutes": 45,
+    "max_hold_minutes": 360,
+    "stop_buffer_atr": 0.1,
+    "min_sweep_atr": 0.1,
+    "displacement_atr": 0.5,
+    "target_r": 2.0
+  },
+  "execution": {
+    "initial_capital": 100000.0,
+    "risk_fraction": 0.0025,
+    "max_notional_fraction": 1.0,
+    "fee_bps": 6.0,
+    "slip_bps": 2.0,
+    "tick": 0.1,
+    "quantity_step": 0.001,
+    "min_quantity": 0.001,
+    "max_quantity": 120.0,
+    "min_notional": 50.0,
+    "funding_mark_buffer_fraction": 0.01
+  },
+  "stress_slip_bps": 4.0,
+  "cost_rationale": "6 bps taker fee per fill is a conservative research assumption, not an authenticated account rate. 2 bps adverse slippage per fill; 4 bps stress tests fragile small-range entries. Historical signed funding uses recorded mark prices.",
+  "screen": {
+    "positive_years": [
+      2025,
+      2026
+    ],
+    "minimum_recent_total_closed_trades": 100,
+    "minimum_each_recent_closed_trades": 30,
+    "minimum_combined_profit_factor": 1.05,
+    "maximum_fold_close_drawdown_pct": 10.0,
+    "recent_stress_net_positive": true
+  },
+  "screen_rationale": "A research screen for fee fragility, sparse activity and dependence on one recent regime; these thresholds do not establish statistical significance or deployment confidence. 2026 fold ends August 31. Both recent folds must be positive under base costs; their summed stress return must be positive.",
+  "ranking": "Qualified candidates first; then largest worst annual net return, then largest mean annual return. Always publish all failures and observed winners separately from qualification.",
+  "failure_route": "If no candidate qualifies, RETURN_TO_PHASE_1 and preserve reserved data untouched. No performance-driven parameter changes or final test follow a failed approach gate.",
+  "optimization_gate": "No Phase 4 optimization without an accepted immutable Phase 3 base and existing runtime baseline-backed authorization. This standalone engine is not registered with Mutation Lab.",
+  "target": "Python research only; Pine parity NOT_APPLICABLE",
+  "limitations": [
+    "Historical order-filter changes are unavailable; the captured current filters are a research feasibility envelope, not historical venue certification.",
+    "OHLC last-trade prices and idealized next-open market execution cannot certify live trigger, latency, partial-fill, liquidation, mark-price or order-acknowledgement semantics.",
+    "Stop-first dual-touch ordering is adverse. A funding credit with uncertain intrabar exit ordering is omitted; a debit is charged.",
+    "Risk is nominal stop risk including fees and slippage; gaps and subsequent funding can exceed it. Exposure cap applies at entry.",
+    "Each annual fold resets capital and position. Positions remaining at cutoff are censored and included through marked equity; no synthetic terminal liquidation.",
+    "No live or paper orders, account integration, profitability guarantee or discretionary SMC replication claim.",
+    "Missing API funding marks use official 5m mark opening quotes with a 1% adverse funding-notional buffer. This is a disclosed approximation; exact settlement marks and venue reconciliation remain unverified."
+  ],
+  "funding_data_adaptation": "Before any economic trial, historical funding API returned blank markPrice fields. Preserve exact rates/timestamps and raw pages; join missing marks to official checksum-verified 5m mark-price candle open at floor(funding timestamp/5m). This is a causal opening-quote proxy, not exact settlement proof. Apply a 1% adverse funding-payment buffer: increase debits and reduce credits. Keep separate proxy counts/provenance and never use future candle high/low/close for funding marks. Full source census found nine missing funding opens on 2022-07-31, 2022-10-02 and 2023-02-24 in incomplete official monthly mark-price archives. Supplement only missing opens from checksummed official daily archives, retain monthly originals and a repair log. If daily data cannot cover them, block rather than borrow or fabricate."
+}

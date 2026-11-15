@@ -1,3 +1,5 @@
+> Historical reference: this is a legacy application-specific document, not the current phase contract. Numeric thresholds and week durations below are historical, not new defaults. Use the [current phase operator](../translation%20and%20generation/agents/codex_phase_operator.md).
+
 # Project Aurum Verdict Criteria
 
 Project Aurum does not judge runs by PnL alone. Every run is scored across six layers that come from the strategy evaluation canon and are simplified into an operator-facing rule set.

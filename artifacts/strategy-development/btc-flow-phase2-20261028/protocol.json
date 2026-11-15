@@ -1,0 +1,200 @@
+{
+  "schedule": "systematic_v2",
+  "phase": 2,
+  "instrument": "Binance USD-M BTCUSDT perpetual",
+  "asset_universe": [
+    "BTCUSDT"
+  ],
+  "raw_timeframe_minutes": 5,
+  "timezone": "UTC",
+  "data_root": "artifacts/strategy-development/btc-liquidity-20261023/raw",
+  "development_start": "2022-01-01",
+  "development_end_exclusive": "2026-09-01",
+  "raw_manifest_sha256": "49ed1b895b054df0447c99ce2b109c58ff8f7f27e5a0c3be1dbb7b54a708cfe8",
+  "atr": {
+    "input_completed_timeframe_minutes": 60,
+    "true_ranges": 20,
+    "method": "arithmetic_mean",
+    "requires_preceding_hourly_close": true,
+    "include_just_closed_hour_when_available": true
+  },
+  "execution": {
+    "initial_capital": 100000.0,
+    "risk_fraction": 0.0025,
+    "max_notional_fraction": 1.0,
+    "fee_bps": 6.0,
+    "slip_bps": 2.0,
+    "tick": 0.1,
+    "quantity_step": 0.001,
+    "min_quantity": 0.001,
+    "max_quantity": 120.0,
+    "min_notional": 50.0,
+    "funding_mark_buffer_fraction": 0.01
+  },
+  "cost_admission": {
+    "reference_fee_bps_each_fill": 6.0,
+    "reference_stress_slip_bps_each_fill": 4.0,
+    "reference_roundtrip_fraction": 0.002,
+    "maximum_friction_fraction_initial_stop_distance": 0.25,
+    "derived_minimum_stop_bps": 80.0,
+    "check_signal_close": true,
+    "check_adverse_slipped_fill_and_rounded_stop": true,
+    "same_rule_for_base_and_stress": true,
+    "equality_passes": true,
+    "widen_stop_to_pass": false
+  },
+  "portfolio": {
+    "one_position": true,
+    "pyramiding": false,
+    "maximum_filled_entries_each_utc_date": 4,
+    "same_open_replacement": false,
+    "entry_requires_flat_at_start_of_open_events": true,
+    "quantity_updates_after_fill": false,
+    "long_short_filter_before_filled_entry_cap": true
+  },
+  "annual_folds": [
+    {
+      "id": "2022",
+      "start": "2022-01-01",
+      "end_exclusive": "2023-01-01"
+    },
+    {
+      "id": "2023",
+      "start": "2023-01-01",
+      "end_exclusive": "2024-01-01"
+    },
+    {
+      "id": "2024",
+      "start": "2024-01-01",
+      "end_exclusive": "2025-01-01"
+    },
+    {
+      "id": "2025",
+      "start": "2025-01-01",
+      "end_exclusive": "2026-01-01"
+    },
+    {
+      "id": "2026",
+      "start": "2026-01-01",
+      "end_exclusive": "2026-09-01"
+    }
+  ],
+  "chronology": "2022-2024_development_and_2025-JanAug2026_reused_screening_not_pristine_OOS;folds_reset_flat_and_use_prior_history_for_features_only",
+  "screen": {
+    "positive_years": [
+      2025,
+      2026
+    ],
+    "minimum_recent_total_closed_trades": 100,
+    "minimum_each_recent_closed_trades": 30,
+    "minimum_combined_profit_factor": 1.05,
+    "maximum_fold_close_drawdown_pct": 10.0,
+    "recent_stress_net_positive": true
+  },
+  "ranking": [
+    "all_qualification_gates_pass",
+    "greatest_worst_fold_net_return",
+    "greatest_mean_fold_net_return",
+    "lexicographic_context_id"
+  ],
+  "reserved_windows": {
+    "preserve_prior_uninspected": "2026-09-01_to_2026-10-23_exclusive_and_any_other_previously_protected_data",
+    "prospective_warmup_start": "2026-11-01",
+    "prospective_evaluation_start": "2026-12-01",
+    "prospective_evaluation_end_exclusive": "2027-05-01",
+    "as_of_2026_10_28": "future_unavailable_unevaluated",
+    "download_rule": "not_even_warmup_before_one_finalist_frozen_and_separate_Phase5_final_contract_authorized",
+    "warmup_trades": 0,
+    "exposure_compromises_untouched_status": true,
+    "automation_created": false
+  },
+  "schema_version": "btc_flow_phase2_v1",
+  "campaign_id": "btc-flow-phase2-20261028",
+  "phase2_execution_authorized": true,
+  "origin": "systematic_native_exploratory",
+  "source_relationship": "new_executed_taker_quote_pressure_hypothesis_not_liquidation_or_paper_replication",
+  "execution_timeframes_minutes": [
+    5,
+    15
+  ],
+  "approaches": [
+    "executed_taker_pressure_reversal_v1",
+    "price_shock_reversal_control_v1"
+  ],
+  "directions": [
+    "long",
+    "short",
+    "both"
+  ],
+  "parameters": {
+    "prior_complete_utc_days": 30,
+    "nearest_rank_quantile": 0.99,
+    "minimum_absolute_price_impulse": 0.006,
+    "stop_completed_hourly_atr_multiple": 2.0,
+    "minimum_anchor_room_at_slipped_fill": 0.006,
+    "maximum_hold_minutes": 120,
+    "last_entry_utc_minutes": 1320,
+    "flat_at_utc_minutes": 1425
+  },
+  "flow": {
+    "quote": "raw_column7",
+    "taker_buy_quote": "raw_column10",
+    "signed_pressure": "2*taker_buy_quote-quote",
+    "aggregate": "sum_original5m_components_then_signed_pressure",
+    "threshold": "strict_abs_pressure_above_nearest_rank_Q99_of_all_bars_in_previous30_complete_UTC_days_same_timeframe_include_healthy_zeros_exclude_entire_current_day",
+    "direction": "pressure_sign_equals_completed_bar_close_minus_open_sign;fade_price_impulse",
+    "control": "same_price_impulse_warmup_ATR_timing_stop_anchor_risk_exit_without_pressure_magnitude_or_sign_filter"
+  },
+  "timing": {
+    "known_at": "observing_bar_end",
+    "legal_after": "observing_bar_end+1millisecond",
+    "fill_index_offset": 2,
+    "fill": "first_execution_grid_open_strictly_after_known_at;one_whole_bar_wait",
+    "prior_fold_intent_transfers": false,
+    "fill_strict_before_fold_end": true,
+    "last_two_bar_intents": "censored_if_no_in_fold_legal_fill"
+  },
+  "exit": {
+    "initial_stop": "signal_close-direction*2*latest_completed_hourly_ATR20",
+    "anchor": "observing_bar_open",
+    "target": "market_exit_at_anchor_with_adverse_slippage_both_sides;no_favorable_gap_improvement",
+    "opening_priority": [
+      "exact_open_funding_carried",
+      "stop_gap_at_open",
+      "time_or_2345_flat_at_open",
+      "anchor_gap_at_anchor",
+      "entry_only_if_flat_at_start_of_open"
+    ],
+    "intrabar": "stop_first_if_stop_and_anchor_hit;uncertain_funding_debit_only;exit_timestamp_bar_end_is_OHLC_resolution_bound",
+    "deadline": "min(entry+120minutes,entry_UTC_date_23:45);flat_before_midnight",
+    "stop_rounding": "away_from_entry_to_tick_before_fill_guard;no_widen_to_admit"
+  },
+  "stress_slip_bps": 20.0,
+  "cost_scope": "base2bps_and_severe20bps_adverse_slippage_each_fill_plus6bps_fee_each_fill;research_assumptions_not_quote_calibrated;fixed_admission_referenceK0.002_retained_separate_from_severe_stress_cost",
+  "incremental_flow_gate": "candidate_sum_2025_2026_base_net_return_strictly_greater_than_same_timeframe_direction_price_only_control;descriptive_not_statistical_causality",
+  "budget": {
+    "candidate_contexts": 6,
+    "control_contexts": 6,
+    "folds": 5,
+    "cost_conditions": 2,
+    "phase2_economic_evaluations": 120,
+    "parameter_searches": 0,
+    "mutations": 0
+  },
+  "prior_exposure": "810_prior_economic_evaluations_including240validation_replays;correlated_not_independent;2022_to_Aug2026_exposed_development_only",
+  "failure_route": "RETURN_TO_PHASE_1_no_tuning_or_least_losing_promotion",
+  "success_route": "only_qualifying_exact_context_to_Phase3_semantic_data_execution_acceptance_no_training_or_orders",
+  "cash_benchmark": {
+    "net_return_pct": 0,
+    "drawdown_pct": 0
+  },
+  "data_validation": "audit_existing_checksum_verified_original5m_price_quote_taker_buy_base_and_quote_consistency;complete_UTC_aggregation;no_downloads",
+  "limitations": [
+    "bar_close_availability_and_one_bar_latency_assumed_not_measured_receive_clock",
+    "OHLC_market_targets_and_stops_not_quote_fill_certification",
+    "20bps_stress_not_empirically_calibrated",
+    "native_exploratory_rule_direction_thresholds_not_established_alpha",
+    "controls_not_exposure_matched",
+    "annual_features_may_use_pre_fold_history_but_signals_positions_do_not_transfer"
+  ]
+}

@@ -1,0 +1,195 @@
+{
+  "schema_version": "btc_funding_state_phase2_v1",
+  "campaign_id": "btc-funding-state-phase2-20261028",
+  "schedule": "systematic_v2",
+  "phase": 2,
+  "classification": "already_systematic",
+  "origin": "systematic_native",
+  "operation": "create",
+  "source_fidelity": "source_informed_adaptation_not_spot_return_replication",
+  "status": "AUTHORIZED_FIXED_IMPLEMENTATION_AND_COMPARISON",
+  "phase2_execution_authorized": true,
+  "authorized_this_turn": "latesthuman_continue_authorizes_fixed90comparison",
+  "user_scope_revision": "5m/15m execution; overnight/intraweek positions permitted; no user-imposed exact maximum",
+  "candidate": "low_percentile_funding_long_24h_v1",
+  "candidate_contexts": [
+    {
+      "minutes": 5,
+      "direction": "long"
+    },
+    {
+      "minutes": 15,
+      "direction": "long"
+    }
+  ],
+  "controls": [
+    "stale_funding_7d_long_24h_control_v1",
+    "continuous_long_control_v1"
+  ],
+  "cash_benchmark": {
+    "return": 0,
+    "market_replay": false
+  },
+  "execution_timeframes_minutes": [
+    5,
+    15
+  ],
+  "hold_hours": 24,
+  "forced_daily_flat": false,
+  "instrument": "Binance USD-M BTCUSDT perpetual",
+  "data_root": "artifacts/strategy-development/btc-liquidity-20261023/raw",
+  "development_start": "2022-01-01",
+  "development_end_exclusive": "2026-09-01",
+  "raw_manifest_sha256": "49ed1b895b054df0447c99ce2b109c58ff8f7f27e5a0c3be1dbb7b54a708cfe8",
+  "rules_file": "artifacts/strategy-development/btc-information-reset-phase1-20261028/RULES.md",
+  "rules_sha256": "4cad5614f3748bc5ce11a45a8c138a381be7ade39a6d0ffdf836696444845815",
+  "parameters": {
+    "lookback_days": 180,
+    "minimum_prior_funding_events": 300,
+    "maximum_midrank_percentile": 0.1,
+    "common_warmup_days": 187,
+    "lagged_control_funding_slots": 21,
+    "hold_hours": 24,
+    "entry_notional_fraction_fee_inclusive": 0.1,
+    "hard_stop": null,
+    "target": null,
+    "pyramiding": false,
+    "same_open_replacement": false,
+    "suppress_when_occupied_at_decision": true
+  },
+  "timing": "first complete execution-bar close after actual funding timestamp+1ms; decision close+1ms; first grid open strictly after decision; no receive-clock proof claimed",
+  "risk": "new fixed10percentnotional sizing; no stop-based risk or stop-distance cost guard; full USDT collateral and explicit solvency checks; no live margin certification",
+  "cost_conditions": {
+    "base": {
+      "fee_bps_each_fill": 6,
+      "slip_bps_each_fill": 2
+    },
+    "stress": {
+      "fee_bps_each_fill": 6,
+      "slip_bps_each_fill": 4
+    },
+    "severe_sensitivity": {
+      "fee_bps_each_fill": 6,
+      "slip_bps_each_fill": 20
+    }
+  },
+  "required_stress_condition": "stress",
+  "severe_sensitivity_role": "reported diagnostic not mandatory promotion gate for this new pre-results contract; execution evidence requiring higher friction reopens mandatory costs",
+  "funding_mark_buffer_fraction": 0.01,
+  "marking": "hypothetical adverse-slipped long liquidation mark and exit fee; no forced cutoff trade",
+  "quantity": {
+    "step": 0.001,
+    "minimum": 0.001,
+    "maximum": 120,
+    "minimum_notional": 50
+  },
+  "initial_capital": 100000,
+  "annual_folds": [
+    {
+      "id": "2022",
+      "start": "2022-01-01",
+      "end_exclusive": "2023-01-01"
+    },
+    {
+      "id": "2023",
+      "start": "2023-01-01",
+      "end_exclusive": "2024-01-01"
+    },
+    {
+      "id": "2024",
+      "start": "2024-01-01",
+      "end_exclusive": "2025-01-01"
+    },
+    {
+      "id": "2025",
+      "start": "2025-01-01",
+      "end_exclusive": "2026-01-01"
+    },
+    {
+      "id": "2026",
+      "start": "2026-01-01",
+      "end_exclusive": "2026-09-01"
+    }
+  ],
+  "chronology": "2022-2024_development_and_2025-JanAug2026_reused_screening_not_pristine_OOS;folds_reset_flat_and_use_prior_history_for_features_only",
+  "screen": {
+    "positive_years": [
+      2025,
+      2026
+    ],
+    "minimum_recent_total_closed_trades": 100,
+    "minimum_each_recent_closed_trades": 30,
+    "minimum_combined_profit_factor": 1.05,
+    "maximum_fold_close_drawdown_pct": 10.0,
+    "recent_stress_net_positive": true
+  },
+  "additional_gates": [
+    "recent base sum strictly beats same-frame stale control",
+    "recent net PnL per notional-day strictly beats same-frame continuous-long benchmark",
+    "recent closed net positive after removing best entry week; MondayUTC grouping"
+  ],
+  "ranking": [
+    "all_qualification_gates_pass",
+    "greatest_worst_fold_net_return",
+    "greatest_mean_fold_net_return",
+    "lexicographic_context_id"
+  ],
+  "future_comparison_budget": {
+    "candidate_contexts": 2,
+    "control_contexts": 4,
+    "annual_folds": 5,
+    "cost_conditions": 3,
+    "economic_evaluations": 90,
+    "parameter_searches": 0,
+    "mutations": 0,
+    "extra_horizons": 0
+  },
+  "actual_this_phase": {
+    "economic_evaluations_before_start": 0,
+    "training": false,
+    "market_data_downloads": 0,
+    "orders": false
+  },
+  "prior_exposure": "930correlatedeconomic evaluations including240validationreplays; no pristine historical OOS",
+  "reserved_windows": {
+    "preserve_prior_uninspected": "2026-09-01_to_2026-10-23_exclusive_and_any_other_previously_protected_data",
+    "prospective_warmup_start": "2026-11-01",
+    "prospective_evaluation_start": "2026-12-01",
+    "prospective_evaluation_end_exclusive": "2027-05-01",
+    "as_of_2026_10_28": "future_unavailable_unevaluated",
+    "download_rule": "not_even_warmup_before_one_finalist_frozen_and_separate_Phase5_final_contract_authorized",
+    "warmup_trades": 0,
+    "exposure_compromises_untouched_status": true,
+    "automation_created": false
+  },
+  "future_final_warmup_dependency": "legacy Nov1 warmup insufficient187days; if retainingDec1start requirefundinghistoryfromMay28includingprotectedinterveningdates; futureseparatelyauthorizedcontractmustresolvepermissionorschedule; no protected data accessed now",
+  "paper": {
+    "url": "https://www.aijmr.com/papers/2026/4/1493.pdf",
+    "local_file": "sources/funding_2026.pdf",
+    "sha256": "7166ae22a7b5856be35f79c511c5acc27c48e5d5678f34ac4528da3382135e95",
+    "role": "observational research motivation; no independent replication identified"
+  },
+  "phase2_pre_economics_gates": [
+    "new bounded24h fixed-notional broker with no invented stop",
+    "independent event-rank tie/warmup/prefix/latency/occupancy/exit/funding/censor cases",
+    "existing immutable source/data identities reverified",
+    "all90contextsandcostsfrozenbeforeeconomics",
+    "complete marked/exposure/control accounting and trial ledger"
+  ],
+  "failure_route": "RETURN_TO_PHASE_1_without_tuning",
+  "future_success_route": "qualifyingexactcontextonlytoPhase3; no training/deployment authorization",
+  "source_and_execution_limits": [
+    "one observational study with substantially overlapping history",
+    "spot source versus perpetual trading adaptation",
+    "settlement availability assumption not received-clock proof",
+    "2005 marks use verified mark-open proxies not exact settlement ticks",
+    "severe cost sensitivity may erase gross headroom",
+    "small correlated event clusters",
+    "historical filters not live exchange certification"
+  ],
+  "adverse_funding_order": "min(pre_intrabar_funding_cash,post_intrabar_funding_cash) valued_at_low_slipped_liquidation_and_fee; ordinaryclosecashincludesallownedfundingbeforebarend",
+  "solvency_failure": "INVALID_EXECUTION on cash<0 or marked/adverseequity<=0 or unsupportedfunding/collateral; preserve trace,no inventedliquidation",
+  "phase1_root": "artifacts/strategy-development/btc-information-reset-phase1-20261028",
+  "phase1_protocol_sha256": "1b5408fafcd094bd8ce68a5541f95b833457d8dfc69d8ced57442a38508509ae",
+  "phase1_acceptance_sha256": "8c873b1ccee569a34631b293780b528d0da7c84837a1274578f3db475a9e7645"
+}

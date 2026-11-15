@@ -54,6 +54,7 @@ class RegisterBaselineRequest(BaseModel):
     spec_json: dict
     causal_story: str
     notes: str = ""
+    workflow_version: str = "reference_v1"
 
 
 class TunePreviewRequest(BaseModel):
@@ -182,7 +183,7 @@ optimization_jobs: dict[str, dict] = {}
 optimization_jobs_lock = Lock()
 tg_jobs: dict[str, dict] = {}
 
-app = FastAPI(title="Mutation Lab", version="1.0.0")
+app = FastAPI(title="Python2Pine StrategyLab", version="1.1.0")
 app.mount("/ui", StaticFiles(directory=Path(__file__).parent / "ui"), name="ui")
 
 
@@ -227,6 +228,7 @@ def health_ready() -> dict:
 
 
 @app.get("/api/pine2python/status")
+@app.get("/api/python2pine/status")
 def pine2python_status() -> dict:
     return pine_workbench.status()
 
@@ -347,6 +349,53 @@ def tuning_edges(version_id: str, include_hybrid: bool = True) -> list[dict]:
     return lab.list_tuning_edges(version_id, include_hybrid=include_hybrid)
 
 
+class ReferenceValidationRequest(BaseModel):
+    dataset_id: str
+    cases: list[dict] = Field(min_length=1, max_length=100)
+
+
+class SearchAuthorizationRequest(BaseModel):
+    dataset_id: str
+    authorization: dict
+
+
+class ReferenceChildRequest(BaseModel):
+    dataset_id: str
+    spec: dict
+    name: str
+    source_code: str | None = None
+
+
+@app.get("/api/versions/{version_id}/workflow")
+def workflow_status(version_id: str, dataset_id: str | None = None) -> dict:
+    return lab.reference_evidence.status(version_id, dataset_id)
+
+
+@app.get("/api/versions/{version_id}/reference-casebook")
+def reference_casebook(version_id: str, dataset_id: str) -> FileResponse:
+    return FileResponse(lab.reference_evidence.casebook_path(version_id, dataset_id))
+
+
+@app.post("/api/versions/{version_id}/reference-validation")
+def validate_reference(version_id: str, request: ReferenceValidationRequest) -> dict:
+    return lab.reference_evidence.validate(version_id, request.dataset_id, request.cases)
+
+
+@app.post("/api/versions/{version_id}/search-authorization")
+def authorize_reference_search(version_id: str, request: SearchAuthorizationRequest) -> dict:
+    return lab.reference_evidence.authorize(version_id, request.dataset_id, request.authorization)
+
+
+@app.post("/api/versions/{version_id}/reference-children")
+def create_reference_child(version_id: str, request: ReferenceChildRequest) -> dict:
+    return lab.create_reference_child(version_id, request.dataset_id, request.spec, request.name, request.source_code)
+
+
+@app.post("/api/versions/{version_id}/pine-target")
+def prepare_reference_pine_target(version_id: str, request: PythonTraceRequest) -> dict:
+    return lab.reference_evidence.prepare_pine_target(version_id, request.dataset_id, pine_workbench)
+
+
 @app.get("/api/optimization-progress")
 def optimization_progress() -> dict:
     return lab.optimization_progress()
@@ -359,6 +408,7 @@ def optimization_result() -> dict:
 
 @app.post("/api/families/register")
 def register_family(request: RegisterBaselineRequest) -> dict:
+    spec = {**request.spec_json, "workflow_version": request.workflow_version}
     return lab.register_baseline(
         family_id=request.family_id,
         title=request.title,
@@ -367,7 +417,7 @@ def register_family(request: RegisterBaselineRequest) -> dict:
         timeframe=request.timeframe,
         version_name=request.version_name,
         source_code=request.source_code,
-        spec_json=request.spec_json,
+        spec_json=spec,
         causal_story=request.causal_story,
         notes=request.notes,
     )
@@ -476,6 +526,10 @@ def optimize_all(version_id: str, request: OptimizeAllRequest) -> dict:
 
 @app.post("/api/versions/{version_id}/optimize-all/jobs")
 def start_optimize_all_job(version_id: str, request: OptimizeAllRequest) -> dict:
+    version = lab._get_upgraded_version(version_id)
+    if not version:
+        raise HTTPException(404, "Version not found.")
+    lab.reference_evidence.require(version, request.dataset_id, "search")
     job_id = f"opt_{uuid4().hex[:12]}"
     now = datetime.now(UTC).isoformat()
     with optimization_jobs_lock:

@@ -1,66 +1,29 @@
-# Universal Mutation Constitution
+# Unified mutation and optimization constitution
 
-This constitution governs Phases 3, 3.1, 4, 4.1, 4.2, and 4.3. It prevents strategy research from converging on a reusable mutation catalog. Every candidate must be derived from the current strategy, current market context, current evidence, and current decision boundary. Before acting, read `agents/translation and generation/agents/codex_phase_operator.md` and the current `STRATEGYLAB_UNRESOLVED_PROOF_MAP.md`; carry relevant issue IDs and evidence dispositions into the phase artifact.
+Active schedule: systematic_v2. Read the phase operator before applying this contract. Phase 4 changes declared parameters; Phase 5 performs evidence-derived structural changes and bounded reoptimization. Diagnostics, whitebox, hybrid-rule combinations and successor decisions are techniques inside Phase 5, not separate mandatory phases.
 
-## Required Inputs
+## Admissible experiments
 
-A mutation phase begins with one frozen parent, its full lineage, the Phase 1 criteria/checklist, the Phase 2 parity package, the Phase 2.5 qualification report, the current asset and venue, the current timeframe contract, the current execution and capital model, and the current validation policy.
+Begin with an accepted immutable parent and a concrete observed development-data failure mechanism. Record hypothesis, exact semantic delta, affected rules/data/execution, expected benefit, falsification case, relevant ablation and complexity cost before evaluation. Eligible families include entry/exit logic, causal context filters, state confirmation, risk allocation inside fixed ceilings and supported rule combinations. Assess each relevant family; do not claim infinite enumeration of “all possible mutations.”
 
-If any controlling input is missing or stale, repair the evidence contract before generating candidates. A Pine-deployable lineage also requires the accepted Pine source hash, Pine2Python analysis ID, matching TradingView dataset/proof fingerprints, explicit user acceptance, and Phase 2 Python trace-parity evidence. Optimization or mutation must not begin from an exploratory workbench revision or a dashboard mismatch.
+Source-derived changes preserve license/attribution and transformation provenance. A mechanical analogue of discretionary concepts is an adapted hypothesis, not an asserted faithful trader replica. Learned policies, model judgment, RL and social-data infrastructure remain separately planned/authorized work.
 
-## Universal Do Constitution
+## Parent and child integrity
 
-- Freeze the parent, data, execution model, capital model, benchmark policy, and acceptance contract before diagnosis.
-- Diagnose behavior before proposing a change.
-- Derive each candidate from one measured weakness, one rival explanation, and one causal mechanism.
-- Name the exact parent decision or state transition the candidate can affect.
-- Use only information available before that decision takes effect.
-- Change one conceptual dependency per candidate.
-- Define the smallest active test that can refute the hypothesis.
-- Declare acceptance and rejection boundaries before running the test.
-- Compare every candidate with the same frozen parent under the same context contract.
-- Use chronological validation and preserve the untouched evidence boundary.
-- Evaluate activity, opportunity loss, economic-engine preservation, implementation integrity, and context-specific portfolio evidence together.
-- Persist every tested candidate, including failures and unrepresentable hypotheses.
-- Promote only candidates that reproduce their evidence in the live strategy engine.
-- Re-run diagnostics after a promoted batch changes the parent behavior materially.
+Save parent code/settings/data identities, independent proof, fixed unoptimized economics and existing baseline-backed authorization. Each child records immutable parent, exact code/parameter delta, effective settings, trial identity and impacted evidence. Never edit accepted parents or silently inherit stale proof.
 
-## Universal Do-Not Constitution
+New semantics require independent positive/negative cases, causal timing/data audit and supported execution before ranking economics. Save an unoptimized child baseline before tuning; obtain valid child authorization with finite parameter domains and budget. Preserve existing parent-domain/runtime checks. Structural changes cannot be smuggled through a parameter-only grant.
 
-- Do not begin from a stock list of indicators, filters, calendar partitions, exit styles, feature families, model families, or mutation roles.
-- Do not reuse a mutation because it worked for another strategy or earlier lineage.
-- Do not inherit a candidate from explanatory prose unless the current evidence independently justifies it.
-- Do not inspect outcome relationships before freezing the admissible information set and validation design.
-- Do not bundle unrelated dependencies into one test.
-- Do not optimize a candidate before its simplest active form has produced credible evidence.
-- Do not redefine criteria, tolerances, benchmarks, costs, sample sufficiency, or robustness requirements after observing results.
-- Do not treat a fixed metric threshold, cost multiplier, trade count, paper-trading duration, or benchmark as universal.
-- Do not accept improvement created by future information, execution impossibility, hidden open risk, activity collapse, isolated chronology, or destruction of the parent economic engine.
-- Do not keep failed candidate controls in the operator path unless the remaining instrumentation has an independent documented use.
-- Do not call an offline relationship a promoted strategy behavior.
-- Do not let complexity compensate for a weak or unfaithful parent.
+## Selection and stopping
 
-## Candidate Derivation Procedure
+Freeze common data/cost/risk/benchmark contracts, development chronology, admissible families, round budget and stop conditions. Compare parent, child and relevant ablations fairly. Reoptimize only legitimate parameters within finite authorized domains; never optimize risk ceilings or legal execution constraints.
 
-1. Freeze the current parent and evidence contract.
-2. Describe the parent economic engine from observed behavior.
-3. Locate one decision boundary where behavior departs from the declared objective.
-4. State the evidence and its uncertainty.
-5. Generate rival causal explanations for that boundary.
-6. Select the explanation that can be tested with decision-time information and current engine capability.
-7. Define one candidate that changes the smallest relevant dependency.
-8. Define the active first test, required diagnostics, and precommitted rejection conditions.
-9. Run the candidate against the frozen parent.
-10. Persist the result and route it by evidence.
+Record all proposals, runs, rejected branches, manual iterations and changes of objective/window in the cumulative trial ledger. Prefer reproducible, stable evidence over a lone optimum. A branch with no supported incremental benefit stops. Unresolved semantic/data/execution defects return to their owner rather than becoming optimization opportunities.
 
-The procedure may produce no candidate. That is a valid result when the evidence cannot distinguish a mechanism, the required information is unavailable at decision time, or the current parent is not strong enough to support another layer.
+All candidate choice uses development evidence. Reserve the final holdout before research/trials, freeze one finalist before inspecting it, and evaluate once. A consumed/failed holdout cannot be reused as untouched after retuning. Final failure means STOP or a new campaign with fresh/forward evidence.
 
-## Context Ownership
+## Promotion contract
 
-The Phase 1 contract owns the meaning of acceptable performance, benchmark relevance, execution realism, robustness, and manual review for the current strategy. Later phases may identify that the contract is incomplete, but they must route back to Phase 1 rather than invent universal replacements.
+A child advances only with current source-fidelity disposition, reference/data/execution proof, net economic evidence under predeclared contextual criteria, complete lineage and trial accounting. Required Pine target acceptance applies to the exact final code before paper trading. Parameter/rule/target changes invalidate affected evidence.
 
-Asset, venue, timeframe, holding behavior, data frequency, trade frequency, liquidity, costs, and operational constraints determine the valid mutation and validation design. The phase prompts supply reasoning rules, not strategy content.
-
-## Promotion Boundary
-
-A candidate becomes part of a new parent only after its active implementation survives the declared comparison, the surviving batch is optimized only within accepted semantics, and the saved child remains reproducible from its lineage artifacts. A promoted child must re-earn every later gate. No mutation phase can grant production status by itself.
+Paper graduation requires an actual adapter and reconciled forward/risk/operational evidence. It never means live authorization. Missing proof means BLOCKED, not presumed acceptance.

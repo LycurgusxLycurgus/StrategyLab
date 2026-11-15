@@ -1,3 +1,5 @@
+> Historical reference: this is a legacy application-specific plan, not the current phase contract. Numeric thresholds and week durations below are historical, not new defaults. Use the [current phase operator](translation%20and%20generation/agents/codex_phase_operator.md).
+
 I put the full buildout into canvas as **“Project Aurum Execution Plan For Codex.”**
 
 # Project Aurum Execution Plan for Codex

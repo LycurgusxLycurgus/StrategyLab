@@ -1,243 +1,129 @@
-# Codex Phase Operator Guide for Mutation Lab
-
-This guide is the active human and agent workflow for creating, validating, porting, qualifying, mutating, and hardening strategies in Mutation Lab. Each phase owns one evidence boundary. A later phase cannot compensate for an earlier phase that did not pass.
-
-## Repository Map
-
-Phase prompts live in `agents/translation and generation/whitebox/`.
-
-| Phase | Prompt | Owned outcome |
-|---:|---|---|
-| 0 | Pine Workbench API and `services/pine2python/` | Immutable greenfield, source-adapted, or indicator-first revisions with automated analysis and local proof evidence. |
-| 1 | `01_translation.md` | Strategy-specific research record and criteria/checklist. |
-| 1.5 | `01-5_baseline_transformation.md` | Complete Pine strategy, screenshot-heavy manual TradingView acceptance, and frozen portability package. |
-| 2 | `02_baseline.md` | Faithful Mutation Lab Python port with criterion-level parity evidence. |
-| 2.5 | `02-5_baseline_qualification.md` | Fast fidelity review, baseline run, authorized optimization, and qualification decision. |
-| 3.1 | `03-1_whitebox_diagnostics.md` | Evidence-derived whitebox diagnosis and mutation hypotheses. |
-| 3 | `03_full-whitebox.md` | One-by-one whitebox previews and an optimized survivor batch. |
-| 4.1 | `04-1_hybrid_diagnostics.md` | Hybrid justification and strategy-specific information, target, representation, and validation contracts. |
-| 4 | `04_hybrid-blackbox.md` | Offline previews, live-engine reproduction, and an optimized hybrid survivor batch. |
-| 4.2 | `04-2_blackbox_viability.md` | Optional constrained discovery and live reproduction of stable decision-time relationships. |
-| 4.3 | `04-3_successor_baseline.md` | Optional evidence-preserving reseed into Phase 1 or Pine revision through Phase 1.5. |
-
-Phases 3 through 4.3 also require `agents/docs/universal_mutation_constitution.md`.
-
-Strategy-development artifacts belong under `artifacts/strategy-development/<strategy_id>/`. Run evidence remains under `artifacts/runs/`, `artifacts/reports/`, and `artifacts/diagnostics/`. Original inspectable source and accepted canonical Pine versions belong under `pre-strategies/` with distinct filenames. Pine2Python is built in this repository at `services/pine2python/`; do not create a temporary external repository or vendor it later.
-
-## Operating Constitution
-
-- The Phase 1 criteria/checklist defines correctness before code exists.
-- TradingView is the canonical proving ground for chart-based strategies.
-- TradingView Basic corroboration uses one on-chart parity-proof dashboard by default; paid CSV export is never required.
-- Dataset fingerprints must match before execution or performance parity can pass.
-- Pine2Python provides analysis, local supported-subset execution, proof generation, and first-divergence comparison; it never optimizes or promotes.
-- Greenfield Pine and source-derived Pine are equal routes selected by evidence.
-- Official TradingView documentation and open-source precedent research are mandatory for both routes.
-- The user alone approves the manual TradingView gate.
-- One parity-dashboard screenshot is the default required evidence and must map to stable checklist IDs; focused extra screenshots are claim-driven.
-- Mutation Lab receives only a frozen, manually accepted Pine strategy.
-- Phase 2 proves parity before economics or optimization are interpreted.
-- Phase 2.5 reviews successful parity quickly and never repeats the port without a discrepancy.
-- Later mutations are derived from the current strategy evidence, never from reusable catalogs.
-- Every test preserves the frozen parent and comparable context.
-- Offline evidence cannot promote live behavior.
-- Production claims require robustness, execution feasibility, forward reconciliation, and operational controls beyond the mutation phases.
-- Strategy families remain in the repo until the user explicitly requests removal.
-
-## Shared Project Evidence Contract
-
-This guide is the shared owner of the evidence rules used by every phase. Each
-standalone phase prompt must read this guide, the applicable phase section, and
-the current `STRATEGYLAB_UNRESOLVED_PROOF_MAP.md` before acting. The register is
-the detailed project memory for open questions, proof obligations, owners,
-non-proof, and reopening triggers; it is not a substitute for the
-strategy-specific criteria or a phase verdict.
-
-Every phase carries forward these identities when applicable: authoritative
-source and immutable parent/child hashes; criteria and research revision;
-dataset file/hash, symbol, venue, session, timezone and timeframe; complete
-settings and execution model; Pine2Python analysis, instrumentation, runtime
-and proof IDs; Python parent/trace IDs; and the exact evidence window and
-warmup/reset boundary. Hash the exact UTF-8 bytes written to disk and verify
-them by binary readback before treating a Pine or proof artifact as immutable.
-
-Keep these evidence classes separate:
-
-- `LOCAL_PROOF_CAPTURE_COMPLETE` means supported PineTS streams were captured;
-  `LOCAL_PROOF_PARITY_PASS` requires caller-owned reference streams. Both are
-  local evidence and retain `TRADINGVIEW_REVIEW_REQUIRED`.
-- A TradingView signature is meaningful only after dataset fingerprints match.
-  `TRADINGVIEW_ACCEPTED` additionally requires exact source/settings/window
-  identity, displayed dashboard values, screenshot SHA-256, and an explicit
-  user verdict. A local result, compile, screenshot filename, or API status
-  cannot supply that verdict.
-- Python parity is a separate gate from indicator acceptance and economics.
-  Headline totals never replace feature, signal, state, rejection, order,
-  position, trade and lifecycle evidence.
-
-For detector-based work, account for every candidate with one terminal result
-and a first-failure funnel, then assess independent chart opportunity recall.
-Separate detector events, checklist/quality gates, lifecycle/order policy, and
-rendering capacity. Record source/known/confirmation/ready/action timestamps;
-pending or open outcomes remain explicitly unresolved at the observation
-cutoff. Use the first causal divergence order for proof mismatches: contiguous
-field groups, time partitions, then exact-bar primitive probes. Count all
-TradingView plot calls, including `alertcondition`, and preflight compiled-token
-pressure on the exact generated bytes. Stateful proofs separate supplied
-history warmup from the hashed window. Persistent historical drawings own
-frozen timestamps and use `xloc.bar_time`; an object-budget failure must not
-erase a detection event. Remaining OHLC ambiguity requires a reason code and
-the evidence/review timestamp that leaves it unresolved.
-
-An issue may block only a phase whose accepted scope it affects or whose input
-identity it invalidates. A later phase may not silently close an earlier issue;
-it records the issue ID, evidence locator, disposition, and return route. A
-mechanism is called reusable only after its same failure mechanism passes on a
-materially different non-SMC consumer; additional SMC assets demonstrate
-context coverage, not cross-strategy transfer. The detailed root-resolution and
-cross-strategy proof gates live in the register.
+# Python2Pine systematic phase operator
 
-### Phase application map
+Active schedule: **systematic_v2**. Research-quality and return-loop contract revised 2026-10-29. This operator replaces the previous phase schedule for new campaigns. It governs research and promotion decisions; prompts do not implement engines, broker adapters, or API gates.
 
-| Phase | Required application of the shared contract |
-|---:|---|
-| 0 / 1 | Freeze source authority and lineage; create a source-cited criteria manifest with hard, conditional, quality, context and isolated alternatives; choose positive, negative and boundary fixtures; define trace fields, timestamps, data identity and unresolved IDs before semantic work. |
-| 1.5 | Prove protected source regions, exact bytes, static/runtime budgets, causal state and visuals; run the bounded dashboard and focused TradingView review; record the user verdict for the exact candidate before strategy/port progression. |
-| 2 | Port only accepted Pine; map every criterion to Pine/Python code and trace fields; compare aligned datasets and localize the first divergence; document approved exclusions/tolerances without turning feed mismatch into parity. |
-| 2.5 | Verify prerequisite freshness and hashes without repeating sufficient parity; run the unoptimized baseline and economic qualification separately; do not use PF/WR to hide source-valid events or repair semantics. |
-| 3.1 / 3 | Derive hypotheses from current evidence; preserve retained, added, removed, retimed and re-anchored opportunities and first-failure classes; test one conceptual dependency while keeping the accepted semantic boundary explicit. |
-| 4.1 / 4 | Freeze decision-time information, target, ambiguity, chronology, opportunity preservation and complexity before outcome inspection; require offline-to-live reproduction before promotion. |
-| 4.2 | Use a bounded untouched evaluation boundary; record failed relationships; discovery never promotes an opaque branch. |
-| 4.3 | Carry evidence-backed constraints and unresolved issue IDs only; a successor re-earns applicable Phase 1 through 2.5 and later gates under its own identity. |
-| Production | Require robustness, adverse execution, venue legality, forward reconciliation and operational controls; prior local, browser or mutation evidence is not deployment readiness. |
+## Start here
 
-## Phase 0: Indicator-First Pine Workbench
+Read root `AGENTS.md`, this operator, the selected phase, `agentic/architecture.md`, and relevant entries of `STRATEGYLAB_UNRESOLVED_PROOF_MAP.md`. Read strategy criteria, source identities, and actual evidence before acting. Resolve contradictions at their owning boundary, not by overwriting historical evidence.
 
-Use this route when the strategy depends on a novel or materially modified
-indicator whose behavior must be established before order rules can be defined.
-Freeze one indicator contract covering its equations, input ownership, output
-series, persistent state, state transitions, timeframe and session ownership,
-completed-bar semantics, warmup, missing-data behavior, invalidation and reset
-rules, object lifecycle, and repaint/future-leakage policy.
+Choose the phase whose inputs are actually satisfied. Resume valid evidence rather than restarting completed work. Work autonomously within the campaign's frozen scope and budgets; ask only for unavailable user-owned decisions or permissions. Missing evidence means BLOCKED, not an invented pass. Emit a concise phase report with artifact locations and exact next action.
 
-Create an immutable Pine revision with mode `indicator_first`; it must declare
-`indicator()`. Instrument every feature and state later consumed by the strategy.
-Run Pynescript analysis and supported PineTS evidence, and preserve each semantic
-change as a child revision. When a mechanism is outside the local runtime subset,
-keep the limitation explicit and define the focused TradingView evidence that
-will decide it.
+## One active lifecycle
 
-Corroborate the exact indicator revision in TradingView on the declared symbol,
-timeframe, inputs, and proof window. The user accepts the matching proof dashboard
-and any claim-driven visual or state evidence. Freeze the accepted indicator hash
-before strategy code is added.
+| Phase | Central deliverable | Forward gate | Failure route |
+| --- | --- | --- | --- |
+| 1 Research and candidate selection | Research-only batch of at least three fresh, complete hypotheses; target 3–4 within budget | At least three evidence-supported test-ready candidates, complete causal rules, source-transfer/measurement dossiers and frozen comparison protocol; explicit testing approval still required | INCOMPLETE/BLOCKED or STOP; never fabricate missing candidates |
+| 2 Controlled comparison | Implement shortlisted candidates across declared asset/timeframe/direction matrix | A candidate meets all predeclared absolute requirements with causal/data/execution proof | Phase 1 with specific failures and research questions; BLOCKED for invalid/missing evidence |
+| 3 Base strategy | Reproducible base of the qualifying candidate in its accepted contexts, with fixed baseline | Independent semantics, raw-data audit, execution and baseline accepted | Repair owner; Phase 2/1 if hypothesis weak |
+| 4 Optimization | Stable parameterized candidate for specified asset/timeframe/direction | Authorized finite search and development evidence | Phase 3 defects; Phase 2/1 weak concept |
+| 5 Mutation + optimization | One frozen finalist after bounded structural experiments and final holdout | All evidence current; final untouched test passes predeclared criteria | STOP or new campaign with fresh evidence |
+| 6 Paper trading | Forward reconciliation and graduation decision | Operational and economic paper contract met | NOT_GRADUATED or BLOCKED; repair creates new candidate |
 
-Create the strategy as a child revision. Preserve the accepted indicator
-calculations unchanged in the first strategy candidate; add explicit signal,
-rejection, order-intent, sizing, fill, stop, target, and position-state contracts
-around them. Route that strategy through Phases 1 and 1.5 independently. Only the
-accepted strategy hash enters Phase 2, where its declared feature, signal, state,
-order, and trade traces must match Python before any Phase 3–4 adaptation.
+“Ensemble” here means controlled comparison of distinct complete candidates, not minor variations of a preselected strategy or automatic signal voting. A combined strategy is itself a new hypothesis requiring comparison, causal validation and complexity accounting. Phase 5 absorbs the old separate diagnostics, whitebox, hybrid, viability and successor stages; those are techniques, not additional mandatory phases.
 
-## Phase 1: Strategy Definition and Research
+## Strategy identity and translation
 
-Begin with a strategy idea, explanation, inspectable source, or completed-lineage research brief. Freeze one asset, venue, timeframe contract, execution context, and business objective.
+Keep independent axes:
 
-Create:
+- Origin: `systematic_native`, `discretionary_origin`, or existing component-classified `hybrid` metadata.
+- Operation: `create`, `replicate`, `translate`, or `improve`.
+- Decision governance and policy interpretability: explicit mechanical rules, opaque learned policy, or a documented combination.
 
-- `artifacts/strategy-development/<strategy_id>/phase1_criteria_checklist.md`
-- `artifacts/strategy-development/<strategy_id>/phase1_research_record.md`
+First classify whether the requested approach is inherently systematic/mechanical or still discretionary; keep that assessment separate from historical origin metadata. For discretionary work, first research transformation methods and their preserved, omitted and changed concepts, then evaluate complete mechanical formulations. Distinguish supported faithful translation, translation of supported parts and designed systematic emulation. An indicator is not automatically a complete strategy. Every trading decision must have a causal rule with zero discretion remaining. Do not silently replace undefined concepts with arbitrary quantitative proxies or claim unsupported equivalence. Record source rule, interpretation, operational formalization, deliberate adaptation, rationale, implementation symbol and validating case. Track source/license/attribution and exact source version. Ambiguity stays explicit until resolved; no silent source rewrite.
 
-The criteria/checklist must assign stable IDs, scope class, pass condition, evidence method, artifact locator, status, and blocking severity to every in-scope requirement. It owns the semantic, visual, execution, economic, benchmark, regression, screenshot, and port-parity contracts.
+Keep source fidelity, reference correctness, data integrity, execution correctness, economic evidence and platform parity as separate verdicts. A proxy can be correct against its own specification and still not be a faithful discretionary replica. Native creation has no invented source-fidelity obligation. Replication/translation requires rule coverage and discrepancies; improvement preserves the accepted parent and measures changes.
 
-Research current official Pine behavior for every nontrivial mechanism. Research inspectable public code for implementation precedent and record provenance and reuse status. Then select `GREENFIELD_PINE` or `SOURCE_DERIVED_PINE` from fit, auditability, and license evidence. A source-derived route cannot continue until the actual source is preserved under `pre-strategies/`.
+## Research and candidate-selection contract
 
-Phase 1 passes only as `READY_FOR_PINE_CREATION`. It cannot create a Python parent or qualify economics.
+For an already systematic request, investigate the strongest available complete mechanical approaches using original sources, existing research and inspectable implementations for the requested market, horizon and execution constraints. Familiarity, repository suggestions and prior mentions grant no selection priority.
 
-## Phase 1.5: TradingView Creation and Manual Acceptance
+For a discretionary request, Phase 1 performs the two research sub-steps above before selection. Assess formulation completeness, source quality, contextual relevance, causal testability, data/execution feasibility, cost evidence and limitations under explicit criteria. Preserve source fidelity separately from correctness of the mechanical specification.
 
-Build or adapt the complete Pine strategy against the frozen criteria. Keep calculations, state, chart objects, diagnostics, and orders aligned. Make one semantic change per testable revision and preserve known-good versions.
+Every new Phase 1 attempt, including a return from failed Phase 2, must research and submit at least three fresh, distinct, coherent test-ready hypotheses; target 3–4 within the approved budget. “Top” means best-supported to investigate, not proven profitability. Explain sources, completeness, relevance, limitations and selection over rejected alternatives. A fresh batch may contain new mechanisms, meaningful revisions of previous strategies, or a justified mix chosen from failure evidence. A revision needs a new candidate identity, parent/delta, diagnosed failure, new causal prediction and falsification test. Minor parameter/filter changes, duplicate contexts, controls and recycled failed specifications do not satisfy the minimum. If fewer than three are defensible, keep Phase 1 INCOMPLETE/BLOCKED and report the evidence gap; continue only within approved research budget, never invent weak candidates or claim PASS_TO_PHASE_2. Behavioral ambiguities block testing rather than inviting silent defaults.
 
-Prepare `phase1_5_manual_review.md` and a screenshot manifest. Freeze the Pine hash, chart environment, complete inputs, strategy properties, execution settings, checklist revision, and fixture locations.
+Phase 2 implements and compares that shortlist, not variants of an assumed winner. It advances only an eligible candidate meeting every predeclared requirement. If none qualifies, return specific failure evidence and unresolved research questions to Phase 1. Phase 3 inherits the qualifying candidate's exact rules, provenance, accepted contexts, comparison proof, trial ledger and protected windows. Do not synthesize untested additions or expand scope without updated specification and comparison.
 
-The user tests the exact candidate on the declared asset and timeframe. Required screenshot evidence must prove the strategy-specific accepted and rejected behavior, visual contract, settings, tester result, and state persistence demanded by Phase 1. Each image maps to checklist IDs and a reviewer verdict.
+All phase instructions and handoffs use neutral operational requirements and decision criteria. Do not include illustrative strategy names, candidate lists, assets, parameter values or trading rules. Campaign artifacts must still record the actual researched candidates and concrete executable rules; neutral instructions do not authorize vague strategy specifications.
 
-Phase 1.5 reaches 100 percent only when every required item passes, audit-only evidence exists, deferred behavior is isolated, hard failures are absent, and the user accepts the exact Pine hash. Save that script as `pre-strategies/<strategy_id>_accepted.pine` and create the portability package.
+## Research-only boundary, approval and return attempts
 
-## Phase 2: Pine-to-Python Port and Parity
+Phase 1 means research/specification, not implementation, signal stress testing or economic validation. Default to research-only for initial and return attempts. A research-ready report must explicitly say that no new candidate trades/economic tests ran, the candidates are unvalidated, and Phase 2 will implement, stress-test and decide Phase 3 promotion or return to research. PASS_TO_PHASE_2 is readiness, not evidence of quality/profit and not execution permission.
 
-Port only the accepted Pine version. Build a criterion-to-code map before implementation. The map connects every required behavior to Pine code, Python code, parent schema, diagnostics, fixtures, and comparison rules.
+Require human approval of the batch and bounded Phase 2 protocol before testing. Research approval alone, a readiness status, or approval of a failed prior batch is not testing approval. If the user explicitly authorizes research plus testing for the new bounded batch, record that scope, announce the research-to-testing transition and execute Phase 2 in the same workflow once prerequisites pass; do not stop at “ready” or ask for redundant approval. Otherwise finish Phase 1 with an explicit approval request. No autonomous repeat-until-profitable loop is authorized.
 
-Create a parity ledger and report. Exact semantic behavior must match exactly. Numerical tolerance is valid only when Phase 1 declared it before implementation. Intentional platform divergence requires a documented mechanism, preserved causal identity, and explicit approval.
+When no Phase 2 candidate qualifies, stop that batch and report RETURN_TO_PHASE_1. Explain the distinct failures and retained evidence, then recommend the next research batch of at least three fresh hypotheses and whether new mechanisms, meaningful revisions or a mix best address those failures. State that those candidates will be tested only after approval of the new batch/protocol. If the next candidates have not yet been researched, label the batch proposal provisional, not test-ready. Approval of further research resumes Phase 1; completion must again meet the minimum-three and evidence gates. Do not issue only a bare “return” verdict or silently start another comparison.
 
-No required item may remain failed or blocked. No optimization, mutation, or economic rescue is allowed during parity work. Freeze the unoptimized Python parent and route only `PARITY_ACCEPTED` ports to Phase 2.5.
+## Research-quality dossier: evidence before enthusiasm
 
-## Phase 2.5: Fast Review and Baseline Qualification
+For every candidate, record the proposed information mechanism and alternative explanations; direct observable or measurement definition; source population, instrument, market, sample dates, observation frequency, information availability, predicted horizon, direction and return definition; and evidence of replication, uncertainty and selection exposure. Separate gross association, predictive increment and executable net trading evidence. Source code, a familiar label, a large headline return or a published correlation is not independently verified edge.
 
-First verify hashes, checklist revision, parity status, approved divergences, dataset identity, and execution contract. A complete package receives `FIDELITY_REVIEW_PASS` without repeating Phase 2.
+Map every source-to-candidate change in instrument, input construction, timestamp/latency, horizon, direction, event population, exits, occupancy and cost model. Explain why the source result could survive each material change; otherwise classify the adaptation as a new, unproven hypothesis and require a direct discrimination test. Input availability cannot decide the hypothesized trade direction or justify substituting a convenient different measurement. Respect user execution timeframe and holding horizon as separate constraints; do not shorten the source horizon silently.
 
-Run the exact unoptimized parent and preserve its report. If the Phase 1 contract authorizes search, use the baseline optimizer only over declared tunable parameters. State definitions, implementation constants, and accepted semantics remain frozen.
+Audit construct validity and point-in-time availability before admission. An unsupported substitute for the claimed mechanism, circular price-derived label presented as ground truth, future information, or inaccessible required data vetoes that measurement/claim until resolved. A disclosed alternative observable is a different hypothesis, not proof of the original mechanism. Legitimate bounded input approximations require an explicit error/availability audit and sensitivity; disclosure alone does not validate them. Never call any approximation a high-quality signal by default.
 
-Judge results using the strategy-specific evidence and benchmark contract. Fixed universal thresholds cannot replace that contract. A faithful, qualified parent advances to Phase 3. A parity defect returns to Phase 2, a Pine acceptance defect returns to Phase 1.5, and a contract defect returns to Phase 1. Economically rejected families remain preserved as research until the user directs cleanup.
+Require a plausible captured-move-versus-all-in-cost budget at the actual legal entry/holding horizon, with source and uncertainty. Stop distance, potential target distance and historical volatility are not expected captured return. Compare plausible effect with timing loss, turnover, fees, spread/slippage, funding/borrow and exits under the requested execution model. Do not invent effect sizes when evidence is missing. A newly designed hypothesis without a proven edge may enter a bounded discrimination experiment if its mechanism, measurable effect target, cost break-even and falsification plan are defensible; record the missing evidence rather than borrowing a changed source's magnitude. Unresolved measurement, timing or behavioral gaps still block admission. Prespecify a cheap discrimination test, matched controls, meaningful effect, uncertainty method, minimum independent coverage and retirement/reopening criteria rather than creating expensive complete campaigns for every interesting label.
 
-## Phases 3 and 3.1: Whitebox Research
+## Phase 2 diagnostics: measurement, signal and economics are different
 
-Run Phase 3.1 before mutation code. Diagnose the frozen parent, its economic engine, the decision boundary that departs from the declared objective, and rival causal explanations. Generate no candidate when evidence cannot distinguish a testable mechanism.
+Freeze diagnostic endpoints and budgets before outcomes. First validate implementation, source/measurement meaning, data clocks and execution. Invalid measurements or tests yield BLOCKED/INVALID evidence, not a strategy loss. Then measure the proposed signal at legal information/entry times and relevant horizons on development partitions, with dependence/overlap-aware uncertainty and multiple-selection accounting. Pair candidate events with defensible controls matched for direction, clock/regime, exposure, turnover and availability where those affect the claim; disclose residual differences. Prespecified ablations/placebos must distinguish information value from merely trading less. Raw-to-net and decision-to-fill attribution should localize weak association, timing decay, exit conversion and costs; fixed-fill attribution is not a zero-cost counterfactual replay.
 
-Phase 3 implements each justified candidate as the smallest active one-dependency test. Persist all preview results. Promote every independent survivor into one optimization batch, save the child only when it satisfies the strategy contract, and run Phase 3.1 again on materially changed behavior.
+Report measurement status and signal status separately from whole-strategy acceptance:
 
-Phase 4 becomes eligible only when no explainable rule hypothesis has a better evidence-to-complexity ratio than a bounded statistical layer.
+- INVALID_PROXY / INVALID_MEASUREMENT: unsupported substitution, circular claim or unavailable/future input; veto use as evidence and promotion until corrected and independently revalidated.
+- NOISE_OR_NO_USEFUL_EFFECT: valid, sufficiently informative tests reject the predeclared economically meaningful effect in the stated context; veto that formulation/context. This is not universal proof that the entire source family is noise.
+- INCONCLUSIVE: insufficient independent observations, weak/mismatched controls or uncertain effect; no validated-signal claim or promotion. Do not disguise low power as proof of noise.
+- PROMISING_COMPONENT: directional or incremental evidence worth retaining, but incomplete replication, costs or uncertainty; prioritize a bounded discriminating research question, not Phase 3 promotion.
+- SUPPORTED_SIGNAL: valid timely measurement, stable relevant effect and incremental evidence beyond defensible controls, with stated uncertainty/selection/latency limits and plausible execution headroom. Record precisely which component and context are supported; observational support does not prove an economic cause.
 
-## Phases 4 and 4.1: Hybrid Research
+Preserve promising/supported components in the phase report or existing evidence store with definition/version, context, effect and uncertainty, controls, known weaknesses, failed strategy wrapper and next falsifiable test. A failed wrapper must not erase genuinely supported information; a good component must not inherit a failed strategy's Phase 3 approval. Improvement from reduced exposure, favorable aggregate PF or isolated trades is insufficient. Only a complete candidate passing all frozen economic/risk/execution requirements advances. Do not relax historical gates after failure or guarantee that sufficient attempts must yield profit.
 
-Phase 4.1 defines one diagnosed decision boundary, the information available before that decision, the target, ambiguity handling, representation, chronology, acceptance conditions, and live-engine contract. It chooses no feature or model from a stock catalog.
+## Campaign contract: freeze before comparing
 
-Phase 4 tests offline candidates, then implements every offline survivor through an explicit live-engine control. Only live reproduction permits promotion. Optimize the live survivor batch under the Phase 1 evidence contract and preserve the whitebox parent outside the bounded decision layer.
+Record campaign identifier and schedule, requested asset/venue/instrument set, trading horizon, timeframe/timezone/session and direction choices, data provider and as-of dates, capital, tradable lot/tick/margin limits, order/fill rules, fees/slippage/funding/borrow where applicable, benchmark, risk ceilings, objective, acceptable drawdown and economic/operational acceptance criteria. Analyze direction-specific behavior separately where pertinent; do not assume symmetric performance. Preserve explicit timeframe/direction choices. When either is unspecified, choose the most pertinent settings from research and justify them before testing. Declare a bounded candidate-by-asset-by-timeframe-by-direction matrix, omitted/infeasible cells, per-context reporting and aggregate selection policy; no silent scope reduction or claims for untested contexts.
 
-## Phase 4.2: Constrained Viability Discovery
+Declare bounded research, candidate/context comparison, parameter and mutation budgets; chronological development/validation partitions; one reserved final holdout; criteria for stopping and returning to research. Evaluation criteria, absolute advancement gates and sample coverage must be frozen before results and follow deployment risk and uncertainty, not universal numerical defaults. Relative rank is insufficient: no candidate advances merely because it lost less than others. Estimate data/compute costs before committing. Do not claim future profitability from attractive historical metrics.
 
-Use Phase 4.2 only when a strong parent has an unresolved boundary that earlier phases cannot express cleanly. Freeze the admissible decision-time information and untouched validation boundary before inspecting outcomes. Complexity is earned by evidence and constrained by the current sample and operational budget.
+Maintain a cumulative trial ledger: all researched candidates and rejected sources, approaches, data/window changes, parameter trials, mutations, failed runs, manual iterations, selection reasons and exposed evaluation windows. Separately count mechanism families, meaningful strategy revisions, asset/timeframe/direction contexts, controls, folds/cost scenarios, replays and unique events; evaluation count is not the number of independent strategies or observations. Publish negative controls and simple comparable baselines. Repeated searches and prior published backtests count as selection exposure. Treat viewed/reused “out-of-sample” windows as development evidence. Use chronological folds and purge overlapping information/labels where applicable. No random future-leaking splits.
 
-Discovery promotes nothing. Every viable relationship must become an auditable live-engine contract and reproduce its evidence against the frozen parent.
+Selection in Phases 2–5 uses authorized development partitions only. Reserve the final window before trials. Freeze one finalist, code/settings/data identities and criteria before its once-only final evaluation in Phase 5. A failed or inspected final holdout is consumed: do not retune and reuse it as untouched. Further development needs a declared new campaign and genuinely fresh/forward evidence. Keep all failures.
 
-## Phase 4.3: Successor Reseed
+## Reference before economics
 
-Use Phase 4.3 when a completed lineage is informative but structurally unable to meet its production objective. Convert the lineage into supported constraints, rejected assumptions, unresolved questions, and a comparable evaluation contract.
+Before candidate testing, specify complete causal rules for signal availability, entries, exits, invalidation, position management, sizing/risk and execution. Identify all unresolved implementation decisions; resolve behavior-affecting decisions and justify designed additions before running the candidate. For each novel indicator, build and validate it before adding dependent orders; indicator acceptance alone does not accept the strategy. Specify information availability, warmup, confirmation, expiry and state transitions. Derive positive, negative and boundary expectations independently, not from copying implementation output. Check repainting, look-ahead bias and timing ambiguity before trusting performance.
 
-Choose a greenfield Phase 1 route, source-derived Phase 1 route, or Phase 1.5 revision from evidence. A material identity change always creates a new Phase 1 criteria/checklist. Every accepted successor repeats manual TradingView acceptance, Python parity, baseline qualification, and all later gates.
+Audit original and normalized market data, timestamp order/duplicates/gaps, timezone/session alignment, revisions and missing values. Preserve raw input identity and any repair log. Produce causal state/signal/order/fill/position traces and a visual ledger with original chart context where useful. Enforce no future data, no backdated information availability, and no order fills before submission.
 
-Carry constraints and questions forward. Do not carry tuned strategy content automatically.
+Verify supported execution, mark-to-market equity including open risk, legal sizing and costs before ranking profit. Unsupported semantics or engine behavior blocks affected conclusions. Reuse existing engines only within their proven capabilities; a bounded engine is not arbitrary-strategy compilation. New engine work needs its own implementation/tests under `agents/docs/production_backtest_engine.md`.
 
-## Final Production Gates
+Run fixed, unoptimized complete candidates before searches. Strategy selection in Phase 2 is distinct from parameter tuning in Phase 4; indispensable earlier tuning requires separate baseline-backed authorization, a declared bounded nested-development budget and trial accounting, with no reserved-holdout inspection. Save the accepted fixed base and authorize search explicitly before optimization. Preserve immutable parents, effective parameters and existing baseline-backed authorization checks; do not bypass runtime gates because the schedule changed.
 
-Freeze one exact final candidate, dataset, parameter set, execution model, and strategy contract. Run chronological robustness and adverse execution scenarios derived from the declared market and venue uncertainty. A universal stress multiplier is not a substitute for a context-specific stress design.
+## Python reference and optional Pine target
 
-Audit whether every intended action can become a legal venue order under the declared account and instrument constraints. Then run forward paper reconciliation until the strategy-specific calendar coverage, event coverage, trade evidence, regime exposure, and operational confidence requirements are met. A universal paper duration or trade count is not valid.
+Python is the executable reference. Pine/TradingView is an optional target and corroboration surface, not an early prerequisite. If a campaign promises Pine delivery, validate the exact final candidate before paper trading: compile/run in TradingView; compare independent cases and timestamped states/actions on a common window with matched settings, feed/session and execution assumptions.
 
-Production readiness requires aligned backtest intent, forward decisions, submitted orders, venue responses, fills, position state, risk controls, and monitoring.
+On TradingView Basic, do not require chart CSV export or bypass plan restrictions. Use an instrumented Pine view, small diagnostic tables/labels, Data Window values and screenshots/manual observations for selected timestamps, including negative controls. Save exact source/settings/window and observations. Identical input traces permit scoped numerical comparisons; different feeds or sampled observations establish only sampled corroboration, not full trade-list/performance parity. Unresolved discrepancies block a claimed target acceptance. Human TradingView corroboration cannot substitute for automated Python tests or vice versa.
 
-## Running the App and Tests
+Target changes after validation invalidate affected target evidence. Python-only campaigns mark Pine parity NOT_APPLICABLE. A screenshot of profit is never semantic proof.
 
-```powershell
-.venv\Scripts\python -m uvicorn app.main:app --reload
-```
+## Shared report and evidence handoff
 
-```powershell
-.venv\Scripts\python -m unittest discover -s app -p tests.py
-```
+Each phase delivers one report containing:
 
-Run the regression suite after engine, schema, migration, API, or report-generation changes. Prompt-only changes require reference and contract validation.
+1. Campaign/schedule, phase, requested-method classification, historical origin/operation and accepted input identities.
+2. Decisions, rejected alternatives, candidate completeness/distinctness, research gaps, translation category, provenance changes and trial-ledger additions.
+3. Exact code/source/settings/dataset hashes, run IDs, criteria versions and reproducible commands.
+4. Separate semantic/source-fidelity/data/execution/economic/target verdicts with supporting artifact paths and relevant unresolved issue dispositions.
+5. Frozen comparison matrix/criteria, actual coverage, measurement/signal/economic verdicts and per-context gate results, negative controls, independent-event and trial counts, uncertainties, exposed windows, protected holdouts, budget used/remaining and status.
+6. PASS_TO_PHASE_N, RETURN_TO_PHASE_N, INCOMPLETE, STOP, or BLOCKED with reason, responsible owner and concrete next action. State whether the work was research-only or included executed Phase 2 evaluations, and record testing approval scope/status. Phase 6 instead uses its graduation statuses.
 
-## Codex Execution Checklist
+Use existing evidence/artifact facilities. Schedule metadata is a document-level campaign field, not a new API workflow enum. Do not fabricate successful endpoints or artifacts. Any changed meaning, code, input, timing, settings or execution contract reopens affected downstream evidence; unrelated valid evidence remains reusable.
 
-1. Read `AGENTS.md`, the active Bridgecode route, the phase prompt, and the universal mutation constitution when applicable.
-2. Verify the previous phase artifact and verdict before acting.
-3. Freeze the current strategy, data, and execution contracts.
-4. Read the Markdown evidence first and request raw data only for a named missing question.
-5. Make the smallest complete change for the active phase.
-6. Persist accepted and rejected evidence.
-7. Run focused validation and the full suite when implementation contracts changed.
-8. Report the exact verdict, evidence, unresolved boundary, and next phase.
-9. Preserve strategy families unless the user explicitly selects them for removal.
+## Compatibility, authority and limits
 
-The workflow prevents false progress by separating strategy definition, manual semantic proof, port fidelity, economic qualification, explainable mutation, bounded statistical discovery, and production validation.
+Stored/runtime selectors remain `reference_v1` and `legacy_pine_v1`. Do not relabel old versions or reinterpret their phase numbers silently. The archived operator supports historical evidence interpretation; continuing a legacy campaign requires an explicit mapping into this schedule, preserved identities and reopened affected gates.
+
+Prompt discovery remains nonrecursive in `agents/translation and generation/whitebox`; exactly six active prompts live there. Previous documents, the recorded README recovery gap and restore instructions live in `agents/archive/2026-10-23-pre-systematic-v2`. Historical runbooks and z_* metric documents are not current default criteria.
+
+A prompt is not an implemented paper broker, universal strategy translator or live-trading approval. Phase 6 blocks if a suitable adapter or required operational evidence is absent. Graduation means eligibility for a separately authorized live review, never permission to submit real orders.
+
+Future discretionary decision-model and learned/blackbox/social research is **plan only**, in `agents/plans/discretionary_and_blackbox_roadmap.md`. No model training, RL, hosted-model integration, social collector or live execution follows from this schedule revamp.

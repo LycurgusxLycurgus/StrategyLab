@@ -1,3 +1,5 @@
+> Historical reference: this is a legacy application-specific document, not the current phase contract. Numeric thresholds and week durations below are historical, not new defaults. Use the [current phase operator](../translation%20and%20generation/agents/codex_phase_operator.md).
+
 # Strategy Review Questions
 
 Use these questions with another LLM that has access to the full source material of the strategy you want to adopt.

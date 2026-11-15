@@ -3,13 +3,13 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>MUTATION LAB | Production Cockpit</title>
-    <link rel="stylesheet" href="/ui/style.css?v=20260915-pine-tg-merge" />
+    <title>Python2Pine StrategyLab</title>
+    <link rel="stylesheet" href="/ui/style.css?v=reference-first-20261017" />
     <link rel="icon" href="data:," />
   </head>
   <body>
-    <header class="topbar" aria-label="Mutation Lab context">
-      <div class="brand">MUTATION LAB</div>
+    <header class="topbar" aria-label="Python2Pine StrategyLab context">
+      <div class="brand">PYTHON2PINE STRATEGYLAB</div>
       <div class="context-strip" aria-label="Current lab context">
         <label class="context-field">
           <span>Family</span>
@@ -71,7 +71,7 @@
             <path d="M12 9v6" />
           </svg>
         </a>
-        <a href="#pine-evidence" aria-label="Pine evidence">
+        <a href="#pine-evidence" aria-label="Pine target and TradingView evidence">
           <svg class="rail-svg" viewBox="0 0 24 24" aria-hidden="true">
             <path d="M5 18V6l7 4 7-4v12l-7-4z" />
             <path d="M12 10v4" />
@@ -89,7 +89,7 @@
     </aside>
 
     <main id="top" class="app-shell">
-      <section class="cockpit-grid" aria-label="Production cockpit">
+      <section class="cockpit-grid" aria-label="Python2Pine strategy workbench">
         <div class="left-stack">
           <section class="panel performance-panel" aria-labelledby="performanceTitle">
             <div class="panel-title compact-line">
@@ -100,7 +100,7 @@
                 <button type="button">Drawdown</button>
               </div>
             </div>
-            <h1 id="performanceTitle">Command Deck</h1>
+            <h1 id="performanceTitle">Reference Strategy Workbench</h1>
             <div id="summaryGrid" class="summary-grid"></div>
           </section>
 
@@ -155,6 +155,18 @@
             <span id="gateBadge" class="gate-badge">Awaiting Evidence</span>
           </div>
           <div id="metricsGrid" class="metrics-grid"></div>
+        </section>
+
+        <section id="workflowEvidence" class="panel workflow-status-panel" aria-labelledby="workflowEvidenceTitle">
+          <div class="section-head">
+            <div>
+              <span class="eyebrow">Evidence by Boundary</span>
+              <strong id="workflowEvidenceTitle">Selected Workflow Status</strong>
+            </div>
+            <span id="workflowRouteBadge" class="badge">Select a version</span>
+          </div>
+          <div id="workflowGateGrid" class="workflow-gate-grid" aria-live="polite"></div>
+          <p id="workflowStatusMessage" class="status" aria-live="polite">Select a family, version and dataset to inspect independent evidence gates.</p>
         </section>
 
         <section id="lab" class="panel family-panel">
@@ -264,12 +276,12 @@
         <section id="pine-evidence" class="panel pine-panel" aria-labelledby="pineEvidenceTitle">
           <div class="section-head">
             <div>
-              <span class="eyebrow">Pre-Phase 1 Workbench</span>
-              <strong id="pineEvidenceTitle">Pine Evidence</strong>
+              <span class="eyebrow">Phase 5 Target Workbench</span>
+              <strong id="pineEvidenceTitle">Pine Target &amp; TradingView Evidence</strong>
             </div>
             <div class="pine-service-state">
               <span id="pineServiceBadge" class="badge">Checking service</span>
-              <span id="pineServiceDetail">Pine2Python status pending</span>
+              <span id="pineServiceDetail">Python2Pine target service status pending</span>
             </div>
           </div>
 
@@ -388,6 +400,13 @@
           <details class="panel register-panel">
             <summary><span>Register Baseline</span></summary>
             <div class="form-stack">
+              <label>
+                <span>Workflow</span>
+                <select id="registerWorkflowVersion">
+                  <option value="reference_v1" selected>Reference-first (new default)</option>
+                  <option value="legacy_pine_v1">Legacy Pine-first (existing lineages)</option>
+                </select>
+              </label>
               <input id="registerFamilyId" placeholder="family_id" />
               <input id="registerTitle" placeholder="Family title" />
               <input id="registerAsset" placeholder="Asset (e.g. BTCUSDT)" />
@@ -426,6 +445,6 @@
       </div>
     </footer>
 
-    <script src="/ui/app.js?v=20260915-pine-tg-merge" defer></script>
+    <script src="/ui/app.js?v=reference-first-20261017" defer></script>
   </body>
 </html>

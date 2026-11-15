@@ -440,6 +440,9 @@ class BacktestEngine:
         collect_trace: bool = False,
     ) -> dict[str, Any]:
         engine_id = spec.get("engine_id")
+        if spec.get("workflow_version") == "reference_v1":
+            from app.reference import run_reference
+            return run_reference(spec, bars, collect_ledger=True)
         if engine_id == "ma_cross_atr_stop_v1":
             result = self._run_ma_cross_atr_stop(spec, bars)
         elif engine_id == "ghl_dc_breakout_v1":

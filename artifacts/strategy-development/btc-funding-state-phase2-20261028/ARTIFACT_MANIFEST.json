@@ -1,0 +1,466 @@
+{
+  "AUTHORIZATION.json": {
+    "bytes": 191,
+    "sha256": "2a9324d3f5b8a8e3c4f89b8d01a2899e93d26d6d56288f516304a6ad55023d2b"
+  },
+  "cumulative_trials.jsonl": {
+    "bytes": 934720,
+    "sha256": "2973bebaea8ac74b1ea1e035ef8f64fbce3ca872442cf87afcf4c530138e8a15"
+  },
+  "DATA_AUDIT.json": {
+    "bytes": 881,
+    "sha256": "c9ac69cd74cc9fafe83ad7f4b3c5ddbc7b231641397d9a21d6680d43479492ba"
+  },
+  "INPUT_IDENTITIES.json": {
+    "bytes": 8020,
+    "sha256": "5d248d8b9600c4c9a6a71505147793b83ea0461254a6acf4a5205abdfda260a8"
+  },
+  "PHASE2.md": {
+    "bytes": 10107,
+    "sha256": "61ce820e7b927e004513bb133d38a2f8cc1ecef52c11d88590fff409a2d86f09"
+  },
+  "protocol.json": {
+    "bytes": 7994,
+    "sha256": "a1a40fa117df51c18656d273b86527f6448782e7c9d825e255324b54dd53da75"
+  },
+  "ROOT_REVIEW.json": {
+    "bytes": 2042,
+    "sha256": "61f958795ce48cd75e400af7ba569dd6556d7aa45f188d5f98c5ec8cd6cce818"
+  },
+  "runs/comparison-v1/15m-continuous_long_control_v1-2022-base.json.gz": {
+    "bytes": 1110150,
+    "sha256": "3640f96e27228ce9038de2e1db181cf51edf1ead5fe7c302c6c684b75f78a705"
+  },
+  "runs/comparison-v1/15m-continuous_long_control_v1-2022-severe_sensitivity.json.gz": {
+    "bytes": 1064431,
+    "sha256": "e68f6d3d1db213f618676035322280b9c4a9c3a5ef8e8ec14ccd5665b7f0c787"
+  },
+  "runs/comparison-v1/15m-continuous_long_control_v1-2022-stress.json.gz": {
+    "bytes": 1110086,
+    "sha256": "025d12913b818318a2eda3d4f5bff38ddfe97231e6416ff51c073318ece550b3"
+  },
+  "runs/comparison-v1/15m-continuous_long_control_v1-2023-base.json.gz": {
+    "bytes": 2099757,
+    "sha256": "6094ed4db5a00d4b916bf3b1f2a72491b1e91edc1dd1e37032cf342feffabb64"
+  },
+  "runs/comparison-v1/15m-continuous_long_control_v1-2023-severe_sensitivity.json.gz": {
+    "bytes": 2060438,
+    "sha256": "78615245e41828694a2c8d297c78142d5e6b43486856b4c33641807dc35194f4"
+  },
+  "runs/comparison-v1/15m-continuous_long_control_v1-2023-stress.json.gz": {
+    "bytes": 2096043,
+    "sha256": "c1442f160160ccb511a433d196af6fd8251d4b2c1ae0eae2db405cb2f64aa77d"
+  },
+  "runs/comparison-v1/15m-continuous_long_control_v1-2024-base.json.gz": {
+    "bytes": 2179178,
+    "sha256": "25e0e4c3fa1de8d328b07f4974c50e2db06c52a8237fe87918cb2b1bc2f9af60"
+  },
+  "runs/comparison-v1/15m-continuous_long_control_v1-2024-severe_sensitivity.json.gz": {
+    "bytes": 2101576,
+    "sha256": "c808fc2bdac2925634c3601031851ac233fa96c7f64909033e5f3e1884c16dcd"
+  },
+  "runs/comparison-v1/15m-continuous_long_control_v1-2024-stress.json.gz": {
+    "bytes": 2165488,
+    "sha256": "ef9dbe1e6c85ba41da8734c0c10fa47d005e09a2ef8b8be95f365b17beffb320"
+  },
+  "runs/comparison-v1/15m-continuous_long_control_v1-2025-base.json.gz": {
+    "bytes": 2103137,
+    "sha256": "eb0f2298f88a449cc4a3809e1fd16ed16fa63a2238d57af4219e5dd0d6142d50"
+  },
+  "runs/comparison-v1/15m-continuous_long_control_v1-2025-severe_sensitivity.json.gz": {
+    "bytes": 2089618,
+    "sha256": "a15aa55d5bcb261a27cf0642283ad130489ffbe16c5efa579c78c801711531c3"
+  },
+  "runs/comparison-v1/15m-continuous_long_control_v1-2025-stress.json.gz": {
+    "bytes": 2103418,
+    "sha256": "771088c2dad588dfe0fdb9701e5e1619744786da29bda47aeb65e0113f32391b"
+  },
+  "runs/comparison-v1/15m-continuous_long_control_v1-2026-base.json.gz": {
+    "bytes": 1413789,
+    "sha256": "573557a250a6f128cd88a1b726aff0bccb317f6858b8b971a5ad3072e665d876"
+  },
+  "runs/comparison-v1/15m-continuous_long_control_v1-2026-severe_sensitivity.json.gz": {
+    "bytes": 1398199,
+    "sha256": "ebf8fcad3a84289a720ba39e73c3d9bf010409289a5d75e168f39b36948ce82f"
+  },
+  "runs/comparison-v1/15m-continuous_long_control_v1-2026-stress.json.gz": {
+    "bytes": 1415198,
+    "sha256": "31ca3ad68fd2ea7bff6f170978bbf1e283b34c862857a82ad9f8630e84c85f71"
+  },
+  "runs/comparison-v1/15m-low_percentile_funding_long_24h_v1-2022-base.json.gz": {
+    "bytes": 276951,
+    "sha256": "86f1f21cc07de3d4f90ed998f5812f4a2ad22bcf67bb09b6216be21d04235e0b"
+  },
+  "runs/comparison-v1/15m-low_percentile_funding_long_24h_v1-2022-severe_sensitivity.json.gz": {
+    "bytes": 277219,
+    "sha256": "f26f9081299ed00bfa2a60ea0903d7036751ffc57047a38804cc86940c926dff"
+  },
+  "runs/comparison-v1/15m-low_percentile_funding_long_24h_v1-2022-stress.json.gz": {
+    "bytes": 277086,
+    "sha256": "5971dfa79044077061698e802f4ce4b2e8809d825eb2fecd35aae9d77864ca1e"
+  },
+  "runs/comparison-v1/15m-low_percentile_funding_long_24h_v1-2023-base.json.gz": {
+    "bytes": 489908,
+    "sha256": "c6d3adad241ad972447479c81b8763c275c88b8acbb7cac4dc6f9bb5ea28e7d9"
+  },
+  "runs/comparison-v1/15m-low_percentile_funding_long_24h_v1-2023-severe_sensitivity.json.gz": {
+    "bytes": 488556,
+    "sha256": "f72298f19466b3d8ef40815cd5e495fac09527f765eb8c6e6280aa88b0e7bff4"
+  },
+  "runs/comparison-v1/15m-low_percentile_funding_long_24h_v1-2023-stress.json.gz": {
+    "bytes": 488786,
+    "sha256": "4686dc43153da1947dd1e19e71393abe694eee08ef096b7af51ba7208ec5eb74"
+  },
+  "runs/comparison-v1/15m-low_percentile_funding_long_24h_v1-2024-base.json.gz": {
+    "bytes": 557660,
+    "sha256": "38622ab9868d2119e0897fe1938892b1650030c10728d09a26a2c19f3a533811"
+  },
+  "runs/comparison-v1/15m-low_percentile_funding_long_24h_v1-2024-severe_sensitivity.json.gz": {
+    "bytes": 551836,
+    "sha256": "efa53254941f77bab27caa273313657e16bd3b82327ab079d847803abae1a443"
+  },
+  "runs/comparison-v1/15m-low_percentile_funding_long_24h_v1-2024-stress.json.gz": {
+    "bytes": 557336,
+    "sha256": "c510ec252c67e7b69ebf46a0c1968c0e552043bf49a683d65b957a5a2f215eae"
+  },
+  "runs/comparison-v1/15m-low_percentile_funding_long_24h_v1-2025-base.json.gz": {
+    "bytes": 597874,
+    "sha256": "370f5c03edfa98e40ab79b6ddd9154198ce3e15782687bbbd81dcc9544f75c74"
+  },
+  "runs/comparison-v1/15m-low_percentile_funding_long_24h_v1-2025-severe_sensitivity.json.gz": {
+    "bytes": 588235,
+    "sha256": "364bb9dfb67fda777cf5fd9f76d3d18ecf3bc4f4e23ccc40474facb433dac2f9"
+  },
+  "runs/comparison-v1/15m-low_percentile_funding_long_24h_v1-2025-stress.json.gz": {
+    "bytes": 598277,
+    "sha256": "fc4fe42e0bd7980ca85c1e9a8312a05cc514ea66e16412c1173c5d7db8302a39"
+  },
+  "runs/comparison-v1/15m-low_percentile_funding_long_24h_v1-2026-base.json.gz": {
+    "bytes": 413974,
+    "sha256": "ce6b9374fe75798941c4ac4e1ad23e21c81d592443ee7bc7f7932e057805dfb3"
+  },
+  "runs/comparison-v1/15m-low_percentile_funding_long_24h_v1-2026-severe_sensitivity.json.gz": {
+    "bytes": 408029,
+    "sha256": "caff79bd456f56a17143473ce95191fea805ae07142131772162e85c85412d25"
+  },
+  "runs/comparison-v1/15m-low_percentile_funding_long_24h_v1-2026-stress.json.gz": {
+    "bytes": 413788,
+    "sha256": "bb4898beebb772b67fde693d4301fe629a5748302487c18a4586d069cca96422"
+  },
+  "runs/comparison-v1/15m-stale_funding_7d_long_24h_control_v1-2022-base.json.gz": {
+    "bytes": 277231,
+    "sha256": "8edf7f9a62e1f843549526ff048d7ec497061b372adace04dde1b6a7bb36f530"
+  },
+  "runs/comparison-v1/15m-stale_funding_7d_long_24h_control_v1-2022-severe_sensitivity.json.gz": {
+    "bytes": 274719,
+    "sha256": "43134b389966bfa1abb5317e62193fd0111514cf6042733d46ba83ab73cf69de"
+  },
+  "runs/comparison-v1/15m-stale_funding_7d_long_24h_control_v1-2022-stress.json.gz": {
+    "bytes": 276496,
+    "sha256": "4e30653543f921f0616b8eabe8805eaa10a3f7aa4ca817eead68806f6ed6a1bb"
+  },
+  "runs/comparison-v1/15m-stale_funding_7d_long_24h_control_v1-2023-base.json.gz": {
+    "bytes": 495485,
+    "sha256": "7ddcd885a2db4013bc6425d1224eeaa3cea85a43437fe2f553ef2122647a37ef"
+  },
+  "runs/comparison-v1/15m-stale_funding_7d_long_24h_control_v1-2023-severe_sensitivity.json.gz": {
+    "bytes": 491844,
+    "sha256": "ef9589733e1e64787e0ff89fda3b0eb946f67d05fad2defba204a9dd39b07ac5"
+  },
+  "runs/comparison-v1/15m-stale_funding_7d_long_24h_control_v1-2023-stress.json.gz": {
+    "bytes": 495913,
+    "sha256": "1ab8fb9efb8b6ae147ab780b57cc57528176d9d0f44268593a14cda8c8ea00f2"
+  },
+  "runs/comparison-v1/15m-stale_funding_7d_long_24h_control_v1-2024-base.json.gz": {
+    "bytes": 561759,
+    "sha256": "858398cb642737eca33ce4d9e867bad48500dff35931836c5a93b6e81b7ffdcb"
+  },
+  "runs/comparison-v1/15m-stale_funding_7d_long_24h_control_v1-2024-severe_sensitivity.json.gz": {
+    "bytes": 554807,
+    "sha256": "601ba3e6f1b075c2d52287ac95998d0b6b2246702f61aacbaf23d5598b6e5080"
+  },
+  "runs/comparison-v1/15m-stale_funding_7d_long_24h_control_v1-2024-stress.json.gz": {
+    "bytes": 564073,
+    "sha256": "b049bec4e4e03a42fcac560395fa4efcf1b6fa328b586a7a3b03769b28cab41a"
+  },
+  "runs/comparison-v1/15m-stale_funding_7d_long_24h_control_v1-2025-base.json.gz": {
+    "bytes": 592535,
+    "sha256": "6dda2933909034aa586c5ac73b2a496d4515da2da7be6359455d611c224f4703"
+  },
+  "runs/comparison-v1/15m-stale_funding_7d_long_24h_control_v1-2025-severe_sensitivity.json.gz": {
+    "bytes": 584768,
+    "sha256": "98553b637c1d277b8e2f320fee0cea88b75cfcf3fe72a685189184b76d7f9bd1"
+  },
+  "runs/comparison-v1/15m-stale_funding_7d_long_24h_control_v1-2025-stress.json.gz": {
+    "bytes": 591189,
+    "sha256": "32b9e65a9506f31d3f751309ec37df4e663428b12eff59af2546c7c98039c89c"
+  },
+  "runs/comparison-v1/15m-stale_funding_7d_long_24h_control_v1-2026-base.json.gz": {
+    "bytes": 420770,
+    "sha256": "2b43c46802a8620f7f49e648087605a35b915e3747abba2774bff511d75ede7d"
+  },
+  "runs/comparison-v1/15m-stale_funding_7d_long_24h_control_v1-2026-severe_sensitivity.json.gz": {
+    "bytes": 409827,
+    "sha256": "afbe98e61af92f61b15afcd18f1406d5b20ee18f3c55fd71772877f4e4a10f48"
+  },
+  "runs/comparison-v1/15m-stale_funding_7d_long_24h_control_v1-2026-stress.json.gz": {
+    "bytes": 421629,
+    "sha256": "2e39616cf802d0f2210bb09fa4520ebe2b321d55042fc5f21c23376e17bd0302"
+  },
+  "runs/comparison-v1/5m-continuous_long_control_v1-2022-base.json.gz": {
+    "bytes": 3173280,
+    "sha256": "d5fafd1241e5f5422b38f78960ae88db594c770c61be2bdd0a6cf817022b9b3e"
+  },
+  "runs/comparison-v1/5m-continuous_long_control_v1-2022-severe_sensitivity.json.gz": {
+    "bytes": 2983356,
+    "sha256": "5f8d8a5a498befbb68233b567a298b82b3fb985d20737737f3ef71c190ad6993"
+  },
+  "runs/comparison-v1/5m-continuous_long_control_v1-2022-stress.json.gz": {
+    "bytes": 3176174,
+    "sha256": "e04cf73c35219cdbcb334b3f9dc7a2937fc28b26d53c24b8e0440f2b23b0ad4c"
+  },
+  "runs/comparison-v1/5m-continuous_long_control_v1-2023-base.json.gz": {
+    "bytes": 5995177,
+    "sha256": "bf54718f5d32cc63ba891e538e40de3fd0d82910fdfbc82f3befd0cb88112c96"
+  },
+  "runs/comparison-v1/5m-continuous_long_control_v1-2023-severe_sensitivity.json.gz": {
+    "bytes": 5760978,
+    "sha256": "f7afcbb8953b4d1a1f3194a8f6682f0a1d7ad2378d5e736e08d34d17277746e8"
+  },
+  "runs/comparison-v1/5m-continuous_long_control_v1-2023-stress.json.gz": {
+    "bytes": 5990410,
+    "sha256": "857844655c6d640350412048634ee7f936514bf9b2af174e0e3a9cb691892614"
+  },
+  "runs/comparison-v1/5m-continuous_long_control_v1-2024-base.json.gz": {
+    "bytes": 6310818,
+    "sha256": "5296b7a0c3ff0af792753bcba7647514f80d0d6cad276dc5d15fd69195984ad5"
+  },
+  "runs/comparison-v1/5m-continuous_long_control_v1-2024-severe_sensitivity.json.gz": {
+    "bytes": 5970802,
+    "sha256": "aa738638b78fd0d4d52380ec071392342237415d80df53f222b5e645cbf68a60"
+  },
+  "runs/comparison-v1/5m-continuous_long_control_v1-2024-stress.json.gz": {
+    "bytes": 6263410,
+    "sha256": "5d87669cef44284a4a8aef5322c3f68247b3834ac7cdec6993f44d5b26051840"
+  },
+  "runs/comparison-v1/5m-continuous_long_control_v1-2025-base.json.gz": {
+    "bytes": 6097582,
+    "sha256": "73ce6fa1b82941e0c13f013a7acf734dee530c63bbe60c65767ba43f06746d59"
+  },
+  "runs/comparison-v1/5m-continuous_long_control_v1-2025-severe_sensitivity.json.gz": {
+    "bytes": 6044758,
+    "sha256": "1ca6defb5d17269abf9d4bedec797b57395141be2f552d49eace90ec556ff003"
+  },
+  "runs/comparison-v1/5m-continuous_long_control_v1-2025-stress.json.gz": {
+    "bytes": 6102416,
+    "sha256": "b537d4edb92e64f1c6eed70d3369e9a1a7127cd2e75288cf84d1f16eac77e07f"
+  },
+  "runs/comparison-v1/5m-continuous_long_control_v1-2026-base.json.gz": {
+    "bytes": 4101673,
+    "sha256": "f5fd753af2b0abbb74ef77ada8a53c547b70b2aac1e10a194e30b45fe9b87216"
+  },
+  "runs/comparison-v1/5m-continuous_long_control_v1-2026-severe_sensitivity.json.gz": {
+    "bytes": 4049846,
+    "sha256": "6ad14f679f0bb14d742aad557b4223dd2b88f6cfa956ea0294e6cd29cbbd2e49"
+  },
+  "runs/comparison-v1/5m-continuous_long_control_v1-2026-stress.json.gz": {
+    "bytes": 4107068,
+    "sha256": "5ce25aeed8ce66d30e8f95abcd44a3efe54237642deb7bfc99a44a2a24d31075"
+  },
+  "runs/comparison-v1/5m-low_percentile_funding_long_24h_v1-2022-base.json.gz": {
+    "bytes": 733697,
+    "sha256": "3b5b01abbcdd268e207a0b786c7d1514cad1d422a7022965930f7fb50e5024ef"
+  },
+  "runs/comparison-v1/5m-low_percentile_funding_long_24h_v1-2022-severe_sensitivity.json.gz": {
+    "bytes": 732429,
+    "sha256": "130825a3a79b319f3ad494d830a45622fcb2362f94fa95407dcf0769d0c39bca"
+  },
+  "runs/comparison-v1/5m-low_percentile_funding_long_24h_v1-2022-stress.json.gz": {
+    "bytes": 732595,
+    "sha256": "ac1999b388f1993224e31ea605871aa21347a6d87eda37b14934d1e550bb2977"
+  },
+  "runs/comparison-v1/5m-low_percentile_funding_long_24h_v1-2023-base.json.gz": {
+    "bytes": 1305472,
+    "sha256": "f74cf039d5003ee2ceef0ad4a91e7baabebda8dd5f8fd28440999eea048e213e"
+  },
+  "runs/comparison-v1/5m-low_percentile_funding_long_24h_v1-2023-severe_sensitivity.json.gz": {
+    "bytes": 1287654,
+    "sha256": "3917d70167e0abd3e3413804acb24a3d9f537af381b8d334adeb05a9adb89854"
+  },
+  "runs/comparison-v1/5m-low_percentile_funding_long_24h_v1-2023-stress.json.gz": {
+    "bytes": 1300697,
+    "sha256": "569789a6047b13698412982a7a1c5401b87872882ef5942fcd61aed43e963580"
+  },
+  "runs/comparison-v1/5m-low_percentile_funding_long_24h_v1-2024-base.json.gz": {
+    "bytes": 1502318,
+    "sha256": "059338fa43f8911205abe0b25560378633d85a734520da25dee017b4173a6771"
+  },
+  "runs/comparison-v1/5m-low_percentile_funding_long_24h_v1-2024-severe_sensitivity.json.gz": {
+    "bytes": 1490532,
+    "sha256": "28835a62e21abfb79ef1d8746ac4cedfd4ac051a07c16703489e672169a74f4b"
+  },
+  "runs/comparison-v1/5m-low_percentile_funding_long_24h_v1-2024-stress.json.gz": {
+    "bytes": 1499752,
+    "sha256": "f30a9c2ec324c91f263a213fa7b2aa701b66e7904eb563a5cbc40cd89659f0b4"
+  },
+  "runs/comparison-v1/5m-low_percentile_funding_long_24h_v1-2025-base.json.gz": {
+    "bytes": 1618654,
+    "sha256": "3ef25d07e0f0428c8f561a4136eb38daf54659cc788efc1cb115c462c1e074dc"
+  },
+  "runs/comparison-v1/5m-low_percentile_funding_long_24h_v1-2025-severe_sensitivity.json.gz": {
+    "bytes": 1588832,
+    "sha256": "354245ca7da0476937aaa270caf0dcc3e518d44e78b2110a641914d0376b40a9"
+  },
+  "runs/comparison-v1/5m-low_percentile_funding_long_24h_v1-2025-stress.json.gz": {
+    "bytes": 1619162,
+    "sha256": "6d79143aab7aeacbea024f151131283cc611e8ce940437c775fb7c41ad8a4c7c"
+  },
+  "runs/comparison-v1/5m-low_percentile_funding_long_24h_v1-2026-base.json.gz": {
+    "bytes": 1118702,
+    "sha256": "940fd71dd5a77d75f1cc82d9cd943307706171021f82b10f12fe7c260c236b7e"
+  },
+  "runs/comparison-v1/5m-low_percentile_funding_long_24h_v1-2026-severe_sensitivity.json.gz": {
+    "bytes": 1093412,
+    "sha256": "c5c19cb1387c0e7a569e11bc7b535ec543d7b62e6f573dc2a240188aa966a535"
+  },
+  "runs/comparison-v1/5m-low_percentile_funding_long_24h_v1-2026-stress.json.gz": {
+    "bytes": 1114923,
+    "sha256": "0b4dc67be358e4209a55c722f8a554b924dfc3a33a7934a4b0deda25a2413722"
+  },
+  "runs/comparison-v1/5m-stale_funding_7d_long_24h_control_v1-2022-base.json.gz": {
+    "bytes": 732547,
+    "sha256": "716cefe432e068a42fc59a2b8bc47875ebe6d31c13cae50be2bcaab41b13ea93"
+  },
+  "runs/comparison-v1/5m-stale_funding_7d_long_24h_control_v1-2022-severe_sensitivity.json.gz": {
+    "bytes": 716873,
+    "sha256": "8b6715d5866dbb2df523446771ad911acecafb8523af48ea296fc7de44ddb1f2"
+  },
+  "runs/comparison-v1/5m-stale_funding_7d_long_24h_control_v1-2022-stress.json.gz": {
+    "bytes": 732367,
+    "sha256": "709dd6bf28a548a56e89718cf7e6200c74c995a7a63cda5a2a409def3b8e4c89"
+  },
+  "runs/comparison-v1/5m-stale_funding_7d_long_24h_control_v1-2023-base.json.gz": {
+    "bytes": 1318546,
+    "sha256": "d001bc5f2573476c374708781400e2cd1ff2277311b0a65f11a87f29fabc8e46"
+  },
+  "runs/comparison-v1/5m-stale_funding_7d_long_24h_control_v1-2023-severe_sensitivity.json.gz": {
+    "bytes": 1311448,
+    "sha256": "f4aaee654858295c41f32e8b31ed228ea92b40924c179efd23fe71f58e3292c1"
+  },
+  "runs/comparison-v1/5m-stale_funding_7d_long_24h_control_v1-2023-stress.json.gz": {
+    "bytes": 1319617,
+    "sha256": "4fc6d9d08070996c50933fdf9306e2045d62ca1f82ebc3d9872a5c62f2ef9a4a"
+  },
+  "runs/comparison-v1/5m-stale_funding_7d_long_24h_control_v1-2024-base.json.gz": {
+    "bytes": 1513924,
+    "sha256": "c51e6732031d8510510da90367b581d8f7bc6e08e942ae361d7c5dcb7975b980"
+  },
+  "runs/comparison-v1/5m-stale_funding_7d_long_24h_control_v1-2024-severe_sensitivity.json.gz": {
+    "bytes": 1490697,
+    "sha256": "11986878193ad05f93d93443af78ce77b009bf8547fc439dbaa43352643eb4c3"
+  },
+  "runs/comparison-v1/5m-stale_funding_7d_long_24h_control_v1-2024-stress.json.gz": {
+    "bytes": 1512716,
+    "sha256": "2b50a879ee20cbaca629bc8a2581b10f28a62bd898eda8ee6d75feb0def2e3e0"
+  },
+  "runs/comparison-v1/5m-stale_funding_7d_long_24h_control_v1-2025-base.json.gz": {
+    "bytes": 1591719,
+    "sha256": "c798df4441513e3e0a4e9f81812263ea6f1775ff734fda044571eaf322c47cf8"
+  },
+  "runs/comparison-v1/5m-stale_funding_7d_long_24h_control_v1-2025-severe_sensitivity.json.gz": {
+    "bytes": 1572949,
+    "sha256": "67f830dec88f6cec4ecdaa0cb0ff78af5b903e396ecb9be4a16395e861089464"
+  },
+  "runs/comparison-v1/5m-stale_funding_7d_long_24h_control_v1-2025-stress.json.gz": {
+    "bytes": 1590833,
+    "sha256": "d982116099dd049f83bc380d1033e103f2ccfce5caa48bfe3123c5420e261c7e"
+  },
+  "runs/comparison-v1/5m-stale_funding_7d_long_24h_control_v1-2026-base.json.gz": {
+    "bytes": 1126666,
+    "sha256": "027f8215735ca0d1b255b6d7fa6824fd602605dc2e0f39617573f888885ce4ed"
+  },
+  "runs/comparison-v1/5m-stale_funding_7d_long_24h_control_v1-2026-severe_sensitivity.json.gz": {
+    "bytes": 1104121,
+    "sha256": "d2fad4ca783a9803dbc6e484981e3b3a3c68419760177f697d583e981279309b"
+  },
+  "runs/comparison-v1/5m-stale_funding_7d_long_24h_control_v1-2026-stress.json.gz": {
+    "bytes": 1126917,
+    "sha256": "3027079b8cffddaa017bca222c0e5788ccc48f99b29fcf33f7b80de5eb06655a"
+  },
+  "runs/comparison-v1/comparison.json": {
+    "bytes": 193864,
+    "sha256": "d33fd9ddce141efb0ced835be19bce7dda11486d772611ded31249a665b280be"
+  },
+  "runs/comparison-v1/comparison.partial.json": {
+    "bytes": 165041,
+    "sha256": "7ed8e0f30f927f1a5599c29276fbc8b1a6938b0da258833e91a15cf36fd9af89"
+  },
+  "runs/comparison-v1/data_audit.json": {
+    "bytes": 226,
+    "sha256": "5a5b56b18d36eb02f7989c8e432f67ce145613bae2b0938b0a0db63c73ddeab3"
+  },
+  "runs/comparison-v1/detector-15-continuous_long_control_v1.json.gz": {
+    "bytes": 256601,
+    "sha256": "cbe4ac847b25c03440d5dcaafa81190c0f170f21db0fd2ac3ab2cddadad82a02"
+  },
+  "runs/comparison-v1/detector-15-low_percentile_funding_long_24h_v1.json.gz": {
+    "bytes": 152205,
+    "sha256": "0023f14ff7c1f3a4975454f287099a0d22cbda9491df7c34d7721b0bddeb955f"
+  },
+  "runs/comparison-v1/detector-15-stale_funding_7d_long_24h_control_v1.json.gz": {
+    "bytes": 159161,
+    "sha256": "a73a426bf31eb41a9a7719dfc8dd94607f19e9c5734814b273049e4371f234c2"
+  },
+  "runs/comparison-v1/detector-5-continuous_long_control_v1.json.gz": {
+    "bytes": 256103,
+    "sha256": "a9c34b41dfa2c75ab6cdd1d2bbebb85f3c7c509b814f79ed3885707b13867dc6"
+  },
+  "runs/comparison-v1/detector-5-low_percentile_funding_long_24h_v1.json.gz": {
+    "bytes": 151468,
+    "sha256": "0ffd637d5e3fef3094b971e35ced0007a2a18215b34303ba0442a1b95330a1d4"
+  },
+  "runs/comparison-v1/detector-5-stale_funding_7d_long_24h_control_v1.json.gz": {
+    "bytes": 159332,
+    "sha256": "0d8b36d7b7b01f3edc49f24d476e1153d4fe12339ac9cae9ebd2f144f7c959c2"
+  },
+  "runs/comparison-v1/features.json.gz": {
+    "bytes": 131820,
+    "sha256": "852b417dbbf638dd2c4b26d5f17afff8779b5b542630980cbb689fbeb876f1a2"
+  },
+  "runs/comparison-v1/identities_after_run.json": {
+    "bytes": 8648,
+    "sha256": "a59c1cdd44f75889f0cdb896d953416dc8b437b2d8bd283899ceaa718a0bbecc"
+  },
+  "runs/comparison-v1/identities_before_run.json": {
+    "bytes": 8648,
+    "sha256": "a59c1cdd44f75889f0cdb896d953416dc8b437b2d8bd283899ceaa718a0bbecc"
+  },
+  "runs/comparison-v1/open_positions.csv": {
+    "bytes": 9121,
+    "sha256": "e16cd1e9c92babe8c3f8e722923aec25ce93f3ac4c6be00c7a843308c9373a9f"
+  },
+  "runs/comparison-v1/progress.json": {
+    "bytes": 67,
+    "sha256": "262df9ba33f1e27c3096e09df7a4b20eea9313d61046063fd14f017953b2ef09"
+  },
+  "runs/comparison-v1/RECONCILIATION.json": {
+    "bytes": 3177,
+    "sha256": "6dfba2e20b93a1061766bbd760ba3a3dab2087efccf84e2ab191f9eb1041c1a6"
+  },
+  "runs/comparison-v1/REPORT.md": {
+    "bytes": 1717,
+    "sha256": "3e85e88759eb8cd0f065237c9cff10b98ca08bbddabf2958aa11e0781872bc98"
+  },
+  "runs/comparison-v1/trades.csv": {
+    "bytes": 1138291,
+    "sha256": "bcfae7c959efaa3b7d9eab25686be50bc14df503893c3451a531d22c7ef562a2"
+  },
+  "runs/comparison-v1/trials.jsonl": {
+    "bytes": 927610,
+    "sha256": "221eff05365e21d397e1b1a7501d0fbf86750954d560e9b77cada8c0e73a6314"
+  },
+  "TEST_RESULTS.json": {
+    "bytes": 2688,
+    "sha256": "ba5831f6495a7d53bc2d54d4b6209a3ac6bb00c7861d23901d68bf109476258a"
+  }
+}

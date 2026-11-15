@@ -1,0 +1,43 @@
+{
+  "campaign_id": "btc-liquidity-20261023",
+  "implementation_status": "ACCEPTED_RESEARCH_IMPLEMENTATION",
+  "economic_status": "RETURN_TO_PHASE_1_NOT_QUALIFIED",
+  "selected_strategy": null,
+  "accepted_run": "comparison-v2",
+  "regression_tests_passed": 43,
+  "first_review": {
+    "model": "gpt-6.1-sol",
+    "effort": "medium",
+    "verdict": "FIX",
+    "blocker": "Funding after deterministic opening stop-gap exit"
+  },
+  "correction_stages_used": 1,
+  "implementation_reviews_used": 2,
+  "terminal_review": {
+    "model": "gpt-6.1-sol",
+    "effort": "medium",
+    "verdict": "PASS"
+  },
+  "root_identity_verification": true,
+  "corrected_evaluations": 240,
+  "cumulative_evaluations_including_replay": 480,
+  "identical_replay_result_payloads": 240,
+  "final_holdout": "UNFETCHED_UNEVALUATED",
+  "best_observed": "15m-confirm_fvg-long",
+  "best_observed_net_profit_factor": 0.8060230782533142,
+  "code_and_input_identities": {
+    "artifacts\\strategy-development\\btc-liquidity-20261023\\protocol.json": "6492626719b9cfefdf5ad98e344678dea92f246ba9d6580394db493dc01eff5b",
+    "C:\\Users\\Baham\\Documents\\Nexuz\\dove_red\\StrategyLab\\app\\btc_liquidity_campaign.py": "d8b5250e4024d3d603e88cee2370861b40f2aebbf99bc983c6b2a8bba877ea4d",
+    "app\\btc_liquidity.py": "455380609b4fd13566bfd363424386a79262f3dedc33e5e5ce6b5f7468022abf",
+    "app\\btc_liquidity_data.py": "18b3e414c4573d9824cd41514b361c94b65c77332500d5345488a754ff877809",
+    "app\\btc_liquidity_tests.py": "25fae992911cdb57ec1181f1afd72bf24e5abed13b5b89f4efebc42502d1456f",
+    "artifacts\\strategy-development\\btc-liquidity-20261023\\raw\\audit.json": "b753943b640ac12851cd5e287a8303c7ebbe391e209589abd53435949a3df899",
+    "artifacts\\strategy-development\\btc-liquidity-20261023\\raw\\exchangeInfo.json": "7997df0087febf4a8c510fd488cc297928f5694126e0932a03f1f01f2bd0ad1b",
+    "artifacts\\strategy-development\\btc-liquidity-20261023\\raw\\funding_coverage.json": "4ba33f9a8986b7cd4ee9b4161c3cea77efd0ccd9d4a3c7382bbe96eec27efe68",
+    "artifacts\\strategy-development\\btc-liquidity-20261023\\raw\\funding_mark_provenance.json": "a102add0906710a7cb5d7a0b9c40d8f0808330bc247e888607df8d3d58ac9b4a",
+    "artifacts\\strategy-development\\btc-liquidity-20261023\\raw\\manifest.json": "49ed1b895b054df0447c99ce2b109c58ff8f7f27e5a0c3be1dbb7b54a708cfe8",
+    "artifacts\\strategy-development\\btc-liquidity-20261023\\raw\\mark_price_gap_repairs.json": "4cf5974236a7f94e0181fd7e8ab4d9a208876af11bf5511031343d0268d5b020",
+    "artifacts\\strategy-development\\btc-liquidity-20261023\\raw\\normalized_funding.json": "f6e3ce0614d31147eb71ed7e823b406963b7a203aeda0376c0ee687395559a2f"
+  },
+  "scope_limit": "Bounded historical research model; no profitable candidate, registered optimization engine, Pine parity, paper graduation or live authorization."
+}

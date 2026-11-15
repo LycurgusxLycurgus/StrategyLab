@@ -1,0 +1,304 @@
+{
+  "schema_version": "btc_successor_phase2_protocol_v1",
+  "campaign_id": "btc-successor-phase2-20261028",
+  "schedule": "systematic_v2",
+  "phase": 2,
+  "authorized_current_scope": "fixed_implementation_and_120_comparison_only",
+  "phase2_execution_authorized": true,
+  "origin": "systematic_native",
+  "operation": "create",
+  "source_relationship": "independently_authored_adaptations_of_published_systematic_kernels_not_replications",
+  "instrument": "Binance USD-M BTCUSDT perpetual",
+  "asset_universe": [
+    "BTCUSDT"
+  ],
+  "execution_timeframe_minutes": 15,
+  "raw_timeframe_minutes": 5,
+  "timezone": "UTC",
+  "data_root": "artifacts/strategy-development/btc-liquidity-20261023/raw",
+  "development_start": "2022-01-01",
+  "development_end_exclusive": "2026-09-01",
+  "raw_manifest_sha256": "49ed1b895b054df0447c99ce2b109c58ff8f7f27e5a0c3be1dbb7b54a708cfe8",
+  "data_validation": "reuse_verified_archives_then_independently_validate_quote_turnover_alignment_and_completed_aggregates",
+  "atr": {
+    "input_completed_timeframe_minutes": 60,
+    "true_ranges": 20,
+    "method": "arithmetic_mean",
+    "requires_preceding_hourly_close": true,
+    "include_just_closed_hour_when_available": true
+  },
+  "candidates": {
+    "shock_reversal_2h": {
+      "priority": 1,
+      "signal_clock_minutes": 120,
+      "volatility_return_lookback": 240,
+      "volatility_ddof": 1,
+      "exclude_current_return_from_volatility": true,
+      "shock_sigma_multiple": 3.0,
+      "stop_atr_multiple": 2.0,
+      "maximum_hold_minutes": 120,
+      "target": null,
+      "exit_policy": "fixed_hard_stop_or_time",
+      "source_id": "de_nicola_2021"
+    },
+    "utc_noise_momentum": {
+      "priority": 2,
+      "signal_clock_minutes": 30,
+      "same_clock_lookback_complete_utc_days": 14,
+      "band_multiplier": 1.0,
+      "minimum_complete_prior_days": 14,
+      "vwap": "sum_verified_5m_quote_turnover/sum_verified_5m_base_volume_from_UTC_midnight",
+      "first_entry_check_utc": "00:30",
+      "last_entry_check_utc": "18:00",
+      "last_entry_check_inclusive": true,
+      "stop_atr_multiple": 2.0,
+      "maximum_hold_minutes": 360,
+      "flatten_at_next_utc_midnight": true,
+      "target": null,
+      "exit_policy": "hard_stop_or_closed_check_current_band_vwap_next_open_or_time_or_midnight",
+      "source_id": "zarattini_aziz_barbon_2025"
+    },
+    "close_channel_24h": {
+      "priority": 3,
+      "signal_clock_minutes": 60,
+      "channel_completed_hourly_closes": 24,
+      "exclude_current_close_from_entry_channel": true,
+      "strict_breakout": true,
+      "initial_stop": "prior_channel_midpoint",
+      "stop_update": "monotonic_midpoint_of_latest24_completed_hourly_closes_including_just_closed_hour",
+      "stop_update_effective": "next15mopen_only",
+      "stop_beyond_current_close": "queue_next_open_exit",
+      "maximum_hold_minutes": 360,
+      "target": null,
+      "exit_policy": "causal_midpoint_hard_trail_or_time",
+      "source_id": "zarattini_pagani_barbon_2025_04_09"
+    }
+  },
+  "candidate_directions": [
+    "long",
+    "short",
+    "both"
+  ],
+  "candidate_contexts": [
+    {
+      "candidate": "shock_reversal_2h",
+      "direction": "long"
+    },
+    {
+      "candidate": "shock_reversal_2h",
+      "direction": "short"
+    },
+    {
+      "candidate": "shock_reversal_2h",
+      "direction": "both"
+    },
+    {
+      "candidate": "utc_noise_momentum",
+      "direction": "long"
+    },
+    {
+      "candidate": "utc_noise_momentum",
+      "direction": "short"
+    },
+    {
+      "candidate": "utc_noise_momentum",
+      "direction": "both"
+    },
+    {
+      "candidate": "close_channel_24h",
+      "direction": "long"
+    },
+    {
+      "candidate": "close_channel_24h",
+      "direction": "short"
+    },
+    {
+      "candidate": "close_channel_24h",
+      "direction": "both"
+    }
+  ],
+  "controls": [
+    {
+      "id": "clock_6h_long",
+      "direction_policy": "always_long"
+    },
+    {
+      "id": "clock_6h_short",
+      "direction_policy": "always_short"
+    },
+    {
+      "id": "clock_6h_alternating",
+      "direction_policy": "long_00_12_short_06_18_UTC"
+    }
+  ],
+  "control_contract": {
+    "entry_times_utc": [
+      "00:00",
+      "06:00",
+      "12:00",
+      "18:00"
+    ],
+    "information_cutoff": "preceding15mclose",
+    "stop_atr_multiple": 2.0,
+    "maximum_hold_minutes": 120,
+    "target": null,
+    "position_risk_cost_rules": "same_as_candidates",
+    "eligibility": "benchmark_only_never_select_as_winner",
+    "comparison_limit": "descriptive_not_exposure_matched_or_statistical_null"
+  },
+  "cash_benchmark": {
+    "net_return_pct": 0,
+    "drawdown_pct": 0,
+    "market_replay_required": false
+  },
+  "execution": {
+    "initial_capital": 100000.0,
+    "risk_fraction": 0.0025,
+    "max_notional_fraction": 1.0,
+    "fee_bps": 6.0,
+    "slip_bps": 2.0,
+    "tick": 0.1,
+    "quantity_step": 0.001,
+    "min_quantity": 0.001,
+    "max_quantity": 120.0,
+    "min_notional": 50.0,
+    "funding_mark_buffer_fraction": 0.01
+  },
+  "stress_slip_bps": 4.0,
+  "cost_admission": {
+    "reference_fee_bps_each_fill": 6.0,
+    "reference_stress_slip_bps_each_fill": 4.0,
+    "reference_roundtrip_fraction": 0.002,
+    "maximum_friction_fraction_initial_stop_distance": 0.25,
+    "derived_minimum_stop_bps": 80.0,
+    "check_signal_close": true,
+    "check_adverse_slipped_fill_and_rounded_stop": true,
+    "same_rule_for_base_and_stress": true,
+    "equality_passes": true,
+    "widen_stop_to_pass": false
+  },
+  "portfolio": {
+    "one_position": true,
+    "pyramiding": false,
+    "maximum_filled_entries_each_utc_date": 4,
+    "same_open_replacement": false,
+    "entry_requires_flat_at_start_of_open_events": true,
+    "quantity_updates_after_fill": false,
+    "long_short_filter_before_filled_entry_cap": true
+  },
+  "ordering": [
+    "exact_open_funding_to_carried_position",
+    "activate_prior_close_amendments",
+    "opening_stop_gap_exit",
+    "queued_decision_time_or_session_exit",
+    "entry_only_if_previously_flat",
+    "intrabar_preexisting_hard_stop_and_adverse_uncertain_funding",
+    "close_mark_features_and_next_open_intents"
+  ],
+  "annual_folds": [
+    {
+      "id": "2022",
+      "start": "2022-01-01",
+      "end_exclusive": "2023-01-01"
+    },
+    {
+      "id": "2023",
+      "start": "2023-01-01",
+      "end_exclusive": "2024-01-01"
+    },
+    {
+      "id": "2024",
+      "start": "2024-01-01",
+      "end_exclusive": "2025-01-01"
+    },
+    {
+      "id": "2025",
+      "start": "2025-01-01",
+      "end_exclusive": "2026-01-01"
+    },
+    {
+      "id": "2026",
+      "start": "2026-01-01",
+      "end_exclusive": "2026-09-01"
+    }
+  ],
+  "chronology": "2022-2024_development_and_2025-JanAug2026_reused_screening_not_pristine_OOS;folds_reset_flat_and_use_prior_history_for_features_only",
+  "screen": {
+    "positive_years": [
+      2025,
+      2026
+    ],
+    "minimum_recent_total_closed_trades": 100,
+    "minimum_each_recent_closed_trades": 30,
+    "minimum_combined_profit_factor": 1.05,
+    "maximum_fold_close_drawdown_pct": 10.0,
+    "recent_stress_net_positive": true
+  },
+  "ranking": [
+    "all_qualification_gates_pass",
+    "greatest_worst_fold_net_return",
+    "greatest_mean_fold_net_return",
+    "lexicographic_context_id"
+  ],
+  "budget": {
+    "phase1_new_economic_runs": 0,
+    "candidate_contexts": 9,
+    "control_contexts": 3,
+    "folds": 5,
+    "cost_conditions": 2,
+    "phase2_economic_evaluations": 120,
+    "parameter_searches": 0,
+    "mutations": 0,
+    "final_holdout_evaluations_in_phase2": 0,
+    "estimated_local_compute_provision_minutes": 30,
+    "estimate_not_measured_runtime": true
+  },
+  "reserved_windows": {
+    "preserve_prior_uninspected": "2026-09-01_to_2026-10-23_exclusive_and_any_other_previously_protected_data",
+    "prospective_warmup_start": "2026-11-01",
+    "prospective_evaluation_start": "2026-12-01",
+    "prospective_evaluation_end_exclusive": "2027-05-01",
+    "as_of_2026_10_28": "future_unavailable_unevaluated",
+    "download_rule": "not_even_warmup_before_one_finalist_frozen_and_separate_Phase5_final_contract_authorized",
+    "warmup_trades": 0,
+    "exposure_compromises_untouched_status": true,
+    "automation_created": false
+  },
+  "required_reports": [
+    "all_candidate_and_control_contexts",
+    "gate_failures",
+    "gross_net_fees_slippage_funding",
+    "direction_counts_and_active_days",
+    "raw_and_terminal_setup_funnel",
+    "cost_guard_rejections",
+    "position_cap_occupancy_suppressions",
+    "marked_and_adverse_equity",
+    "time_exits_and_censoring",
+    "year_and_largest_winning_day_concentration",
+    "source_code_settings_data_identities",
+    "cumulative_all_trials_and_failure_evidence"
+  ],
+  "phase2_pre_economics_gates": [
+    "implemented_indicator_and_exit_contracts",
+    "independently_authored_long_short_boundary_cases",
+    "prefix_causality_and_availability",
+    "audited_price_turnover_funding_alignment",
+    "broker_gap_stop_time_amendment_funding_ordering",
+    "immutable_complete_trial_matrix"
+  ],
+  "failure_route": "RETURN_TO_PHASE_1_no_least_losing_winner_no_tuning",
+  "success_route": "qualifying_exact_context_only_to_Phase3_acceptance_no_automatic_search_or_deployment",
+  "runtime_limit": "existing_fixed2R_simulator_unchanged_is_not_a_supported_executor_for_these_exits;bounded_validated_adapter_required",
+  "source_rule_authority": "artifacts/strategy-development/btc-successor-phase1-20261028/PHASE1.md",
+  "strategy_code_written_in_phase1": false,
+  "annual_decision_ownership": {
+    "observing_15m_bar_open_inside_fold": true,
+    "fill_open_strictly_before_fold_end": true,
+    "prior_fold_last_close_intent_transfers": false,
+    "last_in_fold_close_intent": "censored_if_no_in_fold_next_open"
+  },
+  "source_phase1_campaign_id": "btc-successor-phase1-20261028",
+  "phase1_protocol_sha256": "5af82feecb74dd5c871044b4168b618db36b506e2f3cb0670a3cf92f2064ec36",
+  "phase1_acceptance_sha256": "64a41bdee3724bd10a5003c19e819ab952de5def4979cfe5a6731bd4553bbb9c",
+  "phase1_root": "artifacts/strategy-development/btc-successor-phase1-20261028"
+}

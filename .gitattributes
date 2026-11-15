@@ -2,3 +2,4 @@
 *.pine -text
 artifacts/strategy-development/** -text
 services/pine2python/tests/fixtures/** -text
+agents/archive/2026-10-23-pre-systematic-v2/** -text

@@ -44,6 +44,19 @@ class Repository:
                     created_at TEXT NOT NULL
                 );
 
+                CREATE TABLE IF NOT EXISTS workflow_evidence (
+                    evidence_id TEXT PRIMARY KEY,
+                    version_id TEXT NOT NULL,
+                    dataset_id TEXT NOT NULL,
+                    kind TEXT NOT NULL,
+                    artifact_path TEXT NOT NULL,
+                    artifact_hash TEXT NOT NULL,
+                    dependencies_json TEXT NOT NULL,
+                    created_at TEXT NOT NULL
+                );
+                CREATE INDEX IF NOT EXISTS idx_workflow_evidence_version
+                    ON workflow_evidence(version_id, dataset_id, kind, created_at);
+
                 CREATE TABLE IF NOT EXISTS dataset_hashes (
                     dataset_id TEXT PRIMARY KEY,
                     sha256 TEXT NOT NULL,
@@ -194,6 +207,25 @@ class Repository:
                     payload["created_at"],
                 ),
             )
+
+    def put_workflow_evidence(self, record: dict[str, Any]) -> None:
+        with self._session() as connection:
+            connection.execute(
+                "INSERT OR REPLACE INTO workflow_evidence VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+                (record["evidence_id"], record["version_id"], record["dataset_id"],
+                 record["kind"], record["artifact_path"], record["artifact_hash"],
+                 json.dumps(record["dependencies"], sort_keys=True), record["created_at"]),
+            )
+
+    def list_workflow_evidence(self, version_id: str, dataset_id: str | None = None) -> list[dict[str, Any]]:
+        query = "SELECT * FROM workflow_evidence WHERE version_id = ?"
+        values = [version_id]
+        if dataset_id is not None:
+            query += " AND dataset_id = ?"
+            values.append(dataset_id)
+        with self._session() as connection:
+            rows = connection.execute(query + " ORDER BY created_at DESC", values).fetchall()
+        return [{**dict(row), "dependencies": json.loads(row["dependencies_json"])} for row in rows]
 
     def list_datasets(self) -> list[dict[str, Any]]:
         with self._session() as connection:

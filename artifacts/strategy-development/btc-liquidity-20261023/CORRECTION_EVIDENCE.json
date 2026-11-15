@@ -1,0 +1,18 @@
+{
+  "corrected_annual_runs": 240,
+  "unique_corrected_runs": 240,
+  "result_hashes_match": true,
+  "frozen_identities_match": true,
+  "identical_uncompressed_result_payloads": 240,
+  "reserved_files": [],
+  "status": "RETURN_TO_PHASE_1",
+  "selected": null,
+  "best_observed": "15m-confirm_fvg-long",
+  "regression_suite_tests": 43,
+  "first_review": "FIX",
+  "correction_stage_used": true,
+  "terminal_review": "PENDING",
+  "cumulative_economic_evaluations": 480,
+  "distinct_fixed_contexts": 24,
+  "new_parameter_or_mutation_trials": 0
+}

@@ -1,91 +1,23 @@
-# Strategy Codification Constitution
+# Python reference and target codification
 
-## Purpose
+Active schedule: systematic_v2. The [phase operator](../translation%20and%20generation/agents/codex_phase_operator.md) owns phase coordination; this document defines codification boundaries.
 
-This document defines first principles for converting trading intent into executable, auditable research without prescribing strategy content. It contains no mutation catalog, feature catalog, model catalog, or worked strategy pattern. The active phase prompts derive every implementation and mutation from the current strategy contract and evidence.
+## Reference first
 
-## Codification Boundary
+Specify information availability, indicator state, setup/entry/exit/risk rules and execution assumptions in Python before optional Pine delivery. A complicated indicator can be built and independently accepted before a strategy child adds orders. Engine capabilities must be verified; bounded implementations are not a general compiler for arbitrary strategies.
 
-A strategy is codified when its decisions can be reproduced from declared inputs, state, timing, and execution rules. Descriptive plausibility is not codification. A chart that looks coherent is not sufficient. A profitable backtest is not sufficient. The model must expose what was knowable, when it was knowable, how state changed, why an action became legal, and how the position lifecycle followed.
+Phase 1 classifies the requested approach before research. For discretionary requests, investigate transformation methods before evaluating complete mechanical formulations; distinguish supported faithful translation, translation of supported parts and designed systematic emulation. Indicators alone do not supply complete entry/exit/management decisions, and undefined concepts cannot receive silent arbitrary proxies. Preserve source/version/license and per-rule interpretation, formalization or deliberate adaptation. Independent source fidelity and reference correctness prevent a correct proxy from being mislabeled as a faithful trader replica.
 
-Codification quality has four independent dimensions:
+Phase 1 is research-only by default and needs at least three fresh test-ready hypotheses for a complete batch. Source-to-target measurement, availability, horizon and cost plausibility require explicit evidence dossiers. Phase 2 needs approval of the new batch/protocol and compares that shortlist under a frozen protocol and bounded context matrix, separating measurement validity, signal evidence and full-strategy economics. Invalid proxies and adequately rejected scoped effects are vetoed; inconclusive evidence stays unproven and promising/supported components remain research-only when the strategy fails. Failed comparisons propose at least three fresh candidates (new, meaningful revisions or a justified mix), clearly label further Phase 1 work as research-only and require approval before new testing. Only candidates meeting all predeclared advancement requirements may enter Phase 3; preserve qualifying contexts and trial accounting. Acceptance requires independently derived positive and negative cases, raw/normalized data audit, causal state/signal/order/fill/position traces, mark-to-market economics and supported execution. Save a fixed unoptimized base before authorized search. Code/settings/data changes reopen affected proof; profit cannot repair semantics.
 
-- semantic fidelity to the declared strategy;
-- temporal integrity at every decision point;
-- execution realism under the declared venue contract;
-- evidentiary reproducibility across implementations and validation periods.
+## Pine as an optional target
 
-Failure in one dimension cannot be repaired by strength in another.
+When Pine delivery is required, port the frozen finalist and accept the exact target before paper trading. TradingView owns official compilation and platform behavior. Python-only work marks target parity NOT_APPLICABLE.
 
-## Whitebox Codification
+TradingView Basic chart-data export is not a prerequisite. Use small instrumented tables/labels, Data Window observations and screenshots at declared timestamps, including invalidation/no-setup controls. Match source/settings/window/feed/session/order assumptions and retain observations. Sampled or different-feed checks establish scoped corroboration only, not whole-history numerical or economic parity. Never bypass subscription restrictions or invent exported data.
 
-A whitebox strategy expresses its decision path through explicit states, rules, parameters, and transitions. Its implementation is auditable when a reviewer can reconstruct each decision from recorded inputs and state.
+## Evidence and production
 
-Whitebox quality depends on causal coherence, local observability, explicit invalidation, stable state ownership, and parameters that retain strategy meaning. Interpretability does not prove correctness; it makes correctness and failure testable.
+Keep source fidelity, reference semantics, data, execution, economics and platform verdicts separate. Preserve immutable parents, cumulative trial accounting and the once-only final holdout. Paper trading requires a real compatible adapter and forward reconciliation; a prompt does not create one. Graduation only permits a separately authorized live review.
 
-Whitebox mutation begins only after a faithful baseline qualifies. Each candidate changes one conceptual dependency and is derived from a diagnosed boundary in the current parent. The candidate must state its mechanism, rival explanations, decision-time information, active first test, and rejection condition before execution.
-
-## Hybrid Codification
-
-A hybrid strategy preserves an explicit parent and delegates one bounded decision to a statistical layer. The delegated decision must have a frozen information contract, target contract, ambiguity policy, representation contract, validation design, and live-engine action.
-
-The statistical layer remains subordinate to the parent identity. It earns complexity only when simpler representations cannot express the hypothesis and the available evidence can support the expanded search space. Every live decision must remain reproducible and operationally legal.
-
-Offline evidence authorizes implementation only. Promotion requires live-engine reproduction against the frozen parent.
-
-## Black-Box Viability
-
-Black-box viability work asks whether a strong parent contains a stable relationship that explicit diagnosis has not yet represented. It begins with a precommitted decision boundary, admissible information set, target, chronology, untouched evaluation boundary, complexity budget, and rejection policy.
-
-Outcome inspection cannot define the feature contract retroactively. Full-sample fit cannot replace chronological stability. An opaque relationship cannot become strategy behavior until it is converted into an auditable live contract that reproduces its evidence.
-
-## Strategy Creation
-
-Creation begins with one bounded market context and a criteria/checklist that defines correctness before implementation. Research verifies current platform mechanisms and inspects public precedent. The evidence then selects either greenfield Pine creation or licensed source adaptation. Neither route has default priority.
-
-TradingView is the canonical proving ground for chart-based strategies. The user manually accepts the Pine implementation through checklist-linked screenshots and state evidence on the declared asset and timeframe. Only the accepted Pine version can become the source for a Python port.
-
-## Port Fidelity
-
-Porting is a semantic reproduction task. Every required criterion maps from Pine behavior to Python behavior, diagnostics, and parity evidence. Exact semantics require exact agreement. Numerical tolerance is valid only when declared before comparison and limited to a known platform or data boundary.
-
-Economic optimization begins only after parity closes every required criterion. Optimization may tune declared parameters inside accepted semantics. It may not repair a broken port or redefine the strategy.
-
-## Evidence-Derived Mutation
-
-The mutation process follows one chain:
-
-1. Freeze the parent and context.
-2. Describe the observed economic engine.
-3. Locate one decision boundary that departs from the declared objective.
-4. State direct evidence and uncertainty.
-5. Generate rival causal explanations.
-6. Select one explanation that can be tested with decision-time information.
-7. Define one minimal active candidate and precommitted rejection boundary.
-8. Compare it with the frozen parent.
-9. Persist the result.
-10. Promote only live-engine survivors.
-
-The chain may end without a candidate. Insufficient evidence is a valid conclusion.
-
-## Universal Evidence Rules
-
-- Context owns metric meaning, benchmark relevance, sample sufficiency, cost stress, and forward-validation duration.
-- Chronology owns validation order.
-- Decision timing owns information admissibility.
-- The frozen parent owns comparison.
-- The accepted strategy identity owns the mutation boundary.
-- The live engine owns promotion.
-- The user-owned criteria/checklist owns semantic acceptance.
-
-No universal indicator, filter, model, threshold, benchmark, stress multiplier, trade count, or paper duration can replace those contracts.
-
-## Failure Routing
-
-Contract ambiguity returns to Phase 1. Pine semantic or visual failure returns to Phase 1.5. Python fidelity failure returns to Phase 2. Economic weakness remains a preserved research result after Phase 2.5. Explainable decision-boundary work belongs to Phase 3. Bounded statistical work belongs to Phase 4. Constrained relationship discovery belongs to Phase 4.2. A structurally capped but informative lineage may reseed through Phase 4.3.
-
-Failure artifacts remain evidence. Family deletion is a separate user-directed repository decision.
-
-## Production Boundary
-
-Research promotion is not production readiness. A final candidate must survive strategy-specific chronological robustness, adverse execution assumptions, venue feasibility, forward decision and order reconciliation, operational risk controls, and monitoring. These gates are derived from the declared strategy and deployment context rather than fixed universal values.
+Historical Pine-first/old phase instructions are archived; runtime workflow selectors and existing stored evidence remain unchanged. Future decision-model and learned/social paths are documented separately and are not implemented here.
